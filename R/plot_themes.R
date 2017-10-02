@@ -1,9 +1,7 @@
-### R Tools for Hi-sAFe - GGPLOT THEMES
-### Programmer: Kevin Wolz
-### Originally Created: 30 Sep 2017
-### Last Updated: 01 Oct 2017
-
-##### TIMESERIES THEMES #####
+#' A \code{ggplot2} theme for Hi-sAFe timeseries plots
+#' @description The default ggplot2 theme for Hi-sAFe timeseries plots.
+#' @return A ggplot modifier object containing the theme.
+#' @param base_size A number indicating the base \code{ggplot} test size.
 theme_hisafe_daily <- theme_hisafe_annual <- function(base_size = 18) {
   thm <- theme_bw(base_size = base_size) %+%
     theme(
@@ -31,6 +29,3 @@ theme_hisafe_daily <- theme_hisafe_annual <- function(base_size = 18) {
       aspect.ratio = 0.75
     )
 }
-
-##### SPATIAL THEME #####
-

@@ -1,9 +1,8 @@
-### R Tools for Hi-sAFe - READING OUTPUT DATA
-### Programmer: Kevin Wolz
-### Originally Created: 29 Sep 2017
-### Last Updated: 01 Oct 2017
-
-##### READ OUTPUT FUNCTIONS #####
+#' Read from a Hi-sAFe output profile
+#' @description Customized read.table call to read from a Hi-sAFe output profile.
+#' @return A data frame.
+#' @param file A character string of the path to the file to be read.
+#' @param ... Any other arguements passed to \code{read.table}
 read_table_hisafe <- function(file, ...) {
   # using read.table rather readr::read_table because read_table is not working
   as.tibble(read.table(file,
@@ -14,27 +13,48 @@ read_table_hisafe <- function(file, ...) {
                        encoding = "latin1", ...))
 }
 
-read_hisafe_output_file <- function(file, read.data = TRUE){
+#' Read a single Hi-sAFe output profile
+#' @description Reads the designated output profiles from a single Hi-sAFe simulation.
+#' @return An list of two data frames: \code{data} contains the data from the profile; \code{variables} contains the variable descriptions.
+#' @param profile A character string of the path to the profile to be read.
+#' @param read.data If TRUE, data and variable descriptions are read. If FALSE, only variable descriptions are read.
+read_hisafe_output_file <- function(profile, read.data = TRUE){
 
   ## Read raw text & find break between description & data
-  raw.text <- readLines(file)
+  raw.text <- readLines(profile)
   end.of.var.list <- which(raw.text[-1] == "")[1]
 
   ## Read variable descriptions
-  variables <- read_table_hisafe(file, skip = 7, nrows = end.of.var.list - 8) # always 7 header rows at start of each file
+  variables <- read_table_hisafe(profile, skip = 7, nrows = end.of.var.list - 8) # always 7 header rows at start of each profile
 
   ## Read data
   if (read.data) {
-    dat <- read_table_hisafe(file, skip = end.of.var.list) %>%
-      filter(Year != 0) %>%                    # remove row with Year==0 at the start of every output file
+    dat <- read_table_hisafe(profile, skip = end.of.var.list) %>%
+      filter(Year != 0) %>%                    # remove row with Year==0 at the start of every output profile
       mutate(Date = gsub(pattern = "a.", replacement = "", x = Date, fixed = TRUE)) %>% # is this here to fix an old bug?
-      mutate(Date = dmy(Date))                 # convert Date column into date class
+      mutate(Date = lubridate::dmy(Date))                 # convert Date column into date class
   } else dat <- tibble()                       # if read.data==F, return empty tibble (i.e. only read variable descriptions)
 
   return(list(data = dat, variables = variables))
 }
 
-read_hisafe_output <- function(simu.name, folder, profiles = c("annualtree", "annualplot", "trees", "plot", "monthCells")) {
+#' Read output from a single Hi-sAFe simulation
+#' @description Reads the designated output profiles from a single Hi-sAFe simulation.
+#' @return An object of class \code{hisafe}. This is a list of four data frames:
+#' \code{annual}, \code{daily}, \code{spatial} (monthly cell data), and \code{variables} (variable descriptions and units).
+#' @param simu.name The \code{SimulationName} of the Hi-sAFe simulation. This must be the same as the name of the Hi-sAFe simulation folder.
+#' @param folder A character string of the path to the directory containing the Hi-sAFe simulation folder (which contains the standard subdirectory with the output)
+#' @param profiles A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading the core Hi-sAFe output profiles.
+#' @export
+#' @examples
+#' \dontrun{
+#' # After reading in Hi-sAFe simulation data via:
+#' mydata <- read_hisafe("MySimulation", "./")
+#'
+#' # If only the annual tree data is required:
+#' mytreedata <- read_hisafe("MySimulation", "./", profiles = "annualtree")
+#' }
+read_hisafe <- function(simu.name, folder, profiles = c("annualtree", "annualplot", "trees", "plot", "monthCells")) {
 
   file.prefix <- paste0(folder, "/" , simu.name, "/output-", simu.name, ".sim", "/", simu.name, "_")
   join.cols <- c("SimulationName",             # common columns at the start of all timeseries (Annual, Daily) profiles
@@ -109,10 +129,27 @@ read_hisafe_output <- function(simu.name, folder, profiles = c("annualtree", "an
   return(output)
 }
 
+#' Read output from a group of Hi-sAFe simulations
+#' @description Reads the designated output profiles from a group of Hi-sAFe simulations (i.e. an experiment).
+#' @return An object of class \code{hisafe-group}. This is a list of five data frames:
+#' \code{annual}, \code{daily}, \code{spatial} (monthly cell data), \code{variables} (variable descriptions and units),
+#' and \code{exp.plan} (the provided experimental plan). Data frames will be empty for any data classes not included in the specified profiles
+#' @param exp.plan A data frame containing the experimental plan used to generate the Hi-sAFe simulations. To create an experimental plan, see \code{\link{define_exp}}.
+#' @param folder A character string of the path to the directory containing the Hi-sAFe simulation folders (which each contain the standard subdirectories with the outputs)
+#' @param profiles A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading the core Hi-sAFe output profiles.
+#' @export
+#' @examples
+#' \dontrun{
+#' # After reading in Hi-sAFe simulation data via:
+#' myexp <- read_hisafe_group(MyExpPlan, "./")
+#'
+#' # If only the annual tree data is required:
+#' mytreeexp <- read_hisafe(MyExpPlan, "./", profiles = "annualtree")
+#' }
 read_hisafe_group <- function(exp.plan, folder, profiles = c("annualtree", "annualplot", "trees", "plot", "monthCells")) {
 
   ## Read all data from all simulations & combine
-  data <- map(exp.plan$SimulationName, function(x) read_hisafe_output(x, folder, profiles)) %>%
+  data <- map(exp.plan$SimulationName, function(x) read_hisafe(x, folder, profiles)) %>%
     pmap(bind_rows) # a more generic version of this line that handles cases where the number
   # of elements and order of names in each sublist can vary is:
   # map(map_df(data, ~ as.data.frame(map(.x, ~ unname(nest(.))))), bind_rows)

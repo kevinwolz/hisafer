@@ -5,9 +5,14 @@ Version: 0.0.0.9000
 Author: Kevin Wolz
 Maintainer: Kevin Wolz <wolzkevin@gmail.com>
 Description: An R toolbox for the Hi-sAFe biophysical agroforestry model.
-    It provides functions for creating Hi-sAFe parameter files and batches 
-    of runs for simulated experiments. It also provides functions for reading, 
-    analyzing, and plotting Hi-sAFe output data.
-License: GPL
+    It provides functions for (1) creating Hi-sAFe parameter files and batches 
+    of runs for simulated experiments, (2) calling Hi-sAFe to run simulations, 
+    and (3) reading, analyzing, and plotting Hi-sAFe output data.
+Depends: R (>= 3.4.1)
+Imports: tidyverse (>= 1.1.1), 
+    stringr (>= 1.2.0), 
+    lubridate (>= 1.6.0)
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 6.0.1
