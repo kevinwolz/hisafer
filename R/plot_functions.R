@@ -7,7 +7,7 @@
 #' @param variable A character string of the name of the variable to plot.
 #' @param time.class If 'Annual', an annual timeseries is created. If 'Daily', a daily timeseries is created.
 #' @param time.lim If time.class is 'Annual', a numeric vector of length two providing the \code{c(minimum, maximum)} of years (since planting) to plot.
-#' If time.class is 'Daily, a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
+#' If time.class is 'Daily', a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
 #' If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.
 #' @param tree.id A numeric vector indicating the ids of a subset of tree ids to plot. If no input, all trees will be plotted.
 #' @export
@@ -110,7 +110,7 @@ plot_hisafe_ts <- function(data, variable, time.class = "Annual", time.lim = NUL
 #' @param output.path A character stting indicating the path to the directory where plots should be saved. Plots are
 #' saved in a subdirectory within this directory named by \code{time.class}.
 #' @param time.lim If time.class is 'Annual', a numeric vector of length two providing the \code{c(minimum, maximum)} of years (since planting) to plot.
-#' If time.class is 'Daily, a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
+#' If time.class is 'Daily', a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
 #' If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.
 #' @param tree.id A numeric vector indicating the ids of a subset of tree ids to plot. If no input, all trees will be plotted.
 #' @export

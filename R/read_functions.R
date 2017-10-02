@@ -56,17 +56,32 @@ read_hisafe_output_file <- function(profile, read.data = TRUE){
 #' }
 read_hisafe <- function(simu.name, folder, profiles = c("annualtree", "annualplot", "trees", "plot", "monthCells")) {
 
+  ## Create profile paths
   file.prefix <- paste0(folder, "/" , simu.name, "/output-", simu.name, ".sim", "/", simu.name, "_")
-  join.cols <- c("SimulationName",             # common columns at the start of all timeseries (Annual, Daily) profiles
-                 "Date",
-                 "Day",
-                 "Month",
-                 "Year",
-                 "JulianDay",
-                 "stepNum")
+  files <- paste0(file.prefix, profiles, ".txt" )
+
+  ## Check for existence of all requested profiles and throw error if profile does not exist
+  if(!all(file.exists(files))) {
+    missing.files <- files[!file.exists(files)]
+    missing.profiles <- tail(str_split(missing.files, "/")[[1]], n = 1)
+    missing.profile.error <- paste(c("The following profiles do not exist:",
+                                       missing.profiles),
+                                     collapse = "\n")
+    stop(missing.profile.error)
+  }
 
   ## Function for reading timeseries (Annual, Daily) profiles
   read.ts.profiles <- function(profiles, time.class) {
+
+    ## Common columns at the start of all Annual & Daily profiles
+    join.cols <- c("SimulationName",
+                   "Date",
+                   "Day",
+                   "Month",
+                   "Year",
+                   "JulianDay",
+                   "stepNum")
+
     if(length(profiles) >= 1) {
 
       ## Read in all profiles

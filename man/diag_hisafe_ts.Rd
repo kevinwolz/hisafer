@@ -16,7 +16,7 @@ diag_hisafe_ts(data, time.class = "Annual", output.path = "./diagnostics",
 saved in a subdirectory within this directory named by \code{time.class}.}
 
 \item{time.lim}{If time.class is 'Annual', a numeric vector of length two providing the \code{c(minimum, maximum)} of years (since planting) to plot.
-If time.class is 'Daily, a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
+If time.class is 'Daily', a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
 If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.}
 
 \item{tree.id}{A numeric vector indicating the ids of a subset of tree ids to plot. If no input, all trees will be plotted.}
