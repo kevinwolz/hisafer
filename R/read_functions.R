@@ -177,8 +177,14 @@ read_hisafe_group <- function(exp.plan, folder, profiles = c("annualtree", "annu
       mutate_at(names(exp.plan), factor) %>%            # make exp.plan cols factors
       group_by(SimulationName)                          # group annual data by simulaton
   }
-  data$annual <- timeseries_tidy(data$annual)
-  data$daily <- timeseries_tidy(data$daily)
+  data_tidy <- function(x){
+    left_join(exp.plan, x, by = "SimulationName") %>%   # add exp.plan cols to annual data
+      mutate_at(names(exp.plan), factor) %>%            # make exp.plan cols factors
+      group_by(SimulationName)                          # group annual data by simulaton
+  }
+  data$annual <- data_tidy(data$annual)
+  data$daily <- data_tidy(data$daily)
+  data$monthCells <- data_tidy(data$monthCells)
   data$variables <- data$variables %>% distinct()       # remove duplicate variable descriptions
   data$exp.plan <- exp.plan %>% mutate_all(factor)      # make all columns factors
 

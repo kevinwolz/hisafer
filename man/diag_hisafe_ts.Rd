@@ -10,12 +10,12 @@ diag_hisafe_ts(data, time.class = "annual", output.path = "./diagnostics",
 \arguments{
 \item{data}{An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.}
 
-\item{time.class}{If 'annual', annual timeseries are created. If 'daily', daily timeseries are created.}
+\item{time.class}{If 'annual', the default, annual timeseries are created. If 'daily', daily timeseries are created.}
 
 \item{output.path}{A character stting indicating the path to the directory where plots should be saved. Plots are
 saved in a subdirectory within this directory named by \code{time.class}.}
 
-\item{time.lim}{If time.class is 'annual', a numeric vector of length two providing the \code{c(minimum, maximum)} of years (since planting) to plot.
+\item{time.lim}{If time.class is 'annual', the default, a numeric vector of length two providing the \code{c(minimum, maximum)} of years (since planting) to plot.
 If time.class is 'daily', a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
 If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.}
 
@@ -23,7 +23,7 @@ If no input, the full available time range is plotted. Use \code{NA} to refer to
 }
 \value{
 A list of \code{ggplot} objects is invisibly returned. If the data is of class \code{hop-group} and contains
-data from more than one Hi-sAFe simulation, the plots will contain multiple lines, colored and labeled by SimName.
+data from more than one Hi-sAFe simulation, the plots will contain multiple lines, colored and labeled by SimulationName.
 If the data contains two more tree ids, the plots will be faceted by tree id.
 }
 \description{

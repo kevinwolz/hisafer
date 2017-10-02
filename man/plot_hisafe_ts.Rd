@@ -12,9 +12,9 @@ plot_hisafe_ts(data, variable, time.class = "annual", time.lim = NULL,
 
 \item{variable}{A character string of the name of the variable to plot.}
 
-\item{time.class}{If 'annual', an annual timeseries is created. If 'daily', a daily timeseries is created.}
+\item{time.class}{If 'annual', the default, an annual timeseries is created. If 'daily', a daily timeseries is created.}
 
-\item{time.lim}{If time.class is 'annual', a numeric vector of length two providing the \code{c(minimum, maximum)} of years (since planting) to plot.
+\item{time.lim}{If time.class is 'annual', the default, a numeric vector of length two providing the \code{c(minimum, maximum)} of years (since planting) to plot.
 If time.class is 'daily', a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
 If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.}
 
@@ -22,7 +22,7 @@ If no input, the full available time range is plotted. Use \code{NA} to refer to
 }
 \value{
 A ggplot object. If the data is of class \code{hop-group} and contains data from more than one
-Hi-sAFe simulation, the plot will contain multiple lines, colored and labeled by SimName. If the data
+Hi-sAFe simulation, the plot will contain multiple lines, colored and labeled by SimulationName. If the data
 contains two more tree ids, the plot will be faceted by tree id.
 }
 \description{
@@ -41,6 +41,6 @@ daily.plot <- plot_hisafe_ts(mydata, "carbonCoarseRoots", "daily")
 
 # Once you have the plot object, you can display it and save it:
 annual.plot
-ggsave("annual_carbonCoarseRoots.png", annual.plot)
+ggplot2::ggsave("annual_carbonCoarseRoots.png", annual.plot)
 }
 }

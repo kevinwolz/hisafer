@@ -29,3 +29,26 @@ theme_hisafe_daily <- theme_hisafe_annual <- function(base_size = 18) {
       aspect.ratio = 0.75
     )
 }
+
+#' A \code{ggplot2} theme for Hi-sAFe monthCells tile plots
+#' @description The default ggplot2 theme for Hi-sAFe monthCells tile plots.
+#' @return A ggplot modifier object containing the theme.
+#' @param base_size A number indicating the base \code{ggplot} test size.
+theme_hisafe_monthcells <- function(base_size = 18) {
+  thm <- theme_bw(base_size = base_size) %+%
+    theme(
+      plot.margin = unit(base_size*c(1,1,1,1), "points"),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      panel.border = element_rect(size = 2,
+                                  color = "black"),
+      axis.line = element_blank(), # provided by panel.border instead
+      axis.ticks = element_blank(),
+      axis.text = element_blank(),
+      axis.title.x = element_text(vjust = -1),
+      axis.title.y = element_text(vjust = 2),
+      plot.title = element_text(hjust = 0.5,
+                                margin = margin(b = (base_size * 1), unit = "points")),
+      legend.position = "bottom"
+    )
+}
