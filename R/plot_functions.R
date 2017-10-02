@@ -5,9 +5,9 @@
 #' contains two more tree ids, the plot will be faceted by tree id.
 #' @param data An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
 #' @param variable A character string of the name of the variable to plot.
-#' @param time.class If 'Annual', an annual timeseries is created. If 'Daily', a daily timeseries is created.
-#' @param time.lim If time.class is 'Annual', a numeric vector of length two providing the \code{c(minimum, maximum)} of years (since planting) to plot.
-#' If time.class is 'Daily', a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
+#' @param time.class If 'annual', an annual timeseries is created. If 'daily', a daily timeseries is created.
+#' @param time.lim If time.class is 'annual', a numeric vector of length two providing the \code{c(minimum, maximum)} of years (since planting) to plot.
+#' If time.class is 'daily', a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
 #' If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.
 #' @param tree.id A numeric vector indicating the ids of a subset of tree ids to plot. If no input, all trees will be plotted.
 #' @export
@@ -17,17 +17,17 @@
 #' mydata <- read_hisafe_output("MySimulation", "./")
 #'
 #' # You can create an annual timeseries of carbonCoarseRoots:
-#' annual.plot <- plot_hisafe_ts(mydata, "carbonCoarseRoots", "Annual")
+#' annual.plot <- plot_hisafe_ts(mydata, "carbonCoarseRoots")
 #'
 #' # For a daily timeseries instead:
-#' daily.plot <- plot_hisafe_ts(mydata, "carbonCoarseRoots", "Daily")
+#' daily.plot <- plot_hisafe_ts(mydata, "carbonCoarseRoots", "daily")
 #'
 #' # Once you have the plot object, you can display it and save it:
 #' annual.plot
 #' ggsave("annual_carbonCoarseRoots.png", annual.plot)
 #' }
-plot_hisafe_ts <- function(data, variable, time.class = "Annual", time.lim = NULL, tree.id = NULL) {
-  time.class <- stringr::str_to_title(time.class)
+plot_hisafe_ts <- function(data, variable, time.class = "annual", time.lim = NULL, tree.id = NULL) {
+  time.class <- stringr::str_to_lower(time.class) # prevents error if improper capitalization not input by user
 
   ## Check if data has class hisafe or hisafe-group
   if(!any(c("hop", "hop-group") %in% class(data))) {
@@ -41,7 +41,7 @@ plot_hisafe_ts <- function(data, variable, time.class = "Annual", time.lim = NUL
   var.unit <- data$variables %>% filter(VariableClass == time.class, VariableName == variable) %>% .$Units
 
   ## Create time.class-specific x aesthetic, axis label, plot theme, and time.lim filter
-  if(time.class == "Annual"){
+  if(time.class == "annual"){
     x.var <- "Year0"
     x.label <- "Years after establishment"
     plot.data <- data$annual
@@ -106,11 +106,11 @@ plot_hisafe_ts <- function(data, variable, time.class = "Annual", time.lim = NUL
 #' data from more than one Hi-sAFe simulation, the plots will contain multiple lines, colored and labeled by SimName.
 #' If the data contains two more tree ids, the plots will be faceted by tree id.
 #' @param data An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
-#' @param time.class If 'Annual', annual timeseries are created. If 'Daily', daily timeseries are created.
+#' @param time.class If 'annual', annual timeseries are created. If 'daily', daily timeseries are created.
 #' @param output.path A character stting indicating the path to the directory where plots should be saved. Plots are
 #' saved in a subdirectory within this directory named by \code{time.class}.
-#' @param time.lim If time.class is 'Annual', a numeric vector of length two providing the \code{c(minimum, maximum)} of years (since planting) to plot.
-#' If time.class is 'Daily', a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
+#' @param time.lim If time.class is 'annual', a numeric vector of length two providing the \code{c(minimum, maximum)} of years (since planting) to plot.
+#' If time.class is 'daily', a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
 #' If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.
 #' @param tree.id A numeric vector indicating the ids of a subset of tree ids to plot. If no input, all trees will be plotted.
 #' @export
@@ -122,17 +122,17 @@ plot_hisafe_ts <- function(data, variable, time.class = "Annual", time.lim = NUL
 #' # You can create an annual timeseries of every variable:
 #' diag_hisafe_ts(mydata)
 #'
-#' # For aily timeseries instead:
-#' diag_hisafe_ts(mydata, "Daily")
+#' # For daily timeseries instead:
+#' diag_hisafe_ts(mydata, "daily")
 #' }
-diag_hisafe_ts <- function(data, time.class = "Annual", output.path = "./diagnostics", time.lim = NULL, tree.id = NULL) {
-  time.class <- stringr::str_to_title(time.class) # prevents error if proper capitalization not input by user
-  ts.path <- gsub("//", "/", paste0(output.path, "/", stringr::str_to_lower(time.class), "/"), fixed = TRUE)
+diag_hisafe_ts <- function(data, time.class = "annual", output.path = "./diagnostics", time.lim = NULL, tree.id = NULL) {
+  time.class <- stringr::str_to_lower(time.class) # prevents error if improper capitalization not input by user
+  ts.path <- gsub("//", "/", paste0(output.path, "/", time.class, "/"), fixed = TRUE)
   dir.create(ts.path, recursive = TRUE, showWarnings = FALSE)
 
   ## Clean columns & extract names of variables to plot
   # cols with only "error!" output are all NA's and cause plot errors
-  if(time.class == "Annual") {
+  if(time.class == "annual") {
     data$annual <- data$annual %>% select_if(~sum(!is.na(.)) > 0)
     var.names <- names(data$annual)[(which(names(data$annual) == "id") + 1):length(names(data$annual))]
   } else {

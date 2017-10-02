@@ -4,7 +4,7 @@
 \alias{plot_hisafe_ts}
 \title{Plot timeseries of Hi-sAFe output variable}
 \usage{
-plot_hisafe_ts(data, variable, time.class = "Annual", time.lim = NULL,
+plot_hisafe_ts(data, variable, time.class = "annual", time.lim = NULL,
   tree.id = NULL)
 }
 \arguments{
@@ -12,10 +12,10 @@ plot_hisafe_ts(data, variable, time.class = "Annual", time.lim = NULL,
 
 \item{variable}{A character string of the name of the variable to plot.}
 
-\item{time.class}{If 'Annual', an annual timeseries is created. If 'Daily', a daily timeseries is created.}
+\item{time.class}{If 'annual', an annual timeseries is created. If 'daily', a daily timeseries is created.}
 
-\item{time.lim}{If time.class is 'Annual', a numeric vector of length two providing the \code{c(minimum, maximum)} of years (since planting) to plot.
-If time.class is 'Daily', a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
+\item{time.lim}{If time.class is 'annual', a numeric vector of length two providing the \code{c(minimum, maximum)} of years (since planting) to plot.
+If time.class is 'daily', a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
 If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.}
 
 \item{tree.id}{A numeric vector indicating the ids of a subset of tree ids to plot. If no input, all trees will be plotted.}
@@ -34,10 +34,10 @@ Plots a daily or annual timeseries of a single Hi-sAFe output variable.
 mydata <- read_hisafe_output("MySimulation", "./")
 
 # You can create an annual timeseries of carbonCoarseRoots:
-annual.plot <- plot_hisafe_ts(mydata, "carbonCoarseRoots", "Annual")
+annual.plot <- plot_hisafe_ts(mydata, "carbonCoarseRoots")
 
 # For a daily timeseries instead:
-daily.plot <- plot_hisafe_ts(mydata, "carbonCoarseRoots", "Daily")
+daily.plot <- plot_hisafe_ts(mydata, "carbonCoarseRoots", "daily")
 
 # Once you have the plot object, you can display it and save it:
 annual.plot

@@ -11,7 +11,8 @@ Description: An R toolbox for the Hi-sAFe biophysical agroforestry model.
 Depends: R (>= 3.4.1)
 Imports: tidyverse (>= 1.1.1), 
     stringr (>= 1.2.0), 
-    lubridate (>= 1.6.0)
+    lubridate (>= 1.6.0),
+    viridis (>= 0.4.0)
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
