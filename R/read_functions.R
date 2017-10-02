@@ -40,7 +40,7 @@ read_hisafe_output_file <- function(profile, read.data = TRUE){
 
 #' Read output from a single Hi-sAFe simulation
 #' @description Reads the designated output profiles from a single Hi-sAFe simulation.
-#' @return An object of class \code{hisafe}. This is a list of four data frames:
+#' @return An object of class \code{hop}. This is a list of four data frames:
 #' \code{annual}, \code{daily}, \code{spatial} (monthly cell data), and \code{variables} (variable descriptions and units).
 #' @param simu.name The \code{SimulationName} of the Hi-sAFe simulation. This must be the same as the name of the Hi-sAFe simulation folder.
 #' @param folder A character string of the path to the directory containing the Hi-sAFe simulation folder (which contains the standard subdirectory with the output)
@@ -124,14 +124,14 @@ read_hisafe <- function(simu.name, folder, profiles = c("annualtree", "annualplo
 
   ## Creat output list & assign class
   output <- list(annual = annual.data, daily = daily.data, spatial = spatial.data, variables = variables)
-  class(output)<-c("hisafe", class(output))
+  class(output)<-c("hop", class(output))
 
   return(output)
 }
 
 #' Read output from a group of Hi-sAFe simulations
 #' @description Reads the designated output profiles from a group of Hi-sAFe simulations (i.e. an experiment).
-#' @return An object of class \code{hisafe-group}. This is a list of five data frames:
+#' @return An object of class \code{hop-group}. This is a list of five data frames:
 #' \code{annual}, \code{daily}, \code{spatial} (monthly cell data), \code{variables} (variable descriptions and units),
 #' and \code{exp.plan} (the provided experimental plan). Data frames will be empty for any data classes not included in the specified profiles
 #' @param exp.plan A data frame containing the experimental plan used to generate the Hi-sAFe simulations. To create an experimental plan, see \code{\link{define_exp}}.
@@ -181,7 +181,7 @@ read_hisafe_group <- function(exp.plan, folder, profiles = c("annualtree", "annu
   }
 
   ## Assign class
-  class(data)<-c("hisafe-group", "hisafe", class(data)) # "hisafe"
+  class(data)<-c("hop-group", "hop", class(data)) # "hisafe"
 
   return(data)
 }

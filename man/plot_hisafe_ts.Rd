@@ -7,14 +7,14 @@
 plot_hisafe_ts(data, variable, time.class = "Annual")
 }
 \arguments{
-\item{data}{An object of class \code{hisafe} or \code{hisafe-group} containing output data from one or more Hi-sAFe simulations.}
+\item{data}{An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.}
 
 \item{variable}{A character string of the name of the variable to plot.}
 
 \item{time.class}{If 'Annual', an annual timeseries is created. If 'Daily', a daily timeseries is created.}
 }
 \value{
-A ggplot object. If the data is of class \code{hisafe-group} and contains data from more than one
+A ggplot object. If the data is of class \code{hop-group} and contains data from more than one
 Hi-sAFe simulation, the plot will contain multiple lines, colored and labeled by SimName. If the data
 contains two more tree ids, the plot will be faceted by tree id.
 }

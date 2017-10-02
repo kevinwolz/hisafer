@@ -7,7 +7,7 @@
 diag_hisafe_ts(data, time.class = "Annual", output.path = "./diagnostics")
 }
 \arguments{
-\item{data}{An object of class \code{hisafe} or \code{hisafe-group} containing output data from one or more Hi-sAFe simulations.}
+\item{data}{An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.}
 
 \item{time.class}{If 'Annual', annual timeseries are created. If 'Daily', daily timeseries are created.}
 
@@ -15,7 +15,7 @@ diag_hisafe_ts(data, time.class = "Annual", output.path = "./diagnostics")
 saved in a subdirectory within this directory named by \code{time.class}.}
 }
 \value{
-A list of \code{ggplot} objects is invisibly returned. If the data is of class \code{hisafe-group} and contains
+A list of \code{ggplot} objects is invisibly returned. If the data is of class \code{hop-group} and contains
 data from more than one Hi-sAFe simulation, the plots will contain multiple lines, colored and labeled by SimName.
 If the data contains two more tree ids, the plots will be faceted by tree id.
 }

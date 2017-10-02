@@ -15,7 +15,7 @@ read_hisafe(simu.name, folder, profiles = c("annualtree", "annualplot",
 \item{profiles}{A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading the core Hi-sAFe output profiles.}
 }
 \value{
-An object of class \code{hisafe}. This is a list of four data frames:
+An object of class \code{hop}. This is a list of four data frames:
 \code{annual}, \code{daily}, \code{spatial} (monthly cell data), and \code{variables} (variable descriptions and units).
 }
 \description{

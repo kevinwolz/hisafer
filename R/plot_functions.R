@@ -1,9 +1,9 @@
 #' Plot timeseries of Hi-sAFe output variable
 #' @description Plots a daily or annual timeseries of a single Hi-sAFe output variable.
-#' @return A ggplot object. If the data is of class \code{hisafe-group} and contains data from more than one
+#' @return A ggplot object. If the data is of class \code{hop-group} and contains data from more than one
 #' Hi-sAFe simulation, the plot will contain multiple lines, colored and labeled by SimName. If the data
 #' contains two more tree ids, the plot will be faceted by tree id.
-#' @param data An object of class \code{hisafe} or \code{hisafe-group} containing output data from one or more Hi-sAFe simulations.
+#' @param data An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
 #' @param variable A character string of the name of the variable to plot.
 #' @param time.class If 'Annual', an annual timeseries is created. If 'Daily', a daily timeseries is created.
 #' @export
@@ -26,8 +26,8 @@ plot_hisafe_ts <- function(data, variable, time.class = "Annual") {
   time.class <- stringr::str_to_title(time.class)
 
   ## Check if data has class hisafe or hisafe-group
-  if(!any(c("hisafe", "hisafe-group") %in% class(data))) {
-    stop("data not of class hisafe or hisafe-group")
+  if(!any(c("hop", "hop-group") %in% class(data))) {
+    stop("data not of class hop or hop-group")
   }
 
   ## Color blind-friendly palette
@@ -82,10 +82,10 @@ plot_hisafe_ts <- function(data, variable, time.class = "Annual") {
 #' Plot timeseries diagnostics of Hi-sAFe output
 #' @description Plots a daily or annual timeseries of every Hi-sAFe output variable. All plots are saved as
 #' png files to a specifified output path.
-#' @return A list of \code{ggplot} objects is invisibly returned. If the data is of class \code{hisafe-group} and contains
+#' @return A list of \code{ggplot} objects is invisibly returned. If the data is of class \code{hop-group} and contains
 #' data from more than one Hi-sAFe simulation, the plots will contain multiple lines, colored and labeled by SimName.
 #' If the data contains two more tree ids, the plots will be faceted by tree id.
-#' @param data An object of class \code{hisafe} or \code{hisafe-group} containing output data from one or more Hi-sAFe simulations.
+#' @param data An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
 #' @param time.class If 'Annual', annual timeseries are created. If 'Daily', daily timeseries are created.
 #' @param output.path A character stting indicating the path to the directory where plots should be saved. Plots are
 #' saved in a subdirectory within this directory named by \code{time.class}.
