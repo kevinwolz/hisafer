@@ -1,8 +1,8 @@
 #' A \code{ggplot2} theme for Hi-sAFe timeseries plots
 #' @description The default ggplot2 theme for Hi-sAFe timeseries plots.
 #' @return A ggplot modifier object containing the theme.
-#' @param base_size A number indicating the base \code{ggplot} test size.
-theme_hisafe_daily <- theme_hisafe_annual <- function(base_size = 18) {
+#' @param base_size A number indicating the base \code{ggplot} text size.
+theme_hisafe_ts <- function(base_size = 18) {
   thm <- theme_bw(base_size = base_size) %+%
     theme(
       plot.margin = unit(base_size*c(1,1,1,1), "points"),
@@ -33,7 +33,7 @@ theme_hisafe_daily <- theme_hisafe_annual <- function(base_size = 18) {
 #' A \code{ggplot2} theme for Hi-sAFe monthCells tile plots
 #' @description The default ggplot2 theme for Hi-sAFe monthCells tile plots.
 #' @return A ggplot modifier object containing the theme.
-#' @param base_size A number indicating the base \code{ggplot} test size.
+#' @param base_size A number indicating the base \code{ggplot} text size.
 theme_hisafe_monthcells <- function(base_size = 18) {
   thm <- theme_bw(base_size = base_size) %+%
     theme(

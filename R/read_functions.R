@@ -63,7 +63,7 @@ read_hisafe <- function(simu.name, folder, profiles = c("annualtree", "annualplo
   ## Check for existence of all requested profiles and throw error if profile does not exist
   if(!all(file.exists(files))) {
     missing.files <- files[!file.exists(files)]
-    missing.profiles <- tail(str_split(missing.files, "/")[[1]], n = 1)
+    missing.profiles <- tail(strsplit(missing.files, "/")[[1]], n = 1)
     missing.profile.error <- paste(c("The following profiles do not exist:",
                                        missing.profiles),
                                      collapse = "\n")
@@ -85,17 +85,17 @@ read_hisafe <- function(simu.name, folder, profiles = c("annualtree", "annualplo
     if(length(profiles) >= 1) {
 
       ## Read in all profiles
-      dat.list <- map(profiles, function(x) read_hisafe_output_file(paste0(file.prefix, x, ".txt" )))
+      dat.list <- purrr::map(profiles, function(x) read_hisafe_output_file(paste0(file.prefix, x, ".txt" )))
 
       ## Extract & tidy data
       dat.data <- dat.list %>%
-        map(1) %>%                             # extract first element (data) of each profile
+        purrr::map(1) %>%                             # extract first element (data) of each profile
         reduce(full_join, by = join.cols) %>%  # bind all variable descriptions togeter
         mutate_if(is.logical, as.numeric)      # columns read as logical must be coered to numeric to prevent plotting errors
 
       ## Extract & tidy variable definitions
       dat.variables <- dat.list %>%
-        map(2) %>%                             # extract second element (variable descriptions) of each profile
+        purrr::map(2) %>%                             # extract second element (variable descriptions) of each profile
         bind_rows() %>%                        # bind all variable descriptions togeter
         mutate(VariableClass = time.class)     # add a column that indicates which data class the variable definition is from
     }else {
@@ -120,7 +120,7 @@ read_hisafe <- function(simu.name, folder, profiles = c("annualtree", "annualplo
   ## Read monthCells data & associated variables
   monthCells.profiles <- profiles[profiles %in% c("monthCells")]
   if(length(monthCells.profiles) >= 1) {
-    monthCells.list <- map(monthCells.profiles, function(x) read_hisafe_output_file(paste0(file.prefix, x, ".txt" )))
+    monthCells.list <- purrr::map(monthCells.profiles, function(x) read_hisafe_output_file(paste0(file.prefix, x, ".txt" )))
     monthCells.data <- monthCells.list[[1]]$data
     monthCells.variables <- monthCells.list[[1]]$variables %>% mutate(VariableClass = "monthCells")
   } else {
@@ -164,10 +164,10 @@ read_hisafe <- function(simu.name, folder, profiles = c("annualtree", "annualplo
 read_hisafe_group <- function(exp.plan, folder, profiles = c("annualtree", "annualplot", "trees", "plot", "monthCells")) {
 
   ## Read all data from all simulations & combine
-  data <- map(exp.plan$SimulationName, function(x) read_hisafe(x, folder, profiles)) %>%
-    pmap(bind_rows) # a more generic version of this line that handles cases where the number
+  data <- purrr::map(exp.plan$SimulationName, function(x) read_hisafe(x, folder, profiles)) %>%
+    purrr::pmap(bind_rows) # a more generic version of this line that handles cases where the number
   # of elements and order of names in each sublist can vary is:
-  # map(map_df(data, ~ as.data.frame(map(.x, ~ unname(nest(.))))), bind_rows)
+  # purrr::map(map_df(data, ~ as.data.frame(purrr::map(.x, ~ unname(nest(.))))), bind_rows)
   # However, this isn't necessary becasue read_hisafe_output always produces
   # identically sized and named lists.
 
