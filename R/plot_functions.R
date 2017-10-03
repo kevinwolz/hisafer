@@ -155,7 +155,7 @@ diag_hisafe_ts <- function(data,
   plot.list <- purrr::map(var.names, plot_hisafe_ts, data = data, time.class = time.class, time.lim = time.lim, tree.id = tree.id)
 
   ## Write plots to disk
-  file.names <- paste0(var.names, ".png")
+  file.names <- paste0(time.class, "_", var.names, ".png")
   pwalk(list(file.names, plot.list), ggsave, path = ts.path, width = 7, height = 7)
 
   ## Invisibly return list of plot objects
@@ -229,17 +229,17 @@ plot_hisafe_monthcells <- function(data,
     gsub(pattern = "\\.", replacement = " ")
 
   ## Filter for provided sim.names, years & months
-    plot.data <- data$monthCells %>%
-      mutate(Year = Year - min(Year) + 1) %>% # Create 0+ year values
-      filter(SimulationName %in% sim.names) %>%
-      filter(Year %in% years) %>%
-      filter(Month %in% months)
+  plot.data <- data$monthCells %>%
+    mutate(Year = Year - min(Year) + 1) %>% # Create 0+ year values
+    filter(SimulationName %in% sim.names) %>%
+    filter(Year %in% years) %>%
+    filter(Month %in% months)
 
   ## Find tree locations for each simulation
-    tree.locations <- plot.data %>%
-      summarize(x = median(x), y = median(y))
+  tree.locations <- plot.data %>%
+    summarize(x = median(x), y = median(y))
 
-    ## Create plot
+  ## Create plot
   plot.obj <- ggplot(plot.data, aes(x = x, y = y)) +
     labs(x = rowfacet,
          y = colfacet,
@@ -259,4 +259,72 @@ plot_hisafe_monthcells <- function(data,
     theme_hisafe_monthCells()
 
   return(plot.obj)
+}
+
+#' Plot monthCells diagnostics of Hi-sAFe output
+#' @description Creates three tile plots of every Hi-sAFe monthCells output variable, one plot for each possible
+#' \code{plot_hisafe_monthcells} facet scheme. All plots are saved as png files to a specifified output path.
+#' @details The default data presentation for each of the facet schemes is:
+#' Year~SimulationName plots are for Month==6, every 5 years from 0:max, and all simulations
+#' Month~SimulationName plots are for Year==median, all 12 months, and all simulations
+#' Month~Year plots are for all 12 months and every 5 years from 0:max, with each simulation in its own plot
+#' @return A list of \code{ggplot} objects is invisibly returned, grouped into two sublists based on the faceting scheme. The first sublist contains  Year~SimulationName, and the second contains Month~SimulationName.
+#' @param data An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
+#' @param output.path A character stting indicating the path to the directory where plots should be saved. Plots are
+#' saved in a subdirectory within this directory named /monthCells/facetScheme.
+#' @export
+#' @examples
+#' \dontrun{
+#' # After reading in Hi-sAFe simulation data via:
+#' mydata <- read_hisafe_output("MySimulation", "./")
+#'
+#' # You can create tile plots of every monthCells variable:
+#' diag_hisafe_monthcells(mydata)
+#' }
+diag_hisafe_monthcells <- function(data, output.path = "./diagnostics") {
+  monthcells.path <- gsub("//", "/", paste0(output.path, "/monthCells/"), fixed = TRUE)
+  dir.create(paste0(monthcells.path, "year_simname/"), recursive = TRUE, showWarnings = FALSE)
+  dir.create(paste0(monthcells.path, "month_simname/"), recursive = TRUE, showWarnings = FALSE)
+  dir.create(paste0(monthcells.path, "month_year/"), recursive = TRUE, showWarnings = FALSE)
+
+  ## Clean columns & extract names of variables to plot
+  # cols with only "error!" output are all NA's and cause plot errors
+  data$monthCells <- data$monthCells %>% select_if(~sum(!is.na(.)) > 0)
+  var.names <- names(data$monthCells)[(which(names(data$monthCells) == "cropSpeciesName") + 1):length(names(data$monthCells))]
+
+  ## Create plots
+  plot.list1 <- purrr::map(var.names, plot_hisafe_monthcells,
+                           data = data,
+                           rowfacet = "SimulationName",
+                           colfacet = "Year",
+                           sim.names = "all",
+                           years = seq(0, (max(data$monthCells$Year) - min(data$monthCells$Year)), 5),
+                           months = 6)
+  file.names <- paste0("monthCells_year_simname_", var.names, ".png")
+  pwalk(list(file.names, plot.list1), ggsave, path = paste0(monthcells.path, "year_simname/"), scale = 2, width = 10, height = 10)
+
+  plot.list2 <- purrr::map(var.names, plot_hisafe_monthcells,
+                           data = data,
+                           rowfacet = "SimulationName",
+                           colfacet = "Month",
+                           sim.names = "all",
+                           years = (round(median(data$monthCells$Year),0) - min(data$monthCells$Year)),
+                           months = 1:12)
+  file.names <- paste0("monthCells_month_simname_", var.names, ".png")
+  pwalk(list(file.names, plot.list2), ggsave, path = paste0(monthcells.path, "month_simname/"), scale = 2, height = 10, width = 10)
+
+  for(sim.name in unique(data$monthCells$SimulationName)){
+    plot.list3 <- purrr::map(var.names, plot_hisafe_monthcells,
+                             data = data,
+                             rowfacet = "Year",
+                             colfacet = "Month",
+                             sim.names = sim.name,
+                             years = seq(0, (max(data$monthCells$Year) - min(data$monthCells$Year)), 5),
+                             months = 1:12)
+    file.names <- paste0("monthCells_month_year_", sim.name, "_", var.names, ".png")
+    pwalk(list(file.names, plot.list3), ggsave, path = paste0(monthcells.path, "month_year/"), scale = 2, height = 10, width = 10)
+  }
+
+  ## Invisibly return list of plot objects
+  invisible(list(year.simname = plot.list1, month.simname = plot.list2))
 }
