@@ -3,6 +3,7 @@
 #' @return A data frame.
 #' @param file A character string of the path to the file to be read.
 #' @param ... Any other arguements passed to \code{read.table}
+#' @export
 #' @import tidyverse
 read_table_hisafe <- function(file, ...) {
   # using read.table rather readr::read_table because read_table is not working
@@ -19,6 +20,7 @@ read_table_hisafe <- function(file, ...) {
 #' @return An list of two data frames: \code{data} contains the data from the profile; \code{variables} contains the variable descriptions.
 #' @param profile A character string of the path to the profile to be read.
 #' @param read.data If TRUE, data and variable descriptions are read. If FALSE, only variable descriptions are read.
+#' @export
 #' @import tidyverse
 read_hisafe_output_file <- function(profile, read.data = TRUE){
 
@@ -42,8 +44,8 @@ read_hisafe_output_file <- function(profile, read.data = TRUE){
 
 #' Read output from a single Hi-sAFe simulation
 #' @description Reads the designated output profiles from a single Hi-sAFe simulation.
-#' @return An object of class \code{hop}. This is a list of four data frames:
-#' \code{annual}, \code{daily}, \code{monthCells} (monthly cell data), and \code{variables} (variable descriptions and units).
+#' @return An object of class \code{hop}. This is a list of five data frames:
+#' \code{annual}, \code{daily}, \code{monthCells} (monthly cell data), \code{climate}, and \code{variables} (variable descriptions and units).
 #' @param simu.name The \code{SimulationName} of the Hi-sAFe simulation. This must be the same as the name of the Hi-sAFe simulation folder.
 #' @param folder A character string of the path to the directory containing the Hi-sAFe simulation folder (which contains the standard subdirectory with the output)
 #' @param profiles A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading the core Hi-sAFe output profiles.
@@ -57,7 +59,7 @@ read_hisafe_output_file <- function(profile, read.data = TRUE){
 #' # If only the annual tree data is required:
 #' mytreedata <- read_hisafe("MySimulation", "./", profiles = "annualtree")
 #' }
-read_hisafe <- function(simu.name, folder, profiles = c("annualtree", "annualplot", "trees", "plot", "monthCells")) {
+read_hisafe <- function(simu.name, folder, profiles = c("annualtree", "annualplot", "trees", "plot", "monthCells", "climate")) {
 
   ## Create profile paths
   file.prefix <- paste0(folder, "/" , simu.name, "/output-", simu.name, ".sim", "/", simu.name, "_")
@@ -92,13 +94,13 @@ read_hisafe <- function(simu.name, folder, profiles = c("annualtree", "annualplo
 
       ## Extract & tidy data
       dat.data <- dat.list %>%
-        purrr::map(1) %>%                             # extract first element (data) of each profile
+        purrr::map(1) %>%                      # extract first element (data) of each profile
         reduce(full_join, by = join.cols) %>%  # bind all variable descriptions togeter
         mutate_if(is.logical, as.numeric)      # columns read as logical must be coered to numeric to prevent plotting errors
 
       ## Extract & tidy variable definitions
       dat.variables <- dat.list %>%
-        purrr::map(2) %>%                             # extract second element (variable descriptions) of each profile
+        purrr::map(2) %>%                      # extract second element (variable descriptions) of each profile
         bind_rows() %>%                        # bind all variable descriptions togeter
         mutate(VariableClass = time.class)     # add a column that indicates which data class the variable definition is from
     }else {
@@ -130,8 +132,18 @@ read_hisafe <- function(simu.name, folder, profiles = c("annualtree", "annualplo
     monthCells.data <- monthCells.variables <- tibble()
   }
 
+  ## Read monthCells data & associated variables
+  climate.profiles <- profiles[profiles %in% c("climate")]
+  if(length(climate.profiles) >= 1) {
+    climate.list <- purrr::map(climate.profiles, function(x) read_hisafe_output_file(paste0(file.prefix, x, ".txt" )))
+    climate.data <- climate.list[[1]]$data
+    climate.variables <- climate.list[[1]]$variables %>% mutate(VariableClass = "climate")
+  } else {
+    climate.data <- climate.variables <- tibble()
+  }
+
   ## Combine variables into one tibble
-  variables <- bind_rows(annual.variables, daily.variables, monthCells.variables) %>%
+  variables <- bind_rows(annual.variables, daily.variables, monthCells.variables, climate.variables) %>%
     distinct()                                # remove all duplicate variable definitions
   names(variables) <- c("Subject",            # rename col headers bc different HISAFE versions used English/French
                         "SubjectId",
@@ -141,7 +153,7 @@ read_hisafe <- function(simu.name, folder, profiles = c("annualtree", "annualplo
                         "VariableClass")
 
   ## Creat output list & assign class
-  output <- list(annual = annual.data, daily = daily.data, monthCells = monthCells.data, variables = variables)
+  output <- list(annual = annual.data, daily = daily.data, monthCells = monthCells.data, climate = climate.data, variables = variables)
   class(output)<-c("hop", class(output))
 
   return(output)
@@ -149,8 +161,8 @@ read_hisafe <- function(simu.name, folder, profiles = c("annualtree", "annualplo
 
 #' Read output from a group of Hi-sAFe simulations
 #' @description Reads the designated output profiles from a group of Hi-sAFe simulations (i.e. an experiment).
-#' @return An object of class \code{hop-group}. This is a list of five data frames:
-#' \code{annual}, \code{daily}, \code{monthCells} (monthly cell data), \code{variables} (variable descriptions and units),
+#' @return An object of class \code{hop-group}. This is a list of six data frames:
+#' \code{annual}, \code{daily}, \code{monthCells} (monthly cell data), \code{climate}, \code{variables} (variable descriptions and units),
 #' and \code{exp.plan} (the provided experimental plan). Data frames will be empty for any data classes not included in the specified profiles
 #' @param exp.plan A data frame containing the experimental plan used to generate the Hi-sAFe simulations. To create an experimental plan, see \code{\link{define_exp}}.
 #' @param folder A character string of the path to the directory containing the Hi-sAFe simulation folders (which each contain the standard subdirectories with the outputs)
@@ -165,7 +177,7 @@ read_hisafe <- function(simu.name, folder, profiles = c("annualtree", "annualplo
 #' # If only the annual tree data is required:
 #' mytreeexp <- read_hisafe(MyExpPlan, "./", profiles = "annualtree")
 #' }
-read_hisafe_group <- function(exp.plan, folder, profiles = c("annualtree", "annualplot", "trees", "plot", "monthCells")) {
+read_hisafe_group <- function(exp.plan, folder, profiles = c("annualtree", "annualplot", "trees", "plot", "monthCells", "climate")) {
 
   ## Read all data from all simulations & combine
   data <- purrr::map(exp.plan$SimulationName, function(x) read_hisafe(x, folder, profiles)) %>%

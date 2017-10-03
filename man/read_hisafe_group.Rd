@@ -5,7 +5,7 @@
 \title{Read output from a group of Hi-sAFe simulations}
 \usage{
 read_hisafe_group(exp.plan, folder, profiles = c("annualtree", "annualplot",
-  "trees", "plot", "monthCells"))
+  "trees", "plot", "monthCells", "climate"))
 }
 \arguments{
 \item{exp.plan}{A data frame containing the experimental plan used to generate the Hi-sAFe simulations. To create an experimental plan, see \code{\link{define_exp}}.}
@@ -15,8 +15,8 @@ read_hisafe_group(exp.plan, folder, profiles = c("annualtree", "annualplot",
 \item{profiles}{A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading the core Hi-sAFe output profiles.}
 }
 \value{
-An object of class \code{hop-group}. This is a list of five data frames:
-\code{annual}, \code{daily}, \code{monthCells} (monthly cell data), \code{variables} (variable descriptions and units),
+An object of class \code{hop-group}. This is a list of six data frames:
+\code{annual}, \code{daily}, \code{monthCells} (monthly cell data), \code{climate}, \code{variables} (variable descriptions and units),
 and \code{exp.plan} (the provided experimental plan). Data frames will be empty for any data classes not included in the specified profiles
 }
 \description{
