@@ -3,7 +3,6 @@
 #' @return A data frame.
 #' @param file A character string of the path to the file to be read.
 #' @param ... Any other arguements passed to \code{read.table}
-#' @export
 #' @import tidyverse
 read_table_hisafe <- function(file, ...) {
   # using read.table rather readr::read_table because read_table is not working
@@ -20,7 +19,6 @@ read_table_hisafe <- function(file, ...) {
 #' @return An list of two data frames: \code{data} contains the data from the profile; \code{variables} contains the variable descriptions.
 #' @param profile A character string of the path to the profile to be read.
 #' @param read.data If TRUE, data and variable descriptions are read. If FALSE, only variable descriptions are read.
-#' @export
 #' @import tidyverse
 read_hisafe_output_file <- function(profile, read.data = TRUE){
 
@@ -214,24 +212,22 @@ read_hisafe_group <- function(exp.plan, folder, profiles = c("annualtree", "annu
   # identically sized and named lists.
 
   ## Tidy up data
-  timeseries_tidy <- function(x){
-    left_join(exp.plan, x, by = "SimulationName") %>%   # add exp.plan cols to annual data
-      mutate_at(names(exp.plan), factor) %>%            # make exp.plan cols factors
-      group_by(SimulationName)                          # group annual data by simulaton
-  }
   data_tidy <- function(x){
     left_join(exp.plan, x, by = "SimulationName") %>%   # add exp.plan cols to annual data
       mutate_at(names(exp.plan), factor) %>%            # make exp.plan cols factors
       group_by(SimulationName)                          # group annual data by simulaton
   }
-  data$annual <- data_tidy(data$annual)
-  data$daily <- data_tidy(data$daily)
-  data$monthCells <- data_tidy(data$monthCells)
+  if(ncol(data$annual) > 0) data$annual <- data_tidy(data$annual)
+  if(ncol(data$daily) > 0) data$daily <- data_tidy(data$daily)
+  if(ncol(data$cells) > 0) data$cells <- data_tidy(data$cells)
+  if(ncol(data$voxels) > 0) data$voxels <- data_tidy(data$voxels)
+  if(ncol(data$climate) > 0) data$climate <- data_tidy(data$climate)
   data$variables <- data$variables %>% distinct()       # remove duplicate variable descriptions
   data$exp.plan <- exp.plan %>% mutate_all(factor)      # make all columns factors
 
   ## Warn if lengths of all simulations are not equal
-  year.summary <- data$annual %>%
+
+  year.summary <- data[[as.numeric(which.max(map_int(data, ncol)))]] %>%
     summarize(n = n()) %>%
     unite(label, SimulationName, n, sep = ": ", remove = FALSE)
   if(length(unique(year.summary$n)) != 1) {
