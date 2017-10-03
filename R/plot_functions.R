@@ -40,6 +40,11 @@ plot_hisafe_ts <- function(data,
     stop("data not of class hop or hop-group")
   }
 
+  ## Check if data exists for time.class
+  if(ncol(data[[time.class]]) == 0) {
+    stop(paste("no data from any", time.class, "profiles found"))
+  }
+
   ## Color blind-friendly palette
   cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
@@ -88,7 +93,7 @@ plot_hisafe_ts <- function(data,
   }
 
   ## Pad SimulationName for legend clarity (until bug in legend.text response to margin is fixed)
-  if(class(data) == "hop-group") {
+  if("hop-group" %in% class(data)) {
     levels(plot.data$SimulationName) <- paste0(levels(plot.data$SimulationName), "  ")
   }
 
@@ -141,9 +146,23 @@ diag_hisafe_ts <- function(data,
                            output.path = "./diagnostics",
                            time.lim = NULL,
                            tree.id = NULL) {
+
   time.class <- tolower(time.class) # prevents error if improper capitalization not input by user
+
+  ## Check if data has class hisafe or hisafe-group
+  if(!any(c("hop", "hop-group") %in% class(data))) {
+    stop("data not of class hop or hop-group")
+  }
+
+  ## Check if data exists for time.class
+  if(ncol(data[[time.class]]) == 0) {
+    stop(paste("no data from any", time.class, "profiles found"))
+  }
+
+  ## Create output directory
   ts.path <- gsub("//", "/", paste0(output.path, "/", time.class, "/"), fixed = TRUE)
   dir.create(ts.path, recursive = TRUE, showWarnings = FALSE)
+
 
   ## Clean columns & extract names of variables to plot
   # cols with only "error!" output are all NA's and cause plot errors
@@ -208,6 +227,16 @@ plot_hisafe_monthcells <- function(data,
                                    sim.names = "all",
                                    years = seq(0, 40, 5),
                                    months = 6) {
+
+  ## Check if data has class hisafe or hisafe-group
+  if(!any(c("hop", "hop-group") %in% class(data))) {
+    stop("data not of class hop or hop-group")
+  }
+
+  ## Check if data exists for time.class
+  if(ncol(data$monthCells) == 0) {
+    stop("no data from monthCells profile found")
+  }
 
   ## Convert "all" arguements to actual values
   if(sim.names[1] == "all") { sim.names <- unique(data$monthCells$SimulationName) }
@@ -290,6 +319,18 @@ plot_hisafe_monthcells <- function(data,
 #' diag_hisafe_monthcells(mydata)
 #' }
 diag_hisafe_monthcells <- function(data, output.path = "./diagnostics") {
+
+  ## Check if data has class hisafe or hisafe-group
+  if(!any(c("hop", "hop-group") %in% class(data))) {
+    stop("data not of class hop or hop-group")
+  }
+
+  ## Check if data exists for time.class
+  if(ncol(data$monthCells) == 0) {
+    stop("no data from monthCells profile found")
+  }
+
+  ## Create output directories
   monthcells.path <- gsub("//", "/", paste0(output.path, "/monthCells/"), fixed = TRUE)
   dir.create(paste0(monthcells.path, "year_simname/"), recursive = TRUE, showWarnings = FALSE)
   dir.create(paste0(monthcells.path, "month_simname/"), recursive = TRUE, showWarnings = FALSE)
