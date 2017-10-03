@@ -5,7 +5,7 @@
 \title{Read output from a single Hi-sAFe simulation}
 \usage{
 read_hisafe(simu.name, folder, profiles = c("annualtree", "annualplot",
-  "trees", "plot", "monthCells", "climate"))
+  "trees", "plot", "monthCells", "cells", "voxels", "climate"))
 }
 \arguments{
 \item{simu.name}{The \code{SimulationName} of the Hi-sAFe simulation. This must be the same as the name of the Hi-sAFe simulation folder.}
@@ -15,8 +15,8 @@ read_hisafe(simu.name, folder, profiles = c("annualtree", "annualplot",
 \item{profiles}{A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading the core Hi-sAFe output profiles.}
 }
 \value{
-An object of class \code{hop}. This is a list of five data frames:
-\code{annual}, \code{daily}, \code{monthCells} (monthly cell data), \code{climate}, and \code{variables} (variable descriptions and units).
+An object of class \code{hop}. This is a list of 7 data frames:
+\code{annual}, \code{daily}, \code{monthCells} (monthly cell data), \code{cells}, \code{voxels}, \code{climate}, and \code{variables} (variable descriptions and units).
 }
 \description{
 Reads the designated output profiles from a single Hi-sAFe simulation.
