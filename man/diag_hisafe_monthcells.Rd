@@ -21,9 +21,9 @@ Creates three tile plots of every Hi-sAFe monthCells output variable, one plot f
 }
 \details{
 The default data presentation for each of the facet schemes is:
-Year~SimulationName plots are for Month==6, every 5 years from 0:max, and all simulations
-Month~SimulationName plots are for Year==median, all 12 months, and all simulations
-Month~Year plots are for all 12 months and every 5 years from 0:max, with each simulation in its own plot
+Year~SimulationName plots are for Month==6, every 5 years from 0:max, and all simulations.
+Month~SimulationName plots are for Year==median, all 12 months, and all simulations.
+Month~Year plots are for all 12 months and every 5 years from 0:max, with each simulation in its own plot.
 }
 \examples{
 \dontrun{

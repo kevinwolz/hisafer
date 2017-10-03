@@ -265,9 +265,9 @@ plot_hisafe_monthcells <- function(data,
 #' @description Creates three tile plots of every Hi-sAFe monthCells output variable, one plot for each possible
 #' \code{plot_hisafe_monthcells} facet scheme. All plots are saved as png files to a specifified output path.
 #' @details The default data presentation for each of the facet schemes is:
-#' Year~SimulationName plots are for Month==6, every 5 years from 0:max, and all simulations
-#' Month~SimulationName plots are for Year==median, all 12 months, and all simulations
-#' Month~Year plots are for all 12 months and every 5 years from 0:max, with each simulation in its own plot
+#' Year~SimulationName plots are for Month==6, every 5 years from 0:max, and all simulations.
+#' Month~SimulationName plots are for Year==median, all 12 months, and all simulations.
+#' Month~Year plots are for all 12 months and every 5 years from 0:max, with each simulation in its own plot.
 #' @return A list of \code{ggplot} objects is invisibly returned, grouped into two sublists based on the faceting scheme. The first sublist contains  Year~SimulationName, and the second contains Month~SimulationName.
 #' @param data An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
 #' @param output.path A character stting indicating the path to the directory where plots should be saved. Plots are
