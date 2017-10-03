@@ -15,8 +15,8 @@ read_hisafe_group(exp.plan, folder, profiles = c("annualtree", "annualplot",
 \item{profiles}{A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading the core Hi-sAFe output profiles.}
 }
 \value{
-An object of class \code{hop-group}. This is a list of 8 data frames:
-\code{annual}, \code{daily}, \code{monthCells} (monthly cell data), \code{cells}, \code{voxels}, \code{climate}, \code{variables} (variable descriptions and units),
+An object of class \code{hop-group}. This is a list of 7 data frames:
+\code{annual}, \code{daily}, \code{monthCells} (monthly cell data), \code{cells}, \code{voxels}, \code{variables} (variable descriptions and units),
 and \code{exp.plan} (the provided experimental plan). Data frames will be empty for any data classes not included in the specified profiles
 }
 \description{
