@@ -225,7 +225,7 @@ plot_hisafe_monthcells <- function(data,
 #' @return A ggplot object.
 #' @param data An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
 #' @param variable A character string of the name of the variable to color the tiles.
-#' @param sim.names A character vector containing the dates (yyyy-mm-dd) to include.
+#' @param dates A character vector containing the dates (yyyy-mm-dd) to include.
 #' @export
 #' @import tidyverse
 #' @family hisafe plot functions
@@ -234,8 +234,8 @@ plot_hisafe_monthcells <- function(data,
 #' # After reading in Hi-sAFe simulation data via:
 #' mydata <- read_hisafe_output("MySimulation", "./")
 #'
-#' # You can create a tile plot of monthDirectParIncident:
-#' tile.plot <- plot_hisafe_cells(mydata, "relativeDirectParIncident", paste(1998, 1:12, 1, sep = "-"))
+#' # You can create a tile plot of relativeDirectParIncident:
+#' tile.plot <- plot_hisafe_cells(mydata, "relativeDirectParIncident", paste(1998, 6:8, 1, sep = "-"))
 #'
 #' # Once you have the plot object, you can display it and save it:
 #' tile.plot
@@ -297,6 +297,97 @@ plot_hisafe_cells <- function(data,
     scale_x_continuous(expand = c(0,0)) +
     scale_y_continuous(expand = c(0,0)) +
     facet_cells +
+    geom_tile(aes_string(fill = variable), na.rm = TRUE, color = "black") +
+    geom_point(data = tree.locations, fill = "black", color = "white", shape = 21) +
+    viridis::scale_fill_viridis(option = "magma") +
+    guides(fill = guide_colourbar(barwidth = 15,
+                                  barheight = 1.5,
+                                  title.vjust = 0.8,
+                                  nbin = 100)) +
+    coord_equal() +
+    theme_hisafe_tile()
+
+  return(plot.obj)
+}
+
+
+#' Tile plot of Hi-sAFe voxels output variable
+#' @description Plots a tile plot of a single Hi-sAFe voxels output variable. If a single date is provided, SimulationName is used as the column facet. Otherwise, Date is used as the column facet.
+#' @return A ggplot object.
+#' @param data An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
+#' @param variable A character string of the name of the variable to color the tiles.
+#' @param dates A character vector containing the dates (yyyy-mm-dd) to include.
+#' @export
+#' @import tidyverse
+#' @family hisafe plot functions
+#' @examples
+#' \dontrun{
+#' # After reading in Hi-sAFe simulation data via:
+#' mydata <- read_hisafe_output("MySimulation", "./")
+#'
+#' # You can create a tile plot of waterAvailable:
+#' tile.plot <- plot_hisafe_voxels(mydata, "waterAvailable", paste(1998, 6:8, 1, sep = "-"))
+#'
+#' # Once you have the plot object, you can display it and save it:
+#' tile.plot
+#' ggplot2::ggsave("tiled_waterAvailable.png", tile.plot)
+#' }
+plot_hisafe_voxels <- function(data,
+                              variable,
+                              dates) {
+
+  ## Check if data has class hisafe or hisafe-group
+  if(!any(c("hop", "hop-group") %in% class(data))) {
+    stop("data not of class hop or hop-group")
+  }
+
+  ## Check if data exists for time.class
+  if(ncol(data$voxels) == 0) {
+    stop("no data from voxels profile found")
+  }
+
+  if("hop-group" %in% class(data) & length(dates) > 1) {
+    stop("cannot supply more than one date for object of class hop-group")
+  }
+
+  ## Exract units of supplied variable from the "variables" slot
+  var.unit <- data$variables %>%
+    filter(VariableClass == "voxels", VariableName == variable) %>%
+    .$Units %>%
+    gsub(pattern = "\\.", replacement = " ")
+
+  ## Filter for provided dates
+  plot.data <- data$voxels %>%
+    filter(Date %in% ymd(dates))
+
+  ## Find tree locations for each simulation
+  tree.locations <- plot.data %>%
+    summarize(x = median(x), y = median(y))
+
+  ## Determine faceting & axis labels
+  if("hop-group" %in% class(data) & length(dates) == 1){
+    facet_voxels <- facet_grid(z ~ SimulationName, switch = "both")
+    x.lab = "SimulationName"
+    title.lab = paste0(variable, " (", ymd(dates), ")")
+  } else if(length(dates) == 1) {
+    facet_voxels <- facet_wrap(~z, ncol = 1)
+    title.lab = paste0(variable, " (", ymd(dates), ")")
+  } else {
+    facet_voxels <- facet_grid(z ~ Date, switch = "both")
+    x.lab = "Date"
+    title.lab = variable
+  }
+
+
+  ## Create plot
+  plot.obj <- ggplot(plot.data, aes(x = x, y = y)) +
+    labs(x = x.lab,
+         y = "Depth (m)",
+         fill = var.unit,
+         title = title.lab) +
+    scale_x_continuous(expand = c(0,0)) +
+    scale_y_continuous(expand = c(0,0)) +
+    facet_voxels +
     geom_tile(aes_string(fill = variable), na.rm = TRUE, color = "black") +
     geom_point(data = tree.locations, fill = "black", color = "white", shape = 21) +
     viridis::scale_fill_viridis(option = "magma") +

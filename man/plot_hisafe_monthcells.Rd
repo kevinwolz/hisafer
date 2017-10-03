@@ -56,5 +56,6 @@ ggplot2::ggsave("tiled_monthDirectParIncident.png", tile.plot2)
 }
 \seealso{
 Other hisafe plot functions: \code{\link{plot_hisafe_cells}},
-  \code{\link{plot_hisafe_ts}}
+  \code{\link{plot_hisafe_ts}},
+  \code{\link{plot_hisafe_voxels}}
 }
