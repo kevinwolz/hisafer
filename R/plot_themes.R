@@ -36,7 +36,7 @@ theme_hisafe_ts <- function(base_size = 18) {
 #' @return A ggplot modifier object containing the theme.
 #' @param base_size A number indicating the base \code{ggplot} text size.
 #' @import tidyverse
-theme_hisafe_monthcells <- function(base_size = 18) {
+theme_hisafe_tile <- function(base_size = 18) {
   thm <- theme_bw(base_size = base_size) %+%
     theme(
       plot.margin = unit(base_size*c(1,1,1,1), "points"),

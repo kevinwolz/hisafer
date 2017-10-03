@@ -2,6 +2,7 @@
 
 export(diag_hisafe_monthcells)
 export(diag_hisafe_ts)
+export(plot_hisafe_cells)
 export(plot_hisafe_monthcells)
 export(plot_hisafe_ts)
 export(read_hisafe)

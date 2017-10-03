@@ -114,7 +114,7 @@ plot_hisafe_ts <- function(data,
 }
 
 #' Tile plot of Hi-sAFe monthCells output variable
-#' @description Plots a daily or annual timeseries of a single Hi-sAFe output variable.
+#' @description Plots a tile plot of a single Hi-sAFe monthCells output variable.
 #' @details This function is very picky! You can only facet by two of the three manipulable variables: SimulationName, Year, Month. You must ensure that the one varibale not used for faceting is fixed at a single value.
 #' @return A ggplot object.
 #' @param data An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
@@ -180,11 +180,6 @@ plot_hisafe_monthcells <- function(data,
   }
   fixed.var <- paste(vars[!var.lengths], "=", avail.vars[[(1:3)[!var.lengths]]])
 
-  ## Check if data has class hisafe or hisafe-group
-  if(!any(c("hop", "hop-group") %in% class(data))) {
-    stop("data not of class hop or hop-group")
-  }
-
   ## Exract units of supplied variable from the "variables" slot
   var.unit <- data$variables %>%
     filter(VariableClass == "monthCells", VariableName == variable) %>%
@@ -219,7 +214,98 @@ plot_hisafe_monthcells <- function(data,
                                   title.vjust = 0.8,
                                   nbin = 100)) +
     coord_equal() +
-    theme_hisafe_monthCells()
+    theme_hisafe_tile()
+
+  return(plot.obj)
+}
+
+
+#' Tile plot of Hi-sAFe cells output variable
+#' @description Plots a tile plot of a single Hi-sAFe cells output variable. SimulationName is used as the column facet. Date is used as the row facet.
+#' @return A ggplot object.
+#' @param data An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
+#' @param variable A character string of the name of the variable to color the tiles.
+#' @param sim.names A character vector containing the dates (yyyy-mm-dd) to include.
+#' @export
+#' @import tidyverse
+#' @family hisafe plot functions
+#' @examples
+#' \dontrun{
+#' # After reading in Hi-sAFe simulation data via:
+#' mydata <- read_hisafe_output("MySimulation", "./")
+#'
+#' # You can create a tile plot of monthDirectParIncident:
+#' tile.plot <- plot_hisafe_cells(mydata, "relativeDirectParIncident", paste(1998, 1:12, 1, sep = "-"))
+#'
+#' # Once you have the plot object, you can display it and save it:
+#' tile.plot
+#' ggplot2::ggsave("tiled_relativeDirectParIncident.png", tile.plot)
+#' }
+plot_hisafe_cells <- function(data,
+                              variable,
+                              dates) {
+
+  ## Check if data has class hisafe or hisafe-group
+  if(!any(c("hop", "hop-group") %in% class(data))) {
+    stop("data not of class hop or hop-group")
+  }
+
+  ## Check if data exists for time.class
+  if(ncol(data$cells) == 0) {
+    stop("no data from cells profile found")
+  }
+
+  ## Exract units of supplied variable from the "variables" slot
+  var.unit <- data$variables %>%
+    filter(VariableClass == "cells", VariableName == variable) %>%
+    .$Units %>%
+    gsub(pattern = "\\.", replacement = " ")
+
+  ## Filter for provided dates
+  plot.data <- data$cells %>%
+    filter(Date %in% ymd(dates))
+
+  ## Find tree locations for each simulation
+  tree.locations <- plot.data %>%
+    summarize(x = median(x), y = median(y))
+
+  ## Determine faceting & axis labels
+  if("hop-group" %in% class(data) & length(dates) > 1){
+    facet_cells <- facet_grid(Date ~ SimulationName, switch = "both")
+    x.lab = "SimulationName"
+    y.lab = "Date"
+    title.lab = variable
+  } else if(length(dates) > 1) {
+    facet_cells <- facet_wrap(~Date)
+    x.lab = ""
+    y.lab = "Date"
+    title.lab = variable
+  } else {
+    facet_cells <- geom_blank()
+    x.lab = ""
+    y.lab = ""
+    title.lab = paste0(variable, " (", ymd(dates), ")")
+  }
+
+
+  ## Create plot
+  plot.obj <- ggplot(plot.data, aes(x = x, y = y)) +
+    labs(x = x.lab,
+         y = y.lab,
+         fill = var.unit,
+         title = title.lab) +
+    scale_x_continuous(expand = c(0,0)) +
+    scale_y_continuous(expand = c(0,0)) +
+    facet_cells +
+    geom_tile(aes_string(fill = variable), na.rm = TRUE, color = "black") +
+    geom_point(data = tree.locations, fill = "black", color = "white", shape = 21) +
+    viridis::scale_fill_viridis(option = "magma") +
+    guides(fill = guide_colourbar(barwidth = 15,
+                                  barheight = 1.5,
+                                  title.vjust = 0.8,
+                                  nbin = 100)) +
+    coord_equal() +
+    theme_hisafe_tile()
 
   return(plot.obj)
 }

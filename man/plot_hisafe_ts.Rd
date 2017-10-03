@@ -45,5 +45,6 @@ ggplot2::ggsave("annual_carbonCoarseRoots.png", annual.plot)
 }
 }
 \seealso{
-Other hisafe plot functions: \code{\link{plot_hisafe_monthcells}}
+Other hisafe plot functions: \code{\link{plot_hisafe_cells}},
+  \code{\link{plot_hisafe_monthcells}}
 }

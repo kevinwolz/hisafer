@@ -27,7 +27,7 @@ plot_hisafe_monthcells(data, variable, rowfacet = "SimulationName",
 A ggplot object.
 }
 \description{
-Plots a daily or annual timeseries of a single Hi-sAFe output variable.
+Plots a tile plot of a single Hi-sAFe monthCells output variable.
 }
 \details{
 This function is very picky! You can only facet by two of the three manipulable variables: SimulationName, Year, Month. You must ensure that the one varibale not used for faceting is fixed at a single value.
@@ -55,5 +55,6 @@ ggplot2::ggsave("tiled_monthDirectParIncident.png", tile.plot2)
 }
 }
 \seealso{
-Other hisafe plot functions: \code{\link{plot_hisafe_ts}}
+Other hisafe plot functions: \code{\link{plot_hisafe_cells}},
+  \code{\link{plot_hisafe_ts}}
 }

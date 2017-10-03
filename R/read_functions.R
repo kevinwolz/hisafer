@@ -214,9 +214,8 @@ read_hisafe_group <- function(exp.plan, folder, profiles = c("annualtree", "annu
   data$exp.plan <- exp.plan %>% mutate_all(factor)      # make all columns factors
 
   ## Warn if lengths of all simulations are not equal
-
   year.summary <- data[[as.numeric(which.max(map_int(data, ncol)))]] %>%
-    summarize(n = n()) %>%
+    summarize(n = n_distinct(Year)) %>%
     unite(label, SimulationName, n, sep = ": ", remove = FALSE)
   if(length(unique(year.summary$n)) != 1) {
     year.length.warning <- paste(c("Simulation lengths not equal!",
