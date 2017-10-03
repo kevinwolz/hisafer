@@ -42,3 +42,6 @@ diag_hisafe_ts(mydata)
 diag_hisafe_ts(mydata, "daily")
 }
 }
+\seealso{
+Other hisafe diagnostic fucntions: \code{\link{diag_hisafe_monthcells}}
+}

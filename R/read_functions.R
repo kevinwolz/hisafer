@@ -3,6 +3,7 @@
 #' @return A data frame.
 #' @param file A character string of the path to the file to be read.
 #' @param ... Any other arguements passed to \code{read.table}
+#' @import tidyverse
 read_table_hisafe <- function(file, ...) {
   # using read.table rather readr::read_table because read_table is not working
   as.tibble(read.table(file,
@@ -18,6 +19,7 @@ read_table_hisafe <- function(file, ...) {
 #' @return An list of two data frames: \code{data} contains the data from the profile; \code{variables} contains the variable descriptions.
 #' @param profile A character string of the path to the profile to be read.
 #' @param read.data If TRUE, data and variable descriptions are read. If FALSE, only variable descriptions are read.
+#' @import tidyverse
 read_hisafe_output_file <- function(profile, read.data = TRUE){
 
   ## Read raw text & find break between description & data
@@ -46,6 +48,7 @@ read_hisafe_output_file <- function(profile, read.data = TRUE){
 #' @param folder A character string of the path to the directory containing the Hi-sAFe simulation folder (which contains the standard subdirectory with the output)
 #' @param profiles A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading the core Hi-sAFe output profiles.
 #' @export
+#' @import tidyverse
 #' @examples
 #' \dontrun{
 #' # After reading in Hi-sAFe simulation data via:
@@ -153,6 +156,7 @@ read_hisafe <- function(simu.name, folder, profiles = c("annualtree", "annualplo
 #' @param folder A character string of the path to the directory containing the Hi-sAFe simulation folders (which each contain the standard subdirectories with the outputs)
 #' @param profiles A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading the core Hi-sAFe output profiles.
 #' @export
+#' @import tidyverse
 #' @examples
 #' \dontrun{
 #' # After reading in Hi-sAFe simulation data via:

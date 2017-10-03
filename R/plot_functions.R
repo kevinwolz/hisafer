@@ -11,6 +11,8 @@
 #' If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.
 #' @param tree.id A numeric vector indicating the ids of a subset of tree ids to plot. If no input, all trees will be plotted.
 #' @export
+#' @import tidyverse
+#' @family hisafe plot functions
 #' @examples
 #' \dontrun{
 #' # After reading in Hi-sAFe simulation data via:
@@ -65,7 +67,7 @@ plot_hisafe_ts <- function(data,
     plot.data <- data$daily
     scale_x_ts <- scale_x_date()
     if(!is.null(time.lim)) {
-      time.lim <- ymd(time.lim)
+      time.lim <- lubridate::ymd(time.lim)
       if(is.na(time.lim[1])) { time.lim[1] <- min(plot.data$Date) }
       if(is.na(time.lim[2])) { time.lim[2] <- max(plot.data$Date) }
       plot.data <- plot.data %>% filter(Date >= time.lim[1], Date <= time.lim[2])
@@ -121,6 +123,8 @@ plot_hisafe_ts <- function(data,
 #' If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.
 #' @param tree.id A numeric vector indicating the ids of a subset of tree ids to plot. If no input, all trees will be plotted.
 #' @export
+#' @import tidyverse
+#' @family hisafe diagnostic fucntions
 #' @examples
 #' \dontrun{
 #' # After reading in Hi-sAFe simulation data via:
@@ -174,6 +178,8 @@ diag_hisafe_ts <- function(data,
 #' @param years A numeric vector containing the years to include. Use "all" to include all available values.
 #' @param months A numeric vector containing the months to include. Use "all" to include all available values.
 #' @export
+#' @import tidyverse
+#' @family hisafe plot functions
 #' @examples
 #' \dontrun{
 #' # After reading in Hi-sAFe simulation data via:
@@ -273,6 +279,8 @@ plot_hisafe_monthcells <- function(data,
 #' @param output.path A character stting indicating the path to the directory where plots should be saved. Plots are
 #' saved in a subdirectory within this directory named /monthCells/facetScheme.
 #' @export
+#' @import tidyverse
+#' @family hisafe diagnostic fucntions
 #' @examples
 #' \dontrun{
 #' # After reading in Hi-sAFe simulation data via:

@@ -34,3 +34,6 @@ mydata <- read_hisafe_output("MySimulation", "./")
 diag_hisafe_monthcells(mydata)
 }
 }
+\seealso{
+Other hisafe diagnostic fucntions: \code{\link{diag_hisafe_ts}}
+}
