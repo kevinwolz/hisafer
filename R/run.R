@@ -22,7 +22,6 @@ call_hisafe_exp <- function(path,
   }
 
   ## Call Hi-sAFe via command line
-  parallel.packages <-
   if(parallel) {
     stop("parallel computing not yet supported")
   } else {
