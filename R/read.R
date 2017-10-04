@@ -60,7 +60,7 @@ read_hisafe_output_file <- function(profile, read.data = TRUE){
 read_hisafe <- function(simu.name, folder, profiles = c("annualtree", "annualplot", "trees", "plot", "monthCells", "cells", "voxels", "climate")) {
 
   ## Create profile paths
-  file.prefix <- paste0(folder, "/" , simu.name, "/output-", simu.name, ".sim", "/", simu.name, "_")
+  file.prefix <- gsub("//", "/", paste0(folder, "/" , simu.name, "/output-", simu.name, ".sim", "/", simu.name, "_"))
   files <- paste0(file.prefix, profiles, ".txt" )
 
   ## Check for existence of all requested profiles and throw error if profile does not exist
