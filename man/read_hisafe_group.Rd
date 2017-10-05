@@ -4,20 +4,23 @@
 \alias{read_hisafe_group}
 \title{Read output from a group of Hi-sAFe simulations}
 \usage{
-read_hisafe_group(exp.plan, folder, profiles = c("annualtree", "annualplot",
-  "trees", "plot", "monthCells", "cells", "voxels", "climate"))
+read_hisafe_group(exp.plan, path, profiles = "all", allow.missing = FALSE)
 }
 \arguments{
-\item{exp.plan}{A data frame containing the experimental plan used to generate the Hi-sAFe simulations. To create an experimental plan, see \code{\link{define_exp}}.}
+\item{exp.plan}{A data frame containing the experimental plan used to generate the Hi-sAFe simulations.
+To create an experimental plan, see \code{\link{define_exp}}.}
 
-\item{folder}{A character string of the path to the directory containing the Hi-sAFe simulation folders (which each contain the standard subdirectories with the outputs)}
+\item{path}{A character string of the path to the directory containing the Hi-sAFe simulation folders (which each contain the standard subdirectories with the outputs)}
 
-\item{profiles}{A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading the core Hi-sAFe output profiles.}
+\item{profiles}{A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading all supported Hi-sAFe output profiles via "all". Currently supported profiles are: annualtree, annualplot, trees, plot, monthCells, cells, voxels, climate.}
+
+\item{allow.missing}{If \code{TRUE}, does not produce error when profiles specified by \code{profiles} are not found in the output path.
+It is highly discouraged to change this from the default of \code{FALSE} unless there are specific profiles intentionally missing from some simulations.}
 }
 \value{
 An object of class \code{hop-group}. This is a list of 7 data frames:
-\code{annual}, \code{daily}, \code{monthCells} (monthly cell data), \code{cells}, \code{voxels}, \code{variables} (variable descriptions and units),
-and \code{exp.plan} (the provided experimental plan). Data frames will be empty for any data classes not included in the specified profiles
+\code{annual} (includes data from annualtree and annualplot profiles), \code{daily} (includes data from trees, plot, and climate profiles),
+\code{monthCells}, \code{cells}, \code{voxels}, and \code{variables} (variable descriptions and units from all profiles).
 }
 \description{
 Reads the designated output profiles from a group of Hi-sAFe simulations (i.e. an experiment).

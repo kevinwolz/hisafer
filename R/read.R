@@ -6,12 +6,12 @@
 #' @import tidyverse
 read_table_hisafe <- function(file, ...) {
   # using read.table rather readr::read_table because read_table is not working
-  as.tibble(read.table(file,
-                       header = TRUE,
-                       sep = "\t",
-                       stringsAsFactors = FALSE,
-                       na.strings = c("NA", "error!"), # "error!" is output by HISAFE & causes table merge errors if left
-                       encoding = "latin1", ...))
+  tibble::as.tibble(read.table(file,
+                               header = TRUE,
+                               sep = "\t",
+                               stringsAsFactors = FALSE,
+                               na.strings = c("NA", "error!"), # "error!" is output by HISAFE & causes table merge errors if left
+                               encoding = "latin1", ...))
 }
 
 #' Read a single Hi-sAFe output profile
@@ -43,10 +43,12 @@ read_hisafe_output_file <- function(profile, read.data = TRUE){
 #' Read output from a single Hi-sAFe simulation
 #' @description Reads the designated output profiles from a single Hi-sAFe simulation.
 #' @return An object of class \code{hop}. This is a list of 6 data frames:
-#' \code{annual}, \code{daily}, \code{monthCells} (monthly cell data), \code{cells}, \code{voxels}, and \code{variables} (variable descriptions and units).
+#' \code{annual} (includes data from annualtree and annualplot profiles), \code{daily} (includes data from trees, plot, and climate profiles), \code{monthCells}, \code{cells}, \code{voxels}, and \code{variables} (variable descriptions and units from all profiles).
 #' @param simu.name The \code{SimulationName} of the Hi-sAFe simulation. This must be the same as the name of the Hi-sAFe simulation folder.
-#' @param folder A character string of the path to the directory containing the Hi-sAFe simulation folder (which contains the standard subdirectory with the output)
-#' @param profiles A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading the core Hi-sAFe output profiles.
+#' @param path A character string of the path to the directory containing the Hi-sAFe simulation folder (which contains the standard subdirectory with the output)
+#' @param profiles A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading all supported Hi-sAFe output profiles via "all". Currently supported profiles are: annualtree, annualplot, trees, plot, monthCells, cells, voxels, climate.
+#' @param allow.missing If \code{TRUE}, does not produce error when profiles specified by \code{profiles} are not found in the output path.
+#' It is highly discouraged to change this from the default of \code{FALSE} unless there are specific profiles intentionally missing from some simulations.
 #' @export
 #' @import tidyverse
 #' @examples
@@ -57,20 +59,29 @@ read_hisafe_output_file <- function(profile, read.data = TRUE){
 #' # If only the annual tree data is required:
 #' mytreedata <- read_hisafe("MySimulation", "./", profiles = "annualtree")
 #' }
-read_hisafe <- function(simu.name, folder, profiles = c("annualtree", "annualplot", "trees", "plot", "monthCells", "cells", "voxels", "climate")) {
+read_hisafe <- function(simu.name, path, profiles = "all", allow.missing = FALSE) {
+
+  supported.profiles <- c("annualtree", "annualplot", "trees", "plot", "monthCells", "cells", "voxels", "climate")
+  if(profiles == "all") profiles <- supported.profiles
 
   ## Create profile paths
-  file.prefix <- gsub("//", "/", paste0(folder, "/" , simu.name, "/output-", simu.name, ".sim", "/", simu.name, "_"))
+  file.prefix <- gsub("//", "/", paste0(path, "/" , simu.name, "/output-", simu.name, ".sim", "/", simu.name, "_"))
   files <- paste0(file.prefix, profiles, ".txt" )
 
   ## Check for existence of all requested profiles and throw error if profile does not exist
-  if(!all(file.exists(files))) {
+  missing <- !all(file.exists(files))
+  if(missing) {
     missing.files <- files[!file.exists(files)]
-    missing.profiles <- tail(strsplit(missing.files, "/")[[1]], n = 1)
+    missing.profiles <- purrr::map_chr(strsplit(missing.files, "/"), tail, n = 1)
     missing.profile.error <- paste(c("The following profiles do not exist:",
-                                       missing.profiles),
-                                     collapse = "\n")
+                                     missing.profiles),
+                                   collapse = "\n")
+  }
+  if(missing & !allow.missing) {
     stop(missing.profile.error)
+  } else if(missing & allow.missing) {
+    warning(missing.profile.error)
+    profiles <- profiles[file.exists(files)]
   }
 
   ## Function for reading timeseries (Annual, Daily) profiles
@@ -175,11 +186,14 @@ read_hisafe <- function(simu.name, folder, profiles = c("annualtree", "annualplo
 #' Read output from a group of Hi-sAFe simulations
 #' @description Reads the designated output profiles from a group of Hi-sAFe simulations (i.e. an experiment).
 #' @return An object of class \code{hop-group}. This is a list of 7 data frames:
-#' \code{annual}, \code{daily}, \code{monthCells} (monthly cell data), \code{cells}, \code{voxels}, \code{variables} (variable descriptions and units),
-#' and \code{exp.plan} (the provided experimental plan). Data frames will be empty for any data classes not included in the specified profiles
-#' @param exp.plan A data frame containing the experimental plan used to generate the Hi-sAFe simulations. To create an experimental plan, see \code{\link{define_exp}}.
-#' @param folder A character string of the path to the directory containing the Hi-sAFe simulation folders (which each contain the standard subdirectories with the outputs)
-#' @param profiles A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading the core Hi-sAFe output profiles.
+#' \code{annual} (includes data from annualtree and annualplot profiles), \code{daily} (includes data from trees, plot, and climate profiles),
+#' \code{monthCells}, \code{cells}, \code{voxels}, and \code{variables} (variable descriptions and units from all profiles).
+#' @param exp.plan A data frame containing the experimental plan used to generate the Hi-sAFe simulations.
+#' To create an experimental plan, see \code{\link{define_exp}}.
+#' @param path A character string of the path to the directory containing the Hi-sAFe simulation folders (which each contain the standard subdirectories with the outputs)
+#' @param profiles A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading all supported Hi-sAFe output profiles via "all". Currently supported profiles are: annualtree, annualplot, trees, plot, monthCells, cells, voxels, climate.
+#' @param allow.missing If \code{TRUE}, does not produce error when profiles specified by \code{profiles} are not found in the output path.
+#' It is highly discouraged to change this from the default of \code{FALSE} unless there are specific profiles intentionally missing from some simulations.
 #' @export
 #' @import tidyverse
 #' @examples
@@ -190,10 +204,10 @@ read_hisafe <- function(simu.name, folder, profiles = c("annualtree", "annualplo
 #' # If only the annual tree data is required:
 #' mytreeexp <- read_hisafe(MyExpPlan, "./", profiles = "annualtree")
 #' }
-read_hisafe_group <- function(exp.plan, folder, profiles = c("annualtree", "annualplot", "trees", "plot", "monthCells", "cells", "voxels", "climate")) {
+read_hisafe_group <- function(exp.plan, path, profiles = "all", allow.missing = FALSE) {
 
   ## Read all data from all simulations & combine
-  data <- purrr::map(exp.plan$SimulationName, function(x) read_hisafe(x, folder, profiles)) %>%
+  data <- purrr::map(exp.plan$SimulationName, read_hisafe, path = path, profiles = profiles, allow.missing = allow.missing) %>%
     purrr::pmap(bind_rows) # a more generic version of this line that handles cases where the number
   # of elements and order of names in each sublist can vary is:
   # purrr::map(map_df(data, ~ as.data.frame(purrr::map(.x, ~ unname(nest(.))))), bind_rows)
@@ -219,7 +233,7 @@ read_hisafe_group <- function(exp.plan, folder, profiles = c("annualtree", "annu
     unite(label, SimulationName, n, sep = ": ", remove = FALSE)
   if(length(unique(year.summary$n)) != 1) {
     year.length.warning <- paste(c("Simulation lengths not equal!",
-                                   "Be careful when comparing end-of-simulation results.",
+                                   "Be careful when comparing simulations.",
                                    "Simulation lengths:",
                                    year.summary$label),
                                  collapse = "\n")

@@ -1,4 +1,4 @@
-build_hisafe_exp <- function(exp, path, exp.name, generics = NULL, controls = FALSE) {
+build_hisafe_exp <- function(exp, path, exp.name, baseline.dir, controls = FALSE) {
 
   ## Check if exp has class hip
   if("hip" %in% class(exp)) stop("exp plan not of class hip")
@@ -12,7 +12,7 @@ build_hisafe_exp <- function(exp, path, exp.name, generics = NULL, controls = FA
   readr::write_csv(exp, gsub("//", "/", paste0(exp.path, "/", exp.name, ".csv")))
 
   ## Run Hi-sAFe for each simulation in experiment
-  purrr:map(exp, build_hisafe, path = exp.path, generics = genericss)
+  purrr:map(exp, build_hisafe, path = exp.path, baseline.dir = baseline.dir)
 
   ## Run control simulations
   if(controls) stop("support for running control simulations not yet supported")

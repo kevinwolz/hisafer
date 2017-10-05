@@ -4,19 +4,21 @@
 \alias{read_hisafe}
 \title{Read output from a single Hi-sAFe simulation}
 \usage{
-read_hisafe(simu.name, folder, profiles = c("annualtree", "annualplot",
-  "trees", "plot", "monthCells", "cells", "voxels", "climate"))
+read_hisafe(simu.name, path, profiles = "all", allow.missing = FALSE)
 }
 \arguments{
 \item{simu.name}{The \code{SimulationName} of the Hi-sAFe simulation. This must be the same as the name of the Hi-sAFe simulation folder.}
 
-\item{folder}{A character string of the path to the directory containing the Hi-sAFe simulation folder (which contains the standard subdirectory with the output)}
+\item{path}{A character string of the path to the directory containing the Hi-sAFe simulation folder (which contains the standard subdirectory with the output)}
 
-\item{profiles}{A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading the core Hi-sAFe output profiles.}
+\item{profiles}{A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading all supported Hi-sAFe output profiles via "all". Currently supported profiles are: annualtree, annualplot, trees, plot, monthCells, cells, voxels, climate.}
+
+\item{allow.missing}{If \code{TRUE}, does not produce error when profiles specified by \code{profiles} are not found in the output path.
+It is highly discouraged to change this from the default of \code{FALSE} unless there are specific profiles intentionally missing from some simulations.}
 }
 \value{
 An object of class \code{hop}. This is a list of 6 data frames:
-\code{annual}, \code{daily}, \code{monthCells} (monthly cell data), \code{cells}, \code{voxels}, and \code{variables} (variable descriptions and units).
+\code{annual} (includes data from annualtree and annualplot profiles), \code{daily} (includes data from trees, plot, and climate profiles), \code{monthCells}, \code{cells}, \code{voxels}, and \code{variables} (variable descriptions and units from all profiles).
 }
 \description{
 Reads the designated output profiles from a single Hi-sAFe simulation.
