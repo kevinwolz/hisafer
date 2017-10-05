@@ -63,7 +63,10 @@ define_hisafe_factorial <- function(Nyears,
                             stringsAsFactors = FALSE)
 
   ## Add generic SimulationName column and move to front
-  plan$SimulationName <- paste0("Sim", 1:nrow(plan))
+  plan %>%
+    mutate(SimulationName = paste0("Sim", 1:nrow(plan))) %>%
+    select(SimulationName, everything())
+
 
   check_input_values(plan)
   class(plan) <- c("hip", class(plan))
