@@ -6,7 +6,7 @@ define_hisafe <- function(SimulationName,
                           Crop,
                           Within,
                           Between,
-                          Stagger,
+                          #Stagger,
                           CropDist,
                           Orient,
                           Latitude,
@@ -21,7 +21,7 @@ define_hisafe <- function(SimulationName,
                          Crop = Crop,
                          Within = Within,
                          Between = Between,
-                         Stagger = Stagger,
+                         #Stagger = Stagger,
                          CropDist = CropDist,
                          Orient = Orient,
                          Latitude = Latitude,
@@ -40,7 +40,7 @@ define_hisafe_factorial <- function(Nyears,
                                     Crop,
                                     Within,
                                     Between,
-                                    Stagger,
+                                    #Stagger,
                                     CropDist,
                                     Orient,
                                     Latitude,
@@ -54,7 +54,7 @@ define_hisafe_factorial <- function(Nyears,
                                         Crop = Crop,
                                         Within = Within,
                                         Between = Between,
-                                        Stagger = Stagger,
+                                        #Stagger = Stagger,
                                         CropDist = CropDist,
                                         Orient = Orient,
                                         Latitude = Latitude,
@@ -86,7 +86,7 @@ check_input_values <- function(plan) {
                 "Crop",
                 "Within",
                 "Between",
-                "Stagger",
+                #"Stagger",
                 "CropDist",
                 "Orient",
                 "Latitude",
@@ -124,7 +124,7 @@ check_input_values <- function(plan) {
   if(any(!(DayStart %in% 1:31))) errors <- paste0(errors, "DayStart - DayStart must be an integer between 1 and 31.", collapse = "\n")
   if(any(!(Tree %in% avail.trees))) errors <- paste0(errors, "Tree - supported tree species include: ", paste0(avail.trees, collapse = ", "), collapse = "\n")
   if(any(!(Tree %in% avail.trees))) errors <- paste0(errors, "Crop - supported crop species include: ", paste0(avail.crops, collapse = ", "), collapse = "\n")
-  if(any(Stagger < 0 | Stagger > 0.5)) errors <- paste0(errors, "Stagger - Stagger must be between 0 and 0.5.", collapse = "\n")
+  #if(any(Stagger < 0 | Stagger > 0.5)) errors <- paste0(errors, "Stagger - Stagger must be between 0 and 0.5.", collapse = "\n")
   if(any(Orient < 0 | Orient > 359)) errors <- paste0(errors, "Orient - Orient must be between 0 and 359.", collapse = "\n")
   if(any(Latitude < -90 | Latitude > 90)) errors <- paste0(errors, "Latitude - Latitude must be between -90 and 90.", collapse = "\n")
   if(any(!(is.character(wth.file) | is.na(wth.file)))) errors <- paste0(errors, "wth.file - wth.file must be a character vector.", collapse = "\n")
