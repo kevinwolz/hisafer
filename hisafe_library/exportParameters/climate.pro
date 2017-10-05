@@ -1,0 +1,5 @@
+
+# allSteps	currentStep	frequency	frequencyBegin	frequencyValue	period	periodTo	periodFrom	rootStepToExport
+false	true	false	0	0	false	0	0	false
+# subject	variables
+SafeMacroClimat	{SafeMacroClimat-airVapourPressure;SafeMacroClimat-airVapourPressureSat;SafeMacroClimat-dayLength;SafeMacroClimat-delta;SafeMacroClimat-diffusePar;SafeMacroClimat-directPar;SafeMacroClimat-etpPenman;SafeMacroClimat-extraTerrestrialRadiation;SafeMacroClimat-globalPar;SafeMacroClimat-globalRadiation;SafeMacroClimat-infraRedRadiation;SafeMacroClimat-maxRelativeHumidity;SafeMacroClimat-maxTemperature;SafeMacroClimat-minRelativeHumidity;SafeMacroClimat-minTemperature;SafeMacroClimat-rain;SafeMacroClimat-sunDeclination;SafeMacroClimat-airVpd;SafeMacroClimat-waterTableDepth;SafeMacroClimat-windSpeed}

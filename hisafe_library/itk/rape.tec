@@ -1,0 +1,73 @@
+############ SIMULATION OPTIONS
+cropSpecies = rape
+cropVariety = 1
+simulationNbrDays = 365
+
+############ SOWING OPTIONS
+sowingDate = 253
+sowingDepth = 4.0
+sowingDensity = 55.0
+rowDistance = 0.0
+rowOrientation = 0.0
+
+############ SOIL MANAGEMENT 
+nbSoilManagement = 1
+#num	soilManagementDate	residueMinDepth	soilManagementDepth	residueCode	residueQuantity	residueCProportion	residueCNProportion	residueNMin	residueWaterContent
+1	252	0.0	30.0	1	1.0	42.0	60.0	0.0	0.0
+
+
+############ STAGE FORCING
+stageForcingOption = 2
+ilev = 999
+iamf = 999
+ilax = 999
+isen = 999
+ilan = 999
+iflo = 999
+idrp = 999
+imat = 999
+harvestDate = 999
+latestHarvestDate = 700
+
+############ IRRIGATIONS
+irrigationLocation = 1
+irrigationDepth = 0
+
+nbIrrigation = 0
+# num	irrigationDate	irrigationQuantity
+
+
+############ FERTILIZATIONS
+fertiliserCode = 2
+irrigationWaterNContent = 0.0
+fertilisationLocation = 1
+fertilisationDepth = 0
+
+nbFertilisation = 0
+# num	fertillisationDate	fertilisationQuantity
+
+
+############ HARVEST OPTIONS
+harvestOption = 2
+harvestWaterOption = 2
+harvestWaterMin = 0.6
+harvestWaterMax = 0.16
+harvestSugarMin = 0.25
+harvestNitrogenMin= 0.0
+harvestOilMin = 0.07
+
+harvestResidueCode = 2
+
+########### CUTTING INTERVENTIONS
+cuttingOption = 2
+
+nbCutting = 0
+#num	cuttingDate	cuttingHeight	cuttingLaiResidual	cuttingDryMatterResidual	cuttingNitrogenAdd
+
+############ OTHER INTERVENTIONS
+mulchOption = 1
+mulchType = 0
+mulchInitialQte = 0.0
+mulchDayApplication = 0
+mulchRate = 0.0
+mulchAlbedo = 0.0

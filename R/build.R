@@ -1,4 +1,4 @@
-build_hisafe_exp <- function(exp, path, exp.name, baseline.dir, controls = FALSE) {
+build_hisafe_exp <- function(exp, path, exp.name, export.profiles = "all", controls = FALSE) {
 
   ## Check if exp has class hip
   if("hip" %in% class(exp)) stop("exp plan not of class hip")
@@ -11,8 +11,8 @@ build_hisafe_exp <- function(exp, path, exp.name, baseline.dir, controls = FALSE
   ## Write out experiment summary
   readr::write_csv(exp, gsub("//", "/", paste0(exp.path, "/", exp.name, ".csv")))
 
-  ## Run Hi-sAFe for each simulation in experiment
-  purrr:map(exp, build_hisafe, path = exp.path, baseline.dir = baseline.dir)
+  ## build folder tree & input files for each simulation in experiment
+  purrr:map(exp, build_hisafe, path = exp.path, export.profiles = export.profiles)
 
   ## Run control simulations
   if(controls) stop("support for running control simulations not yet supported")
@@ -20,25 +20,48 @@ build_hisafe_exp <- function(exp, path, exp.name, baseline.dir, controls = FALSE
   invisible(NULL)
 }
 
-build_hisafe <- function(exp, path, baseline.dir) {
+build_hisafe <- function(exp, path, export.profiles = "all") {
 
   ## Check if exp has class hip
   if("hip" %in% class(exp)) stop("exp plan not of class hip")
 
   ## Create simulaton directory & folder tree
   sim.path <- gsub("//", "/", paste0(path, "/", plan$SimulationName[1]))
-  # success <- dir.create(sim.path, showWarnings = FALSE)
-  # if(!success) stop("creation of simulation directory failed")
+  #success <- dir.create(sim.path, showWarnings = FALSE)
+  #if(!success) stop(paste0("creation of simulation directory for ", plan$SimulationName[1], " failed"))
   # build_dir_tree(sim.path)
 
   ## Copy over folder structure & template files from Hi-sAFe template path
   ## Any newly built files below will overwrite these files
-  system(paste("cp -r", baseline.dir, path))
-  system(paste0("mv ", path, baseline.dir, " ", path, "/", plan$SimulationName[1]))
+  system(paste("cp -r", HISAFE.TEMPLATE, path))
+  system(gsub("//", "/", paste0("mv ", path, HISAFE.TEMPLATE, " ", path, "/", plan$SimulationName[1])))
 
-  ## Build simulation files
+  ## Build pld & sim files
   build_pld(exp, sim.path)
   build_sim(exp, sim.path)
+
+  ## Move weather file if one was provided
+  if(!is.na(exp$weatherFile[1])) file.copy(exp$weatherFile[1], paste0(sim.path, "/weather/weather.wth"), overwrite = TRUE)
+
+  ## Copy required .tec files to itk
+  required.tecs <- paste0(HISAFE.LIBRARY, c(plan$Crop[1], plan$LeaveAreaCrop[1]), ".tec")
+  purrr:map(required.tecs, file.copy, to = paste0(sim.path, "/itk"))
+
+  ## Copy required species files to speciesLibraries
+  required.tecs <- paste0(HISAFE.LIBRARY, c(plan$Crop[1], plan$LeaveAreaCrop[1]), ".tec")
+  purrr:map(required.tecs, file.copy, to = paste0(sim.path, "/itk"))
+
+  ## exportProfiles
+  if(export.profiles == "all") export.profiles <- SUPPORTED.PROFILES
+
+  if(!all(export.profiles %in% SUPPORTED.PROFILES)) {
+    missing.profiles <- export.profiles[!(export.profiles %in% SUPPORTED.PROFILES)]
+    missing.profile.error <- paste(c("The following profiles are not available:", missing.profiles), collapse = "\n")
+    stop(missing.profile.error)
+  }
+
+  export.profiles <- paste0(HISAFE.LIBRARY, export.profiles, ".pro")
+  purrr:map(export.profiles, file.copy, to = paste0(sim.path, "/exportParameters"))
 
   invisible(NULL)
 }
@@ -52,35 +75,55 @@ build_hisafe <- function(exp, path, baseline.dir) {
 # }
 
 build_pld <- function(plan, path) {
-  pld.file <- paste0(path, "/plotDescription/Plot_Description.pld")
+  pld.file <- paste0(path, "/plotDescription/template.pld")
   pld <- readLines(pld.file)
-  pld[6] <- paste0("latitude = ", plan$Latitude[i])
-  pld[13] <- paste0("treeLineOrientation = ", plan$Orient[i])
-  pld[14] <- paste0("spacingBetweenRows = ", plan$Between[i])
-  pld[15] <- paste0("spacingWithinRows = ", plan$Within[i])
-
-  if(plan$Tree=="walnut"){
-    pld[91] <- "TreeInit\twalnut-hybrid\t1\t1\t0.5\t0\t0.5\t0.25\t0\t0"
-  }else if(plan$Tree=="poplar"){
-    pld[91] <- "TreeInit\tpoplar\t1\t1\t0.5\t0\t0.5\t0.25\t0\t0"
-  } else {
-    stop(paste0("tree species ", plan$Tree, " not supported"))
-  }
+  pld[6] <- paste0("latitude = ",             plan$latitude[i])
+  pld[6] <- paste0("cellWidth = ",            plan$cellWidth[i])
+  pld[13] <- paste0("treeLineOrientation = ", plan$treeLineOrientation[i])
+  pld[14] <- paste0("spacingBetweenRows = ",  plan$spacingBetweenRows[i])
+  pld[15] <- paste0("spacingWithinRows = ",   plan$spacingWithinRows[i])
+  pld[19] <- paste0("slopeIntensity = ",      plan$slopeIntensity[i])
+  pld[20] <- paste0("slopeAspect = ",   plan$slopeAspect[i])
+  pld[90] <- paste0("TreeInit\t", plan$treeSpecies, "\t1\t", plan$treeHeight, "\t0.5\t0\t0.5\t0.25\t0\t0")
+  pld[95] <- paste0("RootInit\t", plan$rootShape, "\t3\t0.6\t0\t0\t0.5")
   writeLines(pld, pld.file)
+  dum <- file.rename(paste0(path, "/plotDescription/template.pld"), paste0(path, "/plotDescription/", plan$SimulationName[1], ".pld"))
 }
 
 build_sim <- function(plan, path) {
-  sim.file <- paste0(runDir, "/Simulation.sim")
+  nyears <- plan$nbSimulations[1]
+  sim.file <- paste0(path, "/template.sim")
   sim <- readLines(sim.file)
-  sim[7] <- paste0("nbSimulations = ", plan$Nyears[1])
-  sim[8] <- paste0("simulationYearStart = ", plan$YearStart[1])
-  sim[9] <- paste0("simulationDayStart = ", plan$DayStart[1])
-  sim[13] <- paste0("mainCropSpecies = ", plan$Crop[1], ".tec")
-  sim[15] <- paste0("treeCropDistance = ", plan$CropDist[1])
-  sim[43] <- paste0("treeRootPruningYears = ", paste0(1:plan$Nyears[1], collapse=","))
-  sim[44] <- paste0("treeRootPruningDays = ", paste0(rep(365, plan$Nyears[1]), collapse=","))
-  sim[45] <- paste0("treeRootPruningDistance = ", paste0(rep(plan$CropDist[1], plan$Nyears[1]), collapse=","))
-  sim[46] <- paste0("treeRootPruningDepth = ", paste0(rep(plan$RootPruneDepth[1], plan$Nyears[1]), collapse=","))
+
+  sim[4] <- paste0("nbSimulations = ",       plan$nbSimulations[1])
+  sim[5] <- paste0("simulationYearStart = ", plan$simulationYearStart[1])
+  sim[6] <- paste0("simulationDayStart = ",  plan$simulationDayStart[1])
+  sim[10] <- paste0("mainCropSpecies = ",    plan$mainCropSpecies[1], ".tec")
+  sim[11] <- paste0("interCropSpecies = ",   plan$interCropSpecies[1], ".tec")
+  sim[12] <- paste0("treeCropDistance = ",   plan$treeCropDistance[1])
+
+  if(plan$toricSymmetry[1] == "X") {
+    sim[25] <- paste0("toreYp = 0")
+    sim[26] <- paste0("toreYn = 0")
+  } else if(plan$toricSymmetry[1] == "Y") {
+    sim[23] <- paste0("toreXp = 0")
+    sim[24] <- paste0("toreXn = 0")
+  } else if(plan$toricSymmetry[1] == "NO") {
+    sim[23] <- paste0("toreXp = 0")
+    sim[24] <- paste0("toreXn = 0")
+    sim[25] <- paste0("toreYp = 0")
+    sim[26] <- paste0("toreYn = 0")
+  }
+
+  sim[29] <- paste0("treePruningYears = ",     paste0(1:nyears, collapse=","))
+  sim[30] <- paste0("treePruningProp = ",      paste0(rep(0.3, nyears), collapse=","))
+  sim[31] <- paste0("treePruningMaxHeight = ", paste0(rep(4, nyears), collapse=","))
+  sim[32] <- paste0("treePruningDays = ",      paste0(rep(365, nyears), collapse=","))
+
+  sim[40] <- paste0("treeRootPruningYears = ",    paste0(1:nyears, collapse=","))
+  sim[41] <- paste0("treeRootPruningDays = ",     paste0(rep(365, nyears), collapse=","))
+  sim[42] <- paste0("treeRootPruningDistance = ", paste0(rep(plan$treeCropDistance[1], nyears), collapse=","))
+  sim[43] <- paste0("treeRootPruningDepth = ",    paste0(rep(plan$treeRootPruningDepth[1], nyears), collapse=","))
   writeLines(sim, sim.file)
-  dum <- file.rename(paste0(runDir, "/Simulation.sim"), paste0(runDir, "/", plan$SimulationName[1], ".sim"))
+  dum <- file.rename(paste0(path, "/template.sim"), paste0(path, "/", plan$SimulationName[1], ".sim"))
 }

@@ -14,7 +14,7 @@ call_hisafe_exp <- function(path,
     sims.to.run <- gsub("//", "/", paste0(exp.path, "//", simu.names))
     if(!all(dir.exists(sims.to.run))) {
       missing.dirs <- sims.to.run[!dir.exists(sims.to.run)]
-      missing.error <- paste(c("The following profiles do not exist:",
+      missing.error <- paste(c("The following simulations do not exist:",
                                missing.dirs),
                              collapse = "\n")
       stop(missing.error)

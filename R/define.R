@@ -1,72 +1,23 @@
-define_hisafe <- function(SimulationName,
-                          Nyears,
-                          YearStart,
-                          DayStart,
-                          Tree,
-                          Crop,
-                          Within,
-                          Between,
-                          #Stagger,
-                          CropDist,
-                          Orient,
-                          Latitude,
-                          RootPruneDepth,
-                          wth.file
-) {
-  plan <- tibble::tibble(SimulationName = SimulationName,
-                         Nyears = Nyears,
-                         YearStart = YearStart,
-                         DayStart = DayStart,
-                         Tree = Tree,
-                         Crop = Crop,
-                         Within = Within,
-                         Between = Between,
-                         #Stagger = Stagger,
-                         CropDist = CropDist,
-                         Orient = Orient,
-                         Latitude = Latitude,
-                         RootPruneDepth = RootPruneDepth,
-                         wth.file = wth.file)
-  check_input_values(plan)
-  class(plan) <- c("hip", class(plan))
-  return(plan)
-}
+define_hisafe <- function(SimulationName, ..., factorial = FALSE) {
 
+  # FOR TESTING
+  # tmpfun <- function(SimulationName, ...){ c(list(SimulationName = SimulationName), list(...)) }
+  # arg.list <- tmpfun("mysim", Latitude = c(20,40), Between = c(10,15))
 
-define_hisafe_factorial <- function(Nyears,
-                                    YearStart,
-                                    DayStart,
-                                    Tree,
-                                    Crop,
-                                    Within,
-                                    Between,
-                                    #Stagger,
-                                    CropDist,
-                                    Orient,
-                                    Latitude,
-                                    RootPruneDepth,
-                                    wth.file
-) {
-  plan <- tibble::as.tibble(expand.grid(Nyears = Nyears,
-                                        YearStart = YearStart,
-                                        DayStart = DayStart,
-                                        Tree = Tree,
-                                        Crop = Crop,
-                                        Within = Within,
-                                        Between = Between,
-                                        #Stagger = Stagger,
-                                        CropDist = CropDist,
-                                        Orient = Orient,
-                                        Latitude = Latitude,
-                                        RootPruneDepth = RootPruneDepth,
-                                        wth.file = wth.file),
-                            stringsAsFactors = FALSE)
+  arg.list <- c(list(SimulationName = SimulationName), list(...))
+  args.provided <- names(arg.list)
 
-  ## Add generic SimulationName column and move to front
-  plan %>%
-    mutate(SimulationName = paste0("Sim", 1:nrow(plan))) %>%
-    select(SimulationName, everything())
+  default.args <- HISAFE.DEFAULTS()
+  defaults.to.add <- default.args[which(!(names(default.args) %in% args.provided))]
 
+  param.list <- c(arg.list, defaults.to.add)
+
+  if(factorial) {
+    plan <- tibble::as.tibble(expand.grid(param.list, stringsAsFactors = FALSE))
+    plan$SimulationName <- paste0(plan$SimulationName, 1:nrow(plan))
+  } else {
+    plan <- tibble::as.tibble(as.data.frame(param.list, stringsAsFactors = FALSE))
+  }
 
   check_input_values(plan)
   class(plan) <- c("hip", class(plan))
@@ -74,39 +25,33 @@ define_hisafe_factorial <- function(Nyears,
 }
 
 define_hisafe_file <- function(file) {
-  plan <- readr::read_csv(file)
+
+  provided <- readr::read_csv(file)
+  args.provided <- names(provided)
+
+  default.args <- HISAFE.DEFAULTS()
+  defaults.to.add <- tibble::as.tibble(default.args[which(!(names(default.args) %in% args.provided))])
+  defaults.to.add <- defaults.to.add[rep(1,nrow(provided)),]
+
+  plan <- dplyr::bind_cols(provided, defaults.to.add)
+
   check_input_values(plan)
   class(plan) <- c("hip", class(plan))
   return(plan)
 }
 
 check_input_values <- function(plan) {
-  req.cols <- c("SimulationName",
-                "Nyears",
-                "YearStart",
-                "DayStart",
-                "Tree",
-                "Crop",
-                "Within",
-                "Between",
-                #"Stagger",
-                "CropDist",
-                "Orient",
-                "Latitude",
-                "RootPruneDepth",
-                "wth.file")
-  avail.trees <- c("walnut-hybrid", "poplar")
-  avail.crops <- c("wheat", "maize", "soybean")
+  toric.symmetry.opts <- c("XY", "X", "Y", "NO")
 
   ## Check for missing/extra columns
-  if(any(!(names(plan) %in% req.cols))) {
-    extra.cols <- names(plan)[!(names(plan) %in% req.cols)]
+  if(any(!(names(plan) %in% SUPPORTED.PARAMS))) {
+    extra.cols <- names(plan)[!(names(plan) %in% SUPPORTED.PARAMS)]
     extra.message <- paste0(c("The following columns will not be used because they are not supported input parameters:", extra.cols), collapse = "\n")
     warning(extra.message, call. = FALSE)
   }
 
-  if(any(!(req.cols %in% names(plan)))) {
-    missing.cols <- req.cols[req.cols %in% names(plan)]
+  if(any(!(SUPPORTED.PARAMS %in% names(plan)))) {
+    missing.cols <- SUPPORTED.PARAMS[SUPPORTED.PARAMS %in% names(plan)]
     missing.message <- paste0(c("The following required parameters are missing:", missing.cols), collapse = "\n")
     warning(missing.message, call. = FALSE)
   }
@@ -115,23 +60,24 @@ check_input_values <- function(plan) {
   message.orig <- messages <- "Hi-sAFe definition warnings:"
   error.orig <- errors <- "Hi-sAFe definition errors:"
 
-  attach(plan)
   ## Warnings
-  if(any(Nyears > 50)) messages <- paste0(messages, "Nyears - It is not recommended to run simulations longer than 50 years.", collapse = "\n")
-  if(any(Within > 15)) messages <- paste0(messages, "Within - Within row tree spacing is quite large.", collapse = "\n")
-  if(any(Between > 30)) messages <- paste0(messages, "Between - Between row tree spacing is quite large.", collapse = "\n")
-  if(any(CropDist > 3)) messages <- paste0(messages, "CropDist - CropDist is quite large.", collapse = "\n")
-  if(any(RootPruneDepth > 3)) messages <- paste0(messages, "RootPruneDepth - RootPruneDepth is quite large.", collapse = "\n")
+  if(any(plan$Nyears > 50)) messages <- paste0(messages, "Nyears - It is not recommended to run simulations longer than 50 years.", collapse = "\n")
+  if(any(plan$Within > 15)) messages <- paste0(messages, "Within - Some values are quite large.", collapse = "\n")
+  if(any(plan$Between > 30)) messages <- paste0(messages, "Between - Some values are quite large.", collapse = "\n")
+  if(any(plan$CropDist > 3)) messages <- paste0(messages, "CropDist - Some values are quite large.", collapse = "\n")
+  if(any(plan$RootPruneDepth > 3)) messages <- paste0(messages, "RootPruneDepth - Some values are quite large.", collapse = "\n")
 
   ## Errors
-  if(any(!(DayStart %in% 1:31))) errors <- paste0(errors, "DayStart - DayStart must be an integer between 1 and 31.", collapse = "\n")
-  if(any(!(Tree %in% avail.trees))) errors <- paste0(errors, "Tree - supported tree species include: ", paste0(avail.trees, collapse = ", "), collapse = "\n")
-  if(any(!(Tree %in% avail.trees))) errors <- paste0(errors, "Crop - supported crop species include: ", paste0(avail.crops, collapse = ", "), collapse = "\n")
-  #if(any(Stagger < 0 | Stagger > 0.5)) errors <- paste0(errors, "Stagger - Stagger must be between 0 and 0.5.", collapse = "\n")
-  if(any(Orient < 0 | Orient > 359)) errors <- paste0(errors, "Orient - Orient must be between 0 and 359.", collapse = "\n")
-  if(any(Latitude < -90 | Latitude > 90)) errors <- paste0(errors, "Latitude - Latitude must be between -90 and 90.", collapse = "\n")
-  if(any(!(is.character(wth.file) | is.na(wth.file)))) errors <- paste0(errors, "wth.file - wth.file must be a character vector.", collapse = "\n")
-  detach(plan)
+  if(any(!(plan$DayStart %in% 1:31))) errors <- paste0(errors, "DayStart - must be an integer between 1 and 31.", collapse = "\n")
+  if(any(!(plan$Tree %in% SUPPORTED.TREES))) errors <- paste0(errors, "Tree - supported tree species include: ", paste0(SUPPORTED.TREES, collapse = ", "), collapse = "\n")
+  if(any(!(plan$Crop %in% SUPPORTED.CROPS))) errors <- paste0(errors, "Crop - supported crop species include: ", paste0(SUPPORTED.CROPS, collapse = ", "), collapse = "\n")
+  if(any(!(plan$LeaveAreaCrop %in% SUPPORTED.CROPS))) errors <- paste0(errors, "LeaveAreaCrop - supported crop species include: ", paste0(SUPPORTED.CROPS, collapse = ", "), collapse = "\n")
+  if(any(plan$Orient < 0 | Orient > 359)) errors <- paste0(errors, "Orient - must be between 0 and 359.", collapse = "\n")
+  if(any(plan$Latitude < -90 | Latitude > 90)) errors <- paste0(errors, "Latitude - must be between -90 and 90.", collapse = "\n")
+  if(any(!(plan$ToricSymmetry %in% toric.symmetry.opts))) errors <- paste0(errors,
+                                                                     "ToricSymmetry - must be one of: ",
+                                                                     paste0(toric.symmetry.opts, collapse = ", ") , collapse = "\n")
+  if(any(!(is.character(plan$wth.file) | is.na(plan$wth.file)))) errors <- paste0(errors, "wth.file - must be a character vector or NA.", collapse = "\n")
 
   w <- ifelse(messages == message.orig, FALSE, TRUE)
   e <- ifelse(errors == error.orig, FALSE, TRUE)

@@ -61,8 +61,7 @@ read_hisafe_output_file <- function(profile, read.data = TRUE){
 #' }
 read_hisafe <- function(simu.name, path, profiles = "all", allow.missing = FALSE) {
 
-  supported.profiles <- c("annualtree", "annualplot", "trees", "plot", "monthCells", "cells", "voxels", "climate")
-  if(profiles == "all") profiles <- supported.profiles
+  if(profiles == "all") profiles <- SUPPORTED.PROFILES
 
   ## Create profile paths
   file.prefix <- gsub("//", "/", paste0(path, "/" , simu.name, "/output-", simu.name, ".sim", "/", simu.name, "_"))

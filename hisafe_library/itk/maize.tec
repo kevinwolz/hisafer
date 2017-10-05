@@ -1,0 +1,83 @@
+############ SIMULATION OPTIONS
+cropSpecies = maize
+cropVariety = 1
+simulationNbrDays = 365
+
+############ SOWING OPTIONS
+sowingDate = 100
+sowingDepth = 5.0
+sowingDensity = 9.50000
+rowDistance = 2.0
+rowOrientation = 0.0
+
+############ SOIL MANAGEMENT 
+nbSoilManagement = 1
+#num	soilManagementDate	residueMinDepth	soilManagementDepth	residueCode	residueQuantity	residueCProportion	residueCNProportion	residueNMin	residueWaterContent
+1	112	0.0	25.0	1	1.0	42.0	60.0	0.0	0.0
+
+
+############ STAGE FORCING
+stageForcingOption = 2
+ilev = 999
+iamf = 999
+ilax = 999
+isen = 999
+ilan = 999
+iflo = 999
+idrp = 999
+imat = 999
+harvestDate = 999
+latestHarvestDate = 300
+
+############ IRRIGATIONS
+irrigationLocation = 1
+irrigationDepth = 0
+
+nbIrrigation = 9
+#num	irrigationDate	irrigationQuantity
+1	178	20.00
+2	185	24.00
+3	193	29.00
+4	198	29.00
+5	200	28.00
+6	204	31.00
+7	207	21.00
+8	211	21.00
+9	214	23.00
+                                                                                                                                         
+
+############ FERTILIZATIONS
+fertiliserCode = 2
+irrigationWaterNContent = 0.11000
+fertilisationLocation = 1
+fertilisationDepth = 0
+
+nbFertilisation = 1
+#num	fertillisationDate	fertilisationQuantity
+1	112	220.0
+
+
+############ HARVEST OPTIONS 
+harvestOption = 2
+harvestWaterOption = 2
+harvestWaterMin = 0.80000
+harvestWaterMax = 0.320
+harvestSugarMin = 0.25000
+harvestNitrogenMin = 0.02000
+harvestOilMin = 0.25000
+harvestResidueCode = 2
+
+########### CUTTING INTERVENTIONS
+cuttingOption = 2
+
+nbCutting = 0
+#num	cuttingDate	cuttingHeight	cuttingLaiResidual	cuttingDryMatterResidual	cuttingNitrogenAdd
+
+############ OTHER INTERVENTIONS
+mulchOption = 1
+mulchType = 0
+mulchInitialQte = 0.0
+mulchDayApplication = 0
+mulchRate = 0.0
+mulchAlbedo = 0.0
+
