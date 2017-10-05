@@ -1,25 +1,29 @@
-build_hisafe_exp <- function(exp, path, generics = NULL, controls = FALSE) {
+build_hisafe_exp <- function(exp, path, exp.name, generics = NULL, controls = FALSE) {
+
+  ## Check if exp has class hip
+  if("hip" %in% class(exp)) stop("exp plan not of class hip")
 
   ## Create experiment directory
-  exp.path <- gsub("//", "/", paste0(path, "/", exp$name))
+  exp.path <- gsub("//", "/", paste0(path, "/", exp.name))
   success <- dir.create(exp.path, showWarnings = FALSE)
   if(!success) stop("creation of experiment directory failed")
 
   ## Write out experiment summary
-  readr::write_csv(exp$plan, gsub("//", "/", paste0(exp.path, "/", exp$name, ".csv")))
+  readr::write_csv(exp, gsub("//", "/", paste0(exp.path, "/", exp.name, ".csv")))
 
   ## Run Hi-sAFe for each simulation in experiment
-  purrr:map(exp$data, build_hisafe, path = exp.path, generics = genericss)
+  purrr:map(exp, build_hisafe, path = exp.path, generics = genericss)
 
   ## Run control simulations
-  if(controls) {
-    stop("support for running control simulations not yet supported")
-  }
+  if(controls) stop("support for running control simulations not yet supported")
 
   invisible(NULL)
 }
 
-build_hisafe <- function(plan, path, baseline.dir) {
+build_hisafe <- function(exp, path, baseline.dir) {
+
+  ## Check if exp has class hip
+  if("hip" %in% class(exp)) stop("exp plan not of class hip")
 
   ## Create simulaton directory & folder tree
   sim.path <- gsub("//", "/", paste0(path, "/", plan$SimulationName[1]))
@@ -33,8 +37,8 @@ build_hisafe <- function(plan, path, baseline.dir) {
   system(paste0("mv ", path, baseline.dir, " ", path, "/", plan$SimulationName[1]))
 
   ## Build simulation files
-  build_pld(plan, sim.path)
-  build_sim(plan, sim.path)
+  build_pld(exp, sim.path)
+  build_sim(exp, sim.path)
 
   invisible(NULL)
 }
