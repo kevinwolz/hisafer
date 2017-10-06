@@ -1,5 +1,5 @@
 # SIMULATION 
-pldFileName = Restinclieres_formation.pld
+pldFileName         = template.pld
 
 nbSimulations 		= 1
 simulationYearStart = 1995
@@ -13,7 +13,7 @@ treeCropDistance = 0.5
 weededAreaRadius = 0
 
 # WEATHER
-weatherFile 	 = weather.wth
+weatherFile 	  = weather.wth
 
 # EXPORTS
 profileNames 	  = trees,voxels

@@ -61,7 +61,7 @@ read_hisafe_output_file <- function(profile, read.data = TRUE){
 #' }
 read_hisafe <- function(simu.name, path, profiles = "all", allow.missing = FALSE) {
 
-  if(profiles == "all") profiles <- SUPPORTED.PROFILES
+  if(profiles == "all") profiles <- SUPPORTED.PROFILES$profiles
 
   ## Create profile paths
   file.prefix <- gsub("//", "/", paste0(path, "/" , simu.name, "/output-", simu.name, ".sim", "/", simu.name, "_"))
