@@ -1,3 +1,32 @@
+#' Define a Hi-sAFe experiment
+#' @description Defines a Hi-sAFe experiment - the input parameters to one or more Hi-sAFe simulations.
+#' @details It is strongly recommended to name each simulation in your experiment. This can be done via the \code{SimulationName} parameter.
+#' If no names are provided, then \code{define_hisafe} will provide generic names of "Sim_1", "Sim_2", etc.
+#' If \code{factorial = FALSE}, the default, then supply a value of \code{SimulationName} for each experiment.
+#' #' If \code{factorial = TRUE}, then supply a single value of \code{SimulationName} as a prefix.
+#' \code{define_hisafe} will append "_1", "_2", etc. for each of the (unknown number of) factorial experiments.
+#' @return An object of class \code{hip}. This is a data frame with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
+#' @param factorial If \code{FALSE}, the default, then values are recycled (i.e. such as for default behavior of \code{data.frame()}).
+#' If \code{TRUE}, then a factorial experiment is created, in which an ecperiment is defined for each possible combination of supplied values.
+#' @param ... Any suported Hi-sAFe input parameter in the .sim and .pld files can be passed. Parameters should be passed as \code{parameterName = values}. For more information on supported parameters, see _____.
+#' @export
+#' @import tidyverse
+#' @family hisafe definition functions
+#' @examples
+#' \dontrun{
+#' # To define a Hi-sAFe simulation using all default parameter values:
+#' default.exp <- define_hisfafe()
+#'
+#' # To define a Hi-sAFe experiment analyzing only variation in latitude:
+#' latitude.exp <- define_hisfafe(SimulationName = c("Lat15", "Lat30", "Lat45", "Lat60"),
+#'                                latitude = seq(15, 60, 15))
+#'
+#' # To define a factorial Hi-sAFe experiment analyzing
+#' # simultaneous variation in latitude and tree line orientation:
+#' lat.orient.exp <- define_hisfafe(SimulationName = c("Lat15", "Lat30", "Lat45", "Lat60"),
+#'                                  latitude = seq(15, 60, 15),
+#'                                  treeLineOrientation = c(0,90))
+#' }
 define_hisafe <- function(factorial = FALSE, ...) {
 
   # FOR TESTING
@@ -12,45 +41,69 @@ define_hisafe <- function(factorial = FALSE, ...) {
   param.list <- c(arg.list, defaults.to.add)
 
   if(factorial) {
-    plan <- tibble::as.tibble(expand.grid(param.list, stringsAsFactors = FALSE))
-    plan$SimulationName <- paste0(plan$SimulationName, "_", 1:nrow(plan))
+    hip <- tibble::as.tibble(expand.grid(param.list, stringsAsFactors = FALSE))
+    hip$SimulationName <- paste0(hip$SimulationName, "_", 1:nrow(hip))
   } else {
-    plan <- tibble::as.tibble(as.data.frame(param.list, stringsAsFactors = FALSE))
+    hip <- tibble::as.tibble(as.data.frame(param.list, stringsAsFactors = FALSE))
   }
 
   is.unique <- function(x) { length(unique(x)) != 1 }
-  plan <- bind_cols(plan[, map_lgl(plan, is.unique)], plan[, !map_lgl(plan, is.unique)]) %>%
+  hip <- bind_cols(hip[, map_lgl(hip, is.unique)], hip[, !map_lgl(hip, is.unique)]) %>%
     select(SimulationName, everything())
 
-  check_input_values(plan)
-  class(plan) <- c("hip", class(plan))
-  return(plan)
+  check_input_values(hip)
+  class(hip) <- c("hip", class(hip))
+  return(hip)
 }
 
+#' Define a Hi-sAFe experiment from a file
+#' @description Defines a Hi-sAFe experiment - the input parameters to one or more Hi-sAFe simulations.
+#' @details It is strongly recommended to name each simulation in your experiment. This can be done via the \code{SimulationName} parameter.
+#' If no names are provided, then \code{define_hisafe_file} will provide generic names of "Sim_1", "Sim_2", etc.
+#' @return An object of class \code{hip}. This is a data frame with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
+#' @param file A character string of the path to a csv file.
+#' Each row in the file should represent a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
+#' For more information on supported parameters, see _____.
+#' @export
+#' @import tidyverse
+#' @family hisafe definition functions
+#' @examples
+#' \dontrun{
+#' # To define a Hi-sAFe experiment from a file:
+#' myexp <- define_hisafe_file("./data/example_exp.csv")
+#' }
 define_hisafe_file <- function(file) {
 
-  provided <- readr::read_csv(file)
+  provided <- tibble::as.tibble(read.csv(file, header = TRUE, stringsAsFactors = FALSE))
 
   default.params <- purrr::map(HISAFE.PARAMS, ~ .x[["default"]])
   defaults.to.add <- tibble::as.tibble(default.params[which(!(names(default.params) %in% names(provided)))])
   defaults.to.add <- defaults.to.add[rep(1,nrow(provided)),]
 
-  plan <- dplyr::bind_cols(provided, defaults.to.add)
+  hip <- dplyr::bind_cols(provided, defaults.to.add)
+
+  if(length(unique(hip$SimulationName)) == 1) hip$SimulationName <- paste0(hip$SimulationName, "_", 1:nrow(hip))
 
   is.unique <- function(x) { length(unique(x)) != 1 }
-  plan <- bind_cols(plan[, map_lgl(plan, is.unique)], plan[, !map_lgl(plan, is.unique)]) %>%
+  hip <- bind_cols(hip[, map_lgl(hip, is.unique)], hip[, !map_lgl(hip, is.unique)]) %>%
     select(SimulationName, everything())
 
-  check_input_values(plan)
-  class(plan) <- c("hip", class(plan))
-  return(plan)
+  check_input_values(hip)
+  class(hip) <- c("hip", class(hip))
+  return(hip)
 }
 
-check_input_values <- function(plan) {
+#' Check validity of all Hi-sAFe inputs
+#' @description Checks the validity of all Hi-sAFe inputs against \code{HISAFE.PARAMS} and provides errors and/or warnings if issues are found.
+#' Used within \code{define_hisafe} and \code{define_hisafe_file}.
+#' @return Produces errors and/or warnings if issues are found. Otherwise, invisibly returns \code{TRUE}.
+#' @param hip An object of class \code{hip}.
+#' @import tidyverse
+check_input_values <- function(hip) {
 
   ## Check for unsupported inputs
-  if(any(!(names(plan) %in% names(HISAFE.PARAMS)))) {
-    extra.cols <- names(plan)[!(names(plan) %in% names(HISAFE.PARAMS))]
+  if(any(!(names(hip) %in% names(HISAFE.PARAMS)))) {
+    extra.cols <- names(hip)[!(names(hip) %in% names(HISAFE.PARAMS))]
     extra.message <- paste0(c("The following variables are not supported:", extra.cols), collapse = "\n")
     stop(extra.message, call. = FALSE)
   }
@@ -59,9 +112,9 @@ check_input_values <- function(plan) {
   messages <- "Hi-sAFe definition warnings:"
   errors <-   "Hi-sAFe definition errors:"
 
-  allowed.errors <-  purrr::map_chr(names(plan), check_allowed, plan = plan)
-  minmax.errors <-   purrr::map_chr(names(plan), check_minmax, plan = plan)
-  minmax.warnings <- purrr::map_chr(names(plan), check_minmax_sug, plan = plan)
+  allowed.errors <-  purrr::map_chr(names(hip), check_allowed, hip = hip)
+  minmax.errors <-   purrr::map_chr(names(hip), check_minmax, hip = hip)
+  minmax.warnings <- purrr::map_chr(names(hip), check_minmax_sug, hip = hip)
 
   all.messages <- c(messages, minmax.warnings)
   all.errors <-   c(errors, allowed.errors, minmax.errors)
@@ -70,31 +123,54 @@ check_input_values <- function(plan) {
 
   if(all.messages != messages) warning(all.messages, call. = FALSE)
   if(all.errors   != errors)   stop(all.errors, call. = FALSE)
+
+  invisible(TRUE)
 }
 
-check_allowed <- function(variable, plan) {
+#' Check validity of Hi-sAFe input ranges
+#' @description Checks validity of Hi-sAFe inputs ranges against ranges in \code{HISAFE.PARAMS}.
+#' Used within \code{check_input_values}.
+#' @return An error message or empty character stirng.
+#' @param variable A character string of the name of the variable to check.
+#' @param hip An object of class \code{hip}.
+#' @import tidyverse
+check_allowed <- function(variable, hip) {
   allowed.vals <- purrr::map(HISAFE.PARAMS, ~ .x[["allowed"]])[[variable]]
-  allowed.pass <- (is.na(allowed.vals[1]) | all(plan[[variable]] %in% allowed.vals))
+  allowed.pass <- (is.na(allowed.vals[1]) | all(hip[[variable]] %in% allowed.vals))
   if(allowed.pass) return("")
   else return(paste0(variable, " - must be one of: ", paste0(allowed.vals, collapse = ", ")))
 }
 
-check_minmax <- function(variable, plan) {
+#' Check validity of Hi-sAFe input ranges
+#' @description Checks validity of Hi-sAFe input min and max values against values in \code{HISAFE.PARAMS}.
+#' Used within \code{check_input_values}.
+#' @return An error message or empty character stirng.
+#' @param variable A character string of the name of the variable to check.
+#' @param hip An object of class \code{hip}.
+#' @import tidyverse
+check_minmax <- function(variable, hip) {
   min.val <- purrr::map(HISAFE.PARAMS, ~ .x[["min"]])[[variable]]
   max.val <- purrr::map(HISAFE.PARAMS, ~ .x[["max"]])[[variable]]
-  max.pass <- (is.na(max.val) | all(plan[[variable]] <= max.val))
-  min.pass <- (is.na(min.val) | all(plan[[variable]] >= min.val))
+  max.pass <- (is.na(max.val) | all(hip[[variable]] <= max.val))
+  min.pass <- (is.na(min.val) | all(hip[[variable]] >= min.val))
   if(max.pass & min.pass) return("")
   else if(!is.na(max.val) & !is.na(min.val)) return(paste0(variable, " - must be betwen ", min.val, " and ", max.val))
   else if(is.na(max.val) & !is.na(min.val)) return(paste0(variable, " - must be greater than ", min.val))
   else if(!is.na(max.val) & is.na(min.val)) return(paste0(variable, " - must be less than ", max.val))
 }
 
-check_minmax_sug <- function(variable, plan) {
+#' Check plausbility of Hi-sAFe input ranges
+#' @description Checks plausibility of Hi-sAFe input min and max values against suggested values in \code{HISAFE.PARAMS}.
+#' Used within \code{check_input_values}.
+#' @return A warning message or empty character stirng.
+#' @param variable A character string of the name of the variable to check.
+#' @param hip An object of class \code{hip}.
+#' @import tidyverse
+check_minmax_sug <- function(variable, hip) {
   min.sug.val <- purrr::map(HISAFE.PARAMS, ~ .x[["min.sug"]])[[variable]]
   max.sug.val <- purrr::map(HISAFE.PARAMS, ~ .x[["max.sug"]])[[variable]]
-  max.pass <- (is.na(max.sug.val) | all(plan[[variable]] <= max.sug.val))
-  min.pass <- (is.na(min.sug.val) | all(plan[[variable]] >= min.sug.val))
+  max.pass <- (is.na(max.sug.val) | all(hip[[variable]] <= max.sug.val))
+  min.pass <- (is.na(min.sug.val) | all(hip[[variable]] >= min.sug.val))
   if(max.pass & min.pass) return("")
   else if(!is.na(max.sug.val) & !is.na(min.sug.val)) return(paste0(variable, " - is typically betwen ", min.sug.val, " and ", max.sug.val))
   else if(is.na(max.sug.val) & !is.na(min.sug.val)) return(paste0(variable, " - is typically greater than ", min.sug.val))

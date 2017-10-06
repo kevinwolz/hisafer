@@ -1,5 +1,5 @@
-HISAFE.TEMPLATE <- "/Users/wolzy4u/Desktop/RESEARCH/ACTIVE_PROJECTS/HI-SAFE/hisafer/hisafe_template/"
-HISAFE.LIBRARY <- "/Users/wolzy4u/Desktop/RESEARCH/ACTIVE_PROJECTS/HI-SAFE/hisafer/hisafe_library/"
+HISAFE.TEMPLATE <- "/Users/wolzy4u/Desktop/RESEARCH/ACTIVE_PROJECTS/HI-SAFE/hisafer/data/hisafe_template/"
+HISAFE.LIBRARY <- "/Users/wolzy4u/Desktop/RESEARCH/ACTIVE_PROJECTS/HI-SAFE/hisafer/data/hisafe_library/"
 SUPPORTED.PROFILES <- tibble::tibble(profiles = c("annualplot", "annualtree", "annualcrop", "plot", "trees", "roots", "cells", "voxels", "climate", "monthCells"),
                                      freqs    = c(365,          365,          365,          1,      1,       1,       1,        1,       1,         30))
 
