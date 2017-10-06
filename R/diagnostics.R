@@ -8,7 +8,8 @@
 #' @param time.class If 'annual', the default, annual timeseries are created. If 'daily', daily timeseries are created.
 #' @param output.path A character stting indicating the path to the directory where plots should be saved. Plots are
 #' saved in a subdirectory within this directory named by \code{time.class}.
-#' @param time.lim If time.class is 'annual', the default, a numeric vector of length two providing the \code{c(minimum, maximum)} of years (since planting) to plot.
+#' @param time.lim If time.class is 'annual', the default, a numeric vector of length two providing
+#' the \code{c(minimum, maximum)} of years (since planting) to plot.
 #' If time.class is 'daily', a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
 #' If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.
 #' @param tree.id A numeric vector indicating the ids of a subset of tree ids to plot. If no input, all trees will be plotted.
@@ -27,25 +28,19 @@
 #' diag_hisafe_ts(mydata, "daily")
 #' }
 diag_hisafe_ts <- function(data,
-                           time.class = "annual",
+                           time.class  = "annual",
                            output.path = "./diagnostics",
-                           time.lim = NULL,
-                           tree.id = NULL) {
+                           time.lim    = NULL,
+                           tree.id     = NULL) {
 
   time.class <- tolower(time.class) # prevents error if improper capitalization not input by user
 
-  ## Check if data has class hisafe or hisafe-group
-  if(!any(c("hop", "hop-group") %in% class(data))) {
-    stop("data not of class hop or hop-group")
-  }
-
-  ## Check if data exists for time.class
-  if(ncol(data[[time.class]]) == 0) {
-    stop(paste("no data from any", time.class, "profiles found"))
-  }
+  ## Check for data class and if profile exists
+  if(!any(c("hop", "hop-group") %in% class(data))) stop("data not of class hop or hop-group")
+  if(ncol(data[[time.class]]) == 0)                stop(paste("no data from any", time.class, "profiles found"))
 
   ## Create output directory
-  ts.path <- gsub("//", "/", paste0(output.path, "/", time.class, "/"), fixed = TRUE)
+  ts.path <- gsub("//", "/", paste0(output.path, "/", time.class, "/"))
   dir.create(ts.path, recursive = TRUE, showWarnings = FALSE)
 
 
@@ -53,14 +48,18 @@ diag_hisafe_ts <- function(data,
   # cols with only "error!" output are all NA's and cause plot errors
   if(time.class == "annual") {
     data$annual <- data$annual %>% select_if(~sum(!is.na(.)) > 0)
-    var.names <- names(data$annual)[(which(names(data$annual) == "id") + 1):length(names(data$annual))]
+    var.names   <- names(data$annual)[(which(names(data$annual) == "id") + 1):length(names(data$annual))]
   } else {
-    data$daily <- data$daily %>% select_if(~sum(!is.na(.)) > 0)
-    var.names <- names(data$daily)[(which(names(data$daily) == "id") + 1):length(names(data$daily))]
+    data$daily  <- data$daily %>% select_if(~sum(!is.na(.)) > 0)
+    var.names   <- names(data$daily)[(which(names(data$daily) == "id") + 1):length(names(data$daily))]
   }
 
   ## Create plots
-  plot.list <- purrr::map(var.names, plot_hisafe_ts, data = data, time.class = time.class, time.lim = time.lim, tree.id = tree.id)
+  plot.list <- purrr::map(var.names, plot_hisafe_ts,
+                          data       = data,
+                          time.class = time.class,
+                          time.lim   = time.lim,
+                          tree.id    = tree.id)
 
   ## Write plots to disk
   file.names <- paste0(time.class, "_", var.names, ".png")
@@ -77,7 +76,8 @@ diag_hisafe_ts <- function(data,
 #' Year~SimulationName plots are for Month==6, every 5 years from 0:max, and all simulations.
 #' Month~SimulationName plots are for Year==median, all 12 months, and all simulations.
 #' Month~Year plots are for all 12 months and every 5 years from 0:max, with each simulation in its own plot.
-#' @return A list of \code{ggplot} objects is invisibly returned, grouped into two sublists based on the faceting scheme. The first sublist contains  Year~SimulationName, and the second contains Month~SimulationName.
+#' @return A list of \code{ggplot} objects is invisibly returned, grouped into two sublists based on the faceting scheme.
+#' The first sublist contains  Year~SimulationName, and the second contains Month~SimulationName.
 #' @param data An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
 #' @param output.path A character stting indicating the path to the directory where plots should be saved. Plots are
 #' saved in a subdirectory within this directory named /monthCells/facetScheme.
@@ -94,60 +94,55 @@ diag_hisafe_ts <- function(data,
 #' }
 diag_hisafe_monthcells <- function(data, output.path = "./diagnostics") {
 
-  ## Check if data has class hisafe or hisafe-group
-  if(!any(c("hop", "hop-group") %in% class(data))) {
-    stop("data not of class hop or hop-group")
-  }
-
-  ## Check if data exists for time.class
-  if(ncol(data$monthCells) == 0) {
-    stop("no data from monthCells profile found")
-  }
+  ## Check for data class and if profile exists
+  if(!any(c("hop", "hop-group") %in% class(data))) stop("data not of class hop or hop-group")
+  if(ncol(data$monthCells) == 0)                   stop("no data from monthCells profile found")
 
   ## Create output directories
-  monthcells.path <- gsub("//", "/", paste0(output.path, "/monthCells/"), fixed = TRUE)
-  dir.create(paste0(monthcells.path, "year_simname/"), recursive = TRUE, showWarnings = FALSE)
-  dir.create(paste0(monthcells.path, "month_simname/"), recursive = TRUE, showWarnings = FALSE)
-  dir.create(paste0(monthcells.path, "month_year/"), recursive = TRUE, showWarnings = FALSE)
+  monthcells.path <- gsub("//", "/", paste0(output.path, "/monthCells/"))
+  plot.dirs <- paste0(monthcells.path, c("year_simname/", "month_simname/", "month_year/"))
+  purrr::walk(plot.dirs, dir.create, recursive = TRUE, showWarnings = FALSE)
 
   ## Clean columns & extract names of variables to plot
   # cols with only "error!" output are all NA's and cause plot errors
   data$monthCells <- data$monthCells %>% select_if(~sum(!is.na(.)) > 0)
-  var.names <- names(data$monthCells)[(which(names(data$monthCells) == "cropSpeciesName") + 1):length(names(data$monthCells))]
+  var.names       <- names(data$monthCells)[(which(names(data$monthCells) == "cropSpeciesName") + 1):length(names(data$monthCells))]
 
   ## Create plots
   plot.list1 <- purrr::map(var.names, plot_hisafe_monthcells,
-                           data = data,
-                           rowfacet = "SimulationName",
-                           colfacet = "Year",
+                           data      = data,
+                           rowfacet  = "SimulationName",
+                           colfacet  = "Year",
                            sim.names = "all",
-                           years = seq(0, (max(data$monthCells$Year) - min(data$monthCells$Year)), 5),
-                           months = 6)
+                           years     = seq(0, (max(data$monthCells$Year) - min(data$monthCells$Year)), 5),
+                           months    = 6)
   file.names <- paste0("monthCells_year_simname_", var.names, ".png")
-  pwalk(list(file.names, plot.list1), ggsave, path = paste0(monthcells.path, "year_simname/"), scale = 2, width = 10, height = 10)
+  pwalk(list(file.names, plot.list1), ggsave, path = plot.dirs[1], scale = 2, width = 10, height = 10)
 
   plot.list2 <- purrr::map(var.names, plot_hisafe_monthcells,
-                           data = data,
-                           rowfacet = "SimulationName",
-                           colfacet = "Month",
+                           data      = data,
+                           rowfacet  = "SimulationName",
+                           colfacet  = "Month",
                            sim.names = "all",
-                           years = (round(median(data$monthCells$Year),0) - min(data$monthCells$Year)),
-                           months = 1:12)
+                           years     = (round(median(data$monthCells$Year),0) - min(data$monthCells$Year)),
+                           months    = 1:12)
   file.names <- paste0("monthCells_month_simname_", var.names, ".png")
-  pwalk(list(file.names, plot.list2), ggsave, path = paste0(monthcells.path, "month_simname/"), scale = 2, height = 10, width = 10)
+  pwalk(list(file.names, plot.list2), ggsave, path = plot.dirs[2], scale = 2, height = 10, width = 10)
 
+  plot.list3.tog <- list()
   for(sim.name in unique(data$monthCells$SimulationName)){
     plot.list3 <- purrr::map(var.names, plot_hisafe_monthcells,
-                             data = data,
-                             rowfacet = "Year",
-                             colfacet = "Month",
+                             data      = data,
+                             rowfacet  = "Year",
+                             colfacet  = "Month",
                              sim.names = sim.name,
-                             years = seq(0, (max(data$monthCells$Year) - min(data$monthCells$Year)), 5),
-                             months = 1:12)
+                             years     = seq(0, (max(data$monthCells$Year) - min(data$monthCells$Year)), 5),
+                             months    = 1:12)
     file.names <- paste0("monthCells_month_year_", sim.name, "_", var.names, ".png")
-    pwalk(list(file.names, plot.list3), ggsave, path = paste0(monthcells.path, "month_year/"), scale = 2, height = 10, width = 10)
+    pwalk(list(file.names, plot.list3), ggsave, path = plot.dirs[3], scale = 2, height = 10, width = 10)
+    plot.list3.tog <- c(plot.list3.tog, plot.list3)
   }
 
   ## Invisibly return list of plot objects
-  invisible(list(year.simname = plot.list1, month.simname = plot.list2))
+  invisible(list(year.simname = plot.list1, month.simname = plot.list2, month.year = plot.list3.tog))
 }

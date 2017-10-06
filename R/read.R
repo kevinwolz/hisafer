@@ -16,7 +16,7 @@ read_table_hisafe <- function(file, ...) {
 
 #' Read a single Hi-sAFe output profile
 #' @description Reads the designated output profiles from a single Hi-sAFe simulation.
-#' @return An list of two data frames: \code{data} contains the data from the profile; \code{variables} contains the variable descriptions.
+#' @return An list of two data frames (tibbles): \code{data} contains the data from the profile; \code{variables} contains the variable descriptions.
 #' @param profile A character string of the path to the profile to be read.
 #' @param read.data If TRUE, data and variable descriptions are read. If FALSE, only variable descriptions are read.
 #' @import tidyverse
@@ -32,17 +32,17 @@ read_hisafe_output_file <- function(profile, read.data = TRUE){
   ## Read data
   if (read.data) {
     dat <- read_table_hisafe(profile, skip = end.of.var.list) %>%
-      filter(Year != 0) %>%                    # remove row with Year==0 at the start of every output profile
+      filter(Year != 0) %>%                               # remove row with Year==0 at the start of every output profile
       mutate(Date = gsub(pattern = "a.", replacement = "", x = Date, fixed = TRUE)) %>% # is this here to fix an old bug?
       mutate(Date = lubridate::dmy(Date))                 # convert Date column into date class
-  } else dat <- tibble()                       # if read.data==F, return empty tibble (i.e. only read variable descriptions)
+  } else dat <- tibble()                                  # if read.data==F, return empty tibble (i.e. only read variable descriptions)
 
   return(list(data = dat, variables = variables))
 }
 
 #' Read output from a single Hi-sAFe simulation
 #' @description Reads the designated output profiles from a single Hi-sAFe simulation.
-#' @return An object of class \code{hop}. This is a list of 6 data frames:
+#' @return An object of class \code{hop}. This is a list of 6 data frames (tibbles):
 #' \code{annual} (includes data from annualtree and annualplot profiles), \code{daily} (includes data from trees, plot, and climate profiles), \code{monthCells}, \code{cells}, \code{voxels}, and \code{variables} (variable descriptions and units from all profiles).
 #' @param simu.name The \code{SimulationName} of the Hi-sAFe simulation. This must be the same as the name of the Hi-sAFe simulation folder.
 #' @param path A character string of the path to the directory containing the Hi-sAFe simulation folder (which contains the standard subdirectory with the output)
@@ -59,7 +59,10 @@ read_hisafe_output_file <- function(profile, read.data = TRUE){
 #' # If only the annual tree data is required:
 #' mytreedata <- read_hisafe("MySimulation", "./", profiles = "annualtree")
 #' }
-read_hisafe <- function(simu.name, path, profiles = "all", allow.missing = FALSE) {
+read_hisafe <- function(simu.name,
+                        path,
+                        profiles      = "all",
+                        allow.missing = FALSE) {
 
   if(profiles == "all") profiles <- SUPPORTED.PROFILES$profiles
 
@@ -86,14 +89,8 @@ read_hisafe <- function(simu.name, path, profiles = "all", allow.missing = FALSE
   ## Function for reading timeseries (Annual, Daily) profiles
   read.ts.profiles <- function(profiles, time.class) {
 
-    ## Common columns at the start of all Annual & Daily profiles
-    join.cols <- c("SimulationName",
-                   "Date",
-                   "Day",
-                   "Month",
-                   "Year",
-                   "JulianDay",
-                   "stepNum")
+    ## Common columns at the start of all profiles
+    join.cols <- c("SimulationName", "Date", "Day", "Month", "Year", "JulianDay", "stepNum")
 
     if(length(profiles) >= 1) {
 
@@ -111,30 +108,29 @@ read_hisafe <- function(simu.name, path, profiles = "all", allow.missing = FALSE
         purrr::map(2) %>%                      # extract second element (variable descriptions) of each profile
         bind_rows() %>%                        # bind all variable descriptions togeter
         mutate(VariableClass = time.class)     # add a column that indicates which data class the variable definition is from
-    }else {
+    } else {
       dat.data <- dat.variables <- tibble()    # if no profiles were requested from this data class, return empty tibbles
     }
-
     return(list(data = dat.data, variables = dat.variables))
   }
 
   ## Read annual data & associated variables
-  annual.profiles <- profiles[profiles %in% c("annualtree", "annualplot")]
-  annual.dat <- read.ts.profiles(annual.profiles, "annual")
-  annual.data <- annual.dat$data
+  annual.profiles <-  profiles[profiles %in% c("annualtree", "annualplot")]
+  annual.dat <-       read.ts.profiles(annual.profiles, "annual")
+  annual.data <-      annual.dat$data
   annual.variables <- annual.dat$variables
 
   ## Read daily data & associated variables
-  daily.profiles <- profiles[profiles %in% c("trees", "plot", "climate")]
-  daily.dat <- read.ts.profiles(daily.profiles, "daily")
-  daily.data <- daily.dat$data
+  daily.profiles <-  profiles[profiles %in% c("trees", "plot", "climate")]
+  daily.dat <-       read.ts.profiles(daily.profiles, "daily")
+  daily.data <-      daily.dat$data
   daily.variables <- daily.dat$variables
 
   ## Read monthCells data & associated variables
   monthCells.profiles <- profiles[profiles %in% c("monthCells")]
   if(length(monthCells.profiles) >= 1) {
-    monthCells.list <- purrr::map(monthCells.profiles, function(x) read_hisafe_output_file(paste0(file.prefix, x, ".txt" )))
-    monthCells.data <- monthCells.list[[1]]$data
+    monthCells.list <-      purrr::map(monthCells.profiles, function(x) read_hisafe_output_file(paste0(file.prefix, x, ".txt" )))
+    monthCells.data <-      monthCells.list[[1]]$data
     monthCells.variables <- monthCells.list[[1]]$variables %>% mutate(VariableClass = "monthCells")
   } else {
     monthCells.data <- monthCells.variables <- tibble()
@@ -143,8 +139,8 @@ read_hisafe <- function(simu.name, path, profiles = "all", allow.missing = FALSE
   ## Read cells data & associated variables
   cells.profiles <- profiles[profiles %in% c("cells")]
   if(length(cells.profiles) >= 1) {
-    cells.list <- purrr::map(cells.profiles, function(x) read_hisafe_output_file(paste0(file.prefix, x, ".txt" )))
-    cells.data <- cells.list[[1]]$data
+    cells.list <-      purrr::map(cells.profiles, function(x) read_hisafe_output_file(paste0(file.prefix, x, ".txt" )))
+    cells.data <-      cells.list[[1]]$data
     cells.variables <- cells.list[[1]]$variables %>% mutate(VariableClass = "cells")
   } else {
     cells.data <- cells.variables <- tibble()
@@ -153,38 +149,36 @@ read_hisafe <- function(simu.name, path, profiles = "all", allow.missing = FALSE
   ## Read cells data & associated variables
   voxels.profiles <- profiles[profiles %in% c("voxels")]
   if(length(voxels.profiles) >= 1) {
-    voxels.list <- purrr::map(voxels.profiles, function(x) read_hisafe_output_file(paste0(file.prefix, x, ".txt" )))
-    voxels.data <- voxels.list[[1]]$data
+    voxels.list <-      purrr::map(voxels.profiles, function(x) read_hisafe_output_file(paste0(file.prefix, x, ".txt" )))
+    voxels.data <-      voxels.list[[1]]$data
     voxels.variables <- voxels.list[[1]]$variables %>% mutate(VariableClass = "voxels")
   } else {
     voxels.data <- voxels.variables <- tibble()
   }
 
-  ## Combine variables into one tibble
-  variables <- bind_rows(annual.variables, daily.variables, monthCells.variables, cells.variables, voxels.variables) %>%
-    distinct()                                # remove all duplicate variable definitions
-  names(variables) <- c("Subject",            # rename col headers bc different HISAFE versions used English/French
-                        "SubjectId",
-                        "VariableName",
-                        "Units",
-                        "Description",
-                        "VariableClass")
+  ## Combine variables into one tibble, remove duplicates, rename col headers in English
+  variables <- distinct(bind_rows(annual.variables,
+                                  daily.variables,
+                                  monthCells.variables,
+                                  cells.variables,
+                                  voxels.variables))
+  names(variables) <- c("Subject", "SubjectId", "VariableName", "Units", "Description", "VariableClass")
 
   ## Creat output list & assign class
-  output <- list(annual = annual.data,
-                 daily = daily.data,
+  output <- list(annual     = annual.data,
+                 daily      = daily.data,
                  monthCells = monthCells.data,
-                 cells = cells.data,
-                 voxels = voxels.data,
-                 variables = variables)
-  class(output)<-c("hop", class(output))
+                 cells      = cells.data,
+                 voxels     = voxels.data,
+                 variables  = variables)
 
+  class(output)<-c("hop", class(output))
   return(output)
 }
 
 #' Read output from a group of Hi-sAFe simulations
 #' @description Reads the designated output profiles from a group of Hi-sAFe simulations (i.e. an experiment).
-#' @return An object of class \code{hop-group}. This is a list of 7 data frames:
+#' @return An object of class \code{hop-group}. This is a list of 7 data frames (tibbles):
 #' \code{annual} (includes data from annualtree and annualplot profiles), \code{daily} (includes data from trees, plot, and climate profiles),
 #' \code{monthCells}, \code{cells}, \code{voxels}, and \code{variables} (variable descriptions and units from all profiles).
 #' @param exp.plan A data frame containing the experimental plan used to generate the Hi-sAFe simulations.
@@ -203,7 +197,10 @@ read_hisafe <- function(simu.name, path, profiles = "all", allow.missing = FALSE
 #' # If only the annual tree data is required:
 #' mytreeexp <- read_hisafe(MyExpPlan, "./", profiles = "annualtree")
 #' }
-read_hisafe_group <- function(exp.plan, path, profiles = "all", allow.missing = FALSE) {
+read_hisafe_group <- function(exp.plan,
+                              path,
+                              profiles      = "all",
+                              allow.missing = FALSE) {
 
   ## Read all data from all simulations & combine
   data <- purrr::map(exp.plan$SimulationName, read_hisafe, path = path, profiles = profiles, allow.missing = allow.missing) %>%
@@ -220,11 +217,11 @@ read_hisafe_group <- function(exp.plan, path, profiles = "all", allow.missing = 
       group_by(SimulationName)                          # group annual data by simulaton
   }
   if(ncol(data$annual) > 0) data$annual <- data_tidy(data$annual)
-  if(ncol(data$daily) > 0) data$daily <- data_tidy(data$daily)
-  if(ncol(data$cells) > 0) data$cells <- data_tidy(data$cells)
+  if(ncol(data$daily)  > 0) data$daily  <- data_tidy(data$daily)
+  if(ncol(data$cells)  > 0) data$cells  <- data_tidy(data$cells)
   if(ncol(data$voxels) > 0) data$voxels <- data_tidy(data$voxels)
-  data$variables <- data$variables %>% distinct()       # remove duplicate variable descriptions
-  data$exp.plan <- exp.plan %>% mutate_all(factor)      # make all columns factors
+  data$variables <- distinct(data$variables)            # remove duplicate variable descriptions
+  data$exp.plan  <- mutate_all(exp.plan, factor)        # make all columns factors
 
   ## Warn if lengths of all simulations are not equal
   year.summary <- data[[as.numeric(which.max(map_int(data, ncol)))]] %>%
@@ -239,8 +236,6 @@ read_hisafe_group <- function(exp.plan, path, profiles = "all", allow.missing = 
     warning(year.length.warning, call. = FALSE)
   }
 
-  ## Assign class
-  class(data)<-c("hop-group", "hop", class(data)) # "hisafe"
-
+  class(data)<-c("hop-group", "hop", class(data))
   return(data)
 }

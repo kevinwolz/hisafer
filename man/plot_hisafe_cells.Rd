@@ -4,10 +4,10 @@
 \alias{plot_hisafe_cells}
 \title{Tile plot of Hi-sAFe cells output variable}
 \usage{
-plot_hisafe_cells(data, variable, dates)
+plot_hisafe_cells(hop, variable, dates)
 }
 \arguments{
-\item{data}{An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.}
+\item{hop}{An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.}
 
 \item{variable}{A character string of the name of the variable to color the tiles.}
 
@@ -17,7 +17,8 @@ plot_hisafe_cells(data, variable, dates)
 A ggplot object.
 }
 \description{
-Plots a tile plot of a single Hi-sAFe cells output variable. SimulationName is used as the column facet. Date is used as the row facet.
+Plots a tile plot of a single Hi-sAFe cells output variable.
+SimulationName is used as the column facet. Date is used as the row facet.
 }
 \examples{
 \dontrun{

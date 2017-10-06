@@ -10,10 +10,11 @@ define_hisafe(factorial = FALSE, ...)
 \item{factorial}{If \code{FALSE}, the default, then values are recycled (i.e. such as for default behavior of \code{data.frame()}).
 If \code{TRUE}, then a factorial experiment is created, in which an ecperiment is defined for each possible combination of supplied values.}
 
-\item{...}{Any suported Hi-sAFe input parameter in the .sim and .pld files can be passed. Parameters should be passed as \code{parameterName = values}. For more information on supported parameters, see _____.}
+\item{...}{Any suported Hi-sAFe input parameter in the .sim and .pld files can be passed.
+Parameters should be passed as \code{parameterName = values}. For more information on supported parameters, see _____.}
 }
 \value{
-An object of class \code{hip}. This is a data frame with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
+An object of class \code{hip}. This is a data frame (tibble) with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
 }
 \description{
 Defines a Hi-sAFe experiment - the input parameters to one or more Hi-sAFe simulations.
@@ -22,7 +23,7 @@ Defines a Hi-sAFe experiment - the input parameters to one or more Hi-sAFe simul
 It is strongly recommended to name each simulation in your experiment. This can be done via the \code{SimulationName} parameter.
 If no names are provided, then \code{define_hisafe} will provide generic names of "Sim_1", "Sim_2", etc.
 If \code{factorial = FALSE}, the default, then supply a value of \code{SimulationName} for each experiment.
-#' If \code{factorial = TRUE}, then supply a single value of \code{SimulationName} as a prefix.
+If \code{factorial = TRUE}, then supply a single value of \code{SimulationName} as a prefix.
 \code{define_hisafe} will append "_1", "_2", etc. for each of the (unknown number of) factorial experiments.
 }
 \examples{

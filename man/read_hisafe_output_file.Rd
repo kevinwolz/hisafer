@@ -12,7 +12,7 @@ read_hisafe_output_file(profile, read.data = TRUE)
 \item{read.data}{If TRUE, data and variable descriptions are read. If FALSE, only variable descriptions are read.}
 }
 \value{
-An list of two data frames: \code{data} contains the data from the profile; \code{variables} contains the variable descriptions.
+An list of two data frames (tibbles): \code{data} contains the data from the profile; \code{variables} contains the variable descriptions.
 }
 \description{
 Reads the designated output profiles from a single Hi-sAFe simulation.

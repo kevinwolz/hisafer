@@ -3,12 +3,13 @@
 #' @details It is strongly recommended to name each simulation in your experiment. This can be done via the \code{SimulationName} parameter.
 #' If no names are provided, then \code{define_hisafe} will provide generic names of "Sim_1", "Sim_2", etc.
 #' If \code{factorial = FALSE}, the default, then supply a value of \code{SimulationName} for each experiment.
-#' #' If \code{factorial = TRUE}, then supply a single value of \code{SimulationName} as a prefix.
+#' If \code{factorial = TRUE}, then supply a single value of \code{SimulationName} as a prefix.
 #' \code{define_hisafe} will append "_1", "_2", etc. for each of the (unknown number of) factorial experiments.
-#' @return An object of class \code{hip}. This is a data frame with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
+#' @return An object of class \code{hip}. This is a data frame (tibble) with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
 #' @param factorial If \code{FALSE}, the default, then values are recycled (i.e. such as for default behavior of \code{data.frame()}).
 #' If \code{TRUE}, then a factorial experiment is created, in which an ecperiment is defined for each possible combination of supplied values.
-#' @param ... Any suported Hi-sAFe input parameter in the .sim and .pld files can be passed. Parameters should be passed as \code{parameterName = values}. For more information on supported parameters, see _____.
+#' @param ... Any suported Hi-sAFe input parameter in the .sim and .pld files can be passed.
+#' Parameters should be passed as \code{parameterName = values}. For more information on supported parameters, see _____.
 #' @export
 #' @import tidyverse
 #' @family hisafe definition functions
@@ -48,7 +49,8 @@ define_hisafe <- function(factorial = FALSE, ...) {
   }
 
   is.unique <- function(x) { length(unique(x)) != 1 }
-  hip <- bind_cols(hip[, map_lgl(hip, is.unique)], hip[, !map_lgl(hip, is.unique)]) %>%
+  hip <- bind_cols(hip[,  map_lgl(hip, is.unique)],
+                   hip[, !map_lgl(hip, is.unique)]) %>%
     select(SimulationName, everything())
 
   check_input_values(hip)
@@ -60,7 +62,7 @@ define_hisafe <- function(factorial = FALSE, ...) {
 #' @description Defines a Hi-sAFe experiment - the input parameters to one or more Hi-sAFe simulations.
 #' @details It is strongly recommended to name each simulation in your experiment. This can be done via the \code{SimulationName} parameter.
 #' If no names are provided, then \code{define_hisafe_file} will provide generic names of "Sim_1", "Sim_2", etc.
-#' @return An object of class \code{hip}. This is a data frame with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
+#' @return An object of class \code{hip}. This is a data frame (tibble) with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
 #' @param file A character string of the path to a csv file.
 #' Each row in the file should represent a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
 #' For more information on supported parameters, see _____.
@@ -137,8 +139,11 @@ check_input_values <- function(hip) {
 check_allowed <- function(variable, hip) {
   allowed.vals <- purrr::map(HISAFE.PARAMS, ~ .x[["allowed"]])[[variable]]
   allowed.pass <- (is.na(allowed.vals[1]) | all(hip[[variable]] %in% allowed.vals))
-  if(allowed.pass) return("")
-  else return(paste0(variable, " - must be one of: ", paste0(allowed.vals, collapse = ", ")))
+  if(allowed.pass) {
+    return("")
+  } else {
+    return(paste0(variable, " - must be one of: ", paste0(allowed.vals, collapse = ", ")))
+  }
 }
 
 #' Check validity of Hi-sAFe input ranges
@@ -149,14 +154,19 @@ check_allowed <- function(variable, hip) {
 #' @param hip An object of class \code{hip}.
 #' @import tidyverse
 check_minmax <- function(variable, hip) {
-  min.val <- purrr::map(HISAFE.PARAMS, ~ .x[["min"]])[[variable]]
-  max.val <- purrr::map(HISAFE.PARAMS, ~ .x[["max"]])[[variable]]
+  min.val  <- purrr::map(HISAFE.PARAMS, ~ .x[["min"]])[[variable]]
+  max.val  <- purrr::map(HISAFE.PARAMS, ~ .x[["max"]])[[variable]]
   max.pass <- (is.na(max.val) | all(hip[[variable]] <= max.val))
   min.pass <- (is.na(min.val) | all(hip[[variable]] >= min.val))
-  if(max.pass & min.pass) return("")
-  else if(!is.na(max.val) & !is.na(min.val)) return(paste0(variable, " - must be betwen ", min.val, " and ", max.val))
-  else if(is.na(max.val) & !is.na(min.val)) return(paste0(variable, " - must be greater than ", min.val))
-  else if(!is.na(max.val) & is.na(min.val)) return(paste0(variable, " - must be less than ", max.val))
+  if(max.pass & min.pass) {
+    return("")
+  } else if(!is.na(max.val) & !is.na(min.val)) {
+    return(paste0(variable, " - must be betwen ", min.val, " and ", max.val))
+  } else if(is.na(max.val) & !is.na(min.val)) {
+    return(paste0(variable, " - must be greater than ", min.val))
+  } else if(!is.na(max.val) & is.na(min.val)) {
+    return(paste0(variable, " - must be less than ", max.val))
+  }
 }
 
 #' Check plausbility of Hi-sAFe input ranges
@@ -169,10 +179,15 @@ check_minmax <- function(variable, hip) {
 check_minmax_sug <- function(variable, hip) {
   min.sug.val <- purrr::map(HISAFE.PARAMS, ~ .x[["min.sug"]])[[variable]]
   max.sug.val <- purrr::map(HISAFE.PARAMS, ~ .x[["max.sug"]])[[variable]]
-  max.pass <- (is.na(max.sug.val) | all(hip[[variable]] <= max.sug.val))
-  min.pass <- (is.na(min.sug.val) | all(hip[[variable]] >= min.sug.val))
-  if(max.pass & min.pass) return("")
-  else if(!is.na(max.sug.val) & !is.na(min.sug.val)) return(paste0(variable, " - is typically betwen ", min.sug.val, " and ", max.sug.val))
-  else if(is.na(max.sug.val) & !is.na(min.sug.val)) return(paste0(variable, " - is typically greater than ", min.sug.val))
-  else if(!is.na(max.sug.val) & is.na(min.sug.val)) return(paste0(variable, " - is typically less than ", max.sug.val))
+  max.pass    <- (is.na(max.sug.val) | all(hip[[variable]] <= max.sug.val))
+  min.pass    <- (is.na(min.sug.val) | all(hip[[variable]] >= min.sug.val))
+  if(max.pass & min.pass) {
+    return("")
+  } else if(!is.na(max.sug.val) & !is.na(min.sug.val)) {
+    return(paste0(variable, " - is typically betwen ", min.sug.val, " and ", max.sug.val))
+  } else if(is.na(max.sug.val) & !is.na(min.sug.val)) {
+    return(paste0(variable, " - is typically greater than ", min.sug.val))
+  } else if(!is.na(max.sug.val) & is.na(min.sug.val)) {
+    return(paste0(variable, " - is typically less than ", max.sug.val))
+  }
 }

@@ -4,12 +4,12 @@
 \alias{plot_hisafe_monthcells}
 \title{Tile plot of Hi-sAFe monthCells output variable}
 \usage{
-plot_hisafe_monthcells(data, variable, rowfacet = "SimulationName",
+plot_hisafe_monthcells(hop, variable, rowfacet = "SimulationName",
   colfacet = "Year", sim.names = "all", years = seq(0, 40, 5),
   months = 6)
 }
 \arguments{
-\item{data}{An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.}
+\item{hop}{An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.}
 
 \item{variable}{A character string of the name of the variable to color the tiles.}
 
@@ -30,7 +30,8 @@ A ggplot object.
 Plots a tile plot of a single Hi-sAFe monthCells output variable.
 }
 \details{
-This function is very picky! You can only facet by two of the three manipulable variables: SimulationName, Year, Month. You must ensure that the one varibale not used for faceting is fixed at a single value.
+This function is very picky! You can only facet by two of the three manipulable variables: SimulationName, Year, Month.
+You must ensure that the one varibale not used for faceting is fixed at a single value.
 }
 \examples{
 \dontrun{

@@ -4,17 +4,18 @@
 \alias{plot_hisafe_ts}
 \title{Plot timeseries of Hi-sAFe output variable}
 \usage{
-plot_hisafe_ts(data, variable, time.class = "annual", time.lim = NULL,
+plot_hisafe_ts(hop, variable, time.class = "annual", time.lim = NULL,
   tree.id = NULL)
 }
 \arguments{
-\item{data}{An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.}
+\item{hop}{An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.}
 
 \item{variable}{A character string of the name of the variable to plot.}
 
 \item{time.class}{If 'annual', the default, an annual timeseries is created. If 'daily', a daily timeseries is created.}
 
-\item{time.lim}{If time.class is 'annual', the default, a numeric vector of length two providing the \code{c(minimum, maximum)} of years (since planting) to plot.
+\item{time.lim}{If time.class is 'annual', the default, a numeric vector of length two providing
+the \code{c(minimum, maximum)} of years (since planting) to plot.
 If time.class is 'daily', a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
 If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.}
 

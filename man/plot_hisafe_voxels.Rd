@@ -4,10 +4,10 @@
 \alias{plot_hisafe_voxels}
 \title{Tile plot of Hi-sAFe voxels output variable}
 \usage{
-plot_hisafe_voxels(data, variable, dates)
+plot_hisafe_voxels(hop, variable, dates)
 }
 \arguments{
-\item{data}{An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.}
+\item{hop}{An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.}
 
 \item{variable}{A character string of the name of the variable to color the tiles.}
 
@@ -17,7 +17,8 @@ plot_hisafe_voxels(data, variable, dates)
 A ggplot object.
 }
 \description{
-Plots a tile plot of a single Hi-sAFe voxels output variable. If a single date is provided, SimulationName is used as the column facet. Otherwise, Date is used as the column facet.
+Plots a tile plot of a single Hi-sAFe voxels output variable.
+If a single date is provided, SimulationName is used as the column facet. Otherwise, Date is used as the column facet.
 }
 \examples{
 \dontrun{

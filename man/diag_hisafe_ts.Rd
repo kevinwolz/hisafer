@@ -15,7 +15,8 @@ diag_hisafe_ts(data, time.class = "annual", output.path = "./diagnostics",
 \item{output.path}{A character stting indicating the path to the directory where plots should be saved. Plots are
 saved in a subdirectory within this directory named by \code{time.class}.}
 
-\item{time.lim}{If time.class is 'annual', the default, a numeric vector of length two providing the \code{c(minimum, maximum)} of years (since planting) to plot.
+\item{time.lim}{If time.class is 'annual', the default, a numeric vector of length two providing
+the \code{c(minimum, maximum)} of years (since planting) to plot.
 If time.class is 'daily', a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
 If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.}
 

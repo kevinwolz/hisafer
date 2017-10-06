@@ -3,10 +3,11 @@
 #' @return A ggplot object. If the data is of class \code{hop-group} and contains data from more than one
 #' Hi-sAFe simulation, the plot will contain multiple lines, colored and labeled by SimulationName. If the data
 #' contains two more tree ids, the plot will be faceted by tree id.
-#' @param data An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
+#' @param hop An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
 #' @param variable A character string of the name of the variable to plot.
 #' @param time.class If 'annual', the default, an annual timeseries is created. If 'daily', a daily timeseries is created.
-#' @param time.lim If time.class is 'annual', the default, a numeric vector of length two providing the \code{c(minimum, maximum)} of years (since planting) to plot.
+#' @param time.lim If time.class is 'annual', the default, a numeric vector of length two providing
+#' the \code{c(minimum, maximum)} of years (since planting) to plot.
 #' If time.class is 'daily', a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
 #' If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.
 #' @param tree.id A numeric vector indicating the ids of a subset of tree ids to plot. If no input, all trees will be plotted.
@@ -28,38 +29,31 @@
 #' annual.plot
 #' ggplot2::ggsave("annual_carbonCoarseRoots.png", annual.plot)
 #' }
-plot_hisafe_ts <- function(data,
+plot_hisafe_ts <- function(hop,
                            variable,
                            time.class = "annual",
-                           time.lim = NULL,
-                           tree.id = NULL) {
+                           time.lim   = NULL,
+                           tree.id    = NULL) {
   time.class <- tolower(time.class) # prevents error if improper capitalization not input by user
 
-  ## Check if data has class hisafe or hisafe-group
-  if(!any(c("hop", "hop-group") %in% class(data))) {
-    stop("data not of class hop or hop-group")
-  }
-
-  ## Check if data exists for time.class
-  if(ncol(data[[time.class]]) == 0) {
-    stop(paste("no data from any", time.class, "profiles found"))
-  }
+  ## Check for data class and if profile exists
+  if(!any(c("hop", "hop-group") %in% class(hop))) stop("data not of class hop or hop-group")
+  if(ncol(hop[[time.class]]) == 0)                stop(paste("no data from any", time.class, "profiles found"))
 
   ## Color blind-friendly palette
   cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
   ## Exract units of supplied variable from the "variables" slot
-  var.unit <- data$variables %>%
+  var.unit <- hop$variables %>%
     filter(VariableClass == time.class, VariableName == variable) %>%
     .$Units %>%
     stringr::str_replace("\\.", " ")
 
   ## Create time.class-specific x aesthetic, axis label, plot theme, and time.lim filter
   if(time.class == "annual"){
-    x.var <- "Year"
-    x.label <- "Years after establishment"
-    plot.data <- data$annual
-    plot.data <- plot.data %>% mutate(Year = Year - min(Year) + 1) # Create 0+ year values
+    x.var      <- "Year"
+    x.label    <- "Years after establishment"
+    plot.data  <- hop$annual %>% mutate(Year = Year - min(Year) + 1) # Create 0+ year values
     scale_x_ts <- scale_x_continuous(sec.axis = sec_axis(~ ., labels = NULL))
     if(!is.null(time.lim)) {
       if(is.na(time.lim[1])) { time.lim[1] <- min(plot.data$Year) }
@@ -67,9 +61,9 @@ plot_hisafe_ts <- function(data,
       plot.data <- plot.data %>% filter(Year %in% (time.lim[1]:time.lim[2]))
     }
   } else {
-    x.var <- "Date"
-    x.label <- "Date"
-    plot.data <- data$daily
+    x.var      <- "Date"
+    x.label    <- "Date"
+    plot.data  <- hop$daily
     scale_x_ts <- scale_x_date()
     if(!is.null(time.lim)) {
       time.lim <- lubridate::ymd(time.lim)
@@ -93,7 +87,7 @@ plot_hisafe_ts <- function(data,
   }
 
   ## Pad SimulationName for legend clarity (until bug in legend.text response to margin is fixed)
-  if("hop-group" %in% class(data)) {
+  if("hop-group" %in% class(hop)) {
     levels(plot.data$SimulationName) <- paste0(levels(plot.data$SimulationName), "  ")
   }
 
@@ -115,9 +109,10 @@ plot_hisafe_ts <- function(data,
 
 #' Tile plot of Hi-sAFe monthCells output variable
 #' @description Plots a tile plot of a single Hi-sAFe monthCells output variable.
-#' @details This function is very picky! You can only facet by two of the three manipulable variables: SimulationName, Year, Month. You must ensure that the one varibale not used for faceting is fixed at a single value.
+#' @details This function is very picky! You can only facet by two of the three manipulable variables: SimulationName, Year, Month.
+#' You must ensure that the one varibale not used for faceting is fixed at a single value.
 #' @return A ggplot object.
-#' @param data An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
+#' @param hop An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
 #' @param variable A character string of the name of the variable to color the tiles.
 #' @param rowfacet One of "Year", "Month", or "SimulationName", indicating which variable to use for row faceting.
 #' @param colfacet One of "Year", "Month", or "SimulationName", indicating which variable to use for column faceting.
@@ -148,46 +143,38 @@ plot_hisafe_ts <- function(data,
 #' tile.plot2
 #' ggplot2::ggsave("tiled_monthDirectParIncident.png", tile.plot2)
 #' }
-plot_hisafe_monthcells <- function(data,
+plot_hisafe_monthcells <- function(hop,
                                    variable,
-                                   rowfacet = "SimulationName",
-                                   colfacet = "Year",
+                                   rowfacet  = "SimulationName",
+                                   colfacet  = "Year",
                                    sim.names = "all",
-                                   years = seq(0, 40, 5),
-                                   months = 6) {
+                                   years     = seq(0, 40, 5),
+                                   months    = 6) {
 
-  ## Check if data has class hisafe or hisafe-group
-  if(!any(c("hop", "hop-group") %in% class(data))) {
-    stop("data not of class hop or hop-group")
-  }
-
-  ## Check if data exists for time.class
-  if(ncol(data$monthCells) == 0) {
-    stop("no data from monthCells profile found")
-  }
+  ## Check for data class and if profile exists
+  if(!any(c("hop", "hop-group") %in% class(hop))) stop("data not of class hop or hop-group")
+  if(ncol(hop$monthCells) == 0)                   stop("no data from monthCells profile found")
 
   ## Convert "all" arguements to actual values
-  if(sim.names[1] == "all") { sim.names <- unique(data$monthCells$SimulationName) }
-  if(years[1] == "all") { years <- unique(data$monthCells$Year) -  min(data$monthCells$Year) }
-  if(months[1] == "all") { months <- unique(data$monthCells$Month) }
+  if(sim.names[1] == "all") { sim.names <- unique(hop$monthCells$SimulationName) }
+  if(years[1]     == "all") { years     <- unique(hop$monthCells$Year) -  min(hop$monthCells$Year) }
+  if(months[1]    == "all") { months    <- unique(hop$monthCells$Month) }
 
   ## Determine which variable is not part of faceting & trigger associated error
   vars <- c("SimulationName", "Year", "Month")
   avail.vars <- list(sim.names, years, months)
   var.lengths <- purrr::map_int(avail.vars, length) > 1
-  if(sum(var.lengths) > 2) {
-    stop("only two variables of (sim.names, years, months) can have length greater than one")
-  }
+  if(sum(var.lengths) > 2) stop("only two variables of (sim.names, years, months) can have length greater than one")
   fixed.var <- paste(vars[!var.lengths], "=", avail.vars[[(1:3)[!var.lengths]]])
 
   ## Exract units of supplied variable from the "variables" slot
-  var.unit <- data$variables %>%
+  var.unit <- hop$variables %>%
     filter(VariableClass == "monthCells", VariableName == variable) %>%
     .$Units %>%
     gsub(pattern = "\\.", replacement = " ")
 
   ## Filter for provided sim.names, years & months
-  plot.data <- data$monthCells %>%
+  plot.data <- hop$monthCells %>%
     mutate(Year = Year - min(Year) + 1) %>% # Create 0+ year values
     filter(SimulationName %in% sim.names) %>%
     filter(Year %in% years) %>%
@@ -221,9 +208,10 @@ plot_hisafe_monthcells <- function(data,
 
 
 #' Tile plot of Hi-sAFe cells output variable
-#' @description Plots a tile plot of a single Hi-sAFe cells output variable. SimulationName is used as the column facet. Date is used as the row facet.
+#' @description Plots a tile plot of a single Hi-sAFe cells output variable.
+#' SimulationName is used as the column facet. Date is used as the row facet.
 #' @return A ggplot object.
-#' @param data An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
+#' @param hop An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
 #' @param variable A character string of the name of the variable to color the tiles.
 #' @param dates A character vector containing the dates (yyyy-mm-dd) to include.
 #' @export
@@ -241,28 +229,20 @@ plot_hisafe_monthcells <- function(data,
 #' tile.plot
 #' ggplot2::ggsave("tiled_relativeDirectParIncident.png", tile.plot)
 #' }
-plot_hisafe_cells <- function(data,
-                              variable,
-                              dates) {
+plot_hisafe_cells <- function(hop, variable, dates) {
 
-  ## Check if data has class hisafe or hisafe-group
-  if(!any(c("hop", "hop-group") %in% class(data))) {
-    stop("data not of class hop or hop-group")
-  }
-
-  ## Check if data exists for time.class
-  if(ncol(data$cells) == 0) {
-    stop("no data from cells profile found")
-  }
+  ## Check for data class and if profile exists
+  if(!any(c("hop", "hop-group") %in% class(hop))) stop("data not of class hop or hop-group")
+  if(ncol(hop$cells) == 0)                        stop("no data from cells profile found")
 
   ## Exract units of supplied variable from the "variables" slot
-  var.unit <- data$variables %>%
+  var.unit <- hop$variables %>%
     filter(VariableClass == "cells", VariableName == variable) %>%
     .$Units %>%
     gsub(pattern = "\\.", replacement = " ")
 
   ## Filter for provided dates
-  plot.data <- data$cells %>%
+  plot.data <- hop$cells %>%
     filter(Date %in% ymd(dates))
 
   ## Find tree locations for each simulation
@@ -270,21 +250,21 @@ plot_hisafe_cells <- function(data,
     summarize(x = median(x), y = median(y))
 
   ## Determine faceting & axis labels
-  if("hop-group" %in% class(data) & length(dates) > 1){
+  if("hop-group" %in% class(hop) & length(dates) > 1){
     facet_cells <- facet_grid(Date ~ SimulationName, switch = "both")
-    x.lab = "SimulationName"
-    y.lab = "Date"
-    title.lab = variable
+    x.lab       <- "SimulationName"
+    y.lab       <- "Date"
+    title.lab   <- variable
   } else if(length(dates) > 1) {
     facet_cells <- facet_wrap(~Date)
-    x.lab = ""
-    y.lab = "Date"
-    title.lab = variable
+    x.lab       <- ""
+    y.lab       <- "Date"
+    title.lab   <- variable
   } else {
     facet_cells <- geom_blank()
-    x.lab = ""
-    y.lab = ""
-    title.lab = paste0(variable, " (", ymd(dates), ")")
+    x.lab       <- ""
+    y.lab       <- ""
+    title.lab   <- paste0(variable, " (", ymd(dates), ")")
   }
 
 
@@ -312,9 +292,10 @@ plot_hisafe_cells <- function(data,
 
 
 #' Tile plot of Hi-sAFe voxels output variable
-#' @description Plots a tile plot of a single Hi-sAFe voxels output variable. If a single date is provided, SimulationName is used as the column facet. Otherwise, Date is used as the column facet.
+#' @description Plots a tile plot of a single Hi-sAFe voxels output variable.
+#' If a single date is provided, SimulationName is used as the column facet. Otherwise, Date is used as the column facet.
 #' @return A ggplot object.
-#' @param data An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
+#' @param hop An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
 #' @param variable A character string of the name of the variable to color the tiles.
 #' @param dates A character vector containing the dates (yyyy-mm-dd) to include.
 #' @export
@@ -332,32 +313,22 @@ plot_hisafe_cells <- function(data,
 #' tile.plot
 #' ggplot2::ggsave("tiled_waterAvailable.png", tile.plot)
 #' }
-plot_hisafe_voxels <- function(data,
-                              variable,
-                              dates) {
+plot_hisafe_voxels <- function(hop, variable, dates) {
 
-  ## Check if data has class hisafe or hisafe-group
-  if(!any(c("hop", "hop-group") %in% class(data))) {
-    stop("data not of class hop or hop-group")
-  }
+  ## Check for data class and if profile exists
+  if(!any(c("hop", "hop-group") %in% class(hop))) stop("data not of class hop or hop-group")
+  if(ncol(hop$voxels) == 0)                       stop("no data from voxels profile found")
 
-  ## Check if data exists for time.class
-  if(ncol(data$voxels) == 0) {
-    stop("no data from voxels profile found")
-  }
-
-  if("hop-group" %in% class(data) & length(dates) > 1) {
-    stop("cannot supply more than one date for object of class hop-group")
-  }
+  if("hop-group" %in% class(hop) & length(dates) > 1) stop("cannot supply more than one date for object of class hop-group")
 
   ## Exract units of supplied variable from the "variables" slot
-  var.unit <- data$variables %>%
+  var.unit <- hop$variables %>%
     filter(VariableClass == "voxels", VariableName == variable) %>%
     .$Units %>%
     gsub(pattern = "\\.", replacement = " ")
 
   ## Filter for provided dates
-  plot.data <- data$voxels %>%
+  plot.data <- hop$voxels %>%
     filter(Date %in% ymd(dates))
 
   ## Find tree locations for each simulation
@@ -365,17 +336,18 @@ plot_hisafe_voxels <- function(data,
     summarize(x = median(x), y = median(y))
 
   ## Determine faceting & axis labels
-  if("hop-group" %in% class(data) & length(dates) == 1){
+  if("hop-group" %in% class(hop) & length(dates) == 1){
     facet_voxels <- facet_grid(z ~ SimulationName, switch = "both")
-    x.lab = "SimulationName"
-    title.lab = paste0(variable, " (", ymd(dates), ")")
+    x.lab        <- "SimulationName"
+    title.lab    <- paste0(variable, " (", ymd(dates), ")")
   } else if(length(dates) == 1) {
     facet_voxels <- facet_wrap(~z, ncol = 1)
-    title.lab = paste0(variable, " (", ymd(dates), ")")
+    x.lab        <- ""
+    title.lab    <- paste0(variable, " (", ymd(dates), ")")
   } else {
     facet_voxels <- facet_grid(z ~ Date, switch = "both")
-    x.lab = "Date"
-    title.lab = variable
+    x.lab        <- "Date"
+    title.lab    <- variable
   }
 
 

@@ -17,7 +17,7 @@ read_hisafe(simu.name, path, profiles = "all", allow.missing = FALSE)
 It is highly discouraged to change this from the default of \code{FALSE} unless there are specific profiles intentionally missing from some simulations.}
 }
 \value{
-An object of class \code{hop}. This is a list of 6 data frames:
+An object of class \code{hop}. This is a list of 6 data frames (tibbles):
 \code{annual} (includes data from annualtree and annualplot profiles), \code{daily} (includes data from trees, plot, and climate profiles), \code{monthCells}, \code{cells}, \code{voxels}, and \code{variables} (variable descriptions and units from all profiles).
 }
 \description{
