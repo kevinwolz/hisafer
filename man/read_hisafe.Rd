@@ -11,14 +11,16 @@ read_hisafe(simu.name, path, profiles = "all", allow.missing = FALSE)
 
 \item{path}{A character string of the path to the directory containing the Hi-sAFe simulation folder (which contains the standard subdirectory with the output)}
 
-\item{profiles}{A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading all supported Hi-sAFe output profiles via "all". Currently supported profiles are: annualtree, annualplot, trees, plot, monthCells, cells, voxels, climate.}
+\item{profiles}{A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading all supported Hi-sAFe output profiles via "all".
+Currently supported profiles are: annualplot, annualtree, annualcrop, plot, trees, roots, cells, voxels, climate, monthCells.}
 
 \item{allow.missing}{If \code{TRUE}, does not produce error when profiles specified by \code{profiles} are not found in the output path.
 It is highly discouraged to change this from the default of \code{FALSE} unless there are specific profiles intentionally missing from some simulations.}
 }
 \value{
 An object of class \code{hop}. This is a list of 6 data frames (tibbles):
-\code{annual} (includes data from annualtree and annualplot profiles), \code{daily} (includes data from trees, plot, and climate profiles), \code{monthCells}, \code{cells}, \code{voxels}, and \code{variables} (variable descriptions and units from all profiles).
+\code{annual} (includes data from annualtree and annualplot profiles), \code{daily} (includes data from trees, plot, and climate profiles),
+\code{monthCells}, \code{cells}, \code{voxels}, and \code{variables} (variable descriptions and units from all profiles).
 }
 \description{
 Reads the designated output profiles from a single Hi-sAFe simulation.

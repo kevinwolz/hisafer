@@ -10,9 +10,11 @@ read_hisafe_group(exp.plan, path, profiles = "all", allow.missing = FALSE)
 \item{exp.plan}{A data frame containing the experimental plan used to generate the Hi-sAFe simulations.
 To create an experimental plan, see \code{\link{define_exp}}.}
 
-\item{path}{A character string of the path to the directory containing the Hi-sAFe simulation folders (which each contain the standard subdirectories with the outputs)}
+\item{path}{A character string of the path to the directory containing the Hi-sAFe simulation folders
+(which each contain the standard subdirectories with the outputs)}
 
-\item{profiles}{A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading all supported Hi-sAFe output profiles via "all". Currently supported profiles are: annualtree, annualplot, trees, plot, monthCells, cells, voxels, climate.}
+\item{profiles}{A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading all supported Hi-sAFe output profiles via "all".
+Currently supported profiles are: annualplot, annualtree, annualcrop, plot, trees, roots, cells, voxels, climate, monthCells.}
 
 \item{allow.missing}{If \code{TRUE}, does not produce error when profiles specified by \code{profiles} are not found in the output path.
 It is highly discouraged to change this from the default of \code{FALSE} unless there are specific profiles intentionally missing from some simulations.}

@@ -42,10 +42,12 @@ read_hisafe_output_file <- function(profile, read.data = TRUE){
 #' Read output from a single Hi-sAFe simulation
 #' @description Reads the designated output profiles from a single Hi-sAFe simulation.
 #' @return An object of class \code{hop}. This is a list of 6 data frames (tibbles):
-#' \code{annual} (includes data from annualtree and annualplot profiles), \code{daily} (includes data from trees, plot, and climate profiles), \code{monthCells}, \code{cells}, \code{voxels}, and \code{variables} (variable descriptions and units from all profiles).
+#' \code{annual} (includes data from annualtree and annualplot profiles), \code{daily} (includes data from trees, plot, and climate profiles),
+#' \code{monthCells}, \code{cells}, \code{voxels}, and \code{variables} (variable descriptions and units from all profiles).
 #' @param simu.name The \code{SimulationName} of the Hi-sAFe simulation. This must be the same as the name of the Hi-sAFe simulation folder.
 #' @param path A character string of the path to the directory containing the Hi-sAFe simulation folder (which contains the standard subdirectory with the output)
-#' @param profiles A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading all supported Hi-sAFe output profiles via "all". Currently supported profiles are: annualtree, annualplot, trees, plot, monthCells, cells, voxels, climate.
+#' @param profiles A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading all supported Hi-sAFe output profiles via "all".
+#' Currently supported profiles are: annualplot, annualtree, annualcrop, plot, trees, roots, cells, voxels, climate, monthCells.
 #' @param allow.missing If \code{TRUE}, does not produce error when profiles specified by \code{profiles} are not found in the output path.
 #' It is highly discouraged to change this from the default of \code{FALSE} unless there are specific profiles intentionally missing from some simulations.
 #' @export
@@ -182,8 +184,10 @@ read_hisafe <- function(simu.name,
 #' \code{monthCells}, \code{cells}, \code{voxels}, and \code{variables} (variable descriptions and units from all profiles).
 #' @param exp.plan A data frame containing the experimental plan used to generate the Hi-sAFe simulations.
 #' To create an experimental plan, see \code{\link{define_exp}}.
-#' @param path A character string of the path to the directory containing the Hi-sAFe simulation folders (which each contain the standard subdirectories with the outputs)
-#' @param profiles A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading all supported Hi-sAFe output profiles via "all". Currently supported profiles are: annualtree, annualplot, trees, plot, monthCells, cells, voxels, climate.
+#' @param path A character string of the path to the directory containing the Hi-sAFe simulation folders
+#' (which each contain the standard subdirectories with the outputs)
+#' @param profiles A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading all supported Hi-sAFe output profiles via "all".
+#' Currently supported profiles are: annualplot, annualtree, annualcrop, plot, trees, roots, cells, voxels, climate, monthCells.
 #' @param allow.missing If \code{TRUE}, does not produce error when profiles specified by \code{profiles} are not found in the output path.
 #' It is highly discouraged to change this from the default of \code{FALSE} unless there are specific profiles intentionally missing from some simulations.
 #' @export

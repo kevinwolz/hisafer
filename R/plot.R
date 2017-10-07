@@ -1,6 +1,6 @@
 #' Plot timeseries of Hi-sAFe output variable
 #' @description Plots a daily or annual timeseries of a single Hi-sAFe output variable.
-#' @return A ggplot object. If the data is of class \code{hop-group} and contains data from more than one
+#' @return Invisibly returns a ggplot object. If the data is of class \code{hop-group} and contains data from more than one
 #' Hi-sAFe simulation, the plot will contain multiple lines, colored and labeled by SimulationName. If the data
 #' contains two more tree ids, the plot will be faceted by tree id.
 #' @param hop An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
@@ -105,14 +105,14 @@ plot_hisafe_ts <- function(hop,
                        guide = guide_legend(ncol = 2, byrow = TRUE)) +
     theme_hisafe_ts()
 
-  return(plot.obj)
+  invisible(plot.obj)
 }
 
 #' Tile plot of Hi-sAFe monthCells output variable
 #' @description Plots a tile plot of a single Hi-sAFe monthCells output variable.
 #' @details This function is very picky! You can only facet by two of the three manipulable variables: SimulationName, Year, Month.
 #' You must ensure that the one varibale not used for faceting is fixed at a single value.
-#' @return A ggplot object.
+#' @return Invisibly returns a ggplot object.
 #' @param hop An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
 #' @param variable A character string of the name of the variable to color the tiles.
 #' @param rowfacet One of "Year", "Month", or "SimulationName", indicating which variable to use for row faceting.
@@ -205,14 +205,14 @@ plot_hisafe_monthcells <- function(hop,
     coord_equal() +
     theme_hisafe_tile()
 
-  return(plot.obj)
+  invisible(plot.obj)
 }
 
 
 #' Tile plot of Hi-sAFe cells output variable
 #' @description Plots a tile plot of a single Hi-sAFe cells output variable.
 #' SimulationName is used as the column facet. Date is used as the row facet.
-#' @return A ggplot object.
+#' @return Invisibly returns a ggplot object.
 #' @param hop An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
 #' @param variable A character string of the name of the variable to color the tiles.
 #' @param dates A character vector containing the dates (yyyy-mm-dd) to include.
@@ -290,14 +290,14 @@ plot_hisafe_cells <- function(hop, variable, dates) {
     coord_equal() +
     theme_hisafe_tile()
 
-  return(plot.obj)
+  invisible(plot.obj)
 }
 
 
 #' Tile plot of Hi-sAFe voxels output variable
 #' @description Plots a tile plot of a single Hi-sAFe voxels output variable.
 #' If a single date is provided, SimulationName is used as the column facet. Otherwise, Date is used as the column facet.
-#' @return A ggplot object.
+#' @return Invisibly returns ggplot object.
 #' @param hop An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
 #' @param variable A character string of the name of the variable to color the tiles.
 #' @param dates A character vector containing the dates (yyyy-mm-dd) to include.
@@ -374,5 +374,5 @@ plot_hisafe_voxels <- function(hop, variable, dates) {
     coord_equal() +
     theme_hisafe_tile()
 
-  return(plot.obj)
+  invisible(plot.obj)
 }

@@ -28,5 +28,6 @@ myexp <- define_hisafe_file("./data/example_exp.csv")
 }
 }
 \seealso{
-Other hisafe definition functions: \code{\link{define_hisafe}}
+Other hisafe definition functions: \code{\link{define_hisafe}},
+  \code{\link{hisafe_params}}
 }

@@ -24,7 +24,7 @@ plot_hisafe_monthcells(hop, variable, rowfacet = "SimulationName",
 \item{months}{A numeric vector containing the months to include. Use "all" to include all available values.}
 }
 \value{
-A ggplot object.
+Invisibly returns a ggplot object.
 }
 \description{
 Plots a tile plot of a single Hi-sAFe monthCells output variable.

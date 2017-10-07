@@ -13,7 +13,7 @@ diag_hisafe_monthcells(data, output.path = "./diagnostics")
 saved in a subdirectory within this directory named /monthCells/facetScheme.}
 }
 \value{
-A list of \code{ggplot} objects is invisibly returned, grouped into two sublists based on the faceting scheme.
+Invisibly returns a list of \code{ggplot} objects, grouped into two sublists based on the faceting scheme.
 The first sublist contains  Year~SimulationName, and the second contains Month~SimulationName.
 }
 \description{

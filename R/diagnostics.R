@@ -1,7 +1,7 @@
 #' Plot timeseries diagnostics of Hi-sAFe output
 #' @description Plots a daily or annual timeseries of every Hi-sAFe output variable. All plots are saved as
 #' png files to a specifified output path.
-#' @return A list of \code{ggplot} objects is invisibly returned. If the data is of class \code{hop-group} and contains
+#' @return Invisibly returns a list of \code{ggplot} objects. If the data is of class \code{hop-group} and contains
 #' data from more than one Hi-sAFe simulation, the plots will contain multiple lines, colored and labeled by SimulationName.
 #' If the data contains two more tree ids, the plots will be faceted by tree id.
 #' @param data An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
@@ -76,7 +76,7 @@ diag_hisafe_ts <- function(data,
 #' Year~SimulationName plots are for Month==6, every 5 years from 0:max, and all simulations.
 #' Month~SimulationName plots are for Year==median, all 12 months, and all simulations.
 #' Month~Year plots are for all 12 months and every 5 years from 0:max, with each simulation in its own plot.
-#' @return A list of \code{ggplot} objects is invisibly returned, grouped into two sublists based on the faceting scheme.
+#' @return Invisibly returns a list of \code{ggplot} objects, grouped into two sublists based on the faceting scheme.
 #' The first sublist contains  Year~SimulationName, and the second contains Month~SimulationName.
 #' @param data An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
 #' @param output.path A character stting indicating the path to the directory where plots should be saved. Plots are

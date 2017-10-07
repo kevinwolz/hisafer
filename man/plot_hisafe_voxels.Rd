@@ -14,7 +14,7 @@ plot_hisafe_voxels(hop, variable, dates)
 \item{dates}{A character vector containing the dates (yyyy-mm-dd) to include.}
 }
 \value{
-A ggplot object.
+Invisibly returns ggplot object.
 }
 \description{
 Plots a tile plot of a single Hi-sAFe voxels output variable.

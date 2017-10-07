@@ -23,7 +23,7 @@ If no input, the full available time range is plotted. Use \code{NA} to refer to
 \item{tree.id}{A numeric vector indicating the ids of a subset of tree ids to plot. If no input, all trees will be plotted.}
 }
 \value{
-A list of \code{ggplot} objects is invisibly returned. If the data is of class \code{hop-group} and contains
+Invisibly returns a list of \code{ggplot} objects. If the data is of class \code{hop-group} and contains
 data from more than one Hi-sAFe simulation, the plots will contain multiple lines, colored and labeled by SimulationName.
 If the data contains two more tree ids, the plots will be faceted by tree id.
 }
