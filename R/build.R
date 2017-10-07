@@ -49,7 +49,7 @@ build_hisafe <- function(hip,
   build_sim(hip, sim.path, export.profiles, saveProjectOption)
 
   ## Move weather file if one was provided
-  if(!is.na(hip$weatherFile[1])) file.copy(hip$weatherFile[1], paste0(sim.path, "/weather/weather.wth"), overwrite = TRUE)
+  if(hip$weatherFile[1] != "default") file.copy(hip$weatherFile[1], paste0(sim.path, "/weather/weather.wth"), overwrite = TRUE)
 
   ## Copy required .tec files to itk
   required.tecs <- paste0(HISAFE.LIBRARY, c(plan$Crop[1], plan$LeaveAreaCrop[1]), ".tec")
@@ -115,7 +115,7 @@ build_sim <- function(plan, path, export.profiles, saveProjectOption) {
   sim[12] <- paste0("treeCropDistance = ",    plan$treeCropDistance[1])
   sim[13] <- paste0("weededAreaRadius = ",    plan$weededAreaRadius[1])
 
-  sim[16] <- paste0("weatherFile = ",         plan$weatherFile[1])
+  sim[16] <- "weatherFile = weather.wth"
 
   sim[19] <- paste0("profileNames = ",        paste0(SUPPORTED.PROFILES$profiles[SUPPORTED.PROFILES$profiles %in% export.profiles], collapse = ", "))
   sim[20] <- paste0("exportFrequencies = ",   paste0(SUPPORTED.PROFILES$freqs[SUPPORTED.PROFILES$profiles %in% export.profiles], collapse = ", "))

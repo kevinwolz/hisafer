@@ -3,15 +3,14 @@
 #' @return A data frame.
 #' @param file A character string of the path to the file to be read.
 #' @param ... Any other arguements passed to \code{read.table}
-#' @import tidyverse
 read_table_hisafe <- function(file, ...) {
   # using read.table rather readr::read_table because read_table is not working
-  tibble::as.tibble(read.table(file,
-                               header = TRUE,
-                               sep = "\t",
-                               stringsAsFactors = FALSE,
-                               na.strings = c("NA", "error!"), # "error!" is output by HISAFE & causes table merge errors if left
-                               encoding = "latin1", ...))
+  dplyr::as_tibble(read.table(file,
+                              header = TRUE,
+                              sep = "\t",
+                              stringsAsFactors = FALSE,
+                              na.strings = c("NA", "error!"), # "error!" is output by HISAFE & causes table merge errors if left
+                              encoding = "latin1", ...))
 }
 
 #' Read a single Hi-sAFe output profile
@@ -19,7 +18,7 @@ read_table_hisafe <- function(file, ...) {
 #' @return An list of two data frames (tibbles): \code{data} contains the data from the profile; \code{variables} contains the variable descriptions.
 #' @param profile A character string of the path to the profile to be read.
 #' @param read.data If TRUE, data and variable descriptions are read. If FALSE, only variable descriptions are read.
-#' @import tidyverse
+#' @importFrom dplyr %>%
 read_hisafe_output_file <- function(profile, read.data = TRUE){
 
   ## Read raw text & find break between description & data
@@ -32,10 +31,10 @@ read_hisafe_output_file <- function(profile, read.data = TRUE){
   ## Read data
   if (read.data) {
     dat <- read_table_hisafe(profile, skip = end.of.var.list) %>%
-      filter(Year != 0) %>%                               # remove row with Year==0 at the start of every output profile
-      mutate(Date = gsub(pattern = "a.", replacement = "", x = Date, fixed = TRUE)) %>% # is this here to fix an old bug?
-      mutate(Date = lubridate::dmy(Date))                 # convert Date column into date class
-  } else dat <- tibble()                                  # if read.data==F, return empty tibble (i.e. only read variable descriptions)
+      dplyr::filter(Year != 0) %>%                               # remove row with Year==0 at the start of every output profile
+      dplyr::mutate(Date = gsub(pattern = "a.", replacement = "", x = Date, fixed = TRUE)) %>% # is this here to fix an old bug?
+      dplyr::mutate(Date = lubridate::dmy(Date))                 # convert Date column into date class
+  } else dat <- dplyr::tibble()                                  # if read.data==F, return empty tibble (i.e. only read variable descriptions)
 
   return(list(data = dat, variables = variables))
 }
@@ -50,7 +49,7 @@ read_hisafe_output_file <- function(profile, read.data = TRUE){
 #' @param allow.missing If \code{TRUE}, does not produce error when profiles specified by \code{profiles} are not found in the output path.
 #' It is highly discouraged to change this from the default of \code{FALSE} unless there are specific profiles intentionally missing from some simulations.
 #' @export
-#' @import tidyverse
+#' @importFrom dplyr %>%
 #' @examples
 #' \dontrun{
 #' # After reading in Hi-sAFe simulation data via:
@@ -99,17 +98,17 @@ read_hisafe <- function(simu.name,
 
       ## Extract & tidy data
       dat.data <- dat.list %>%
-        purrr::map(1) %>%                      # extract first element (data) of each profile
-        reduce(full_join, by = join.cols) %>%  # bind all variable descriptions togeter
-        mutate_if(is.logical, as.numeric)      # columns read as logical must be coered to numeric to prevent plotting errors
+        purrr::map(1) %>%                                    # extract first element (data) of each profile
+        purrr::reduce(dplyr::full_join, by = join.cols) %>%  # bind all variable descriptions togeter
+        dplyr::mutate_if(is.logical, as.numeric)             # columns read as logical must be coered to numeric to prevent plotting errors
 
       ## Extract & tidy variable definitions
       dat.variables <- dat.list %>%
-        purrr::map(2) %>%                      # extract second element (variable descriptions) of each profile
-        bind_rows() %>%                        # bind all variable descriptions togeter
-        mutate(VariableClass = time.class)     # add a column that indicates which data class the variable definition is from
+        purrr::map(2) %>%                              # extract second element (variable descriptions) of each profile
+        dplyr::bind_rows() %>%                         # bind all variable descriptions togeter
+        dplyr::mutate(VariableClass = time.class)      # add a column that indicates which data class the variable definition is from
     } else {
-      dat.data <- dat.variables <- tibble()    # if no profiles were requested from this data class, return empty tibbles
+      dat.data <- dat.variables <- dplyr::tibble()    # if no profiles were requested from this data class, return empty tibbles
     }
     return(list(data = dat.data, variables = dat.variables))
   }
@@ -131,9 +130,9 @@ read_hisafe <- function(simu.name,
   if(length(monthCells.profiles) >= 1) {
     monthCells.list <-      purrr::map(monthCells.profiles, function(x) read_hisafe_output_file(paste0(file.prefix, x, ".txt" )))
     monthCells.data <-      monthCells.list[[1]]$data
-    monthCells.variables <- monthCells.list[[1]]$variables %>% mutate(VariableClass = "monthCells")
+    monthCells.variables <- monthCells.list[[1]]$variables %>% dplyr::mutate(VariableClass = "monthCells")
   } else {
-    monthCells.data <- monthCells.variables <- tibble()
+    monthCells.data <- monthCells.variables <- dplyr::tibble()
   }
 
   ## Read cells data & associated variables
@@ -141,9 +140,9 @@ read_hisafe <- function(simu.name,
   if(length(cells.profiles) >= 1) {
     cells.list <-      purrr::map(cells.profiles, function(x) read_hisafe_output_file(paste0(file.prefix, x, ".txt" )))
     cells.data <-      cells.list[[1]]$data
-    cells.variables <- cells.list[[1]]$variables %>% mutate(VariableClass = "cells")
+    cells.variables <- cells.list[[1]]$variables %>% dplyr::mutate(VariableClass = "cells")
   } else {
-    cells.data <- cells.variables <- tibble()
+    cells.data <- cells.variables <- dplyr::tibble()
   }
 
   ## Read cells data & associated variables
@@ -151,17 +150,17 @@ read_hisafe <- function(simu.name,
   if(length(voxels.profiles) >= 1) {
     voxels.list <-      purrr::map(voxels.profiles, function(x) read_hisafe_output_file(paste0(file.prefix, x, ".txt" )))
     voxels.data <-      voxels.list[[1]]$data
-    voxels.variables <- voxels.list[[1]]$variables %>% mutate(VariableClass = "voxels")
+    voxels.variables <- voxels.list[[1]]$variables %>% dplyr::mutate(VariableClass = "voxels")
   } else {
-    voxels.data <- voxels.variables <- tibble()
+    voxels.data <- voxels.variables <- dplyr::tibble()
   }
 
   ## Combine variables into one tibble, remove duplicates, rename col headers in English
-  variables <- distinct(bind_rows(annual.variables,
-                                  daily.variables,
-                                  monthCells.variables,
-                                  cells.variables,
-                                  voxels.variables))
+  variables <- distinctdistinct(dplyr::bind_rows(annual.variables,
+                                                 daily.variables,
+                                                 monthCells.variables,
+                                                 cells.variables,
+                                                 voxels.variables))
   names(variables) <- c("Subject", "SubjectId", "VariableName", "Units", "Description", "VariableClass")
 
   ## Creat output list & assign class
@@ -188,7 +187,7 @@ read_hisafe <- function(simu.name,
 #' @param allow.missing If \code{TRUE}, does not produce error when profiles specified by \code{profiles} are not found in the output path.
 #' It is highly discouraged to change this from the default of \code{FALSE} unless there are specific profiles intentionally missing from some simulations.
 #' @export
-#' @import tidyverse
+#' @importFrom dplyr %>%
 #' @examples
 #' \dontrun{
 #' # After reading in Hi-sAFe simulation data via:
@@ -204,7 +203,7 @@ read_hisafe_group <- function(exp.plan,
 
   ## Read all data from all simulations & combine
   data <- purrr::map(exp.plan$SimulationName, read_hisafe, path = path, profiles = profiles, allow.missing = allow.missing) %>%
-    purrr::pmap(bind_rows) # a more generic version of this line that handles cases where the number
+    purrr::pmap(dplyr::bind_rows) # a more generic version of this line that handles cases where the number
   # of elements and order of names in each sublist can vary is:
   # purrr::map(map_df(data, ~ as.data.frame(purrr::map(.x, ~ unname(nest(.))))), bind_rows)
   # However, this isn't necessary becasue read_hisafe_output always produces
@@ -212,21 +211,21 @@ read_hisafe_group <- function(exp.plan,
 
   ## Tidy up data
   data_tidy <- function(x){
-    left_join(exp.plan, x, by = "SimulationName") %>%   # add exp.plan cols to annual data
-      mutate_at(names(exp.plan), factor) %>%            # make exp.plan cols factors
-      group_by(SimulationName)                          # group annual data by simulaton
+    dplyr:left_join(exp.plan, x, by = "SimulationName") %>%   # add exp.plan cols to annual data
+      dplyr::mutate_at(names(exp.plan), factor) %>%            # make exp.plan cols factors
+      dplyr::group_by(SimulationName)                          # group annual data by simulaton
   }
   if(ncol(data$annual) > 0) data$annual <- data_tidy(data$annual)
   if(ncol(data$daily)  > 0) data$daily  <- data_tidy(data$daily)
   if(ncol(data$cells)  > 0) data$cells  <- data_tidy(data$cells)
   if(ncol(data$voxels) > 0) data$voxels <- data_tidy(data$voxels)
-  data$variables <- distinct(data$variables)            # remove duplicate variable descriptions
-  data$exp.plan  <- mutate_all(exp.plan, factor)        # make all columns factors
+  data$variables <- dplyr:distinct(data$variables)            # remove duplicate variable descriptions
+  data$exp.plan  <- dplyr:mutate_all(exp.plan, factor)        # make all columns factors
 
   ## Warn if lengths of all simulations are not equal
-  year.summary <- data[[as.numeric(which.max(map_int(data, ncol)))]] %>%
-    summarize(n = n_distinct(Year)) %>%
-    unite(label, SimulationName, n, sep = ": ", remove = FALSE)
+  year.summary <- data[[as.numeric(which.max(purrr::map_int(data, ncol)))]] %>%
+    dplyr::summarize(n = dplyr::n_distinct(Year)) %>%
+    tidyr::unite(label, SimulationName, n, sep = ": ", remove = FALSE)
   if(length(unique(year.summary$n)) != 1) {
     year.length.warning <- paste(c("Simulation lengths not equal!",
                                    "Be careful when comparing simulations.",

@@ -11,7 +11,7 @@
 #' @param ... Any suported Hi-sAFe input parameter in the .sim and .pld files can be passed.
 #' Parameters should be passed as \code{parameterName = values}. For more information on supported parameters, see _____.
 #' @export
-#' @import tidyverse
+#' @importFrom dplyr %>%
 #' @family hisafe definition functions
 #' @examples
 #' \dontrun{
@@ -31,8 +31,8 @@
 define_hisafe <- function(factorial = FALSE, ...) {
 
   # FOR TESTING
-  # tmpfun <- function(SimulationName, ...){ c(list(SimulationName = SimulationName), list(...)) }
-  # arg.list <- tmpfun("myrun", latitude = 100, spacingWithinRows = 50, cellWidth = -1, rootShape = 4)
+  # tmpfun <- function(...){ list(...) }
+  # arg.list <- tmpfun(SimulationName = c("my1", "my2"), spacingBetweenRows = c(7,7), spacingWithinRows = c(5,5), cellWidth = 1)
 
   arg.list <- list(...)
 
@@ -42,16 +42,17 @@ define_hisafe <- function(factorial = FALSE, ...) {
   param.list <- c(arg.list, defaults.to.add)
 
   if(factorial) {
-    hip <- tibble::as.tibble(expand.grid(param.list, stringsAsFactors = FALSE))
+    hip <- dplyr::as_tibble(expand.grid(param.list, stringsAsFactors = FALSE))
     hip$SimulationName <- paste0(hip$SimulationName, "_", 1:nrow(hip))
   } else {
-    hip <- tibble::as.tibble(as.data.frame(param.list, stringsAsFactors = FALSE))
+    hip <- dplyr::as_tibble(as.data.frame(param.list, stringsAsFactors = FALSE))
+    if(all(unique(hip$SimulationName) == "Sim")) hip$SimulationName <- paste0(hip$SimulationName, "_", 1:nrow(hip))
   }
 
   is.unique <- function(x) { length(unique(x)) != 1 }
-  hip <- bind_cols(hip[,  map_lgl(hip, is.unique)],
-                   hip[, !map_lgl(hip, is.unique)]) %>%
-    select(SimulationName, everything())
+  hip <- dplyr::bind_cols(hip[,  purrr::map_lgl(hip, is.unique)],
+                          hip[, !purrr::map_lgl(hip, is.unique)]) %>%
+    dplyr::select(SimulationName, everything())
 
   check_input_values(hip)
   class(hip) <- c("hip", class(hip))
@@ -67,7 +68,7 @@ define_hisafe <- function(factorial = FALSE, ...) {
 #' Each row in the file should represent a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
 #' For more information on supported parameters, see _____.
 #' @export
-#' @import tidyverse
+#' @importFrom dplyr %>%
 #' @family hisafe definition functions
 #' @examples
 #' \dontrun{
@@ -76,10 +77,10 @@ define_hisafe <- function(factorial = FALSE, ...) {
 #' }
 define_hisafe_file <- function(file) {
 
-  provided <- tibble::as.tibble(read.csv(file, header = TRUE, stringsAsFactors = FALSE))
+  provided <- dplyr::as_tibble(read.csv(file, header = TRUE, stringsAsFactors = FALSE))
 
-  default.params <- purrr::map(HISAFE.PARAMS, ~ .x[["default"]])
-  defaults.to.add <- tibble::as.tibble(default.params[which(!(names(default.params) %in% names(provided)))])
+  default.params  <- purrr::map(HISAFE.PARAMS, ~ .x[["default"]])
+  defaults.to.add <- dplyr::as_tibble(default.params[which(!(names(default.params) %in% names(provided)))])
   defaults.to.add <- defaults.to.add[rep(1,nrow(provided)),]
 
   hip <- dplyr::bind_cols(provided, defaults.to.add)
@@ -87,8 +88,9 @@ define_hisafe_file <- function(file) {
   if(length(unique(hip$SimulationName)) == 1) hip$SimulationName <- paste0(hip$SimulationName, "_", 1:nrow(hip))
 
   is.unique <- function(x) { length(unique(x)) != 1 }
-  hip <- bind_cols(hip[, map_lgl(hip, is.unique)], hip[, !map_lgl(hip, is.unique)]) %>%
-    select(SimulationName, everything())
+  hip <- dplyr::bind_cols(hip[,  purrr::map_lgl(hip, is.unique)],
+                          hip[, !purrr::map_lgl(hip, is.unique)]) %>%
+    dplyr::select(SimulationName, everything())
 
   check_input_values(hip)
   class(hip) <- c("hip", class(hip))
@@ -100,13 +102,12 @@ define_hisafe_file <- function(file) {
 #' Used within \code{define_hisafe} and \code{define_hisafe_file}.
 #' @return Produces errors and/or warnings if issues are found. Otherwise, invisibly returns \code{TRUE}.
 #' @param hip An object of class \code{hip}.
-#' @import tidyverse
 check_input_values <- function(hip) {
 
   ## Check for unsupported inputs
   if(any(!(names(hip) %in% names(HISAFE.PARAMS)))) {
     extra.cols <- names(hip)[!(names(hip) %in% names(HISAFE.PARAMS))]
-    extra.message <- paste0(c("The following variables are not supported:", extra.cols), collapse = "\n")
+    extra.message <- c("The following variables are not supported:", paste0(extra.cols, collapse = ", "))
     stop(extra.message, call. = FALSE)
   }
 
@@ -114,14 +115,23 @@ check_input_values <- function(hip) {
   messages <- "Hi-sAFe definition warnings:"
   errors <-   "Hi-sAFe definition errors:"
 
-  allowed.errors <-  purrr::map_chr(names(hip), check_allowed, hip = hip)
-  minmax.errors <-   purrr::map_chr(names(hip), check_minmax, hip = hip)
-  minmax.warnings <- purrr::map_chr(names(hip), check_minmax_sug, hip = hip)
+  hip.no.name <- dplyr::select(hip, -SimulationName)
+  unique.sim.error     <- ifelse(identical(hip.no.name, dplyr::distinct(hip.no.name)),   "", "-- Each simulaton must be distinct.")
+  unique.simname.error <- ifelse(unique(table(hip$SimulationName)) == 1, "", "-- SimulationName - each siulation must have a unique name")
+  btwn.tree.error      <- ifelse(((hip$spacingBetweenRows / hip$cellWidth) %% 2) == 1, "",
+                                 "-- Tree should be centered in a cell. (spacingBetweenRows / cellWidth) should be an odd integer")
+  within.tree.error    <- ifelse(((hip$spacingWithinRows  / hip$cellWidth) %% 2) == 1, "",
+                                 "-- Tree should be centered in a cell. (spacingWithinRows / cellWidth) should be an odd integer")
+  allowed.errors       <- purrr::map_chr(names(hip), check_allowed, hip = hip)
+  minmax.errors        <- purrr::map_chr(names(hip), check_minmax,  hip = hip)
 
-  all.messages <- c(messages, minmax.warnings)
-  all.errors <-   c(errors, allowed.errors, minmax.errors)
+  diff.crop.warning    <- ifelse(any(hip$mainCropSpecies == hip$interCropSpecies), "-- mainCropSpecies & interCropSpecies are typically different", "")
+  minmax.warnings      <- purrr::map_chr(names(hip), check_minmax_sug, hip = hip)
+
+  all.messages <- c(messages, minmax.warnings, diff.crop.warning)
+  all.errors   <- c(errors, unique.sim.error, unique.simname.error, btwn.tree.error, within.tree.error, allowed.errors, minmax.errors)
   all.messages <- paste0(all.messages[!all.messages == ""], collapse = "\n")
-  all.errors <-   paste0(all.errors[!all.errors == ""], collapse = "\n")
+  all.errors   <- paste0(all.errors[!all.errors == ""], collapse = "\n")
 
   if(all.messages != messages) warning(all.messages, call. = FALSE)
   if(all.errors   != errors)   stop(all.errors, call. = FALSE)
@@ -135,14 +145,13 @@ check_input_values <- function(hip) {
 #' @return An error message or empty character stirng.
 #' @param variable A character string of the name of the variable to check.
 #' @param hip An object of class \code{hip}.
-#' @import tidyverse
 check_allowed <- function(variable, hip) {
   allowed.vals <- purrr::map(HISAFE.PARAMS, ~ .x[["allowed"]])[[variable]]
   allowed.pass <- (is.na(allowed.vals[1]) | all(hip[[variable]] %in% allowed.vals))
   if(allowed.pass) {
     return("")
   } else {
-    return(paste0(variable, " - must be one of: ", paste0(allowed.vals, collapse = ", ")))
+    return(paste0("-- ", variable, " - must be one of: ", paste0(allowed.vals, collapse = ", ")))
   }
 }
 
@@ -152,7 +161,6 @@ check_allowed <- function(variable, hip) {
 #' @return An error message or empty character stirng.
 #' @param variable A character string of the name of the variable to check.
 #' @param hip An object of class \code{hip}.
-#' @import tidyverse
 check_minmax <- function(variable, hip) {
   min.val  <- purrr::map(HISAFE.PARAMS, ~ .x[["min"]])[[variable]]
   max.val  <- purrr::map(HISAFE.PARAMS, ~ .x[["max"]])[[variable]]
@@ -161,11 +169,11 @@ check_minmax <- function(variable, hip) {
   if(max.pass & min.pass) {
     return("")
   } else if(!is.na(max.val) & !is.na(min.val)) {
-    return(paste0(variable, " - must be betwen ", min.val, " and ", max.val))
+    return(paste0("-- ", variable, " - must be betwen ", min.val, " and ", max.val))
   } else if(is.na(max.val) & !is.na(min.val)) {
-    return(paste0(variable, " - must be greater than ", min.val))
+    return(paste0("-- ", variable, " - must be greater than ", min.val))
   } else if(!is.na(max.val) & is.na(min.val)) {
-    return(paste0(variable, " - must be less than ", max.val))
+    return(paste0("-- ", variable, " - must be less than ", max.val))
   }
 }
 
@@ -175,7 +183,6 @@ check_minmax <- function(variable, hip) {
 #' @return A warning message or empty character stirng.
 #' @param variable A character string of the name of the variable to check.
 #' @param hip An object of class \code{hip}.
-#' @import tidyverse
 check_minmax_sug <- function(variable, hip) {
   min.sug.val <- purrr::map(HISAFE.PARAMS, ~ .x[["min.sug"]])[[variable]]
   max.sug.val <- purrr::map(HISAFE.PARAMS, ~ .x[["max.sug"]])[[variable]]
@@ -184,10 +191,10 @@ check_minmax_sug <- function(variable, hip) {
   if(max.pass & min.pass) {
     return("")
   } else if(!is.na(max.sug.val) & !is.na(min.sug.val)) {
-    return(paste0(variable, " - is typically betwen ", min.sug.val, " and ", max.sug.val))
+    return(paste0("-- ", variable, " - is typically betwen ", min.sug.val, " and ", max.sug.val))
   } else if(is.na(max.sug.val) & !is.na(min.sug.val)) {
-    return(paste0(variable, " - is typically greater than ", min.sug.val))
+    return(paste0("-- ", variable, " - is typically greater than ", min.sug.val))
   } else if(!is.na(max.sug.val) & is.na(min.sug.val)) {
-    return(paste0(variable, " - is typically less than ", max.sug.val))
+    return(paste0("-- ", variable, " - is typically less than ", max.sug.val))
   }
 }

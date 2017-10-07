@@ -14,7 +14,7 @@
 #' If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.
 #' @param tree.id A numeric vector indicating the ids of a subset of tree ids to plot. If no input, all trees will be plotted.
 #' @export
-#' @import tidyverse
+#' @importFrom dplyr %>%
 #' @family hisafe diagnostic fucntions
 #' @examples
 #' \dontrun{
@@ -47,10 +47,10 @@ diag_hisafe_ts <- function(data,
   ## Clean columns & extract names of variables to plot
   # cols with only "error!" output are all NA's and cause plot errors
   if(time.class == "annual") {
-    data$annual <- data$annual %>% select_if(~sum(!is.na(.)) > 0)
+    data$annual <- data$annual %>% dplyr::select_if(~sum(!is.na(.)) > 0)
     var.names   <- names(data$annual)[(which(names(data$annual) == "id") + 1):length(names(data$annual))]
   } else {
-    data$daily  <- data$daily %>% select_if(~sum(!is.na(.)) > 0)
+    data$daily  <- data$daily %>% dplyr::select_if(~sum(!is.na(.)) > 0)
     var.names   <- names(data$daily)[(which(names(data$daily) == "id") + 1):length(names(data$daily))]
   }
 
@@ -63,7 +63,7 @@ diag_hisafe_ts <- function(data,
 
   ## Write plots to disk
   file.names <- paste0(time.class, "_", var.names, ".png")
-  pwalk(list(file.names, plot.list), ggsave, path = ts.path, width = 7, height = 7)
+  purrr::pwalk(list(file.names, plot.list), ggplot2::ggsave, path = ts.path, width = 7, height = 7)
 
   ## Invisibly return list of plot objects
   invisible(plot.list)
@@ -82,7 +82,7 @@ diag_hisafe_ts <- function(data,
 #' @param output.path A character stting indicating the path to the directory where plots should be saved. Plots are
 #' saved in a subdirectory within this directory named /monthCells/facetScheme.
 #' @export
-#' @import tidyverse
+#' @importFrom dplyr %>%
 #' @family hisafe diagnostic fucntions
 #' @examples
 #' \dontrun{
@@ -105,7 +105,7 @@ diag_hisafe_monthcells <- function(data, output.path = "./diagnostics") {
 
   ## Clean columns & extract names of variables to plot
   # cols with only "error!" output are all NA's and cause plot errors
-  data$monthCells <- data$monthCells %>% select_if(~sum(!is.na(.)) > 0)
+  data$monthCells <- data$monthCells %>% dplyr::select_if(~sum(!is.na(.)) > 0)
   var.names       <- names(data$monthCells)[(which(names(data$monthCells) == "cropSpeciesName") + 1):length(names(data$monthCells))]
 
   ## Create plots
@@ -117,7 +117,7 @@ diag_hisafe_monthcells <- function(data, output.path = "./diagnostics") {
                            years     = seq(0, (max(data$monthCells$Year) - min(data$monthCells$Year)), 5),
                            months    = 6)
   file.names <- paste0("monthCells_year_simname_", var.names, ".png")
-  pwalk(list(file.names, plot.list1), ggsave, path = plot.dirs[1], scale = 2, width = 10, height = 10)
+  purrr::pwalk(list(file.names, plot.list1), ggplot2::ggsave, path = plot.dirs[1], scale = 2, width = 10, height = 10)
 
   plot.list2 <- purrr::map(var.names, plot_hisafe_monthcells,
                            data      = data,
@@ -127,7 +127,7 @@ diag_hisafe_monthcells <- function(data, output.path = "./diagnostics") {
                            years     = (round(median(data$monthCells$Year),0) - min(data$monthCells$Year)),
                            months    = 1:12)
   file.names <- paste0("monthCells_month_simname_", var.names, ".png")
-  pwalk(list(file.names, plot.list2), ggsave, path = plot.dirs[2], scale = 2, height = 10, width = 10)
+  purrr::pwalk(list(file.names, plot.list2), ggplot2::ggsave, path = plot.dirs[2], scale = 2, height = 10, width = 10)
 
   plot.list3.tog <- list()
   for(sim.name in unique(data$monthCells$SimulationName)){
@@ -139,7 +139,7 @@ diag_hisafe_monthcells <- function(data, output.path = "./diagnostics") {
                              years     = seq(0, (max(data$monthCells$Year) - min(data$monthCells$Year)), 5),
                              months    = 1:12)
     file.names <- paste0("monthCells_month_year_", sim.name, "_", var.names, ".png")
-    pwalk(list(file.names, plot.list3), ggsave, path = plot.dirs[3], scale = 2, height = 10, width = 10)
+    purrr::pwalk(list(file.names, plot.list3), ggplot2::ggsave, path = plot.dirs[3], scale = 2, height = 10, width = 10)
     plot.list3.tog <- c(plot.list3.tog, plot.list3)
   }
 

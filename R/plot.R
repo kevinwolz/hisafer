@@ -12,7 +12,8 @@
 #' If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.
 #' @param tree.id A numeric vector indicating the ids of a subset of tree ids to plot. If no input, all trees will be plotted.
 #' @export
-#' @import tidyverse
+#' @importFrom dplyr %>%
+#' @import ggplot2
 #' @family hisafe plot functions
 #' @examples
 #' \dontrun{
@@ -45,20 +46,20 @@ plot_hisafe_ts <- function(hop,
 
   ## Exract units of supplied variable from the "variables" slot
   var.unit <- hop$variables %>%
-    filter(VariableClass == time.class, VariableName == variable) %>%
+    dplyr::filter(VariableClass == time.class, VariableName == variable) %>%
     .$Units %>%
-    stringr::str_replace("\\.", " ")
+    gsub(pattern = "\\.", replacement = " ")
 
   ## Create time.class-specific x aesthetic, axis label, plot theme, and time.lim filter
   if(time.class == "annual"){
     x.var      <- "Year"
     x.label    <- "Years after establishment"
-    plot.data  <- hop$annual %>% mutate(Year = Year - min(Year) + 1) # Create 0+ year values
+    plot.data  <- hop$annual %>% dplyr::mutate(Year = Year - min(Year) + 1) # Create 0+ year values
     scale_x_ts <- scale_x_continuous(sec.axis = sec_axis(~ ., labels = NULL))
     if(!is.null(time.lim)) {
       if(is.na(time.lim[1])) { time.lim[1] <- min(plot.data$Year) }
       if(is.na(time.lim[2])) { time.lim[2] <- max(plot.data$Year) }
-      plot.data <- plot.data %>% filter(Year %in% (time.lim[1]:time.lim[2]))
+      plot.data <- plot.data %>% dplyr::filter(Year %in% (time.lim[1]:time.lim[2]))
     }
   } else {
     x.var      <- "Date"
@@ -69,20 +70,20 @@ plot_hisafe_ts <- function(hop,
       time.lim <- lubridate::ymd(time.lim)
       if(is.na(time.lim[1])) { time.lim[1] <- min(plot.data$Date) }
       if(is.na(time.lim[2])) { time.lim[2] <- max(plot.data$Date) }
-      plot.data <- plot.data %>% filter(Date >= time.lim[1], Date <= time.lim[2])
+      plot.data <- plot.data %>% dplyr::filter(Date >= time.lim[1], Date <= time.lim[2])
     }
   }
 
   ## Filter by supplied tree.id
   if(!is.null(tree.id)) {
-    plot.data <- plot.data %>% filter(id %in% tree.id)
+    plot.data <- plot.data %>% dplyr::filter(id %in% tree.id)
   }
 
   ## If number of trees in scene is > 1, then facet by tree id
   if(length(unique(plot.data$id)) == 1) {
     facet_annual <- geom_blank()
   } else {
-    plot.data <- plot.data %>% mutate(id = paste("Tree", id))
+    plot.data <- plot.data %>% dplyr::mutate(id = paste("Tree", id))
     facet_annual <- facet_wrap(~id, nrow = 1)
   }
 
@@ -120,7 +121,8 @@ plot_hisafe_ts <- function(hop,
 #' @param years A numeric vector containing the years to include. Use "all" to include all available values.
 #' @param months A numeric vector containing the months to include. Use "all" to include all available values.
 #' @export
-#' @import tidyverse
+#' @importFrom dplyr %>%
+#' @import ggplot2
 #' @family hisafe plot functions
 #' @examples
 #' \dontrun{
@@ -169,20 +171,20 @@ plot_hisafe_monthcells <- function(hop,
 
   ## Exract units of supplied variable from the "variables" slot
   var.unit <- hop$variables %>%
-    filter(VariableClass == "monthCells", VariableName == variable) %>%
+    dplyr::filter(VariableClass == "monthCells", VariableName == variable) %>%
     .$Units %>%
     gsub(pattern = "\\.", replacement = " ")
 
   ## Filter for provided sim.names, years & months
   plot.data <- hop$monthCells %>%
-    mutate(Year = Year - min(Year) + 1) %>% # Create 0+ year values
-    filter(SimulationName %in% sim.names) %>%
-    filter(Year %in% years) %>%
-    filter(Month %in% months)
+    dplyr::mutate(Year = Year - min(Year) + 1) %>% # Create 0+ year values
+    dplyr::filter(SimulationName %in% sim.names) %>%
+    dplyr::filter(Year %in% years) %>%
+    dplyr::filter(Month %in% months)
 
   ## Find tree locations for each simulation
   tree.locations <- plot.data %>%
-    summarize(x = median(x), y = median(y))
+    dplyr::summarize(x = median(x), y = median(y))
 
   ## Create plot
   plot.obj <- ggplot(plot.data, aes(x = x, y = y)) +
@@ -215,7 +217,8 @@ plot_hisafe_monthcells <- function(hop,
 #' @param variable A character string of the name of the variable to color the tiles.
 #' @param dates A character vector containing the dates (yyyy-mm-dd) to include.
 #' @export
-#' @import tidyverse
+#' @importFrom dplyr %>%
+#' @import ggplot2
 #' @family hisafe plot functions
 #' @examples
 #' \dontrun{
@@ -237,17 +240,17 @@ plot_hisafe_cells <- function(hop, variable, dates) {
 
   ## Exract units of supplied variable from the "variables" slot
   var.unit <- hop$variables %>%
-    filter(VariableClass == "cells", VariableName == variable) %>%
+    dplyr::filter(VariableClass == "cells", VariableName == variable) %>%
     .$Units %>%
     gsub(pattern = "\\.", replacement = " ")
 
   ## Filter for provided dates
   plot.data <- hop$cells %>%
-    filter(Date %in% ymd(dates))
+    dplyr::filter(Date %in% lubridate::ymd(dates))
 
   ## Find tree locations for each simulation
   tree.locations <- plot.data %>%
-    summarize(x = median(x), y = median(y))
+    dplyr::summarize(x = median(x), y = median(y))
 
   ## Determine faceting & axis labels
   if("hop-group" %in% class(hop) & length(dates) > 1){
@@ -299,7 +302,8 @@ plot_hisafe_cells <- function(hop, variable, dates) {
 #' @param variable A character string of the name of the variable to color the tiles.
 #' @param dates A character vector containing the dates (yyyy-mm-dd) to include.
 #' @export
-#' @import tidyverse
+#' @importFrom dplyr %>%
+#' @import ggplot2
 #' @family hisafe plot functions
 #' @examples
 #' \dontrun{
@@ -323,27 +327,27 @@ plot_hisafe_voxels <- function(hop, variable, dates) {
 
   ## Exract units of supplied variable from the "variables" slot
   var.unit <- hop$variables %>%
-    filter(VariableClass == "voxels", VariableName == variable) %>%
+    dplyr::filter(VariableClass == "voxels", VariableName == variable) %>%
     .$Units %>%
     gsub(pattern = "\\.", replacement = " ")
 
   ## Filter for provided dates
   plot.data <- hop$voxels %>%
-    filter(Date %in% ymd(dates))
+    dplyr::filter(Date %in% ymd(dates))
 
   ## Find tree locations for each simulation
   tree.locations <- plot.data %>%
-    summarize(x = median(x), y = median(y))
+    dplyr::summarize(x = median(x), y = median(y))
 
   ## Determine faceting & axis labels
   if("hop-group" %in% class(hop) & length(dates) == 1){
     facet_voxels <- facet_grid(z ~ SimulationName, switch = "both")
     x.lab        <- "SimulationName"
-    title.lab    <- paste0(variable, " (", ymd(dates), ")")
+    title.lab    <- paste0(variable, " (", lubridate::ymd(dates), ")")
   } else if(length(dates) == 1) {
     facet_voxels <- facet_wrap(~z, ncol = 1)
     x.lab        <- ""
-    title.lab    <- paste0(variable, " (", ymd(dates), ")")
+    title.lab    <- paste0(variable, " (", lubridate::ymd(dates), ")")
   } else {
     facet_voxels <- facet_grid(z ~ Date, switch = "both")
     x.lab        <- "Date"

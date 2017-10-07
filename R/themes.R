@@ -2,7 +2,7 @@
 #' @description The default ggplot2 theme for Hi-sAFe timeseries plots.
 #' @return A ggplot modifier object containing the theme.
 #' @param base_size A number indicating the base \code{ggplot} text size.
-#' @import tidyverse
+#' @import ggplot2
 theme_hisafe_ts <- function(base_size = 18) {
   thm <- theme_bw(base_size = base_size) %+%
     theme(
@@ -34,7 +34,7 @@ theme_hisafe_ts <- function(base_size = 18) {
 #' @description The default ggplot2 theme for Hi-sAFe monthCells tile plots.
 #' @return A ggplot modifier object containing the theme.
 #' @param base_size A number indicating the base \code{ggplot} text size.
-#' @import tidyverse
+#' @import ggplot2
 theme_hisafe_tile <- function(base_size = 18) {
   thm <- theme_bw(base_size = base_size) %+%
     theme(

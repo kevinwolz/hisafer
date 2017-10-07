@@ -9,7 +9,10 @@ Description: An R toolbox for the Hi-sAFe biophysical agroforestry model.
     of runs for simulated experiments, (2) calling Hi-sAFe to run simulations, 
     and (3) reading, analyzing, and plotting Hi-sAFe output data.
 Depends: R (>= 3.4.1)
-Imports: tidyverse (>= 1.1.1), 
+Imports: ggplot2 (>= 2.2.1), 
+    dplyr (>= 0.7.3),
+    tidyr (>= 0.7.1),
+    purrr (>= 0.2.3),
     lubridate (>= 1.6.0),
     viridis (>= 0.4.0)
 License: GPL-3

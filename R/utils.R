@@ -1,10 +1,10 @@
 HISAFE.TEMPLATE <- "/Users/wolzy4u/Desktop/RESEARCH/ACTIVE_PROJECTS/HI-SAFE/hisafer/data/hisafe_template/"
-HISAFE.LIBRARY <- "/Users/wolzy4u/Desktop/RESEARCH/ACTIVE_PROJECTS/HI-SAFE/hisafer/data/hisafe_library/"
-SUPPORTED.PROFILES <- tibble::tibble(profiles = c("annualplot", "annualtree", "annualcrop", "plot", "trees", "roots", "cells", "voxels", "climate", "monthCells"),
+HISAFE.LIBRARY  <- "/Users/wolzy4u/Desktop/RESEARCH/ACTIVE_PROJECTS/HI-SAFE/hisafer/data/hisafe_library/"
+SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("annualplot", "annualtree", "annualcrop", "plot", "trees", "roots", "cells", "voxels", "climate", "monthCells"),
                                      freqs    = c(365,          365,          365,          1,      1,       1,       1,        1,       1,         30))
 
-SUPPORTED.TREES <-    c("walnut-hybrid", "poplar", "wild-cherry")
-SUPPORTED.CROPS <-    c("alfalfa", "baresoil", "durum-wheat", "grass", "maize", "rape", "soybean", "weed-restinclieres", "weed", "wheat")
+SUPPORTED.TREES    <- c("walnut-hybrid", "poplar", "wild-cherry")
+SUPPORTED.CROPS    <- c("alfalfa", "baresoil", "durum-wheat", "grass", "maize", "rape", "soybean", "weed-restinclieres", "weed", "wheat")
 SUPPORTED.SYMMETRY <- c("XY", "X", "Y", "NO")
 
 param <- function(default, allowed, min, max, min.sug, max.sug) {
@@ -34,7 +34,7 @@ HISAFE.PARAMS <- list(
     interCropSpecies          = param( "weed-restinclieres", SUPPORTED.CROPS,    NA,    NA,    NA,      NA),
     treeCropDistance          = param( 0.5,                  NA,                 0,     NA,    0.5,     3),
     weededAreaRadius          = param( 0,                    NA,                 0,     NA,    NA,      2),
-    weatherFile               = param( NA,                   NA,                 NA,    NA,    NA,      NA),
+    weatherFile               = param( "default",            NA,                 NA,    NA,    NA,      NA),
     toricSymmetry             = param( "XY",                 SUPPORTED.SYMMETRY, NA,    NA,    NA,      NA),   # special def
     treePruningFreq           = param( 2,                    NA,                 0,     NA,    1,       3),    # special def
     treePruningProp           = param( 0.3,                  NA,                 0,     1,     0.25,    0.5),
