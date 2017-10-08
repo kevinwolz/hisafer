@@ -42,7 +42,7 @@ HISAFE.PARAMS <- list(
   treePruningFreq           = param( 2,                    NA,                 0,     NA,    1,       3),    # special def
   treePruningProp           = param( 0.3,                  NA,                 0,     1,     0.25,    0.5),
   treePruningMaxHeight      = param( 4,                    NA,                 0,     NA,    2,       5),
-  treeRootPruningFreq       = param( 0,                    NA,                 0,     NA,    1,       3),    # special def
+  treeRootPruningFreq       = param( 0,                    NA,                 0,     NA,    0,       3),    # special def
   treeRootPruningDistance   = param( 0.5,                  NA,                 NA,    NA,    0.5,     2),
   treeRootPruningDepth      = param( 0,                    NA,                 0,     NA,    NA,      2)
 )

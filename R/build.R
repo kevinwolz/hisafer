@@ -36,7 +36,7 @@ build_hisafe_exp <- function(hip,
   make_hip <- function(x) {
     class(x) <- c("hip", class(x))
     return(x)
-    }
+  }
   hip.list <- as.list(hip) %>%
     purrr::pmap(list) %>% # solution from: https://rpubs.com/wch/200398
     purrr::map(tibble::as_tibble) %>%
@@ -192,19 +192,23 @@ build_sim <- function(plan, path, profiles, saveProjectOption) {
     sim[26] <- paste0("toreYn = 0")
   }
 
-  tree.prune.years   <- seq(1, nyears, plan$treePruningFreq)
-  n.tree.prune.years <- length(tree.prune.years)
-  sim[29] <- paste0("treePruningYears = ",     paste0(tree.prune.years, collapse=","))
-  sim[30] <- paste0("treePruningProp = ",      paste0(rep(plan$treePruningProp, n.tree.prune.years), collapse=","))
-  sim[31] <- paste0("treePruningMaxHeight = ", paste0(rep(plan$treePruningMaxHeight, n.tree.prune.years), collapse=","))
-  sim[32] <- paste0("treePruningDays = ",      paste0(rep(365, n.tree.prune.years), collapse=","))
+  if(plan$treePruningFreq > 0) {
+    tree.prune.years   <- seq(1, nyears, plan$treePruningFreq)
+    n.tree.prune.years <- length(tree.prune.years)
+    sim[29] <- paste0("treePruningYears = ",     paste0(tree.prune.years, collapse=","))
+    sim[30] <- paste0("treePruningProp = ",      paste0(rep(plan$treePruningProp, n.tree.prune.years), collapse=","))
+    sim[31] <- paste0("treePruningMaxHeight = ", paste0(rep(plan$treePruningMaxHeight, n.tree.prune.years), collapse=","))
+    sim[32] <- paste0("treePruningDays = ",      paste0(rep(365, n.tree.prune.years), collapse=","))
+  }
 
-  root.prune.years   <- seq(1, nyears, plan$treeRootPruningFreq)
-  n.root.prune.years <- length(root.prune.years)
-  sim[40] <- paste0("treeRootPruningYears = ",    paste0(root.prune.years, collapse=","))
-  sim[41] <- paste0("treeRootPruningDays = ",     paste0(rep(365, n.root.prune.years), collapse=","))
-  sim[42] <- paste0("treeRootPruningDistance = ", paste0(rep(plan$treeRootPruningDistance, n.root.prune.years), collapse=","))
-  sim[43] <- paste0("treeRootPruningDepth = ",    paste0(rep(plan$treeRootPruningDepth, n.root.prune.years), collapse=","))
+  if(plan$treeRootPruningFreq > 0) {
+    root.prune.years   <- seq(1, nyears, plan$treeRootPruningFreq)
+    n.root.prune.years <- length(root.prune.years)
+    sim[40] <- paste0("treeRootPruningYears = ",    paste0(root.prune.years, collapse=","))
+    sim[41] <- paste0("treeRootPruningDays = ",     paste0(rep(365, n.root.prune.years), collapse=","))
+    sim[42] <- paste0("treeRootPruningDistance = ", paste0(rep(plan$treeRootPruningDistance, n.root.prune.years), collapse=","))
+    sim[43] <- paste0("treeRootPruningDepth = ",    paste0(rep(plan$treeRootPruningDepth, n.root.prune.years), collapse=","))
+  }
 
   writeLines(sim, sim.file)
   dum <- file.rename(paste0(path, "/template.sim"), paste0(path, "/", plan$SimulationName, ".sim"))
