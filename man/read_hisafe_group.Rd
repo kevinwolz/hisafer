@@ -4,25 +4,27 @@
 \alias{read_hisafe_group}
 \title{Read output from a group of Hi-sAFe simulations}
 \usage{
-read_hisafe_group(exp.plan, path, profiles = "all", allow.missing = FALSE)
+read_hisafe_group(hip = NULL, path = NULL, profiles = "all",
+  allow.missing = FALSE)
 }
 \arguments{
-\item{exp.plan}{A data frame containing the experimental plan used to generate the Hi-sAFe simulations.
-To create an experimental plan, see \code{\link{define_exp}}.}
+\item{hip}{An object of class hip. To create a hip object see \code{\link{define_exp}}.
+If the hip object contains a \code{path} value, then this can be used without providing \code{path} directly to \code{read_hisafe_group}.
+If \code{hip} is not provided, then \code{path} is required and the input data for the experiment is read from the experiment
+summary .csv file created when building the experiment.}
 
 \item{path}{A character string of the path to the directory containing the Hi-sAFe simulation folders
-(which each contain the standard subdirectories with the outputs)}
+(which each contain the standard subdirectories with the outputs).
+If \code{hip} is not provided, then \code{path} is required. If both \code{hip} and \code{path} are provided, \code{path} is used.}
 
 \item{profiles}{A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading all supported Hi-sAFe output profiles via "all".
 Currently supported profiles are: annualplot, annualtree, annualcrop, plot, trees, roots, cells, voxels, climate, monthCells.}
-
-\item{allow.missing}{If \code{TRUE}, does not produce error when profiles specified by \code{profiles} are not found in the output path.
-It is highly discouraged to change this from the default of \code{FALSE} unless there are specific profiles intentionally missing from some simulations.}
 }
 \value{
-An object of class \code{hop-group}. This is a list of 7 data frames (tibbles):
+An object of class \code{hop-group}. This is a list of 9 data frames (tibbles):
 \code{annual} (includes data from annualtree and annualplot profiles), \code{daily} (includes data from trees, plot, and climate profiles),
-\code{monthCells}, \code{cells}, \code{voxels}, and \code{variables} (variable descriptions and units from all profiles).
+\code{monthCells}, \code{cells}, \code{voxels}, \code{variables} (variable descriptions and units from all profiles),
+\code{inputs} (the hip object that generated the simulation), and \code{path} (the path to the simulation folder).
 }
 \description{
 Reads the designated output profiles from a group of Hi-sAFe simulations (i.e. an experiment).

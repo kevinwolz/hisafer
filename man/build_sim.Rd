@@ -4,14 +4,14 @@
 \alias{build_sim}
 \title{Build .sim file for Hi-sAFe simulation}
 \usage{
-build_sim(plan, path, export.profiles, saveProjectOption)
+build_sim(plan, path, profiles, saveProjectOption)
 }
 \arguments{
 \item{plan}{A single simulation (row) from an object of class hip.}
 
 \item{path}{A character string of the path to the simulation folder.}
 
-\item{export.profiles}{A character vector of output profiles the simulation to export.}
+\item{profiles}{A character vector of output profiles the simulation to export.}
 
 \item{saveProjectOption}{Logical, sets the saveProjectOption parameter in the .sim file.}
 }

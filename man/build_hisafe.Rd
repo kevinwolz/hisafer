@@ -4,19 +4,16 @@
 \alias{build_hisafe}
 \title{Builds a Hi-sAFe simulation}
 \usage{
-build_hisafe(hip, path, export.profiles = "all", saveProjectOption = FALSE,
-  part.of.exp = FALSE)
+build_hisafe(hip, path, profiles = "all", saveProjectOption = FALSE)
 }
 \arguments{
 \item{hip}{A single simulation (row) from an object of class hip.}
 
 \item{path}{A character string of the path to the simulation folder.}
 
-\item{export.profiles}{A character vector of output profiles the simulation to export.}
+\item{profiles}{A character vector of output profiles the simulation to export.}
 
 \item{saveProjectOption}{Logical, sets the saveProjectOption parameter in the .sim file.}
-
-\item{part.of.exp}{Logical, indicates if \code{build_hisafe} was called from within \code{build_hisafe_exp}. Do not change this!}
 }
 \value{
 Invisibly returns a list containing the original hip object and supplied path.

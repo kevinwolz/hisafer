@@ -3,7 +3,7 @@
 #' @return Invisibly returns a list containing the original hip object and path to the experiment folder.
 #' @param hip An object of class hip - typically with multiple experiments (rows).
 #' @param path A character string of the path to the folder in which the experiment folder should be created.
-#' @param export.profiles A character vector of output profiles the simulation to export.
+#' @param profiles A character vector of output profiles the simulation to export.
 #' @param saveProjectOption Logical, sets the saveProjectOption parameter in the .sim file.
 #' @export
 #' @family hisafe build functions
@@ -17,8 +17,8 @@
 #' }
 build_hisafe_exp <- function(hip,
                              path,
-                             exp.name = "experiment",
-                             export.profiles   = "all",
+                             exp.name          = "experiment",
+                             profiles          = "all",
                              saveProjectOption = FALSE,
                              controls          = FALSE) {
 
@@ -27,15 +27,21 @@ build_hisafe_exp <- function(hip,
 
   ## Create experiment directory
   exp.path <- gsub("//", "/", paste0(path, "/", exp.name))
-  success <- dir.create(exp.path, showWarnings = FALSE)
-  if(!success) stop("creation of experiment directory failed")
+  dum <- dir.create(exp.path, showWarnings = FALSE)
 
   ## Write out experiment summary
-  write.table(hip, gsub("//", "/", paste0(exp.path, "/", exp.name, "_summary.csv")), sep = ",", row.names = FALSE)
+  readr::write_csv(hip, gsub("//", "/", paste0(exp.path, "/", exp.name, "_summary.csv")))
 
   ## build folder tree & input files for each simulation in experiment
-  hip.list <- purrr::pmap(as.list(hip), list)
-  purrr::walk(hip.list, build_hisafe, path = exp.path, export.profiles = export.profiles, saveProjectOption = saveProjectOption, part.of.exp = TRUE)
+  make_hip <- function(x) {
+    class(x) <- c("hip", class(x))
+    return(x)
+    }
+  hip.list <- as.list(hip) %>%
+    purrr::pmap(list) %>% # solution from: https://rpubs.com/wch/200398
+    purrr::map(tibble::as_tibble) %>%
+    purrr::map(make_hip)
+  purrr::walk(hip.list, build_hisafe, path = exp.path, profiles = profiles, saveProjectOption = saveProjectOption)
 
   ## Run control simulations
   if(controls) stop("support for running control simulations not yet supported")
@@ -48,9 +54,8 @@ build_hisafe_exp <- function(hip,
 #' @return Invisibly returns a list containing the original hip object and supplied path.
 #' @param hip A single simulation (row) from an object of class hip.
 #' @param path A character string of the path to the simulation folder.
-#' @param export.profiles A character vector of output profiles the simulation to export.
+#' @param profiles A character vector of output profiles the simulation to export.
 #' @param saveProjectOption Logical, sets the saveProjectOption parameter in the .sim file.
-#' @param part.of.exp Logical, indicates if \code{build_hisafe} was called from within \code{build_hisafe_exp}. Do not change this!
 #' @export
 #' @family hisafe build functions
 #' @examples
@@ -63,25 +68,27 @@ build_hisafe_exp <- function(hip,
 #' }
 build_hisafe <- function(hip,
                          path,
-                         export.profiles   = "all",
-                         saveProjectOption = FALSE,
-                         part.of.exp = FALSE) {
+                         profiles          = "all",
+                         saveProjectOption = FALSE) {
 
-  if(export.profiles[1] == "all") export.profiles <- SUPPORTED.PROFILES$profiles
+  if(profiles[1] == "all") profiles <- SUPPORTED.PROFILES$profiles
 
   ## Check if data has class hip and nrow == 1
-  hip <- dplyr::as_tibble(hip) # build_hisafe_exp sends in a list rather than a data frame
-  if(!("hip" %in% class(hip)) & !part.of.exp) stop("data not of class hip")
-  if(nrow(hip) > 1) stop("build_hisafe only handles hip objects containing a single simulation (1 row). Use build_hisafe_exp to build multiple simulations.")
+  if(!("hip" %in% class(hip))) stop("data not of class hip")
+  if(nrow(hip) > 1) stop("build_hisafe only handles hip objects containing a single simulation (1 row).
+                         Use build_hisafe_exp to build multiple simulations.")
 
   ## Copy over folder structure & template files from Hi-sAFe template path
   ## Any newly built files below will overwrite these files
   sim.path <- gsub("//", "/", paste0(path, "/", hip$SimulationName))
   system(paste("cp -r", HISAFE.TEMPLATE, sim.path))
 
+  ## Write out experiment summary
+  readr::write_csv(hip, gsub("//", "/", paste0(sim.path, "/", hip$SimulationName, "_summary.csv")))
+
   ## Build pld & sim files
   build_pld(hip, sim.path)
-  build_sim(hip, sim.path, export.profiles, saveProjectOption)
+  build_sim(hip, sim.path, profiles, saveProjectOption)
 
   ## Move weather file if one was provided
   if(hip$weatherFile != "default") file.copy(hip$weatherFile, paste0(sim.path, "/weather/weather.wth"), overwrite = TRUE)
@@ -91,13 +98,13 @@ build_hisafe <- function(hip,
   dum <- purrr::map(required.tecs, file.copy, to = paste0(sim.path, "/itk"))
 
   ## Copy required exportProfiles
-  if(!all(export.profiles %in% SUPPORTED.PROFILES$profiles)) {
-    missing.profiles <- export.profiles[!(export.profiles %in% SUPPORTED.PROFILES$profiles)]
+  if(!all(profiles %in% SUPPORTED.PROFILES$profiles)) {
+    missing.profiles <- profiles[!(profiles %in% SUPPORTED.PROFILES$profiles)]
     missing.profile.error <- paste(c("The following profiles are not available:", missing.profiles), collapse = "\n")
     stop(missing.profile.error)
   }
 
-  export.profile.paths <- paste0(HISAFE.LIBRARY, "exportParameters/", export.profiles, ".pro")
+  export.profile.paths <- paste0(HISAFE.LIBRARY, "exportParameters/", profiles, ".pro")
   dum <- purrr::map(export.profile.paths, file.copy, to = paste0(sim.path, "/exportParameters"))
 
   invisible(list(hip = hip, path = path))
@@ -138,9 +145,9 @@ build_pld <- function(plan, path) {
 #' @return Invisibly returns \code{TRUE}.
 #' @param plan A single simulation (row) from an object of class hip.
 #' @param path A character string of the path to the simulation folder.
-#' @param export.profiles A character vector of output profiles the simulation to export.
+#' @param profiles A character vector of output profiles the simulation to export.
 #' @param saveProjectOption Logical, sets the saveProjectOption parameter in the .sim file.
-build_sim <- function(plan, path, export.profiles, saveProjectOption) {
+build_sim <- function(plan, path, profiles, saveProjectOption) {
   sim.file <- gsub("//", "/", paste0(path, "/template.sim"))
   sim <- readLines(sim.file)
 
@@ -160,8 +167,8 @@ build_sim <- function(plan, path, export.profiles, saveProjectOption) {
 
   sim[16] <- "weatherFile = weather.wth"
 
-  sim[19] <- paste0("profileNames = ",        paste0(SUPPORTED.PROFILES$profiles[SUPPORTED.PROFILES$profiles %in% export.profiles], collapse = ", "))
-  sim[20] <- paste0("exportFrequencies = ",   paste0(SUPPORTED.PROFILES$freqs[SUPPORTED.PROFILES$profiles %in% export.profiles], collapse = ", "))
+  sim[19] <- paste0("profileNames = ",        paste0(SUPPORTED.PROFILES$profiles[SUPPORTED.PROFILES$profiles %in% profiles], collapse = ","))
+  sim[20] <- paste0("exportFrequencies = ",   paste0(SUPPORTED.PROFILES$freqs[SUPPORTED.PROFILES$profiles %in% profiles], collapse = ","))
 
   if(plan$toricSymmetry == "XY") {
     sim[23] <- paste0("toreXp = 1")

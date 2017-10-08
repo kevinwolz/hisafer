@@ -26,5 +26,6 @@ hisafe_params("all")       # details of all parameters
 }
 \seealso{
 Other hisafe definition functions: \code{\link{define_hisafe_file}},
-  \code{\link{define_hisafe}}
+  \code{\link{define_hisafe}},
+  \code{\link{hisafe_profiles}}
 }

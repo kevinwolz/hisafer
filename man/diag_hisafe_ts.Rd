@@ -4,16 +4,17 @@
 \alias{diag_hisafe_ts}
 \title{Plot timeseries diagnostics of Hi-sAFe output}
 \usage{
-diag_hisafe_ts(data, time.class = "annual", output.path = "./diagnostics",
+diag_hisafe_ts(hop, time.class = "annual", output.path = NULL,
   time.lim = NULL, tree.id = NULL)
 }
 \arguments{
-\item{data}{An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.}
+\item{hop}{An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.}
 
 \item{time.class}{If 'annual', the default, annual timeseries are created. If 'daily', daily timeseries are created.}
 
 \item{output.path}{A character stting indicating the path to the directory where plots should be saved. Plots are
-saved in a subdirectory within this directory named by \code{time.class}.}
+saved in a subdirectory within this directory named by \code{time.class}.
+If no value is provided, the simulation path is read from the hop object and used.}
 
 \item{time.lim}{If time.class is 'annual', the default, a numeric vector of length two providing
 the \code{c(minimum, maximum)} of years (since planting) to plot.

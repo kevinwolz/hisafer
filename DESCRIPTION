@@ -13,6 +13,7 @@ Imports: ggplot2 (>= 2.2.1),
     dplyr (>= 0.7.3),
     tidyr (>= 0.7.1),
     purrr (>= 0.2.3),
+    readr (>= 1.1.1),
     lubridate (>= 1.6.0),
     viridis (>= 0.4.0)
 License: GPL-3

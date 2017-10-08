@@ -16,11 +16,11 @@ param <- function(default, allowed, min, max, min.sug, max.sug) {
 
 HISAFE.PARAMS <- list(
   ## PLD                             DEFAULT               ALLOWED             MIN    MAX    MIN.SUG  MAX.SUG
-  latitude                  = param( 45,                   NA,                 -90,   90,    NA,      NA),
+  latitude                  = param( 43.7,                 NA,                 -90,   90,    NA,      NA),
   cellWidth                 = param( 1,                    NA,                 0.5,   NA,    1,       2),
-  treeLineOrientation       = param( 0,                    NA,                 0,     359,   NA,      NA),
-  spacingBetweenRows        = param( 15,                   NA,                 1,     NA,    3,       30),
-  spacingWithinRows         = param( 5,                    NA,                 1,     NA,    NA,      30),
+  treeLineOrientation       = param( 90,                   NA,                 0,     359,   NA,      NA),
+  spacingBetweenRows        = param( 13,                   NA,                 1,     NA,    3,       30),
+  spacingWithinRows         = param( 9,                    NA,                 1,     NA,    NA,      30),
   slopeIntensity            = param( 0,                    NA,                 0,     NA,    NA,      45),
   slopeAspect               = param( 0,                    NA,                 0,     359,   NA,      NA),
   windMeanForce             = param( 5,                    NA,                 0,     NA,    NA,      NA),
@@ -32,7 +32,7 @@ HISAFE.PARAMS <- list(
   SimulationName            = param( "Sim",                NA,                 NA,    NA,    NA,      NA),   # special def
   nbSimulations             = param( 30,                   NA,                 1,     NA,    NA,      50),
   simulationYearStart       = param( 1995,                 NA,                 NA,    NA,    NA,      NA),
-  simulationDayStart        = param( 1,                    NA,                 1,     31,    NA,      NA),
+  simulationDayStart        = param( 240,                  NA,                 1,     365,   NA,      NA),
   mainCropSpecies           = param( "durum-wheat",        SUPPORTED.CROPS,    NA,    NA,    NA,      NA),
   interCropSpecies          = param( "weed-restinclieres", SUPPORTED.CROPS,    NA,    NA,    NA,      NA),
   treeCropDistance          = param( 0.5,                  NA,                 0,     NA,    0.5,     3),
@@ -42,7 +42,7 @@ HISAFE.PARAMS <- list(
   treePruningFreq           = param( 2,                    NA,                 0,     NA,    1,       3),    # special def
   treePruningProp           = param( 0.3,                  NA,                 0,     1,     0.25,    0.5),
   treePruningMaxHeight      = param( 4,                    NA,                 0,     NA,    2,       5),
-  treeRootPruningFreq       = param( 1,                    NA,                 0,     NA,    1,       3),    # special def
+  treeRootPruningFreq       = param( 0,                    NA,                 0,     NA,    1,       3),    # special def
   treeRootPruningDistance   = param( 0.5,                  NA,                 NA,    NA,    0.5,     2),
   treeRootPruningDepth      = param( 0,                    NA,                 0,     NA,    NA,      2)
 )
@@ -89,4 +89,17 @@ hisafe_params <- function(variable = "names") {
     }
   }
   invisible(param.names)
+}
+
+#' Display supported Hi-sAFe output profiles
+#' @description Displays supported Hi-sAFe output profiles and standard output frequency.
+#' @return Invisibly returns a data frame containing the profiles names and output frequency.
+#' @export
+#' @family hisafe definition functions
+#' @examples
+#' \dontrun{
+#' hisafe_profiles()
+#' }
+hisafe_profiles <- function(variable = "names") {
+  print(as.data.frame(SUPPORTED.PROFILES), row.names = FALSE)
 }

@@ -4,12 +4,10 @@
 \alias{read_hisafe_output_file}
 \title{Read a single Hi-sAFe output profile}
 \usage{
-read_hisafe_output_file(profile, read.data = TRUE)
+read_hisafe_output_file(profile)
 }
 \arguments{
 \item{profile}{A character string of the path to the profile to be read.}
-
-\item{read.data}{If TRUE, data and variable descriptions are read. If FALSE, only variable descriptions are read.}
 }
 \value{
 An list of two data frames (tibbles): \code{data} contains the data from the profile; \code{variables} contains the variable descriptions.

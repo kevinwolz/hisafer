@@ -4,15 +4,15 @@
 \alias{build_hisafe_exp}
 \title{Builds a group Hi-sAFe simulations}
 \usage{
-build_hisafe_exp(hip, path, exp.name = "experiment",
-  export.profiles = "all", saveProjectOption = FALSE, controls = FALSE)
+build_hisafe_exp(hip, path, exp.name = "experiment", profiles = "all",
+  saveProjectOption = FALSE, controls = FALSE)
 }
 \arguments{
 \item{hip}{An object of class hip - typically with multiple experiments (rows).}
 
 \item{path}{A character string of the path to the folder in which the experiment folder should be created.}
 
-\item{export.profiles}{A character vector of output profiles the simulation to export.}
+\item{profiles}{A character vector of output profiles the simulation to export.}
 
 \item{saveProjectOption}{Logical, sets the saveProjectOption parameter in the .sim file.}
 }

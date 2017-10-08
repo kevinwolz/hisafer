@@ -38,8 +38,8 @@ plot_hisafe_ts <- function(hop,
   time.class <- tolower(time.class) # prevents error if improper capitalization not input by user
 
   ## Check for data class and if profile exists
-  if(!any(c("hop", "hop-group") %in% class(hop))) stop("data not of class hop or hop-group")
-  if(ncol(hop[[time.class]]) == 0)                stop(paste("no data from any", time.class, "profiles found"))
+  if(!any(c("hop", "hop-group") %in% class(hop))) stop("data not of class hop or hop-group", call. = FALSE)
+  if(nrow(hop[[time.class]]) == 0)                stop(paste("no data from any", time.class, "profiles found"), call. = FALSE)
 
   ## Color blind-friendly palette
   cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
@@ -154,8 +154,8 @@ plot_hisafe_monthcells <- function(hop,
                                    months    = 6) {
 
   ## Check for data class and if profile exists
-  if(!any(c("hop", "hop-group") %in% class(hop))) stop("data not of class hop or hop-group")
-  if(ncol(hop$monthCells) == 0)                   stop("no data from monthCells profile found")
+  if(!any(c("hop", "hop-group") %in% class(hop))) stop("data not of class hop or hop-group", call. = FALSE)
+  if(nrow(hop$monthCells) == 0)                   stop("no data from monthCells profile found", call. = FALSE)
 
   ## Convert "all" arguements to actual values
   if(sim.names[1] == "all") { sim.names <- unique(hop$monthCells$SimulationName) }
@@ -166,8 +166,9 @@ plot_hisafe_monthcells <- function(hop,
   vars <- c("SimulationName", "Year", "Month")
   avail.vars <- list(sim.names, years, months)
   var.lengths <- purrr::map_int(avail.vars, length) > 1
-  if(sum(var.lengths) > 2) stop("only two variables of (sim.names, years, months) can have length greater than one")
-  fixed.var <- paste(vars[!var.lengths], "=", avail.vars[[(1:3)[!var.lengths]]])
+  if(sum(var.lengths) > 2) stop("only two variables of (sim.names, years, months) can have length greater than one", call. = FALSE)
+  fixed <- which(!(vars %in% c(rowfacet, colfacet)))
+  fixed.var <- paste(vars[fixed], "=", avail.vars[[fixed]])
 
   ## Exract units of supplied variable from the "variables" slot
   var.unit <- hop$variables %>%
@@ -235,8 +236,8 @@ plot_hisafe_monthcells <- function(hop,
 plot_hisafe_cells <- function(hop, variable, dates) {
 
   ## Check for data class and if profile exists
-  if(!any(c("hop", "hop-group") %in% class(hop))) stop("data not of class hop or hop-group")
-  if(ncol(hop$cells) == 0)                        stop("no data from cells profile found")
+  if(!any(c("hop", "hop-group") %in% class(hop))) stop("data not of class hop or hop-group", call. = FALSE)
+  if(nrow(hop$cells) == 0)                        stop("no data from cells profile found", call. = FALSE)
 
   ## Exract units of supplied variable from the "variables" slot
   var.unit <- hop$variables %>%
@@ -320,10 +321,10 @@ plot_hisafe_cells <- function(hop, variable, dates) {
 plot_hisafe_voxels <- function(hop, variable, dates) {
 
   ## Check for data class and if profile exists
-  if(!any(c("hop", "hop-group") %in% class(hop))) stop("data not of class hop or hop-group")
-  if(ncol(hop$voxels) == 0)                       stop("no data from voxels profile found")
+  if(!any(c("hop", "hop-group") %in% class(hop))) stop("data not of class hop or hop-group", call. = FALSE)
+  if(nrow(hop$voxels) == 0)                       stop("no data from voxels profile found", call. = FALSE)
 
-  if("hop-group" %in% class(hop) & length(dates) > 1) stop("cannot supply more than one date for object of class hop-group")
+  if("hop-group" %in% class(hop) & length(dates) > 1) stop("cannot supply more than one date for object of class hop-group", call. = FALSE)
 
   ## Exract units of supplied variable from the "variables" slot
   var.unit <- hop$variables %>%

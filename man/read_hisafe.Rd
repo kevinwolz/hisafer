@@ -4,23 +4,30 @@
 \alias{read_hisafe}
 \title{Read output from a single Hi-sAFe simulation}
 \usage{
-read_hisafe(simu.name, path, profiles = "all", allow.missing = FALSE)
+read_hisafe(hip = NULL, simu.name = NULL, path = NULL, profiles = "all")
 }
 \arguments{
-\item{simu.name}{The \code{SimulationName} of the Hi-sAFe simulation. This must be the same as the name of the Hi-sAFe simulation folder.}
+\item{hip}{An object of class \code{hip}. To create a hip object see \code{\link{define_exp}}.
+If object contains a \code{path} value, then this can be used without providing \code{path} directly to \code{read_hisafe}.
+Cannot provided both \code{hip} and \code{simu.name}.
+If \code{hip} is not provided, then \code{path} is required and the input data for the experiment is read from the experiment
+summary .csv file created when building the experiment.}
 
-\item{path}{A character string of the path to the directory containing the Hi-sAFe simulation folder (which contains the standard subdirectory with the output)}
+\item{simu.name}{The \code{SimulationName} of the Hi-sAFe simulation to read. This must be the same as the name of the Hi-sAFe simulation folder.
+Cannot provided both \code{hip} and \code{simu.name}.}
 
-\item{profiles}{A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading all supported Hi-sAFe output profiles via "all".
-Currently supported profiles are: annualplot, annualtree, annualcrop, plot, trees, roots, cells, voxels, climate, monthCells.}
+\item{path}{A character string of the path to the directory containing the Hi-sAFe simulation folder
+(which contains the standard subdirectory with the output).
+If \code{hip} is not provided, then \code{path} is required. If both \code{hip} and \code{path} are provided, \code{path} is used.}
 
-\item{allow.missing}{If \code{TRUE}, does not produce error when profiles specified by \code{profiles} are not found in the output path.
-It is highly discouraged to change this from the default of \code{FALSE} unless there are specific profiles intentionally missing from some simulations.}
+\item{profiles}{A character vector of the names of Hi-sAFe output profiles to read.
+Defaults to reading all supported Hi-sAFe output profiles via "all". For currently supported profiles see: \code{\link{hisafe_profiles}}}
 }
 \value{
-An object of class \code{hop}. This is a list of 6 data frames (tibbles):
+An object of class \code{hop}. This is a list of 8 data frames (tibbles):
 \code{annual} (includes data from annualtree and annualplot profiles), \code{daily} (includes data from trees, plot, and climate profiles),
-\code{monthCells}, \code{cells}, \code{voxels}, and \code{variables} (variable descriptions and units from all profiles).
+\code{monthCells}, \code{cells}, \code{voxels}, \code{variables} (variable descriptions and units from all profiles),
+\code{inputs} (the hip object that generated the simulation), and \code{path} (the path to the simulation folder).
 }
 \description{
 Reads the designated output profiles from a single Hi-sAFe simulation.
