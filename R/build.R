@@ -1,7 +1,7 @@
-#' Builds a group Hi-sAFe simulations
-#' @description Builds a Hi-sAFe experiment (a group of simulation) - creates the folder structure and input files.
+#' Builds a Hi-sAFe experiment
+#' @description Builds a Hi-sAFe experiment (a group of simulations) - creates the folder structure and input files.
 #' @return Invisibly returns a list containing the original hip object and path to the experiment folder.
-#' @param hip An object of class hip - typically with multiple experiments (rows).
+#' @param hip An object of class hip - typically with multiple simulations (rows).
 #' @param path A character string of the path to the folder in which the experiment folder should be created.
 #' @param profiles A character vector of output profiles the simulation to export.
 #' @param saveProjectOption Logical, sets the saveProjectOption parameter in the .sim file.

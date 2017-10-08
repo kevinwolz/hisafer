@@ -2,13 +2,13 @@
 % Please edit documentation in R/build.R
 \name{build_hisafe_exp}
 \alias{build_hisafe_exp}
-\title{Builds a group Hi-sAFe simulations}
+\title{Builds a Hi-sAFe experiment}
 \usage{
 build_hisafe_exp(hip, path, exp.name = "experiment", profiles = "all",
   saveProjectOption = FALSE, controls = FALSE)
 }
 \arguments{
-\item{hip}{An object of class hip - typically with multiple experiments (rows).}
+\item{hip}{An object of class hip - typically with multiple simulations (rows).}
 
 \item{path}{A character string of the path to the folder in which the experiment folder should be created.}
 
@@ -20,7 +20,7 @@ build_hisafe_exp(hip, path, exp.name = "experiment", profiles = "all",
 Invisibly returns a list containing the original hip object and path to the experiment folder.
 }
 \description{
-Builds a Hi-sAFe experiment (a group of simulation) - creates the folder structure and input files.
+Builds a Hi-sAFe experiment (a group of simulations) - creates the folder structure and input files.
 }
 \examples{
 \dontrun{

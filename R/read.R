@@ -1,11 +1,11 @@
-#' Read output from a group of Hi-sAFe simulations
-#' @description Reads the designated output profiles from a group of Hi-sAFe simulations (i.e. an experiment).
+#' Read output from a Hi-sAFe experiment
+#' @description Reads the designated output profiles from a Hi-sAFe experiiment (i.e. a group of Hi-sAFe simulations).
 #' @return An object of class \code{hop-group}. This is a list of 9 data frames (tibbles):
 #' \code{annual} (includes data from annualtree and annualplot profiles), \code{daily} (includes data from trees, plot, and climate profiles),
 #' \code{monthCells}, \code{cells}, \code{voxels}, \code{variables} (variable descriptions and units from all profiles),
 #' \code{inputs} (the hip object that generated the simulation), and \code{path} (the path to the simulation folder).
 #' @param hip An object of class hip. To create a hip object see \code{\link{define_exp}}.
-#' If the hip object contains a \code{path} value, then this can be used without providing \code{path} directly to \code{read_hisafe_group}.
+#' If the hip object contains a \code{path} value, then this can be used without providing \code{path} directly to \code{read_hisafe_exp}.
 #' If \code{hip} is not provided, then \code{path} is required and the input data for the experiment is read from the experiment
 #' summary .csv file created when building the experiment.
 #' @param path A character string of the path to the directory containing the Hi-sAFe simulation folders
@@ -18,15 +18,15 @@
 #' @examples
 #' \dontrun{
 #' # After reading in Hi-sAFe simulation data via:
-#' myexp <- read_hisafe_group(MyExpPlan, "./")
+#' myexp <- read_hisafe_exp(MyExpPlan, "./")
 #'
 #' # If only the annual tree data is required:
 #' mytreeexp <- read_hisafe(MyExpPlan, "./", profiles = "annualtree")
 #' }
-read_hisafe_group <- function(hip           = NULL,
-                              path          = NULL,
-                              profiles      = "all",
-                              allow.missing = FALSE) {
+read_hisafe_exp <- function(hip           = NULL,
+                            path          = NULL,
+                            profiles      = "all",
+                            allow.missing = FALSE) {
 
   if(is.null(hip) & is.null(path))        stop("must provide at least one of hip or path")
   if(is.null(path)) path <- hip$path
