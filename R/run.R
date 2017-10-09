@@ -25,7 +25,9 @@ run_hisafe_exp <- function(hip        = NULL,
                            simu.names = "all",
                            parallel   = FALSE) {
 
-  if(!is.null(hip) & nrow(hip) <= 1)      stop("run_hisafe_exp runs multiple simulations. Please use hip object with more than one experiment (row).")
+  if(!is.null(hip)){
+    if(nrow(hip$hip) <= 1) stop("run_hisafe_exp runs multiple simulations. Please use hip object with more than one experiment (row).")
+  }
   if(is.null(hip) & is.null(exp.path))    stop("must provide hip OR exp.path", call. = FALSE)
   if(!is.null(hip) & !is.null(exp.path))  stop("must provide hip OR exp.path", call. = FALSE)
 
@@ -82,7 +84,9 @@ run_hisafe_exp <- function(hip        = NULL,
 #' }
 run_hisafe <- function(hip = NULL, path = NULL, simu.name = NULL) {
 
-  if(!is.null(hip) & nrow(hip) > 1)       stop("run_hisafe runs a single simulation at a time. Please use hip object with one experiment (row).")
+  if(!is.null(hip)){
+    if(nrow(hip$hip) > 1) stop("run_hisafe_exp runs multiple simulations. Please use hip object with more than one experiment (row).")
+  }
   if(is.null(hip) & is.null(path))        stop("must provide at least one of hip or path", call. = FALSE)
   if(is.null(hip) & is.null(simu.name))   stop("must provide hip OR simu.name", call. = FALSE)
   if(!is.null(hip) & !is.null(simu.name)) stop("must provide hip OR simu.name", call. = FALSE)
