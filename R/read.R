@@ -184,7 +184,7 @@ read_hisafe <- function(hip           = NULL,
       profile.data      <- profile.list$data
       profile.variables <- profile.list$variables %>% dplyr::mutate(VariableClass = profile)
     } else {
-      warning(paste0(profile, " profile too large (> 300 MB) to read"))
+      warning(paste0(profile, " profile too large (> 300 MB) to read"), call. = FALSE)
       profile.data <- profile.variables <- dplyr::tibble()
     }
     return(list(data = profile.data, variables = profile.variables))
@@ -206,16 +206,47 @@ read_hisafe <- function(hip           = NULL,
   other.profiles    <- profiles[profiles %in% c("annualcrop", "roots", "monthCells", "cells", "voxels")]
   if(length(other.profiles) >= 1) {
     other <- purrr::map(other.profiles, read.other.profiles)
-    annualcrop.data      <- ifelse(is.null(other$annualcrop), dplyr::tibble(), other$annual.crop$data)
-    annualcrop.variables <- ifelse(is.null(other$annualcrop), dplyr::tibble(), other$annual.crop$variables)
-    roots.data           <- ifelse(is.null(other$roots),      dplyr::tibble(), other$roots$data)
-    roots.variables      <- ifelse(is.null(other$roots),      dplyr::tibble(), other$roots$variables)
-    monthCells.data      <- ifelse(is.null(other$monthCells), dplyr::tibble(), other$monthCells$data)
-    monthCells.variables <- ifelse(is.null(other$monthCells), dplyr::tibble(), other$monthCells$variables)
-    cells.data           <- ifelse(is.null(other$cells),      dplyr::tibble(), other$cells$data)
-    cells.variables      <- ifelse(is.null(other$cells),      dplyr::tibble(), other$cells$variables)
-    voxels.data          <- ifelse(is.null(other$voxels),     dplyr::tibble(), other$voxels$data)
-    voxels.variables     <- ifelse(is.null(other$voxels),     dplyr::tibble(), other$voxels$variables)
+    names(other) <- other.profiles
+
+    if(is.null(other$annualcrop)) {
+      annualcrop.data      <- dplyr::tibble()
+      annualcrop.variables <- dplyr::tibble()
+    } else {
+      annualcrop.data      <- other$annual.crop$data
+      annualcrop.variables <- other$annual.crop$variables
+    }
+
+    if(is.null(other$roots)) {
+      roots.data      <- dplyr::tibble()
+      roots.variables <- dplyr::tibble()
+    } else {
+      roots.data      <- other$roots$data
+      roots.variables <- other$roots$variables
+    }
+
+    if(is.null(other$monthCells)) {
+      monthCells.data      <- dplyr::tibble()
+      monthCells.variables <- dplyr::tibble()
+    } else {
+      monthCells.data      <- other$monthCells$data
+      monthCells.variables <- other$monthCells$variables
+    }
+
+    if(is.null(other$cells)) {
+      cells.data      <- dplyr::tibble()
+      cells.variables <- dplyr::tibble()
+    } else {
+      cells.data      <- other$cells$data
+      cells.variables <- other$cells$variables
+    }
+
+    if(is.null(other$voxels)) {
+      voxels.data      <- dplyr::tibble()
+      voxels.variables <- dplyr::tibble()
+    } else {
+      voxels.data      <- other$voxels$data
+      voxels.variables <- other$voxels$variables
+    }
 
   } else {
     annualcrop.data <- annualcrop.variables <- dplyr::tibble()
