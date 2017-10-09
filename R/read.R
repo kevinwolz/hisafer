@@ -1,9 +1,9 @@
 #' Read output from a Hi-sAFe experiment
 #' @description Reads the designated output profiles from a Hi-sAFe experiiment (i.e. a group of Hi-sAFe simulations).
-#' @return An object of class \code{hop-group}. This is a list of 11 data frames (tibbles):
+#' @return An object of class \code{hop-group}. This is a list of 13 data frames (tibbles):
 #' \code{annual} (includes data from annualtree and annualplot profiles), \code{daily} (includes data from trees, plot, and climate profiles), \code{annualcrop},
 #' \code{roots}, \code{monthCells}, \code{cells}, \code{voxels}, \code{variables} (variable descriptions and units from all profiles),
-#' \code{inputs} (the hip object that generated the simulation), and \code{path} (the path to the simulation folder).
+#' \code{inputs} (the hip object that generated the simulation), \code{path} (the paths to the simulation folders), \code{exp.plan} (the manipulated input variables in the experiment), and \code{exp.path} (the path to the experiment folder).
 #' @param hip An object of class hip. To create a hip object see \code{\link{define_exp}}.
 #' If the hip object contains a \code{path} value, then this can be used without providing \code{path} directly to \code{read_hisafe_exp}.
 #' If \code{hip} is not provided, then \code{path} is required and the input data for the experiment is read from the experiment
@@ -73,6 +73,8 @@ read_hisafe_exp <- function(hip           = NULL,
                                  collapse = "\n")
     warning(year.length.warning, call. = FALSE)
   }
+
+  data$exp.path <- path
 
   class(data)<-c("hop-group", "hop", class(data))
   return(data)

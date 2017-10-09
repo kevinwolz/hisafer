@@ -8,7 +8,7 @@
 #' @param time.class If 'annual', the default, annual timeseries are created. If 'daily', daily timeseries are created.
 #' @param output.path A character stting indicating the path to the directory where plots should be saved. Plots are
 #' saved in a subdirectory within this directory named by \code{time.class}.
-#' If no value is provided, the simulation path is read from the hop object and used.
+#' If no value is provided, the experiment/simulation path is read from the hop object, and a folder is created there called "diagnostics".
 #' @param time.lim If time.class is 'annual', the default, a numeric vector of length two providing
 #' the \code{c(minimum, maximum)} of years (since planting) to plot.
 #' If time.class is 'daily', a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
@@ -42,8 +42,8 @@ diag_hisafe_ts <- function(hop,
 
   ## Create output directory
   if(is.null(output.path) & "hop-group" %in% class(hop)) {
-    stop("must provide output.path for data of class hop-group")
-  } else if(is.null(output.path)){
+    output.path <- gsub("//", "/", paste0(hop$exp.path, "/diagnostics"))
+  } else if(is.null(output.path) & !("hop-group" %in% class(hop))){
     output.path <- gsub("//", "/", paste0(hop$path, "/diagnostics"))
   }
   ts.path <- gsub("//", "/", paste0(output.path, "/", time.class, "/"))
@@ -87,7 +87,7 @@ diag_hisafe_ts <- function(hop,
 #' @param hop An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
 #' @param output.path A character stting indicating the path to the directory where plots should be saved. Plots are
 #' saved in a subdirectory within this directory named /monthCells/facetScheme.
-#' If no value is provided, the simulation path is read from the hop object and used.
+#' If no value is provided, the experiment/simulation path is read from the hop object, and a folder is created there called "diagnostics".
 #' @export
 #' @importFrom dplyr %>%
 #' @family hisafe diagnostic fucntions
@@ -107,8 +107,8 @@ diag_hisafe_monthcells <- function(hop, output.path = NULL) {
 
   ## Create output directories
   if(is.null(output.path) & "hop-group" %in% class(hop)) {
-    stop("must provide output.path for data of class hop-group")
-  } else if(is.null(output.path)){
+    output.path <- gsub("//", "/", paste0(hop$exp.path, "/diagnostics"))
+  } else if(is.null(output.path) & !("hop-group" %in% class(hop))){
     output.path <- gsub("//", "/", paste0(hop$path, "/diagnostics"))
   }
   monthcells.path <- gsub("//", "/", paste0(output.path, "/monthCells/"))

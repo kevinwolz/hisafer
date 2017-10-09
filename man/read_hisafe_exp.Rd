@@ -20,10 +20,10 @@ If \code{hip} is not provided, then \code{path} is required. If both \code{hip} 
 Currently supported profiles are: annualplot, annualtree, annualcrop, plot, trees, roots, cells, voxels, climate, monthCells.}
 }
 \value{
-An object of class \code{hop-group}. This is a list of 11 data frames (tibbles):
+An object of class \code{hop-group}. This is a list of 13 data frames (tibbles):
 \code{annual} (includes data from annualtree and annualplot profiles), \code{daily} (includes data from trees, plot, and climate profiles), \code{annualcrop},
 \code{roots}, \code{monthCells}, \code{cells}, \code{voxels}, \code{variables} (variable descriptions and units from all profiles),
-\code{inputs} (the hip object that generated the simulation), and \code{path} (the path to the simulation folder).
+\code{inputs} (the hip object that generated the simulation), \code{path} (the paths to the simulation folders), \code{exp.plan} (the manipulated input variables in the experiment), and \code{exp.path} (the path to the experiment folder).
 }
 \description{
 Reads the designated output profiles from a Hi-sAFe experiiment (i.e. a group of Hi-sAFe simulations).

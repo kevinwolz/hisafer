@@ -11,7 +11,7 @@ diag_hisafe_monthcells(hop, output.path = NULL)
 
 \item{output.path}{A character stting indicating the path to the directory where plots should be saved. Plots are
 saved in a subdirectory within this directory named /monthCells/facetScheme.
-If no value is provided, the simulation path is read from the hop object and used.}
+If no value is provided, the experiment/simulation path is read from the hop object, and a folder is created there called "diagnostics".}
 }
 \value{
 Invisibly returns a list of \code{ggplot} objects, grouped into two sublists based on the faceting scheme.

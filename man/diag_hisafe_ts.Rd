@@ -14,7 +14,7 @@ diag_hisafe_ts(hop, time.class = "annual", output.path = NULL,
 
 \item{output.path}{A character stting indicating the path to the directory where plots should be saved. Plots are
 saved in a subdirectory within this directory named by \code{time.class}.
-If no value is provided, the simulation path is read from the hop object and used.}
+If no value is provided, the experiment/simulation path is read from the hop object, and a folder is created there called "diagnostics".}
 
 \item{time.lim}{If time.class is 'annual', the default, a numeric vector of length two providing
 the \code{c(minimum, maximum)} of years (since planting) to plot.
