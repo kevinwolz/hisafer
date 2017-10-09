@@ -4,8 +4,7 @@
 \alias{read_hisafe_exp}
 \title{Read output from a Hi-sAFe experiment}
 \usage{
-read_hisafe_exp(hip = NULL, path = NULL, profiles = "all",
-  allow.missing = FALSE)
+read_hisafe_exp(hip = NULL, path = NULL, profiles = "all")
 }
 \arguments{
 \item{hip}{An object of class hip. To create a hip object see \code{\link{define_exp}}.

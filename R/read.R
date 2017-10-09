@@ -33,7 +33,7 @@ read_hisafe_exp <- function(hip           = NULL,
   if(!is.null(hip)) {
     exp.plan <- hip
   } else {
-    exp.name <- tail(strsplit(path, "/"), n = 1)
+    exp.name <- tail(strsplit(path, "/")[[1]], n = 1)
     exp.plan <- tibble::as_tibble(read.csv(gsub("//", "/", paste0(path, "/", exp.name, "_summary.csv")), header = TRUE, stringsAsFactors = FALSE))
   }
 
