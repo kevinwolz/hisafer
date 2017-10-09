@@ -6,6 +6,7 @@
 #' @param profiles A character vector of output profiles the simulation to export.
 #' @param saveProjectOption Logical, sets the saveProjectOption parameter in the .sim file.
 #' @export
+#' @importFrom dplyr %>%
 #' @family hisafe build functions
 #' @examples
 #' \dontrun{

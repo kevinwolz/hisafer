@@ -7,7 +7,9 @@
 #' @param exp.path A character string of the path to the experiment folder containing the simulation folders. Required if \code{hip} is not provided.
 #' @param simu.names Names of the simulations to run. Default is to run all simulations in the experiment folder via "all".
 #' @param parallel Logical, should parallel computing be used.
+#' @param num.cores Numbers of cores to use in parallel computing. If not provided, will default to one less than the total number of available cores.
 #' @export
+#' @importFrom foreach %dopar%
 #' @family hisafe run functions
 #' @examples
 #' \dontrun{
@@ -23,7 +25,8 @@
 run_hisafe_exp <- function(hip        = NULL,
                            exp.path   = NULL,
                            simu.names = "all",
-                           parallel   = FALSE) {
+                           parallel   = FALSE,
+                           num.cores  = NULL) {
 
   if(!is.null(hip)){
     if(nrow(hip$hip) <= 1) stop("run_hisafe_exp runs multiple simulations. Please use hip object with more than one experiment (row).")
@@ -34,13 +37,14 @@ run_hisafe_exp <- function(hip        = NULL,
   if(is.null(exp.path)) exp.path <- hip$path
 
   ## Determine simulations to run & check for missing directories
-  if(simu.names == "all") {
+  if(simu.names[1] == "all") {
     sims.to.run <- list.dirs(exp.path, recursive = FALSE)
     if(length(sims.to.run) == 0) stop("path does not contain any simulation directories")
+    simu.names  <- purrr::map_chr(sims.to.run, function(x) tail(strsplit(x, "/")[[1]], n = 1))
   } else {
     sims.to.run <- gsub("//", "/", paste0(exp.path, "//", simu.names))
     if(!all(dir.exists(sims.to.run))) {
-      missing.dirs <- sims.to.run[!dir.exists(sims.to.run)]
+      missing.dirs  <- simu.names[!dir.exists(sims.to.run)]
       missing.error <- paste(c("The following simulations do not exist:",
                                missing.dirs),
                              collapse = "\n")
@@ -48,15 +52,14 @@ run_hisafe_exp <- function(hip        = NULL,
     }
   }
 
-  run.log <- list()
   if(parallel) {
-    stop("parallel computing not yet supported")
+    if(is.null(num.cores)) num.cores <- parallel::detectCores() - 1
+    cl <- parallel::makeCluster(num.cores)
+    doParallel::registerDoParallel(cl)
+    run.log <- foreach::foreach(i = simu.names, .inorder = FALSE) %dopar% run_hisafe(path = exp.path, simu.name = i)
+    doParallel::stopImplicitCluster()
   } else {
-    for(i in sims.to.run){
-      simu.name <- tail(strsplit(i, "/")[[1]], n = 1)
-      r.log <- run_hisafe(path = exp.path, simu.name = simu.name)
-      run.log <- c(run.log, r.log)
-    }
+    run.log <- foreach::foreach(i = simu.names) %do% run_hisafe(path = exp.path, simu.name = i)
   }
   invisible(run.log)
 }
@@ -101,7 +104,7 @@ run_hisafe <- function(hip = NULL, path = NULL, simu.name = NULL) {
   simulationStartTime <- proc.time()[3]
   out <- file(paste0(sim.path, simu.name, "_simulation_log.txt"), open="w")
   cat("Beginning simulation:", simu.name, file = out)
-  cat("Beginning simulation:", simu.name)
+  cat("\nBeginning simulation:", simu.name)
 
   ## Change working directory to Capsis directory
   pre.wd <- getwd()

@@ -52,7 +52,7 @@ define_hisafe <- function(factorial = FALSE, ...) {
   is.unique <- function(x) { length(unique(x)) != 1 }
   hip <- dplyr::bind_cols(hip[,  purrr::map_lgl(hip, is.unique)],
                           hip[, !purrr::map_lgl(hip, is.unique)]) %>%
-    dplyr::select(SimulationName, everything())
+    dplyr::select(SimulationName, dplyr::everything())
 
   check_input_values(hip)
   class(hip) <- c("hip", class(hip))

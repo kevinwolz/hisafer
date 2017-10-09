@@ -5,7 +5,7 @@
 \title{Run a Hi-sAFe experiment}
 \usage{
 run_hisafe_exp(hip = NULL, exp.path = NULL, simu.names = "all",
-  parallel = FALSE)
+  parallel = FALSE, num.cores = NULL)
 }
 \arguments{
 \item{hip}{An object of class hip with multiple simulations (rows).
@@ -17,6 +17,8 @@ If \code{hip} is not provided, then \code{exp.path} is required.}
 \item{simu.names}{Names of the simulations to run. Default is to run all simulations in the experiment folder via "all".}
 
 \item{parallel}{Logical, should parallel computing be used.}
+
+\item{num.cores}{Numbers of cores to use in parallel computing. If not provided, will default to one less than the total number of available cores.}
 }
 \value{
 Invisibly returns a list of console logs from simulation runs.

@@ -25,8 +25,7 @@
 #' }
 read_hisafe_exp <- function(hip           = NULL,
                             path          = NULL,
-                            profiles      = "all",
-                            allow.missing = FALSE) {
+                            profiles      = "all") {
 
   if(is.null(hip) & is.null(path))        stop("must provide at least one of hip or path")
   if(is.null(path)) path <- hip$path

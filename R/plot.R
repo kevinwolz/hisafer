@@ -268,7 +268,7 @@ plot_hisafe_cells <- function(hop, variable, dates) {
     facet_cells <- geom_blank()
     x.lab       <- ""
     y.lab       <- ""
-    title.lab   <- paste0(variable, " (", ymd(dates), ")")
+    title.lab   <- paste0(variable, " (", lubridate::ymd(dates), ")")
   }
 
 
@@ -334,7 +334,7 @@ plot_hisafe_voxels <- function(hop, variable, dates) {
 
   ## Filter for provided dates
   plot.data <- hop$voxels %>%
-    dplyr::filter(Date %in% ymd(dates))
+    dplyr::filter(Date %in% lubridate::ymd(dates))
 
   ## Find tree locations for each simulation
   tree.locations <- plot.data %>%
