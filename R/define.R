@@ -32,7 +32,7 @@ define_hisafe <- function(factorial = FALSE, ...) {
 
   # FOR TESTING
   # tmpfun <- function(...){ list(...) }
-  # arg.list <- tmpfun(SimulationName = c("my1", "my2"), spacingBetweenRows = c(7,7), spacingWithinRows = c(5,5), cellWidth = 1)
+  # arg.list <- tmpfun(SimulationName = c("my1", "my2"), spacingBetweenRows = c(7,9), spacingWithinRows = c(5,7), cellWidth = 1)
 
   arg.list <- list(...)
 
@@ -50,8 +50,10 @@ define_hisafe <- function(factorial = FALSE, ...) {
   }
 
   is.unique <- function(x) { length(unique(x)) != 1 }
-  hip <- dplyr::bind_cols(hip[,  purrr::map_lgl(hip, is.unique)],
-                          hip[, !purrr::map_lgl(hip, is.unique)]) %>%
+  unique.cols  <- names(hip)[purrr::map_lgl(hip, is.unique)]
+  manip.cols   <- names(arg.list)[!(names(arg.list) %in% unique.cols)]
+  default.cols <- names(defaults.to.add)
+  hip <- dplyr::bind_cols(hip[,  unique.cols], hip[, manip.cols], hip[, default.cols]) %>%
     dplyr::select(SimulationName, dplyr::everything())
 
   check_input_values(hip)
@@ -88,9 +90,11 @@ define_hisafe_file <- function(file) {
   if(length(unique(hip$SimulationName)) == 1) hip$SimulationName <- paste0(hip$SimulationName, "_", 1:nrow(hip))
 
   is.unique <- function(x) { length(unique(x)) != 1 }
-  hip <- dplyr::bind_cols(hip[,  purrr::map_lgl(hip, is.unique)],
-                          hip[, !purrr::map_lgl(hip, is.unique)]) %>%
-    dplyr::select(SimulationName, everything())
+  unique.cols  <- names(hip)[purrr::map_lgl(hip, is.unique)]
+  manip.cols   <- names(arg.list)[!(names(arg.list) %in% unique.cols)]
+  default.cols <- names(defaults.to.add)
+  hip <- dplyr::bind_cols(hip[,  unique.cols], hip[, manip.cols], hip[, default.cols]) %>%
+    dplyr::select(SimulationName, dplyr::everything())
 
   check_input_values(hip)
   class(hip) <- c("hip", class(hip))
