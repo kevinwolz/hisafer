@@ -38,8 +38,7 @@ read_hisafe_exp <- function(hip           = NULL,
   }
 
   is.unique <- function(x) { length(unique(x)) != 1 }
-  exp.plan <- exp.plan[, purrr::map_lgl(exp.plan, is.unique)] %>%
-    dplyr::mutate_all(factor)
+  exp.plan <- exp.plan[, purrr::map_lgl(exp.plan, is.unique)]
 
   ## Read all data from all simulations & combine
   data <- purrr::map(exp.plan$SimulationName, read_hisafe, hip = NULL, path = path, profiles = profiles) %>%
@@ -52,6 +51,7 @@ read_hisafe_exp <- function(hip           = NULL,
   ## Tidy up data
   data_tidy <- function(x){
     dplyr::left_join(exp.plan, x, by = "SimulationName") %>%   # add exp.plan cols to annual data
+      dplyr::mutate_at(names(exp.plan), factor) %>%
       dplyr::group_by(SimulationName)                          # group annual data by simulaton
   }
   if(ncol(data$annual) > 0) data$annual <- data_tidy(data$annual)
