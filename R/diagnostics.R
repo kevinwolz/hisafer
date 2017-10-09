@@ -41,7 +41,11 @@ diag_hisafe_ts <- function(hop,
   if(nrow(hop[[time.class]]) == 0)                stop(paste("no data from any", time.class, "profiles found"), call. = FALSE)
 
   ## Create output directory
-  if(is.null(output.path)) output.path <- gsub("//", "/", paste0(hop$path, "/diagnostics"))
+  if(is.null(output.path) & "hop-group" %in% class(hop)) {
+    stop("must provide output.path for data of class hop-group")
+  } else if(is.null(output.path)){
+    output.path <- gsub("//", "/", paste0(hop$path, "/diagnostics"))
+  }
   ts.path <- gsub("//", "/", paste0(output.path, "/", time.class, "/"))
   dir.create(ts.path, recursive = TRUE, showWarnings = FALSE)
 
@@ -102,7 +106,11 @@ diag_hisafe_monthcells <- function(hop, output.path = NULL) {
   if(nrow(hop$monthCells) == 0)                   stop("no data from monthCells profile found", call. = FALSE)
 
   ## Create output directories
-  if(is.null(output.path)) output.path <- gsub("//", "/", paste0(hop$path, "/diagnostics"))
+  if(is.null(output.path) & "hop-group" %in% class(hop)) {
+    stop("must provide output.path for data of class hop-group")
+  } else if(is.null(output.path)){
+    output.path <- gsub("//", "/", paste0(hop$path, "/diagnostics"))
+  }
   monthcells.path <- gsub("//", "/", paste0(output.path, "/monthCells/"))
   plot.dirs <- paste0(monthcells.path, c("year_simname/", "month_simname/", "month_year/"))
   purrr::walk(plot.dirs, dir.create, recursive = TRUE, showWarnings = FALSE)

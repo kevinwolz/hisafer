@@ -42,7 +42,7 @@ read_hisafe_exp <- function(hip           = NULL,
     dplyr::mutate_all(factor)
 
   ## Read all data from all simulations & combine
-  data <- purrr::map(exp.plan$SimulationName, read_hisafe, path = path, profiles = profiles) %>%
+  data <- purrr::map(exp.plan$SimulationName, read_hisafe, hip = NULL, path = path, profiles = profiles) %>%
     purrr::pmap(dplyr::bind_rows) # a more generic version of this line that handles cases where the number
   # of elements and order of names in each sublist can vary is:
   # purrr::map(map_df(data, ~ as.data.frame(purrr::map(.x, ~ unname(nest(.))))), bind_rows)
@@ -136,7 +136,7 @@ read_hisafe <- function(hip           = NULL,
     profiles <- profiles[file.exists(files)]
   }
 
-  cat("Reading: ", simu.name, "\nProfiles:", paste0(profiles, collapse = ", "))
+  cat("\nReading: ", simu.name, "\nProfiles:", paste0(profiles, collapse = ", "))
 
   ## Read simulation inputs & extract cols that vary for binding to output data
   if(is.null(hip)){
@@ -275,7 +275,7 @@ read_hisafe <- function(hip           = NULL,
                  voxels      = voxels.data,
                  variables   = variables,
                  inputs      = hip,
-                 path        = simu.path)
+                 path        = tibble::tibble(path = simu.path))
 
   class(output)<-c("hop", class(output))
   return(output)
