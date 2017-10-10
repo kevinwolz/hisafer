@@ -54,10 +54,13 @@ read_hisafe_exp <- function(hip           = NULL,
       dplyr::mutate_at(names(exp.plan), factor) %>%
       dplyr::group_by(SimulationName)                          # group annual data by simulaton
   }
-  if(ncol(data$annual) > 0) data$annual <- data_tidy(data$annual)
-  if(ncol(data$daily)  > 0) data$daily  <- data_tidy(data$daily)
-  if(ncol(data$cells)  > 0) data$cells  <- data_tidy(data$cells)
-  if(ncol(data$voxels) > 0) data$voxels <- data_tidy(data$voxels)
+  if(nrow(data$annual) > 0)      data$annual      <- data_tidy(data$annual)
+  if(nrow(data$daily)  > 0)      data$daily       <- data_tidy(data$daily)
+  if(nrow(data$annualcrop)  > 0) data$annualcrop  <- data_tidy(data$annualcrop)
+  if(nrow(data$roots)  > 0)      data$roots       <- data_tidy(data$roots)
+  if(nrow(data$monthCells)  > 0) data$monthCells  <- data_tidy(data$monthCells)
+  if(nrow(data$cells)  > 0)      data$cells       <- data_tidy(data$cells)
+  if(nrow(data$voxels) > 0)      data$voxels      <- data_tidy(data$voxels)
   data$variables <- dplyr::distinct(data$variables)            # remove duplicate variable descriptions
   data$exp.plan  <- dplyr::mutate_all(exp.plan, factor)        # make all columns factors
 

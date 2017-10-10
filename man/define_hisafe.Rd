@@ -43,7 +43,5 @@ lat.orient.exp <- define_hisfafe(SimulationName = c("Lat15", "Lat30", "Lat45", "
 }
 }
 \seealso{
-Other hisafe definition functions: \code{\link{define_hisafe_file}},
-  \code{\link{hisafe_params}},
-  \code{\link{hisafe_profiles}}
+Other hisafe definition functions: \code{\link{define_hisafe_file}}
 }

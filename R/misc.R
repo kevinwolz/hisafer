@@ -5,7 +5,7 @@
 #' If "all", then the names, default values, and accepted/suggested ranges of supported Hi-sAFe parameters is printed.
 #' Can also be a character vector of specific Hi-sAFe parameters of which to display details.
 #' @export
-#' @family hisafe definition functions
+#' @family hisafe helper functions
 #' @examples
 #' \dontrun{
 #' hisafe_params()            # just for parameter names
@@ -46,11 +46,36 @@ hisafe_params <- function(variable = "names") {
 #' @description Displays supported Hi-sAFe output profiles and standard output frequency.
 #' @return Invisibly returns a data frame containing the profiles names and output frequency.
 #' @export
-#' @family hisafe definition functions
+#' @family hisafe helper functions
 #' @examples
 #' \dontrun{
 #' hisafe_profiles()
 #' }
 hisafe_profiles <- function(variable = "names") {
   print(as.data.frame(SUPPORTED.PROFILES), row.names = FALSE)
+}
+
+#' Change SimulationNames in a hop object
+#' @description Changes SimulationNames in a hop object.
+#' @return Returns the provided hop object with names changed.
+#' @param hop A hop object.
+#' @param old.names A character vector of the old SimulationNames to change.
+#' @param new.names A character vector of the new SimulationNames, in the same order as they apply to \code{old.names}.
+#' @export
+#' @family hisafe helper functions
+#' @examples
+#' \dontrun{
+#' simu_rename(myhop, old.names = c("Sim_1", "Sim_2"), new.names = c("Lat30", "Lat60"))
+#' }
+simu_rename <- function(hop, old.names, new.names) {
+  if(!any(c("hop", "hop-group") %in% class(hop))) stop("data not of class hop or hop-group", call. = FALSE)
+
+  profiles.to.check <- c("annual", "daily", "annualcrop", "roots", "monthCells", "cells", "voxels", "exp.plan")
+  profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
+
+  for(i in profiles) {
+    levels(hop[[i]]$SimulationName) <- new.names[match(levels(hop[[i]]$SimulationName), old.names)]
+  }
+
+  return(hop)
 }
