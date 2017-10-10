@@ -7,7 +7,7 @@
 run_hisafe(hip = NULL, path = NULL, simu.name = NULL)
 }
 \arguments{
-\item{hip}{An object of class hip with a single simulation (row).
+\item{hip}{An object of class "hip" with a single simulation (row).
 If the hip object contains a \code{path} value, then this can be used without providing \code{path} directly to \code{run_hisafe}.
 If \code{hip} is not provided, then \code{path} and \code{simu.name} are required.}
 

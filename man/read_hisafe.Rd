@@ -7,7 +7,7 @@
 read_hisafe(hip = NULL, simu.name = NULL, path = NULL, profiles = "all")
 }
 \arguments{
-\item{hip}{An object of class \code{hip}. To create a hip object see \code{\link{define_exp}}.
+\item{hip}{An object of class "hip". To create a hip object see \code{\link{define_exp}}.
 If object contains a \code{path} value, then this can be used without providing \code{path} directly to \code{read_hisafe}.
 Cannot provided both \code{hip} and \code{simu.name}.
 If \code{hip} is not provided, then \code{path} is required and the input data for the experiment is read from the experiment
@@ -24,7 +24,7 @@ If \code{hip} is not provided, then \code{path} is required. If both \code{hip} 
 Defaults to reading all supported Hi-sAFe output profiles via "all". For currently supported profiles see: \code{\link{hisafe_profiles}}}
 }
 \value{
-An object of class \code{hop}. This is a list of 10 data frames (tibbles):
+An object of class "hop". This is a list of 10 data frames (tibbles):
 \code{annual} (includes data from annualtree and annualplot profiles), \code{daily} (includes data from trees, plot, and climate profiles), \code{annualcrop},
 \code{roots}, \code{monthCells}, \code{cells}, \code{voxels}, \code{variables} (variable descriptions and units from all profiles),
 \code{inputs} (the hip object that generated the simulation), and \code{path} (the path to the simulation folder).

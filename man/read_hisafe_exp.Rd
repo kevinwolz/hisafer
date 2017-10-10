@@ -7,7 +7,7 @@
 read_hisafe_exp(hip = NULL, path = NULL, profiles = "all")
 }
 \arguments{
-\item{hip}{An object of class hip. To create a hip object see \code{\link{define_exp}}.
+\item{hip}{An object of class "hip". To create a hip object see \code{\link{define_exp}}.
 If the hip object contains a \code{path} value, then this can be used without providing \code{path} directly to \code{read_hisafe_exp}.
 If \code{hip} is not provided, then \code{path} is required and the input data for the experiment is read from the experiment
 summary .csv file created when building the experiment.}
@@ -20,7 +20,7 @@ If \code{hip} is not provided, then \code{path} is required. If both \code{hip} 
 Currently supported profiles are: annualplot, annualtree, annualcrop, plot, trees, roots, cells, voxels, climate, monthCells.}
 }
 \value{
-An object of class \code{hop-group}. This is a list of 13 data frames (tibbles):
+An object of class "hop-group". This is a list of 13 data frames (tibbles):
 \code{annual} (includes data from annualtree and annualplot profiles), \code{daily} (includes data from trees, plot, and climate profiles), \code{annualcrop},
 \code{roots}, \code{monthCells}, \code{cells}, \code{voxels}, \code{variables} (variable descriptions and units from all profiles),
 \code{inputs} (the hip object that generated the simulation), \code{path} (the paths to the simulation folders), \code{exp.plan} (the manipulated input variables in the experiment), and \code{exp.path} (the path to the experiment folder).

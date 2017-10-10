@@ -1,7 +1,7 @@
 #' Run a Hi-sAFe experiment
 #' @description Runs a Hi-sAFe experiment (a group of simulations) - calls Hi-sAFe from command line.
 #' @return Invisibly returns a list of console logs from simulation runs.
-#' @param hip An object of class hip with multiple simulations (rows).
+#' @param hip An object of class "hip" with multiple simulations (rows).
 #' If the hip object contains a \code{path} value, then this can be used without providing \code{exp.path} directly to \code{run_hisafe_exp}.
 #' If \code{hip} is not provided, then \code{exp.path} is required.
 #' @param exp.path A character string of the path to the experiment folder containing the simulation folders. Required if \code{hip} is not provided.
@@ -28,11 +28,12 @@ run_hisafe_exp <- function(hip        = NULL,
                            parallel   = FALSE,
                            num.cores  = NULL) {
 
+  if(!is.null(hip) & !("hip" %in% class(hip))) stop("data not of class hip", call. = FALSE)
   if(!is.null(hip)){
-    if(nrow(hip$hip) <= 1) stop("run_hisafe_exp runs multiple simulations. Please use hip object with more than one experiment (row).")
+    if(nrow(hip$hip) <= 1) stop("run_hisafe_exp runs multiple simulations. Please use hip object with more than one experiment (row).", call. = FALSE)
   }
   if(is.null(hip) & is.null(exp.path))    stop("must provide hip OR exp.path", call. = FALSE)
-  if(!is.null(hip) & !is.null(exp.path))  stop("must provide hip OR exp.path", call. = FALSE)
+  if(!is.null(hip) & !is.null(exp.path))  stop("must provide hip OR exp.path, not both", call. = FALSE)
 
   if(is.null(exp.path)) exp.path <- hip$path
 
@@ -54,6 +55,8 @@ run_hisafe_exp <- function(hip        = NULL,
 
   if(parallel) {
     if(is.null(num.cores)) num.cores <- parallel::detectCores() - 1
+    if(num.cores < 2) stop("There are less than 2 detectable cores on this computer. Parallel computing not possible.")
+    cat("\nInitializing simulations on", num.cores, "cores")
     cl <- parallel::makeCluster(num.cores)
     doParallel::registerDoParallel(cl)
     run.log <- foreach::foreach(i = simu.names, .inorder = FALSE) %dopar% run_hisafe(path = exp.path, simu.name = i)
@@ -67,7 +70,7 @@ run_hisafe_exp <- function(hip        = NULL,
 #' Run a Hi-sAFe simulation
 #' @description Runs a Hi-sAFe simulation - calls Hi-sAFe from command line.
 #' @return Invisibly returns a console log from simulation run.
-#' @param hip An object of class hip with a single simulation (row).
+#' @param hip An object of class "hip" with a single simulation (row).
 #' If the hip object contains a \code{path} value, then this can be used without providing \code{path} directly to \code{run_hisafe}.
 #' If \code{hip} is not provided, then \code{path} and \code{simu.name} are required.
 #' @param path A character string of the path to the folder containing the simulation folder. Required if \code{hip} is not provided.
@@ -87,19 +90,20 @@ run_hisafe_exp <- function(hip        = NULL,
 #' }
 run_hisafe <- function(hip = NULL, path = NULL, simu.name = NULL) {
 
+  if(!is.null(hip) & !("hip" %in% class(hip))) stop("data not of class hip", call. = FALSE)
   if(!is.null(hip)){
-    if(nrow(hip$hip) > 1) stop("run_hisafe_exp runs multiple simulations. Please use hip object with more than one experiment (row).")
+    if(nrow(hip$hip) > 1) stop("run_hisafe_exp runs multiple simulations. Please use hip object with more than one experiment (row).", call. = FALSE)
   }
   if(is.null(hip) & is.null(path))        stop("must provide at least one of hip or path", call. = FALSE)
   if(is.null(hip) & is.null(simu.name))   stop("must provide hip OR simu.name", call. = FALSE)
-  if(!is.null(hip) & !is.null(simu.name)) stop("must provide hip OR simu.name", call. = FALSE)
+  if(!is.null(hip) & !is.null(simu.name)) stop("must provide hip OR simu.name, not both", call. = FALSE)
 
   if(is.null(path)) path <- hip$path
   if(is.null(simu.name)) simu.name <- hip$SimulationName
 
   sim.path <- gsub("//", "/", paste0(path, "/", simu.name, "/"))
 
-  if(!dir.exists(sim.path)) stop("The simulation does not exist.")
+  if(!dir.exists(sim.path)) stop(paste("The simulation", simu.name, "does not exist."), call. = FALSE)
 
   simulationStartTime <- proc.time()[3]
   out <- file(paste0(sim.path, simu.name, "_simulation_log.txt"), open="w")

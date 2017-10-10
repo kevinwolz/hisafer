@@ -9,7 +9,7 @@ check_allowed(variable, hip)
 \arguments{
 \item{variable}{A character string of the name of the variable to check.}
 
-\item{hip}{An object of class \code{hip}.}
+\item{hip}{An object of class "hip"}
 }
 \value{
 An error message or empty character stirng.

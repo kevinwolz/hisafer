@@ -8,7 +8,7 @@ run_hisafe_exp(hip = NULL, exp.path = NULL, simu.names = "all",
   parallel = FALSE, num.cores = NULL)
 }
 \arguments{
-\item{hip}{An object of class hip with multiple simulations (rows).
+\item{hip}{An object of class "hip" with multiple simulations (rows).
 If the hip object contains a \code{path} value, then this can be used without providing \code{exp.path} directly to \code{run_hisafe_exp}.
 If \code{hip} is not provided, then \code{exp.path} is required.}
 

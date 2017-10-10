@@ -12,7 +12,7 @@ Each row in the file should represent a Hi-sAFe simulation and each column a Hi-
 For more information on supported parameters, see _____.}
 }
 \value{
-An object of class \code{hip}. This is a data frame (tibble) with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
+An object of class "hip". This is a data frame (tibble) with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
 }
 \description{
 Defines a Hi-sAFe experiment - the input parameters to one or more Hi-sAFe simulations.

@@ -7,7 +7,7 @@
 check_input_values(hip)
 }
 \arguments{
-\item{hip}{An object of class \code{hip}.}
+\item{hip}{An object of class "hip".}
 }
 \value{
 Produces errors and/or warnings if issues are found. Otherwise, invisibly returns \code{TRUE}.

@@ -8,7 +8,7 @@ diag_hisafe_ts(hop, time.class = "annual", output.path = NULL,
   time.lim = NULL, tree.id = NULL)
 }
 \arguments{
-\item{hop}{An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.}
+\item{hop}{An object of class "hop" or "hop-group" containing output data from one or more Hi-sAFe simulations.}
 
 \item{time.class}{If 'annual', the default, annual timeseries are created. If 'daily', daily timeseries are created.}
 
@@ -24,7 +24,7 @@ If no input, the full available time range is plotted. Use \code{NA} to refer to
 \item{tree.id}{A numeric vector indicating the ids of a subset of tree ids to plot. If no input, all trees will be plotted.}
 }
 \value{
-Invisibly returns a list of \code{ggplot} objects. If the data is of class \code{hop-group} and contains
+Invisibly returns a list of \code{ggplot} objects. If the data is of class "hop-group" and contains
 data from more than one Hi-sAFe simulation, the plots will contain multiple lines, colored and labeled by SimulationName.
 If the data contains two more tree ids, the plots will be faceted by tree id.
 }

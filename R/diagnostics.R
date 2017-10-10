@@ -1,10 +1,10 @@
 #' Plot timeseries diagnostics of Hi-sAFe output
 #' @description Plots a daily or annual timeseries of every Hi-sAFe output variable. All plots are saved as
 #' png files to a specifified output path.
-#' @return Invisibly returns a list of \code{ggplot} objects. If the data is of class \code{hop-group} and contains
+#' @return Invisibly returns a list of \code{ggplot} objects. If the data is of class "hop-group" and contains
 #' data from more than one Hi-sAFe simulation, the plots will contain multiple lines, colored and labeled by SimulationName.
 #' If the data contains two more tree ids, the plots will be faceted by tree id.
-#' @param hop An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
+#' @param hop An object of class "hop" or "hop-group" containing output data from one or more Hi-sAFe simulations.
 #' @param time.class If 'annual', the default, annual timeseries are created. If 'daily', daily timeseries are created.
 #' @param output.path A character stting indicating the path to the directory where plots should be saved. Plots are
 #' saved in a subdirectory within this directory named by \code{time.class}.
@@ -84,7 +84,7 @@ diag_hisafe_ts <- function(hop,
 #' Month~Year plots are for all 12 months and every 5 years from 0:max, with each simulation in its own plot.
 #' @return Invisibly returns a list of \code{ggplot} objects, grouped into two sublists based on the faceting scheme.
 #' The first sublist contains  Year~SimulationName, and the second contains Month~SimulationName.
-#' @param hop An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
+#' @param hop An object of class "hop" or "hop-group" containing output data from one or more Hi-sAFe simulations.
 #' @param output.path A character stting indicating the path to the directory where plots should be saved. Plots are
 #' saved in a subdirectory within this directory named /monthCells/facetScheme.
 #' If no value is provided, the experiment/simulation path is read from the hop object, and a folder is created there called "diagnostics".

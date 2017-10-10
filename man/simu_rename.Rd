@@ -7,7 +7,7 @@
 simu_rename(hop, old.names, new.names)
 }
 \arguments{
-\item{hop}{A hop object.}
+\item{hop}{A object of class "hop".}
 
 \item{old.names}{A character vector of the old SimulationNames to change.}
 

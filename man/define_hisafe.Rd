@@ -14,7 +14,7 @@ If \code{TRUE}, then a factorial experiment is created, in which an ecperiment i
 Parameters should be passed as \code{parameterName = values}. For more information on supported parameters, see _____.}
 }
 \value{
-An object of class \code{hip}. This is a data frame (tibble) with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
+An object of class "hip". This is a data frame (tibble) with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
 }
 \description{
 Defines a Hi-sAFe experiment - the input parameters to one or more Hi-sAFe simulations.

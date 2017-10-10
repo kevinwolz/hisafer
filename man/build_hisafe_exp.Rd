@@ -8,7 +8,7 @@ build_hisafe_exp(hip, path, exp.name = "experiment", profiles = "all",
   saveProjectOption = FALSE, controls = FALSE)
 }
 \arguments{
-\item{hip}{An object of class hip - typically with multiple simulations (rows).}
+\item{hip}{An object of class "hip" - typically with multiple simulations (rows).}
 
 \item{path}{A character string of the path to the folder in which the experiment folder should be created.}
 

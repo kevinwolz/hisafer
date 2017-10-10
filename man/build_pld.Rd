@@ -7,7 +7,7 @@
 build_pld(plan, path)
 }
 \arguments{
-\item{plan}{A single simulation (row) from an object of class hip.}
+\item{plan}{A single simulation (row) from an object of class "hip"}
 
 \item{path}{A character string of the path to the simulation folder.}
 }

@@ -5,7 +5,7 @@
 #' If \code{factorial = FALSE}, the default, then supply a value of \code{SimulationName} for each experiment.
 #' If \code{factorial = TRUE}, then supply a single value of \code{SimulationName} as a prefix.
 #' \code{define_hisafe} will append "_1", "_2", etc. for each of the (unknown number of) factorial experiments.
-#' @return An object of class \code{hip}. This is a data frame (tibble) with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
+#' @return An object of class "hip". This is a data frame (tibble) with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
 #' @param factorial If \code{FALSE}, the default, then values are recycled (i.e. such as for default behavior of \code{data.frame()}).
 #' If \code{TRUE}, then a factorial experiment is created, in which an ecperiment is defined for each possible combination of supplied values.
 #' @param ... Any suported Hi-sAFe input parameter in the .sim and .pld files can be passed.
@@ -49,13 +49,7 @@ define_hisafe <- function(factorial = FALSE, ...) {
     if(all(unique(hip$SimulationName) == "Sim")) hip$SimulationName <- paste0(hip$SimulationName, "_", 1:nrow(hip))
   }
 
-  is.unique <- function(x) { length(unique(x)) != 1 }
-  unique.cols  <- names(hip)[purrr::map_lgl(hip, is.unique)]
-  manip.cols   <- names(arg.list)[!(names(arg.list) %in% unique.cols)]
-  default.cols <- names(defaults.to.add)[!(names(defaults.to.add) == "SimulationName")]
-  hip <- dplyr::bind_cols(hip[,  unique.cols], hip[, manip.cols], hip[, default.cols]) %>%
-    dplyr::select(SimulationName, dplyr::everything())
-
+  hip <- arrange_hip(hip, arg.list, defaults.to.add)
   check_input_values(hip)
   class(hip) <- c("hip", class(hip))
   return(hip)
@@ -65,7 +59,7 @@ define_hisafe <- function(factorial = FALSE, ...) {
 #' @description Defines a Hi-sAFe experiment - the input parameters to one or more Hi-sAFe simulations.
 #' @details It is strongly recommended to name each simulation in your experiment. This can be done via the \code{SimulationName} parameter.
 #' If no names are provided, then \code{define_hisafe_file} will provide generic names of "Sim_1", "Sim_2", etc.
-#' @return An object of class \code{hip}. This is a data frame (tibble) with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
+#' @return An object of class "hip". This is a data frame (tibble) with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
 #' @param file A character string of the path to a csv file.
 #' Each row in the file should represent a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
 #' For more information on supported parameters, see _____.
@@ -89,13 +83,7 @@ define_hisafe_file <- function(file) {
 
   if(length(unique(hip$SimulationName)) == 1) hip$SimulationName <- paste0(hip$SimulationName, "_", 1:nrow(hip))
 
-  is.unique <- function(x) { length(unique(x)) != 1 }
-  unique.cols  <- names(hip)[purrr::map_lgl(hip, is.unique)]
-  manip.cols   <- names(arg.list)[!(names(arg.list) %in% unique.cols)]
-  default.cols <- names(defaults.to.add)
-  hip <- dplyr::bind_cols(hip[,  unique.cols], hip[, manip.cols], hip[, default.cols]) %>%
-    dplyr::select(SimulationName, dplyr::everything())
-
+  hip <- arrange_hip(hip, provided, defaults.to.add)
   check_input_values(hip)
   class(hip) <- c("hip", class(hip))
   return(hip)
@@ -105,7 +93,7 @@ define_hisafe_file <- function(file) {
 #' @description Checks the validity of all Hi-sAFe inputs against \code{HISAFE.PARAMS} and provides errors and/or warnings if issues are found.
 #' Used within \code{define_hisafe} and \code{define_hisafe_file}.
 #' @return Produces errors and/or warnings if issues are found. Otherwise, invisibly returns \code{TRUE}.
-#' @param hip An object of class \code{hip}.
+#' @param hip An object of class "hip".
 check_input_values <- function(hip) {
 
   ## Check for unsupported inputs
@@ -148,7 +136,7 @@ check_input_values <- function(hip) {
 #' Used within \code{check_input_values}.
 #' @return An error message or empty character stirng.
 #' @param variable A character string of the name of the variable to check.
-#' @param hip An object of class \code{hip}.
+#' @param hip An object of class "hip"
 check_allowed <- function(variable, hip) {
   allowed.vals <- purrr::map(HISAFE.PARAMS, ~ .x[["allowed"]])[[variable]]
   allowed.pass <- (is.na(allowed.vals[1]) | all(hip[[variable]] %in% allowed.vals))
@@ -164,7 +152,7 @@ check_allowed <- function(variable, hip) {
 #' Used within \code{check_input_values}.
 #' @return An error message or empty character stirng.
 #' @param variable A character string of the name of the variable to check.
-#' @param hip An object of class \code{hip}.
+#' @param hip An object of class "hip"
 check_minmax <- function(variable, hip) {
   min.val  <- purrr::map(HISAFE.PARAMS, ~ .x[["min"]])[[variable]]
   max.val  <- purrr::map(HISAFE.PARAMS, ~ .x[["max"]])[[variable]]
@@ -186,7 +174,7 @@ check_minmax <- function(variable, hip) {
 #' Used within \code{check_input_values}.
 #' @return A warning message or empty character stirng.
 #' @param variable A character string of the name of the variable to check.
-#' @param hip An object of class \code{hip}.
+#' @param hip An object of class "hip"
 check_minmax_sug <- function(variable, hip) {
   min.sug.val <- purrr::map(HISAFE.PARAMS, ~ .x[["min.sug"]])[[variable]]
   max.sug.val <- purrr::map(HISAFE.PARAMS, ~ .x[["max.sug"]])[[variable]]
@@ -201,4 +189,21 @@ check_minmax_sug <- function(variable, hip) {
   } else if(!is.na(max.sug.val) & is.na(min.sug.val)) {
     return(paste0("-- ", variable, " - is typically less than ", max.sug.val))
   }
+}
+
+#' Arrange columns of hip object
+#' @description Arranges columns of hip object so that Simulationname is first, then columns that vary between eperiments,
+#' then columns with non-default values, and finally columns with default values.
+#' Used within \code{define_hisafe} and \code{define_hisafe_file}.
+#' @return A hip object
+#' @param hip An object of class "hip"
+#' @param arg.list Passed by \code{define_hisafe}.
+#' @param defaults.to.add Passed by \code{define_hisafe}.
+arrange_hip <- function(hip, arg.list, defaults.to.add) {
+  unique.cols  <- names(hip)[purrr::map_lgl(hip, function(x) (length(unique(x)) != 1))]
+  manip.cols   <- names(arg.list)[!(names(arg.list) %in% unique.cols)]
+  default.cols <- names(defaults.to.add)[!(names(defaults.to.add) == "SimulationName")]
+  hip <- dplyr::bind_cols(hip[,  unique.cols], hip[, manip.cols], hip[, default.cols]) %>%
+    dplyr::select(SimulationName, dplyr::everything())
+  return(hip)
 }

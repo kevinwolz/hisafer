@@ -7,7 +7,7 @@
 build_hisafe(hip, path, profiles = "all", saveProjectOption = FALSE)
 }
 \arguments{
-\item{hip}{A single simulation (row) from an object of class hip.}
+\item{hip}{An object of class "hip" containing a single simulation (row).}
 
 \item{path}{A character string of the path to the simulation folder.}
 

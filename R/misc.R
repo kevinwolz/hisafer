@@ -58,7 +58,7 @@ hisafe_profiles <- function(variable = "names") {
 #' Change SimulationNames in a hop object
 #' @description Changes SimulationNames in a hop object.
 #' @return Returns the provided hop object with names changed.
-#' @param hop A hop object.
+#' @param hop A object of class "hop".
 #' @param old.names A character vector of the old SimulationNames to change.
 #' @param new.names A character vector of the new SimulationNames, in the same order as they apply to \code{old.names}.
 #' @export
