@@ -32,7 +32,7 @@ define_hisafe <- function(factorial = FALSE, ...) {
 
   # FOR TESTING
   # tmpfun <- function(...){ list(...) }
-  # arg.list <- tmpfun(SimulationName = c("my1", "my2"), spacingBetweenRows = c(7,9), spacingWithinRows = c(5,7), cellWidth = 1)
+  # arg.list <- tmpfun(treeSpecies = c("walnut-hybrid", "poplar", "wild-cherry"))
 
   arg.list <- list(...)
 
@@ -52,7 +52,7 @@ define_hisafe <- function(factorial = FALSE, ...) {
   is.unique <- function(x) { length(unique(x)) != 1 }
   unique.cols  <- names(hip)[purrr::map_lgl(hip, is.unique)]
   manip.cols   <- names(arg.list)[!(names(arg.list) %in% unique.cols)]
-  default.cols <- names(defaults.to.add)
+  default.cols <- names(defaults.to.add)[!(names(defaults.to.add) == "SimulationName")]
   hip <- dplyr::bind_cols(hip[,  unique.cols], hip[, manip.cols], hip[, default.cols]) %>%
     dplyr::select(SimulationName, dplyr::everything())
 

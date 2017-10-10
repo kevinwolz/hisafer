@@ -31,7 +31,7 @@ build_hisafe_exp <- function(hip,
   dum <- dir.create(exp.path, showWarnings = FALSE)
 
   ## Write out experiment summary
-  readr::write_csv(hip, gsub("//", "/", paste0(exp.path, "/", exp.name, "_summary.csv")))
+  readr::write_csv(hip, gsub("//", "/", paste0(exp.path, "/", exp.name, "_experiment_summary.csv")))
 
   ## build folder tree & input files for each simulation in experiment
   make_hip <- function(x) {
