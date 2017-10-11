@@ -55,7 +55,6 @@ plot_hisafe_ts <- function(hop,
     x.var      <- "Year"
     x.label    <- "Years after establishment"
     plot.data  <- hop$annual %>%
-      dplyr::filter(!is.na(Date)) %>%            # any simulations that produced output profiles with no data will have NA's in all columns
       dplyr::mutate(Year = Year - min(Year) + 1) # Create 0+ year values
     scale_x_ts <- scale_x_continuous(sec.axis = sec_axis(~ ., labels = NULL))
     if(!is.null(time.lim)) {
@@ -66,8 +65,7 @@ plot_hisafe_ts <- function(hop,
   } else {
     x.var      <- "Date"
     x.label    <- "Date"
-    plot.data  <- hop$daily %>%
-      dplyr::filter(!is.na(Date)) # any simulations that produced output profiles with no data will have NA's in all columns
+    plot.data  <- hop$daily
     scale_x_ts <- scale_x_date()
     if(!is.null(time.lim)) {
       time.lim <- lubridate::ymd(time.lim)

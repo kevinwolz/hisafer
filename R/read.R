@@ -50,6 +50,7 @@ read_hisafe_exp <- function(hip = NULL, path = NULL, profiles = "all") {
   data_tidy <- function(x){
     if(nrow(x) > 0) {
       x <- dplyr::left_join(exp.plan, x, by = "SimulationName") %>%   # add exp.plan cols to annual data
+        dplyr::filter(!is.na(Date)) %>%                               # output profiles with no data will have NA's in all columns
         dplyr::mutate_at(names(exp.plan), factor) %>%
         dplyr::group_by(SimulationName)                               # group annual data by simulaton
     }
@@ -164,16 +165,15 @@ read_hisafe <- function(hip = NULL, simu.name = NULL, path = NULL, profiles = "a
       ## Extract & tidy data
       dat.data <- dat.list %>%
         purrr::map(1) %>%                                    # extract first element (data) of each profile
-        purrr::reduce(dplyr::full_join, by = join.cols) %>%  # bind all variable descriptions togeter
+        purrr::reduce(dplyr::full_join, by = join.cols) %>%  # bind all profiles togeter
         dplyr::mutate_if(is.logical, as.numeric)             # columns read as logical must be coered to numeric to prevent plotting errors
-
       ## Extract & tidy variable definitions
       dat.variables <- dat.list %>%
         purrr::map(2) %>%                              # extract second element (variable descriptions) of each profile
         dplyr::bind_rows() %>%                         # bind all variable descriptions togeter
         dplyr::mutate(VariableClass = time.class)      # add a column that indicates which data class the variable definition is from
     } else {
-      dat.data <- dat.variables <- dplyr::tibble()    # if no profiles were requested from this data class, return empty tibbles
+      dat.data <- dat.variables <- dplyr::tibble()     # if no profiles were requested from this data class, return empty tibbles
     }
     return(list(data = dat.data, variables = dat.variables))
   }
@@ -184,7 +184,8 @@ read_hisafe <- function(hip = NULL, simu.name = NULL, path = NULL, profiles = "a
     cat(paste0("\nreading:  ", profile, collapse = ", "))
     if(file.info(file)$size < 3e8) {
       profile.list      <- read_hisafe_output_file(file)
-      profile.data      <- profile.list$data
+      profile.data      <- profile.list$data %>%
+        dplyr::mutate_if(is.logical, as.numeric)   # columns read as logical must be coered to numeric to prevent plotting errors
       profile.variables <- profile.list$variables %>% dplyr::mutate(VariableClass = profile)
     } else {
       warning(paste(profile, "profile too large (> 300 MB) to read"), call. = FALSE)
