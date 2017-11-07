@@ -1,4 +1,4 @@
-#' hisafe: A package of tools for interacting with the Hi-sAFe biophysical agroforestry model.
+#' hisafer: A package of tools for interacting with the Hi-sAFe biophysical agroforestry model.
 #'
 #' The hisafer package provides functions for defining, building, running, reading,
 #' analyzing, and plotting Hi-sAFe simulaitons.

@@ -8,6 +8,7 @@
 #' @param simu.names Names of the simulations to run. Default is to run all simulations in the experiment folder via "all".
 #' @param parallel Logical, should parallel computing be used.
 #' @param num.cores Numbers of cores to use in parallel computing. If not provided, will default to one less than the total number of available cores.
+#' @param capsis.path A character string of the path to the Capsis folder
 #' @export
 #' @importFrom foreach %dopar%
 #' @family hisafe run functions
@@ -22,11 +23,12 @@
 #' # the simulations can all be run:
 #' run_hisafe_exp(myexp)
 #' }
-run_hisafe_exp <- function(hip        = NULL,
-                           exp.path   = NULL,
-                           simu.names = "all",
-                           parallel   = FALSE,
-                           num.cores  = NULL) {
+run_hisafe_exp <- function(hip         = NULL,
+                           exp.path    = NULL,
+                           simu.names  = "all",
+                           parallel    = FALSE,
+                           num.cores   = NULL,
+                           capsis.path = "/Applications/Capsis/") {
 
   if(!is.null(hip) & !("hip" %in% class(hip))) stop("data not of class hip", call. = FALSE)
   if(!is.null(hip)){
@@ -59,7 +61,7 @@ run_hisafe_exp <- function(hip        = NULL,
     cat("\nInitializing simulations on", num.cores, "cores")
     cl <- parallel::makeCluster(num.cores)
     doParallel::registerDoParallel(cl)
-    run.log <- foreach::foreach(i = simu.names, .inorder = FALSE) %dopar% run_hisafe(path = exp.path, simu.name = i)
+    run.log <- foreach::foreach(i = simu.names, .inorder = FALSE) %dopar% run_hisafe(path = exp.path, simu.name = i, capsis.path = capsis.path)
     doParallel::stopImplicitCluster()
   } else {
     run.log <- foreach::foreach(i = simu.names) %do% run_hisafe(path = exp.path, simu.name = i)
@@ -75,6 +77,7 @@ run_hisafe_exp <- function(hip        = NULL,
 #' If \code{hip} is not provided, then \code{path} and \code{simu.name} are required.
 #' @param path A character string of the path to the folder containing the simulation folder. Required if \code{hip} is not provided.
 #' @param simu.name Name of the simulation to run. Required if \code{hip} is not provided.
+#' @param capsis.path A character string of the path to the Capsis folder
 #' @export
 #' @family hisafe run functions
 #' @examples
@@ -88,7 +91,7 @@ run_hisafe_exp <- function(hip        = NULL,
 #' # the simulations can all be run:
 #' run_hisafe(myexp)
 #' }
-run_hisafe <- function(hip = NULL, path = NULL, simu.name = NULL) {
+run_hisafe <- function(hip = NULL, path = NULL, simu.name = NULL, capsis.path = "/Applications/Capsis/") {
 
   if(!is.null(hip) & !("hip" %in% class(hip))) stop("data not of class hip", call. = FALSE)
   if(!is.null(hip)){
@@ -112,7 +115,7 @@ run_hisafe <- function(hip = NULL, path = NULL, simu.name = NULL) {
 
   ## Change working directory to Capsis directory
   pre.wd <- getwd()
-  setwd("/Applications/Capsis/")
+  setwd(capsis.path)
 
   ## Run Hi-sAFe
   call <- paste0("sh capsis.sh -p script safe.pgms.ScriptGen ", sim.path, simu.name, ".sim")
