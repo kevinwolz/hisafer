@@ -24,7 +24,7 @@ build_hisafe_exp <- function(hip,
                              controls          = FALSE) {
 
   ## Check if data has class hip
-  if(!("hip" %in% class(hip))) stop("data not of class hip")
+  if(!("hip" %in% class(hip))) stop("data not of class hip", call. = FALSE)
 
   ## Create experiment directory
   exp.path <- gsub("//", "/", paste0(path, "/", exp.name))
@@ -45,7 +45,7 @@ build_hisafe_exp <- function(hip,
     purrr::walk(build_hisafe, path = exp.path, profiles = profiles, saveProjectOption = saveProjectOption)
 
   ## Run control simulations
-  if(controls) stop("support for running control simulations not yet supported")
+  if(controls) stop("support for running control simulations not yet supported", call. = FALSE)
 
   hip.aug <- list(hip = hip, path = exp.path)
   class(hip.aug) <- c("hip", class(hip.aug))
@@ -74,13 +74,17 @@ build_hisafe <- function(hip, path, profiles = "all", saveProjectOption = FALSE)
   if(profiles[1] == "all") profiles <- SUPPORTED.PROFILES$profiles
 
   ## Check if data has class hip and nrow == 1
-  if(!("hip" %in% class(hip))) stop("data not of class hip")
+  if(!("hip" %in% class(hip))) stop("data not of class hip", call. = FALSE)
   if(nrow(hip) > 1)            stop("build_hisafe only handles hip objects containing a single simulation (1 row).
-                                     Use build_hisafe_exp to build multiple simulations.")
+                                     Use build_hisafe_exp to build multiple simulations.", call. = FALSE)
+
+  ## Check if path already exists
+  if(!dir.exists(path)) stop("path does not exist.", call. = FALSE)
 
   ## Copy over folder structure & template files from Hi-sAFe template path
   ## Any newly built files below will overwrite these files
   sim.path <- gsub("//", "/", paste0(path, "/", hip$SimulationName))
+  if(dir.exists(sim.path)) stop(paste0("A simulation with the name <", hip$SimulationName, "> already exisits in this location."), call. = FALSE)
   system(paste("cp -r", HISAFE.TEMPLATE, sim.path))
 
   ## Write out experiment summary
@@ -102,7 +106,7 @@ build_hisafe <- function(hip, path, profiles = "all", saveProjectOption = FALSE)
   dum <- purrr::map(required.tecs, file.copy, to = paste0(sim.path, "/itk"))
 
   ## Copy required .tree files to treeSpecies
-  required.trees <- paste0(HISAFE.LIBRARY, "treeSpecies/", hip$treeSpecies, ".tec")
+  required.trees <- paste0(HISAFE.LIBRARY, "treeSpecies/", hip$treeSpecies, ".tree")
   dum <- purrr::map(required.trees, file.copy, to = paste0(sim.path, "/treeSpecies"))
 
   ## Copy required exportProfiles

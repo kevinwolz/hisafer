@@ -8,9 +8,9 @@ saveProjectOption = 0
 
 # CROP ROTATION
 mainCropSpecies = durum-wheat-allur.plt
-interCropSpecies = baresoil.plt
+interCropSpecies = grass.plt
 mainCropItk = durum-wheat.tec
-interCropItk = weed-restinclieres.tec
+interCropItk = grass.tec
 treeCropDistance = 0.5
 weededAreaRadius = 0
 
