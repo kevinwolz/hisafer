@@ -4,7 +4,8 @@
 \alias{run_hisafe}
 \title{Run a Hi-sAFe simulation}
 \usage{
-run_hisafe(hip = NULL, path = NULL, simu.name = NULL)
+run_hisafe(hip = NULL, path = NULL, simu.name = NULL,
+  capsis.path = "/Applications/Capsis/")
 }
 \arguments{
 \item{hip}{An object of class "hip" with a single simulation (row).
@@ -14,6 +15,8 @@ If \code{hip} is not provided, then \code{path} and \code{simu.name} are require
 \item{path}{A character string of the path to the folder containing the simulation folder. Required if \code{hip} is not provided.}
 
 \item{simu.name}{Name of the simulation to run. Required if \code{hip} is not provided.}
+
+\item{capsis.path}{A character string of the path to the Capsis folder}
 }
 \value{
 Invisibly returns a console log from simulation run.

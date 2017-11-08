@@ -5,7 +5,8 @@
 \title{Run a Hi-sAFe experiment}
 \usage{
 run_hisafe_exp(hip = NULL, exp.path = NULL, simu.names = "all",
-  parallel = FALSE, num.cores = NULL)
+  parallel = FALSE, num.cores = NULL,
+  capsis.path = "/Applications/Capsis/")
 }
 \arguments{
 \item{hip}{An object of class "hip" with multiple simulations (rows).
@@ -19,6 +20,8 @@ If \code{hip} is not provided, then \code{exp.path} is required.}
 \item{parallel}{Logical, should parallel computing be used.}
 
 \item{num.cores}{Numbers of cores to use in parallel computing. If not provided, will default to one less than the total number of available cores.}
+
+\item{capsis.path}{A character string of the path to the Capsis folder}
 }
 \value{
 Invisibly returns a list of console logs from simulation runs.

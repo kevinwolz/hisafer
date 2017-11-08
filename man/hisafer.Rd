@@ -4,7 +4,7 @@
 \name{hisafer}
 \alias{hisafer}
 \alias{hisafer-package}
-\title{hisafe: A package of tools for interacting with the Hi-sAFe biophysical agroforestry model.}
+\title{hisafer: A package of tools for interacting with the Hi-sAFe biophysical agroforestry model.}
 \description{
 The hisafer package provides functions for defining, building, running, reading,
 analyzing, and plotting Hi-sAFe simulaitons.
