@@ -1,6 +1,5 @@
 # SIMULATION 
 pldFileName = template.pld
-
 nbSimulations = 1
 simulationYearStart = 1995
 simulationDayStart = 290
@@ -22,7 +21,7 @@ weatherFile = weather.wth
 profileNames = annualplot,annualtree,annualcrop,plot,trees,cells
 exportFrequencies = 365,365,365,1,1,1
 
-# TORIC SYMETRY PARAMETERS
+# TORIC SYMETRY
 toreXp = 1
 toreXn = 1
 toreYp = 1

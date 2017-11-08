@@ -53,5 +53,15 @@ HISAFE.PARAMS <- list(
   treePruningMaxHeight      = param( 4,                    NA,                 0,     NA,    2,       5),
   treeRootPruningFreq       = param( 0,                    NA,                 0,     NA,    0,       3),    # special def
   treeRootPruningDistance   = param( 0.5,                  NA,                 NA,    NA,    0.5,     2),
-  treeRootPruningDepth      = param( 0,                    NA,                 0,     NA,    NA,      2)
+  treeRootPruningDepth      = param( 0,                    NA,                 0,     NA,    NA,      2),
+
+  ## TREE
+  budBurstTempAccumulationDateStart       = param( 61,     NA,                 1,     365,   NA,      NA),
+  budBurstAccumulatedTemp                 = param( 612,    NA,                 1,     10000, 200,     1000),
+  lueMax                                  = param( 0.6,    NA,                 0,     NA,    NA,      NA),
+  coarseRootAnoxiaResistance              = param( 60,     NA,                 NA,    NA,    NA,      NA),
+  rootHalfLife                            = param( 114,    NA,                 NA,    NA,    NA,      NA),
+  rootAnoxiaHalfLife                      = param( 50,     NA,                 NA,    NA,    NA,      NA),
+  colonisationThreshold                   = param( 1500,   NA,                 NA,    NA,    NA,      NA)
 )
+

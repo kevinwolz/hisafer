@@ -23,7 +23,6 @@ windMeanForce = 5
 # SOIL
 waterTable = true
 voxelThicknessMax = 0.2
-
 humificationDepth = 0.40
 organicNitrogen = 0.13
 albedo = 0.2
@@ -32,17 +31,14 @@ rainRunOffFraction = 0.2
 rootingObstance = 1.2
 minNh4Concentration = 0
 ph = 8.4
-
 capillary = false
 capillaryUptake = 1
 minHumidity = 0.3
-
 drainage = false
 impermeableLayerDepth = 0
 spaceBetweenDrainagePipes = 0
 drainagePipesDepth = 0
 waterConductivity = 0
-
 swellingClaySoil = false
 nitrification = true
 denitrification = false

@@ -93,9 +93,17 @@ build_hisafe <- function(hip, path, profiles = "all", saveProjectOption = FALSE)
   ## Move weather file if one was provided
   if(hip$weatherFile != "default") file.copy(hip$weatherFile, paste0(sim.path, "/weather/weather.wth"), overwrite = TRUE)
 
+  ## Copy required .plt files to cropSpecies
+  required.plts <- paste0(HISAFE.LIBRARY, "cropSpecies/", c(hip$mainCropSpecies, hip$interCropSpecies), ".plt")
+  dum <- purrr::map(required.plts, file.copy, to = paste0(sim.path, "/cropSpecies"))
+
   ## Copy required .tec files to itk
-  required.tecs <- paste0(HISAFE.LIBRARY, "itk/", c(hip$mainCropSpecies, hip$interCropSpecies), ".tec")
+  required.tecs <- paste0(HISAFE.LIBRARY, "itk/", c(hip$mainCropItk, hip$interCropItk), ".tec")
   dum <- purrr::map(required.tecs, file.copy, to = paste0(sim.path, "/itk"))
+
+  ## Copy required .tree files to treeSpecies
+  required.trees <- paste0(HISAFE.LIBRARY, "treeSpecies/", hip$treeSpecies, ".tec")
+  dum <- purrr::map(required.trees, file.copy, to = paste0(sim.path, "/treeSpecies"))
 
   ## Copy required exportProfiles
   if(!all(profiles %in% SUPPORTED.PROFILES$profiles)) {
@@ -106,6 +114,9 @@ build_hisafe <- function(hip, path, profiles = "all", saveProjectOption = FALSE)
 
   export.profile.paths <- paste0(HISAFE.LIBRARY, "exportParameters/", profiles, ".pro")
   dum <- purrr::map(export.profile.paths, file.copy, to = paste0(sim.path, "/exportParameters"))
+
+  ## Edit tree file
+  build_tree(hip, sim.path, hip$treeSpecies)
 
   hip.aug <- list(hip = hip, path = path)
   class(hip.aug) <- c("hip", class(hip.aug))
@@ -130,8 +141,8 @@ build_pld <- function(plan, path) {
   pld[20]  <- paste0("slopeAspect = ",         plan$slopeAspect)
   pld[21]  <- paste0("windMeanForce = ",       plan$windMeanForce)
   pld[24]  <- paste0("waterTable = ",          plan$waterTable)
-  pld[100] <- paste0("TreeInit\t",             plan$treeSpecies, "\t1\t", plan$treeHeight, "\t0.5\t0\t0.5\t0.25\t0\t0")
-  pld[105] <- paste0("RootInit\t",             plan$rootShape, "\t3\t0.6\t0\t0\t0.5")
+  pld[96]  <- paste0("TreeInit\t",             plan$treeSpecies, "\t1\t", plan$treeHeight, "\t0.5\t0\t0.5\t0.25\t0\t0")
+  pld[101] <- paste0("RootInit\t",             plan$rootShape, "\t3\t0.6\t0\t0\t0.5")
 
   writeLines(pld, pld.file)
   dum <- file.rename(paste0(path, "/plotDescription/template.pld"), paste0(path, "/plotDescription/", plan$SimulationName, ".pld"))
@@ -153,50 +164,73 @@ build_sim <- function(plan, path, profiles, saveProjectOption) {
   nyears <- plan$nbSimulations
 
   sim[2]  <- paste0("pldFileName = ",         plan$SimulationName, ".pld")
-  sim[4]  <- paste0("nbSimulations = ",       plan$nbSimulations)
-  sim[5]  <- paste0("simulationYearStart = ", plan$simulationYearStart)
-  sim[6]  <- paste0("simulationDayStart = ",  plan$simulationDayStart)
-  sim[7]  <- paste0("simulationNbrDays = ",   plan$simulationNbrDays)
-  sim[8]  <- paste0("saveProjectOption = ",   as.numeric(saveProjectOption))
-  sim[11] <- paste0("mainCropSpecies = ",     plan$mainCropSpecies,  ".plt")
-  sim[12] <- paste0("interCropSpecies = ",    plan$interCropSpecies, ".plt")
-  sim[13] <- paste0("mainCropItk = ",         plan$mainCropItk,  ".tec")
-  sim[14] <- paste0("interCropItk = ",        plan$interCropItk, ".tec")
-  sim[15] <- paste0("treeCropDistance = ",    plan$treeCropDistance)
-  sim[16] <- paste0("weededAreaRadius = ",    plan$weededAreaRadius)
+  sim[3]  <- paste0("nbSimulations = ",       plan$nbSimulations)
+  sim[4]  <- paste0("simulationYearStart = ", plan$simulationYearStart)
+  sim[5]  <- paste0("simulationDayStart = ",  plan$simulationDayStart)
+  sim[6]  <- paste0("simulationNbrDays = ",   plan$simulationNbrDays)
+  sim[7]  <- paste0("saveProjectOption = ",   as.numeric(saveProjectOption))
+  sim[10] <- paste0("mainCropSpecies = ",     plan$mainCropSpecies,  ".plt")
+  sim[11] <- paste0("interCropSpecies = ",    plan$interCropSpecies, ".plt")
+  sim[12] <- paste0("mainCropItk = ",         plan$mainCropItk,  ".tec")
+  sim[13] <- paste0("interCropItk = ",        plan$interCropItk, ".tec")
+  sim[14] <- paste0("treeCropDistance = ",    plan$treeCropDistance)
+  sim[15] <- paste0("weededAreaRadius = ",    plan$weededAreaRadius)
 
-  sim[19] <- "weatherFile = weather.wth"
+  sim[18] <- "weatherFile = weather.wth"
 
-  sim[22] <- paste0("profileNames = ",        paste0(SUPPORTED.PROFILES$profiles[SUPPORTED.PROFILES$profiles %in% profiles], collapse = ","))
-  sim[23] <- paste0("exportFrequencies = ",   paste0(SUPPORTED.PROFILES$freqs[SUPPORTED.PROFILES$profiles %in% profiles], collapse = ","))
+  sim[21] <- paste0("profileNames = ",        paste0(SUPPORTED.PROFILES$profiles[SUPPORTED.PROFILES$profiles %in% profiles], collapse = ","))
+  sim[22] <- paste0("exportFrequencies = ",   paste0(SUPPORTED.PROFILES$freqs[SUPPORTED.PROFILES$profiles %in% profiles], collapse = ","))
 
   X <- as.numeric(grepl("X", plan$toricSymmetry))
   Y <- as.numeric(grepl("Y", plan$toricSymmetry))
-  sim[26] <- paste0("toreXp = ", X)
-  sim[27] <- paste0("toreXn = ", X)
-  sim[28] <- paste0("toreYp = ", Y)
-  sim[29] <- paste0("toreYn = ", Y)
+  sim[25] <- paste0("toreXp = ", X)
+  sim[26] <- paste0("toreXn = ", X)
+  sim[27] <- paste0("toreYp = ", Y)
+  sim[28] <- paste0("toreYn = ", Y)
 
   if(plan$treePruningFreq > 0) {
     tree.prune.years   <- seq(1, nyears, plan$treePruningFreq)
     n.tree.prune.years <- length(tree.prune.years)
-    sim[32] <- paste0("treePruningYears = ",     paste0(tree.prune.years, collapse=","))
-    sim[33] <- paste0("treePruningProp = ",      paste0(rep(plan$treePruningProp, n.tree.prune.years), collapse=","))
-    sim[34] <- paste0("treePruningMaxHeight = ", paste0(rep(plan$treePruningMaxHeight, n.tree.prune.years), collapse=","))
-    sim[35] <- paste0("treePruningDays = ",      paste0(rep(365, n.tree.prune.years), collapse=","))
+    sim[31] <- paste0("treePruningYears = ",     paste0(tree.prune.years, collapse=","))
+    sim[32] <- paste0("treePruningProp = ",      paste0(rep(plan$treePruningProp, n.tree.prune.years), collapse=","))
+    sim[33] <- paste0("treePruningMaxHeight = ", paste0(rep(plan$treePruningMaxHeight, n.tree.prune.years), collapse=","))
+    sim[34] <- paste0("treePruningDays = ",      paste0(rep(365, n.tree.prune.years), collapse=","))
   }
 
   if(plan$treeRootPruningFreq > 0) {
     root.prune.years   <- seq(1, nyears, plan$treeRootPruningFreq)
     n.root.prune.years <- length(root.prune.years)
-    sim[43] <- paste0("treeRootPruningYears = ",    paste0(root.prune.years, collapse=","))
-    sim[44] <- paste0("treeRootPruningDays = ",     paste0(rep(365, n.root.prune.years), collapse=","))
-    sim[45] <- paste0("treeRootPruningDistance = ", paste0(rep(plan$treeRootPruningDistance, n.root.prune.years), collapse=","))
-    sim[46] <- paste0("treeRootPruningDepth = ",    paste0(rep(plan$treeRootPruningDepth, n.root.prune.years), collapse=","))
+    sim[42] <- paste0("treeRootPruningYears = ",    paste0(root.prune.years, collapse=","))
+    sim[43] <- paste0("treeRootPruningDays = ",     paste0(rep(365, n.root.prune.years), collapse=","))
+    sim[44] <- paste0("treeRootPruningDistance = ", paste0(rep(plan$treeRootPruningDistance, n.root.prune.years), collapse=","))
+    sim[45] <- paste0("treeRootPruningDepth = ",    paste0(rep(plan$treeRootPruningDepth, n.root.prune.years), collapse=","))
   }
 
   writeLines(sim, sim.file)
   dum <- file.rename(paste0(path, "/template.sim"), paste0(path, "/", plan$SimulationName, ".sim"))
+
+  invisible(TRUE)
+}
+
+#' Edit .tree file for Hi-sAFe simulation
+#' @description Edits .tree file for a Hi-sAFe simulation. Used within \code{build_hisafe}.
+#' @return Invisibly returns \code{TRUE}.
+#' @param plan A single simulation (row) from an object of class "hip"
+#' @param path A character string of the path to the simulation folder.
+#' @param species A character string of the tree species to edit.
+build_tree <- function(plan, path, species) {
+  tree.file <- gsub("//", "/", paste0(path, "/treeSpecies/", species, ".tree"))
+  tree <- readLines(tree.file)
+
+  tree[23]  <- paste0("budBurstTempAccumulationDateStart = ", plan$budBurstTempAccumulationDateStart)
+  tree[25]  <- paste0("budBurstAccumulatedTemp = ",           plan$budBurstAccumulatedTemp)
+  tree[46]  <- paste0("lueMax = ",                            plan$lueMax)
+  tree[80]  <- paste0("coarseRootAnoxiaResistance = ",        plan$coarseRootAnoxiaResistance)
+  tree[82]  <- paste0("rootHalfLife = ",                      plan$rootHalfLife)
+  tree[83]  <- paste0("rootAnoxiaHalfLife = ",                plan$rootAnoxiaHalfLife)
+  tree[84]  <- paste0("colonisationThreshold = ",             plan$colonisationThreshold)
+
+  writeLines(tree, tree.file)
 
   invisible(TRUE)
 }
