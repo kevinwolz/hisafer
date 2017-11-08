@@ -110,10 +110,10 @@ check_input_values <- function(hip) {
   hip.no.name <- dplyr::select(hip, -SimulationName)
   unique.sim.error     <- ifelse(identical(hip.no.name, dplyr::distinct(hip.no.name)),   "", "-- Each simulaton must be distinct.")
   unique.simname.error <- ifelse(unique(table(hip$SimulationName)) == 1, "", "-- SimulationName - each siulation must have a unique name")
-  btwn.tree.error      <- ifelse(((hip$spacingBetweenRows / hip$cellWidth) %% 2) == 1, "",
-                                 "-- Tree should be centered in a cell. (spacingBetweenRows / cellWidth) should be an odd integer")
-  within.tree.error    <- ifelse(((hip$spacingWithinRows  / hip$cellWidth) %% 2) == 1, "",
-                                 "-- Tree should be centered in a cell. (spacingWithinRows / cellWidth) should be an odd integer")
+  # btwn.tree.error      <- ifelse(((hip$spacingBetweenRows / hip$cellWidth) %% 2) == 1, "",
+  #                                "-- Tree should be centered in a cell. (spacingBetweenRows / cellWidth) should be an odd integer")
+  # within.tree.error    <- ifelse(((hip$spacingWithinRows  / hip$cellWidth) %% 2) == 1, "",
+  #                                "-- Tree should be centered in a cell. (spacingWithinRows / cellWidth) should be an odd integer")
   allowed.errors       <- purrr::map_chr(names(hip), check_allowed, hip = hip)
   minmax.errors        <- purrr::map_chr(names(hip), check_minmax,  hip = hip)
 
@@ -121,7 +121,7 @@ check_input_values <- function(hip) {
   minmax.warnings      <- purrr::map_chr(names(hip), check_minmax_sug, hip = hip)
 
   all.messages <- c(messages, minmax.warnings, diff.crop.warning)
-  all.errors   <- c(errors, unique.sim.error, unique.simname.error, btwn.tree.error, within.tree.error, allowed.errors, minmax.errors)
+  all.errors   <- c(errors, unique.sim.error, unique.simname.error, allowed.errors, minmax.errors) # btwn.tree.error, within.tree.error,
   all.messages <- paste0(all.messages[!all.messages == ""], collapse = "\n")
   all.errors   <- paste0(all.errors[!all.errors == ""], collapse = "\n")
 

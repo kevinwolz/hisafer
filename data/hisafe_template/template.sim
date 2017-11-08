@@ -1,14 +1,17 @@
-# SIMULATION
+# SIMULATION 
 pldFileName = template.pld
 
 nbSimulations = 1
 simulationYearStart = 1995
-simulationDayStart = 240
+simulationDayStart = 290
+simulationNbrDays = 365
 saveProjectOption = 0
 
 # CROP ROTATION
-mainCropSpecies = durum-wheat.tec
-interCropSpecies = weed-restinclieres.tec
+mainCropSpecies = durum-wheat-allur.plt
+interCropSpecies = baresoil.plt
+mainCropItk = durum-wheat.tec
+interCropItk = baresoil.tec
 treeCropDistance = 0.5
 weededAreaRadius = 0
 
@@ -16,8 +19,8 @@ weededAreaRadius = 0
 weatherFile = weather.wth
 
 # EXPORTS
-profileNames = trees,voxels
-exportFrequencies = 30,30
+profileNames = annualplot,annualtree,annualcrop,plot,trees,cells
+exportFrequencies = 365,365,365,1,1,1
 
 # TORIC SYMETRY PARAMETERS
 toreXp = 1
@@ -41,3 +44,24 @@ toreYn = 1
 #treeRootPruningDays = 365
 #treeRootPruningDistance = 1.5
 #treeRootPruningDepth = 1.0
+
+# INITILIZATION OF PERENNIAL CROPS	
+# Main Crop
+#mainCropStage = 5
+#mainCropLai = 0.2
+#mainCropBiomass = 0.2
+#mainCropRootDepth = 1
+#mainCropGrainBiomass = 0
+#mainCropNitrogen = 50
+#mainCropCarbon = 0
+#mainCropRootDensity = 4,8,0.2,0,0
+	
+# Inter Crop
+#interCropStage = 5
+#interCropLai = 0.2
+#interCropBiomass = 0.2
+#interCropRootDepth = 1
+#interCropGrainBiomass = 0
+#interCropNitrogen = 50
+#interCropCarbon = 0
+#interCropRootDensity = 4,8,0.2,0,0

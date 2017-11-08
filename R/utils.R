@@ -7,7 +7,12 @@ SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("annualplot", "annualtree", "an
                                     freqs    = c(365,          365,          365,          1,      1,       1,       1,        1,       1,         30))
 
 SUPPORTED.TREES    <- c("walnut-hybrid", "poplar", "wild-cherry")
-SUPPORTED.CROPS    <- c("alfalfa", "baresoil", "durum-wheat", "grass", "maize", "rape", "soybean", "weed-restinclieres", "weed", "wheat")
+SUPPORTED.CROPS    <- c("alfalfa", "banana", "baresoil", "barley", "durum-wheat-allur", "fescue", "flax", "grass", "lettuce", "maize",
+                        "mustard", "pea", "potato", "rape", "ryegrass", "sorghum", "soybean", "sugarbet", "sugarcanne", "sunflower",
+                        "tomato", "vine-grenac", "wheat")
+SUPPORTED.ITK    <- c("alfalfa", "banane", "baresoil", "barley", "durum-wheat", "fescue", "flax", "grass", "lettuce", "maize", "mustard",
+                      "pea", "potato", "rape", "ryegrass", "sorghum", "soybean", "sugarbet", "sugarcanne", "sunflower", "tomato","vine",
+                      "weed-restinclieres", "weed", "wheat")
 SUPPORTED.SYMMETRY <- c("XY", "X", "Y", "NO")
 
 param <- function(default, allowed, min, max, min.sug, max.sug) {
@@ -24,6 +29,7 @@ HISAFE.PARAMS <- list(
   slopeIntensity            = param( 0,                    NA,                 0,     NA,    NA,      45),
   slopeAspect               = param( 0,                    NA,                 0,     359,   NA,      NA),
   windMeanForce             = param( 5,                    NA,                 0,     NA,    NA,      NA),
+  waterTable                = param( "true",               c("true", "false"), NA,    NA,    NA,      NA),
   treeSpecies               = param( "walnut-hybrid",      SUPPORTED.TREES,    NA,    NA,    NA,      NA),   # special def
   treeHeight                = param( 1,                    NA,                 0.1,   NA,    0.25,    3),
   rootShape                 = param( 1,                    1:3,                NA,    NA,    NA,      NA),
@@ -33,8 +39,11 @@ HISAFE.PARAMS <- list(
   nbSimulations             = param( 30,                   NA,                 1,     NA,    NA,      50),
   simulationYearStart       = param( 1995,                 NA,                 NA,    NA,    NA,      NA),
   simulationDayStart        = param( 240,                  NA,                 1,     365,   NA,      NA),
-  mainCropSpecies           = param( "durum-wheat",        SUPPORTED.CROPS,    NA,    NA,    NA,      NA),
+  simulationNbrDays         = param( 365,                  NA,                 1,     365,   NA,      NA),
+  mainCropSpecies           = param( "durum-wheat-allur",  SUPPORTED.CROPS,    NA,    NA,    NA,      NA),
   interCropSpecies          = param( "weed-restinclieres", SUPPORTED.CROPS,    NA,    NA,    NA,      NA),
+  mainCropItk               = param( "durum-wheat",        SUPPORTED.ITK,      NA,    NA,    NA,      NA),
+  interCropItk              = param( "weed-restinclieres", SUPPORTED.ITK,      NA,    NA,    NA,      NA),
   treeCropDistance          = param( 0.5,                  NA,                 0,     NA,    0.5,     3),
   weededAreaRadius          = param( 0,                    NA,                 0,     NA,    NA,      2),
   weatherFile               = param( "default",            NA,                 NA,    NA,    NA,      NA),

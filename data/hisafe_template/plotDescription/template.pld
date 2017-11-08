@@ -1,25 +1,23 @@
 # STAND
-country = COUNTRY
-townShip = TOWNSHIP
-site = SITE
-name = NAME
+country = FRANCE
+townShip = Montpellier
+site = Restinclieres
+name = Parcelle A2
 latitude = 43.7
-longitude = -9999
-elevation = -9999
+longitude = 3.5
+elevation = 62
 
 # PLOT 
 cellWidth = 1
 nbTrees = 1
 treeLineOrientation = 90
 spacingBetweenRows = 13
-spacingWithinRows = 9
+spacingWithinRows = 8
 geometryOption = 1
 plotHeight = 1
 plotWidth = 1
 slopeIntensity = 0
 slopeAspect = 0
-
-# WIND
 windMeanForce = 5
 
 # SOIL
@@ -47,8 +45,20 @@ waterConductivity = 0
 
 swellingClaySoil = false
 nitrification = true
+denitrification = false
 macroporosity = false
 stoneOption = false													
+
+# STICS V8
+pluiebat = 50.0
+mulchbat = 0.50    
+zesx = 60.00     
+cfes = 5.00
+z0solnu = 0.01 
+CsurNsol = 9.523809
+penterui = 0.33 
+profdenit = 20.0
+vpotdenit = 16.0
 
 # NITROGEN
 nitrogenDiffusionConstant = 1													

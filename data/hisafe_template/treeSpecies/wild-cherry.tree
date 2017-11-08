@@ -1,0 +1,130 @@
+# WILD CHERRY PARAMETERS 
+#           
+
+treeSpecies = wild-cherry
+
+#Crown shape and volume calculation
+#1=ellipsoid 2=paraboloid
+crownShape = 1
+
+
+#Tree diameter and height are linked through the following allometric relationships
+#height = a * dbh^b (dbh in meters)
+heightDbhAllometricCoeffA = 22
+heightDbhAllometricCoeffB = 0.494
+
+#Tree diameter and crown diameter are linked through the following allometric relationships
+#if crownShape = 1 ellipsoide => crownDiameter = a * dbh + b (dbh in meters) 
+crownDbhAllometricCoeffA = 15.8
+crownDbhAllometricCoeffB = 1.19
+
+#Tree diameter, height and stem volume  are linked through the following allometric relationships
+#Ln(V) = a + b * ln(dbh) + c * ln(height) 
+#Ln(V)=1.92*ln(D)+1.02*ln(H)-1.41
+# Soit V=(1/4.10) * D^1.92 * H^1.02
+
+stemDbhAllometricCoeffA = -1.41
+stemDbhAllometricCoeffB = 1.92
+stemDbhAllometricCoeffC = 1.02
+
+#recopy from walnuts 
+stumpToStemBiomassRatio = 0.25
+
+#Root shape for initialisation
+cRAreaToFRLengthRatio = 0.0000001
+
+# Phenology parameters
+# 1=ColdDeciduous
+phenologyType = 1
+budBurstTempAccumulationDateStart = 1
+budBurstTempThreshold = 10
+budBurstAccumulatedTemp = 110
+
+#recopy from walnuts 
+leafExpansionDuration = 91
+budBurstToLeafFallDuration = 180
+leafFallDuration = 15
+leafFallFrostThreshold = 0
+
+
+# Light parameters
+woodAreaDensity = 0.05
+leafParAbsorption = 0.85
+leafNirAbsorption = 0.15
+clumpingCoef = 1
+
+# Microclimate parameters (PIPO!!!!!!) 
+stemFlowCoefficient = 1
+stemFlowMax = 0.25
+wettability = 0.1
+
+# Transpiration  parameters  s m-1
+stomatalResistance = 200
+
+
+# CAllocation parameters  
+lueMax = 0.6
+leafAgeForLueMax = 60
+leafSenescenceTimeConstant = 0.0000781
+leafAreaCrownVolCoefA = 4.33
+leafAreaCrownVolCoefB = -0.32
+leafCarbonContent = 0.5	
+leafMassArea = 0.07	
+woodDensity = 500			
+branchVolumeRatio =  0.0005	
+
+imbalanceThreshold = 0.7	
+
+waterStressResponsiveness = 0.5
+nitrogenStressResponsiveness = 2
+rsNoStressResponsiveness = 1
+maxTargetLfrRatioDailyVariation = 0.005
+targetLfrRatioUpperDrift = 1
+minTargetLfrRatio = 0.45
+maxTargetLfrRatio = 0.75
+
+optiNCBranch = 0.01
+optiNCCoarseRoot = 0.01
+optiNCFineRoot = 0.03
+optiNCFoliage = 0.04
+optiNCStem = 0.01
+optiNCStump = 0.01
+targetNCoefficient = 1.2
+luxuryNCoefficient = 2
+
+
+maxDailyNSC = 0.005
+maxNSCFraction = 0.02
+targetNSCFraction = 0.1
+leafNRemobFraction = 0.5
+rootNRemobFraction = 0.5
+
+leafSenescenceRate = 0
+
+# Root parameters 
+coarseRootAnoxiaResistance = 60
+specificRootLength = 5.0
+rootHalfLife  = 180
+rootAnoxiaHalfLife = 30
+colonisationThreshold = 500		
+horizontalPreference = 0.5
+geotropismFactor = 1.0
+localWaterUptakeFactor = 0.7
+sinkDistanceEffectWater = 0
+localNitrogenUptakeFactor = 0.7
+
+
+coarseRootBiomassRatio = 1
+coarseRootTopologyType = 3
+
+#Degi water repartition module
+rootDiameter = 0.05
+rootConductivity = 0.00001 
+alpha = 0.1
+minTranspirationPotential = -30000
+maxTranspirationPotential = -10000
+bufferPotential = 0.05 
+longitudinalResistantFactor = 50
+
+
+						
