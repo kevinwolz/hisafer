@@ -207,7 +207,12 @@ arrange_hip <- function(hip, arg.list, defaults.to.add) {
   unique.cols  <- names(hip)[purrr::map_lgl(hip, function(x) (length(unique(x)) != 1))]
   manip.cols   <- names(arg.list)[!(names(arg.list) %in% unique.cols)]
   default.cols <- names(defaults.to.add)[!(names(defaults.to.add) == "SimulationName")]
-  hip <- dplyr::bind_cols(hip[,  unique.cols], hip[, manip.cols], hip[, default.cols]) %>%
-    dplyr::select(SimulationName, dplyr::everything())
+
+  if(is.null(manip.cols)) {
+    hip <- dplyr::bind_cols(hip[, "SimulationName"], hip[,  unique.cols], hip[, default.cols])
+  } else {
+    hip <- dplyr::bind_cols(hip[,  unique.cols], hip[, manip.cols], hip[, default.cols]) %>%
+      dplyr::select(SimulationName, dplyr::everything())
+  }
   return(hip)
 }

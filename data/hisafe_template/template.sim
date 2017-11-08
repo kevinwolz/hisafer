@@ -10,7 +10,7 @@ saveProjectOption = 0
 mainCropSpecies = durum-wheat-allur.plt
 interCropSpecies = baresoil.plt
 mainCropItk = durum-wheat.tec
-interCropItk = baresoil.tec
+interCropItk = weed-restinclieres.tec
 treeCropDistance = 0.5
 weededAreaRadius = 0
 

@@ -1,1 +1,5 @@
-SimulationName,latitude,treeLineOrientationLat15_Orient0,15,0Lat30_Orient0,30,0Lat45_Orient0,45,0Lat60_Orient0,60,0Lat15_Orient90,15,90Lat30_Orient90,30,90Lat45_Orient90,45,90Lat60_Orient90,60,90
+SimulationName,latitude,treeLineOrientation
+Lat30_Orient0,30,0
+Lat60_Orient0,60,0
+Lat30_Orient90,30,90
+Lat60_Orient90,60,90
