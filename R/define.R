@@ -114,6 +114,10 @@ check_input_values <- function(hip) {
   #                                "-- Tree should be centered in a cell. (spacingBetweenRows / cellWidth) should be an odd integer")
   # within.tree.error    <- ifelse(((hip$spacingWithinRows  / hip$cellWidth) %% 2) == 1, "",
   #                                "-- Tree should be centered in a cell. (spacingWithinRows / cellWidth) should be an odd integer")
+  btwn.tree.error      <- ifelse(((hip$spacingBetweenRows / hip$cellWidth) %% 1) == 0, "",
+                                 "-- (spacingBetweenRows / cellWidth) should be a whole number")
+  within.tree.error    <- ifelse(((hip$spacingWithinRows  / hip$cellWidth) %% 1) == 0, "",
+                                 "-- (spacingWithinRows / cellWidth) should be a whole number")
   allowed.errors       <- purrr::map_chr(names(hip), check_allowed, hip = hip)
   minmax.errors        <- purrr::map_chr(names(hip), check_minmax,  hip = hip)
 
@@ -121,7 +125,7 @@ check_input_values <- function(hip) {
   minmax.warnings      <- purrr::map_chr(names(hip), check_minmax_sug, hip = hip)
 
   all.messages <- c(messages, minmax.warnings, diff.crop.warning)
-  all.errors   <- c(errors, unique.sim.error, unique.simname.error, allowed.errors, minmax.errors) # btwn.tree.error, within.tree.error,
+  all.errors   <- c(errors, unique.sim.error, unique.simname.error, btwn.tree.error, within.tree.error, allowed.errors, minmax.errors)
   all.messages <- paste0(all.messages[!all.messages == ""], collapse = "\n")
   all.errors   <- paste0(all.errors[!all.errors == ""], collapse = "\n")
 
