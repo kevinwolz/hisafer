@@ -1,8 +1,5 @@
 ##### GLOBAL VARIABLES ABAILABLE TO ALL hisafer FUNCTIONS DEFAULTS AND SUPPORTED PARAMETERS/CLASSES/PROFILES/VALUES
 
-HISAFE.TEMPLATE <- "/Users/kevinwolz/Desktop/RESEARCH/ACTIVE_PROJECTS/HI-SAFE/hisafer/data/hisafe_template/"
-HISAFE.LIBRARY  <- "/Users/kevinwolz/Desktop/RESEARCH/ACTIVE_PROJECTS/HI-SAFE/hisafer/data/hisafe_library/"
-
 SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("annualplot", "annualtree", "annualcrop", "plot", "trees", "roots", "cells", "voxels", "climate", "monthCells"),
                                     freqs    = c(365,          365,          365,          1,      1,       1,       1,        1,       1,         30))
 

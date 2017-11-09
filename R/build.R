@@ -91,7 +91,8 @@ build_structure <- function(hip, path, profiles, saveProjectOption) {
   ## Any newly built files below will overwrite these files
   sim.path <- gsub("//", "/", paste0(path, "/", hip$SimulationName))
   if(dir.exists(sim.path)) stop(paste0("A simulation with the name <", hip$SimulationName, "> already exisits in this location."), call. = FALSE)
-  system(paste("cp -r", HISAFE.TEMPLATE, sim.path))
+  system(paste("cp -r", system.file("extdata", "hisafe_template", package = "hisafer"), sim.path))
+  HISAFE.LIBRARY <- system.file("extdata", "hisafe_library", package = "hisafer")
 
   ## Write out experiment summary
   readr::write_csv(hip, gsub("//", "/", paste0(sim.path, "/", hip$SimulationName, "_simu_summary.csv")))
@@ -104,15 +105,15 @@ build_structure <- function(hip, path, profiles, saveProjectOption) {
   if(hip$weatherFile != "default") file.copy(hip$weatherFile, paste0(sim.path, "/weather/weather.wth"), overwrite = TRUE)
 
   ## Copy required .plt files to cropSpecies
-  required.plts <- paste0(HISAFE.LIBRARY, "cropSpecies/", c(hip$mainCropSpecies, hip$interCropSpecies), ".plt")
+  required.plts <- paste0(HISAFE.LIBRARY, "/cropSpecies/", c(hip$mainCropSpecies, hip$interCropSpecies), ".plt")
   dum <- purrr::map(required.plts, file.copy, to = paste0(sim.path, "/cropSpecies"))
 
   ## Copy required .tec files to itk
-  required.tecs <- paste0(HISAFE.LIBRARY, "itk/", c(hip$mainCropItk, hip$interCropItk), ".tec")
+  required.tecs <- paste0(HISAFE.LIBRARY, "/itk/", c(hip$mainCropItk, hip$interCropItk), ".tec")
   dum <- purrr::map(required.tecs, file.copy, to = paste0(sim.path, "/itk"))
 
   ## Copy required .tree files to treeSpecies
-  required.trees <- paste0(HISAFE.LIBRARY, "treeSpecies/", hip$treeSpecies, ".tree")
+  required.trees <- paste0(HISAFE.LIBRARY, "/treeSpecies/", hip$treeSpecies, ".tree")
   dum <- purrr::map(required.trees, file.copy, to = paste0(sim.path, "/treeSpecies"))
 
   ## Copy required exportProfiles
@@ -122,7 +123,7 @@ build_structure <- function(hip, path, profiles, saveProjectOption) {
     stop(missing.profile.error)
   }
 
-  export.profile.paths <- paste0(HISAFE.LIBRARY, "exportParameters/", profiles, ".pro")
+  export.profile.paths <- paste0(HISAFE.LIBRARY, "/exportParameters/", profiles, ".pro")
   dum <- purrr::map(export.profile.paths, file.copy, to = paste0(sim.path, "/exportParameters"))
 
   ## Edit tree file
