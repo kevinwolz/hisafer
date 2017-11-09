@@ -7,9 +7,9 @@
 #' \code{define_hisafe} will append "_1", "_2", etc. for each of the (unknown number of) factorial experiments.
 #' @return An object of class "hip". This is a data frame (tibble) with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
 #' @param factorial If \code{FALSE}, the default, then values are recycled (i.e. such as for default behavior of \code{data.frame()}).
-#' If \code{TRUE}, then a factorial experiment is created, in which an ecperiment is defined for each possible combination of supplied values.
+#' If \code{TRUE}, then a factorial experiment is created, in which an experiment is defined for each possible combination of supplied values.
 #' @param ... Any suported Hi-sAFe input parameter in the .sim and .pld files can be passed.
-#' Parameters should be passed as \code{parameterName = values}. For more information on supported parameters, see _____.
+#' Parameters should be passed as \code{parameterName = values}. For more information on supported parameters, use \code{hisafe_params()}.
 #' @export
 #' @importFrom dplyr %>%
 #' @family hisafe definition functions
@@ -32,7 +32,8 @@ define_hisafe <- function(factorial = FALSE, ...) {
 
   # FOR TESTING
   # tmpfun <- function(...){ list(...) }
-  # arg.list <- tmpfun(treeSpecies = c("walnut-hybrid", "poplar", "wild-cherry"))
+  # arg.list <- tmpfun(latitude = 60, treeLineOrientation = -180)
+  # arg.list <- tmpfun(latitude = c(30, 60), treeLineOrientation = c(0,90))
 
   arg.list <- list(...)
 
@@ -62,7 +63,7 @@ define_hisafe <- function(factorial = FALSE, ...) {
 #' @return An object of class "hip". This is a data frame (tibble) with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
 #' @param file A character string of the path to a csv file.
 #' Each row in the file should represent a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
-#' For more information on supported parameters, see _____.
+#' For more information on supported parameters, use \code{hisafe_params()}.
 #' @export
 #' @importFrom dplyr %>%
 #' @family hisafe definition functions
@@ -206,13 +207,16 @@ check_minmax_sug <- function(variable, hip) {
 arrange_hip <- function(hip, arg.list, defaults.to.add) {
   unique.cols  <- names(hip)[purrr::map_lgl(hip, function(x) (length(unique(x)) != 1))]
   manip.cols   <- names(arg.list)[!(names(arg.list) %in% unique.cols)]
-  default.cols <- names(defaults.to.add)[!(names(defaults.to.add) == "SimulationName")]
+  default.cols <- names(defaults.to.add)
 
-  if(is.null(manip.cols)) {
+  unique.cols <- unique.cols[unique.cols != "SimulationName"]
+  manip.cols <- manip.cols[manip.cols != "SimulationName"]
+  default.cols <- default.cols[default.cols != "SimulationName"]
+
+  if(is.null(manip.cols) | length(manip.cols) == 0) {
     hip <- dplyr::bind_cols(hip[, "SimulationName"], hip[,  unique.cols], hip[, default.cols])
   } else {
-    hip <- dplyr::bind_cols(hip[,  unique.cols], hip[, manip.cols], hip[, default.cols]) %>%
-      dplyr::select(SimulationName, dplyr::everything())
-  }
+    hip <- dplyr::bind_cols(hip[, "SimulationName"], hip[,  unique.cols], hip[, manip.cols], hip[, default.cols])
+    }
   return(hip)
 }

@@ -91,7 +91,10 @@ run_hisafe_exp <- function(hip         = NULL,
 #' # the simulations can all be run:
 #' run_hisafe(myexp)
 #' }
-run_hisafe <- function(hip = NULL, path = NULL, simu.name = NULL, capsis.path = "/Applications/Capsis/") {
+run_hisafe <- function(hip = NULL,
+                       path = NULL,
+                       simu.name = NULL,
+                       capsis.path = "/Applications/Capsis/") {
 
   if(!is.null(hip) & !("hip" %in% class(hip))) stop("data not of class hip", call. = FALSE)
   if(!is.null(hip)){

@@ -9,7 +9,7 @@ define_hisafe_file(file)
 \arguments{
 \item{file}{A character string of the path to a csv file.
 Each row in the file should represent a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
-For more information on supported parameters, see _____.}
+For more information on supported parameters, use \code{hisafe_params()}.}
 }
 \value{
 An object of class "hip". This is a data frame (tibble) with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.

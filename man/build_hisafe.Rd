@@ -2,34 +2,46 @@
 % Please edit documentation in R/build.R
 \name{build_hisafe}
 \alias{build_hisafe}
-\title{Builds a Hi-sAFe simulation}
+\title{Builds a Hi-sAFe simulation or experiment}
 \usage{
-build_hisafe(hip, path, profiles = "all", saveProjectOption = FALSE)
+build_hisafe(hip, path, exp.name = "experiment", profiles = "all",
+  saveProjectOption = FALSE, controls = FALSE)
 }
 \arguments{
-\item{hip}{An object of class "hip" containing a single simulation (row).}
+\item{hip}{An object of class "hip".}
 
-\item{path}{A character string of the path to the simulation folder.}
+\item{path}{A character string of the path to the folder in which the simulation/experiment
+folder should be created.}
+
+\item{exp.name}{A character vector of the name of the experiment folder. Only used if the supllie d
+"hip" object contains more than one simulation.}
 
 \item{profiles}{A character vector of output profiles the simulation to export.}
 
-\item{saveProjectOption}{Logical, sets the saveProjectOption parameter in the .sim file.}
+\item{saveProjectOption}{Logical, sets the saveProjectOption parameter in the .sim file, which
+tells Hi-sAFe to save a (large) file at the end of the simulation which allows a subsequent simulation to
+start where this one left off.}
+
+\item{controls}{Logical for whether or not to also build simulations for crop and tree controls.}
 }
 \value{
-Invisibly returns a list containing the original hip object and supplied path.
+Invisibly returns a list containing the original hip object and path to the simulation/experiment folder.
 }
 \description{
-Builds a Hi-sAFe simulation - creates the folder structure and input files.
+Builds a Hi-sAFe simulation or experiment (a group of simulations) - creates the folder structure and input files.
 }
 \examples{
 \dontrun{
-# Once a single Hi-sAFe simulation is defined:
-myexp <- define_hisafe()
+# For a single Hi-sAFe simulation
+mysim <- define_hisafe(latitude = 30)
+
+# Building the simulation folder structure & files:
+build_hisafe(mysim, "./simulations")
+
+# Once a group Hi-sAFe simulations (experiment) is defined:
+myexp <- define_hisafe(latitude = c(30,60))
 
 # Building the experiment folder structure & files:
-build_hisafe(myexp, "./simulations")
+build_hisafe(myexp, "./simulations", exp.name = "lat_exp")
 }
-}
-\seealso{
-Other hisafe build functions: \code{\link{build_hisafe_exp}}
 }

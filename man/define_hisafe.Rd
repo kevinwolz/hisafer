@@ -8,10 +8,10 @@ define_hisafe(factorial = FALSE, ...)
 }
 \arguments{
 \item{factorial}{If \code{FALSE}, the default, then values are recycled (i.e. such as for default behavior of \code{data.frame()}).
-If \code{TRUE}, then a factorial experiment is created, in which an ecperiment is defined for each possible combination of supplied values.}
+If \code{TRUE}, then a factorial experiment is created, in which an experiment is defined for each possible combination of supplied values.}
 
 \item{...}{Any suported Hi-sAFe input parameter in the .sim and .pld files can be passed.
-Parameters should be passed as \code{parameterName = values}. For more information on supported parameters, see _____.}
+Parameters should be passed as \code{parameterName = values}. For more information on supported parameters, use \code{hisafe_params()}.}
 }
 \value{
 An object of class "hip". This is a data frame (tibble) with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.

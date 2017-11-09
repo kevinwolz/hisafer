@@ -1,58 +1,187 @@
 ---
-title: "hisafer Vignette"
-author: "Kevin J. Wolz"
-date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+title: "Introduction to hisafer"
+output: rmarkdown::html_vignette # pdf_document
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{hisafer}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
+hisafer is an R toolbox for the Hi-sAFe biophysical agroforestry model. It provides functions for defining, building, running, reading, analyzing, and plotting Hi-sAFe simulaitons. The first step to using hisafer is to load the library:
 
-- Never uses retina figures
-- Has a smaller default figure size
-- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
-
-## Vignette Info
-
-Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
-
-## Styles
-
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
-
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
-
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side. 
-
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
+```{r}
+library(hisafer)
 ```
 
-You can enable figure captions by `fig_caption: yes` in YAML:
+*hisafer utilizes the tidyverse approach to R programming and data manipulation. While most consequneces of this approach are behind the scenes, one obvious example to users is that outputs from most hisafer fucntions are tibbles rather than simple data frames. This has little practical impact on your use of hisafer, but should improve your overall experience.*
 
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
+## Six Steps to Hi-sAFe Experimentation
+hisafer tools are organized via the six main steps of experimentation with Hi-sAFe. While hisafer can be used to interact with Hi-sAFe at any of these steps independently, enhanced functionality is available when using hisafer to interact with Hi-sAFe from the beginning.
 
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
 
-## More Examples
+### 1. Define
+Define functions allow you to define one or more Hi-sAFe "simulations". Simulations are definied by specifying one or more Hi-SAFe input parameters from the .sim, .pld, or .tree files. Any Hi-SAFe input parameters not specified will simply inherit the parameters used during Hi-sAFe's calibration. To see which Hi-SAFe input parameters are currently supported, use:
 
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
-
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
+```{r}
+hisafe_params()
 ```
 
-Also a quote using `>`:
+By default, `hisafe_params()` just provides the names of supported parameters. To also see the default values, range of allowed values, and range of suggested values, use:
 
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
+```{r, eval = FALSE}
+hisafe_params("all")
+```
+ 
+Once you know which parameter(s) you want to customize, you can define a Hi-sAFe simulation or experiment using `define_hisafe()`. Let's start with just a simple Hi-sAFe simulation in which we only want to customize **latitude** and **treeLineOrientation**. 
+
+```{r, error = TRUE, purl = FALSE}
+hip_sim <- define_hisafe(latitude = 60, treeLineOrientation = -180)
+```
+
+Oops! It looks like **treeLineOrientation** must be between 0 and 359. Let's double check the details on this parameter.
+
+```{r}
+hisafe_params("treeLineOrientation")
+```
+
+Okay, let's try again using a new value for **treeLineOrientation**.
+
+```{r}
+hip_sim <- define_hisafe(latitude = 60, treeLineOrientation = 90)
+hip_sim
+```
+
+We can now see a defined Hi-sAFe simulation, which is contained within a `hip` object (for "Hi-sAFe Input Parmaeters"). Each row of a `hip` object describes a single Hi-sAFe simulation, and each column provides the value of a Hi-sAFe input parameter. For convenience, any customized parmaeters appear first in the object, which the remaining, default parameters in columns to the right. If not provided manually, a default **SimulationName** is provided for each simulation within the `hip` object.
+
+Let's try something more complicated now. Most Hi-sAFe simulations are run in groups that vary one or more parameters over a range of values. A group of multiple, related simulations is called an "experiment". We can also use `define_hisafe()` to define an experiment by simply providing multiple values for one or more parameters. There are two methods for defining an experiment, depending on if the `define_hisafe()` agrument `factorial` is `TRUE` or `FALSE`. 
+
+If `factorial` is `FALSE`, the default, then values are recycled (i.e. such as for default behavior of `data.frame()`).
+
+```{r}
+hip_exp_F <- define_hisafe(factorial = FALSE, 
+                           latitude = c(30, 60),
+                           treeLineOrientation = c(0,90))
+hip_exp_F
+```
+
+In this case, you can see that there are two simulations in the resulting `hip`, one with **latitude**=30 and **treeLineOrientation**=0, and the other with **latitude**=60 and **treeLineOrientation**=90.
+
+If `factorial` is `TRUE`, then a factorial experiment is created, in which a simulation is defined for each possible combination of supplied values.
+
+```{r}
+hip_exp <- define_hisafe(factorial = TRUE, 
+                           latitude = c(30, 60),
+                           treeLineOrientation = c(0,90))
+hip_exp
+```
+
+In this case, you can see that there are four simulations in the resulting `hip`, one for each possible combination of the supplied values of **latitude** and **treeLineOrientation**. We'll use this `hip` object for moving on to the BUILD step.
+
+You can also use `define_hisafe_file()` to directly read a `hip` object from a *csv* file. For more information on this approach, see `?define_hisafe_file`.
+
+
+### 2. Build
+There is only one Build function: `build_hisafe()`. This function takes your `hip` object as an input and builds the actual folders/files on your computer that Hi-sAFe will read to run to the simulation(s). In addition to the `hip` object, you must supply a `path` where the simulation directory is to be created. 
+
+Optionally, you can also:
+
+- If there are multiple simulations in the supplied `hip`, use `exp.name` to customize the name of the experiment folder, which is created first in the supplied `path` and contains each of the simulation folders.
+- Specify the Hi-sAFe output profiles using `profiles`. This is important! The default for this arguement is "all", which will include the very large "cells" and "voxels" outputs, slowing your Hi-sAFe simulations dramatically. To see which Hi-sAFe output profiles are supported and their export frequency, use `hisafe_profiles()`.
+- Specify the saveProjectOption in Hi-sAFe, which tells Hi-sAFe to save a (large) file at the end of the simulation to allow a subsequent simulation to start where this one left off. 
+
+For more details on these options, see `?build_hisafe`.
+
+It is good practice for the output of `build_hisafe()` to overwrite your `hip` object, as it will add the experiment/simulationpath to the object. This will enhance functionality during the RUN and READ steps.
+
+```{r, eval = FALSE}
+hip_exp <- build_hisafe(hip = hip_exp, 
+                        path = "./simulations",
+                        exp.name = "lat-orient_exp", 
+                        profiles = c("annualplot", "annualtree", "annualcrop", "monthCells", "trees", "plot"), 
+                        saveProjectOption = FALSE)
+hip_exp
+```
+
+
+### 3. Run
+Once the Hi-sAFe folders/files are created on your comupter, you are ready to run Hi-sAFe! There are two functions for running Hi-sAFe simulations: `run_hisafe()` for running a single simulation, and `run_hisafe_exp()` for running a group of simulations. To run our previous experiment on **latitude** and **treeLineOrientation** we will use `run_hisafe_exp()` by providing: 
+
+- The `hip` object.
+- A `path` to the experiment folder. If `hip` updated using `build_hisafe()`, then there is no need to supply `path` as it is contained within the `hip` object.
+- A character string of which simulations within the experiment to run via `simu.names`. The default "all" will run all simulations in the experiment. 
+- A logical `parallel` indicating whether or not to run multiple simulations in parallel on your computer. The default is `FALSE`, but it is highly encouraged to use parallel processing if your computer as the capacity! If `parallel` is `TRUE`, one fewer than the total number of available cores will be used. Alternatively, the number of cores to use can be specified directly via `num.cores`.
+- The path to the Capsis folder on your computer via `capsis.path`. This is where hisafer can find Capsis and the Hi-sAFe model. 
+
+```{r, eval = FALSE}
+run_hisafe_exp(hip = hip_exp,
+               simu.names = "all",
+               parallel = TRUE,
+               capsis.path = "/Applications/Capsis/")
+```
+
+
+Both `run_hisafe()` and `run_hisafe_exp()` can also be used without a `hip` object to run Hi-sAFe simulations that were not create using hisafer. To do this with `run_hisafe()`, for example, you must supply the `path` to the where the simulation folder is located and the name of the simulation via `simu.name`. Just make sure the folder/file structure is correct!
+
+```{r, eval = FALSE}
+run_hisafe(path = "./simulations"
+           simu.name  = "Sim_From_Kevin",
+           capsis.path = "/Applications/Capsis/")
+```
+
+
+### 4. Read
+Hi-sAFe can generate quite a lot of output data. All of this data is created within a set of (large) text files, which can be difficult to navigate with out hisafer. The Read step of Hi-sAFe experimentation reads all of this data into R for easy manipulation and analysis. Analagous to the Run step, there are two functions for reading Hi-sAFe output data: `read_hisafe()` for reading in a single simulation, and `read_hisafe_exp()` for reading in a Hi-sAFe experiment (group of simluations). `read_hisafe()` is used analagously to `run_hisafe()`.
+
+To read in our previous experiment on **latitude** and **treeLineOrientation** we will use `read_hisafe_exp()`. The only required input is a `hip` object that has been modified by `build_hisafe()` to include the experiment's path. Alternatively, a `path` can by manually provided. You can also specify which Hi-sAFe output profiles to read in using `profiles`. While the default is to read all profiles, you may not want to read in any created "cells" or "voxels" data if you simply want to analyze annual tree growth data. 
+
+The resulting object created `read_hisafe_exp()` is a `hop` obeject (for "Hi-sAFe OutPut") of class "hop" and "hop-group". This is a list of 12 tibbles (data frames): 
+
+- `annual` - includes data from annualtree and annualplot profiles
+- `daily` - includes data from trees, plot, and climate profiles
+- `annualcrop`
+- `roots`
+- `monthCells`
+- `cells`
+- `voxels`
+- `variables` - variable descriptions and units from all profiles
+- `inputs` - the hip object that generated the simulation
+- `path` - the paths to the simulation folders
+- `exp.plan` - the manipulated input variables in the experiment
+- `exp.path` - the path to the experiment folder
+
+If any Hi-sAFe output profiles specified by `profiles` were not created when Hi-sAFe was run, a warning will notify you. 
+
+If any Hi-sAFe output profiles were either not created by Hi-sAFe (via the `profiles` arguement of `build_hisafe_exp()`) or not selected for reading (via the `profiles` arguement of `read_hisafe_exp()`), the the associated list components will be empty tibbles.
+
+WARNING: Depending on the number of simulations, length of simulations, and which output profiles are specified, reading in Hi-sAFe data can take a few minutes!
+
+```{r, eval = FALSE}
+hop_exp <- read_hisafe_exp(hip = hip_exp, profiles = "all")
+hop_exp
+```
+
+```{r, echo = FALSE}
+hop_exp <- read_hisafe_exp(path = "./experiment", profiles = "all")
+#load("vignette_hop.Rdata")
+```
+
+```{r, echo = FALSE}
+hop_exp
+```
+
+
+### 5. Diagnostics
+Prior to performing any analyses using your `hop` data, it is highly recommended to check some basic diagnostics on your simluations to ensure that the simulations ran as expected. To do so, hisafer provides some basic diagnostic functions:
+
+- `diag_hisafe_ts()` - plots a timeseries plot for each variable in the "annual" and "daily" data of a `hop` object.
+- `diag_hisafe_monthcells()` - plots a full range of tile plots for each variable in the "monthCells" data of a `hop` object.
+
+All outputs from these Diagnostics functions will be saved to a "diagnostics" folder within the simulation folder of the `hop`.
+
+### 6. Analysis
+There are many different types of analyses that can be performed with Hi-sAFe output data. Conseuqnetly, there are no strict "analysis" functions in hisafer. However, there are some plotting functions that can aid in your analyses: 
+
+- `plot_hisafe_ts()` - plots "annual" or "daily" timeseries data
+- `plot_hisafe_monthcells()` - plots "monthCells" data
+- `plot_hisafe_cells()` - plots "cells" data
+- `plot_hisafe_voxels()` - plots "voxels" data

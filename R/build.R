@@ -1,37 +1,53 @@
-#' Builds a Hi-sAFe experiment
-#' @description Builds a Hi-sAFe experiment (a group of simulations) - creates the folder structure and input files.
-#' @return Invisibly returns a list containing the original hip object and path to the experiment folder.
-#' @param hip An object of class "hip" - typically with multiple simulations (rows).
-#' @param path A character string of the path to the folder in which the experiment folder should be created.
+#' Builds a Hi-sAFe simulation or experiment
+#' @description Builds a Hi-sAFe simulation or experiment (a group of simulations) - creates the folder structure and input files.
+#' @return Invisibly returns a list containing the original hip object and path to the simulation/experiment folder.
+#' @param hip An object of class "hip".
+#' @param path A character string of the path to the folder in which the simulation/experiment
+#' folder should be created.
+#' @param exp.name A character vector of the name of the experiment folder. Only used if the supllie d
+#' "hip" object contains more than one simulation.
 #' @param profiles A character vector of output profiles the simulation to export.
-#' @param saveProjectOption Logical, sets the saveProjectOption parameter in the .sim file.
+#' @param saveProjectOption Logical, sets the saveProjectOption parameter in the .sim file, which
+#' tells Hi-sAFe to save a (large) file at the end of the simulation which allows a subsequent simulation to
+#' start where this one left off.
+#' @param controls Logical for whether or not to also build simulations for crop and tree controls.
 #' @export
 #' @importFrom dplyr %>%
 #' @family hisafe build functions
 #' @examples
 #' \dontrun{
+#' # For a single Hi-sAFe simulation
+#' mysim <- define_hisafe(latitude = 30)
+#'
+#' # Building the simulation folder structure & files:
+#' build_hisafe(mysim, "./simulations")
+#'
 #' # Once a group Hi-sAFe simulations (experiment) is defined:
 #' myexp <- define_hisafe(latitude = c(30,60))
 #'
 #' # Building the experiment folder structure & files:
-#' build_hisafe_exp(myexp, "./simulations", exp.name = "lat_exp")
+#' build_hisafe(myexp, "./simulations", exp.name = "lat_exp")
 #' }
-build_hisafe_exp <- function(hip,
-                             path,
-                             exp.name          = "experiment",
-                             profiles          = "all",
-                             saveProjectOption = FALSE,
-                             controls          = FALSE) {
+build_hisafe <- function(hip,
+                         path,
+                         exp.name          = "experiment",
+                         profiles          = "all",
+                         saveProjectOption = FALSE,
+                         controls          = FALSE) {
 
   ## Check if data has class hip
   if(!("hip" %in% class(hip))) stop("data not of class hip", call. = FALSE)
 
-  ## Create experiment directory
-  exp.path <- gsub("//", "/", paste0(path, "/", exp.name))
-  dir.create(exp.path, showWarnings = FALSE)
-
-  ## Write out experiment summary
-  readr::write_csv(hip, gsub("//", "/", paste0(exp.path, "/", exp.name, "_exp_summary.csv")))
+  ## For experiment
+  if(nrow(hip) > 1) {
+    exp.path <- gsub("//", "/", paste0(path, "/", exp.name))
+    dir.create(exp.path, showWarnings = FALSE, recursive = TRUE)
+    readr::write_csv(hip, gsub("//", "/", paste0(exp.path, "/", exp.name, "_exp_summary.csv")))
+  } else {
+    exp.path <- gsub("//", "/", paste0(path, "/", exp.name))
+    exp.path <- gsub(paste0("/", exp.name), "", exp.path)
+    dir.create(exp.path, showWarnings = FALSE, recursive = TRUE)
+  }
 
   ## build folder tree & input files for each simulation in experiment
   make_hip <- function(x) {
@@ -42,7 +58,7 @@ build_hisafe_exp <- function(hip,
     purrr::pmap(list) %>%
     purrr::map(dplyr::as_tibble) %>%
     purrr::map(make_hip) %>%
-    purrr::walk(build_hisafe, path = exp.path, profiles = profiles, saveProjectOption = saveProjectOption)
+    purrr::walk(build_structure, path = exp.path, profiles = profiles, saveProjectOption = saveProjectOption)
 
   ## Run control simulations
   if(controls) stop("support for running control simulations not yet supported", call. = FALSE)
@@ -59,17 +75,7 @@ build_hisafe_exp <- function(hip,
 #' @param path A character string of the path to the simulation folder.
 #' @param profiles A character vector of output profiles the simulation to export.
 #' @param saveProjectOption Logical, sets the saveProjectOption parameter in the .sim file.
-#' @export
-#' @family hisafe build functions
-#' @examples
-#' \dontrun{
-#' # Once a single Hi-sAFe simulation is defined:
-#' myexp <- define_hisafe()
-#'
-#' # Building the experiment folder structure & files:
-#' build_hisafe(myexp, "./simulations")
-#' }
-build_hisafe <- function(hip, path, profiles = "all", saveProjectOption = FALSE) {
+build_structure <- function(hip, path, profiles, saveProjectOption) {
 
   if(profiles[1] == "all") profiles <- SUPPORTED.PROFILES$profiles
 
