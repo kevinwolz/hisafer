@@ -1,5 +1,0 @@
-
-# allSteps	currentStep	frequency	frequencyBegin	frequencyValue	period	periodTo	periodFrom	rootStepToExport
-false	true	false	0	0	false	0	0	false
-# subject	variables
-SafePlot	{SafePlot-mainCropName;SafePlot-cropBiomass;SafePlot-maxCropBiomass;SafePlot-minCropBiomass;SafePlot-cropYield;SafePlot-maxCropYield;SafePlot-minCropYield;SafePlot-cropLai;SafePlot-minCropLai;SafePlot-maxCropLai;SafePlot-treeLai;SafePlot-treeYield;SafePlot-annualParIncident;SafePlot-annualParIncidentCrops;SafePlot-annualParIncidentInterCrops;SafePlot-annualParInterceptedByCrops;SafePlot-annualParInterceptedByInterCrops;SafePlot-annualParInterceptedByTrees;SafePlot-annualWaterEvaporatedInCrop;SafePlot-annualWaterEvaporatedInInterCrop;SafePlot-annualWaterExtractedByCrop;SafePlot-annualWaterExtractedByInterCrop;SafePlot-annualWaterExtractedByTrees;SafePlot-maxTreesCarbonFoliage;SafePlot-maxTreesLeafArea;SafePlot-treeDbh;SafePlot-treeHeight;SafePlot-waterExtractedByCrops;SafePlot-waterExtractedByInterCrops;SafePlot-waterExtractedByTrees}

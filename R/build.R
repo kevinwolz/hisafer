@@ -7,6 +7,8 @@
 #' @param exp.name A character vector of the name of the experiment folder. Only used if the supllie d
 #' "hip" object contains more than one simulation.
 #' @param profiles A character vector of output profiles the simulation to export.
+#' @param template.path A character string of the path to the Hi-sAFe directory structure/files to use as a template.
+#' If "default", then the default template inluded with hisafer (i.e. the files used for Hi-sAFe calibtation) will be used.
 #' @param saveProjectOption Logical, sets the saveProjectOption parameter in the .sim file, which
 #' tells Hi-sAFe to save a (large) file at the end of the simulation which allows a subsequent simulation to
 #' start where this one left off.
@@ -32,6 +34,7 @@ build_hisafe <- function(hip,
                          path,
                          exp.name          = "experiment",
                          profiles          = "all",
+                         template.path     = "default",
                          saveProjectOption = FALSE,
                          controls          = FALSE) {
 
@@ -58,7 +61,7 @@ build_hisafe <- function(hip,
     purrr::pmap(list) %>%
     purrr::map(dplyr::as_tibble) %>%
     purrr::map(make_hip) %>%
-    purrr::walk(build_structure, path = exp.path, profiles = profiles, saveProjectOption = saveProjectOption)
+    purrr::walk(build_structure, path = exp.path, profiles = profiles, template.path = template.path, saveProjectOption = saveProjectOption)
 
   ## Run control simulations
   if(controls) stop("support for running control simulations not yet supported", call. = FALSE)
@@ -74,8 +77,16 @@ build_hisafe <- function(hip,
 #' @param hip An object of class "hip" containing a single simulation (row).
 #' @param path A character string of the path to the simulation folder.
 #' @param profiles A character vector of output profiles the simulation to export.
+#' @param template.path A character string of the path to the Hi-sAFe directory structure/files to use as a template.
+#' If "default", then the default template inluded with hisafer (i.e. the files used for Hi-sAFe calibtation) will be used.
 #' @param saveProjectOption Logical, sets the saveProjectOption parameter in the .sim file.
-build_structure <- function(hip, path, profiles, saveProjectOption) {
+build_structure <- function(hip, path, profiles, template.path, saveProjectOption) {
+
+  if(template.path == "default") {
+    HISAFE.TEMPLATE <- gsub("//", "/", paste0(system.file("extdata", "hisafe_template", package = "hisafer"), "/"))
+  } else {
+    HISAFE.TEMPLATE <- gsub("//", "/", paste0(template.path, "/"))
+  }
 
   if(profiles[1] == "all") profiles <- SUPPORTED.PROFILES$profiles
 
@@ -91,42 +102,47 @@ build_structure <- function(hip, path, profiles, saveProjectOption) {
   ## Any newly built files below will overwrite these files
   sim.path <- gsub("//", "/", paste0(path, "/", hip$SimulationName))
   if(dir.exists(sim.path)) stop(paste0("A simulation with the name <", hip$SimulationName, "> already exisits in this location."), call. = FALSE)
-  system(paste("cp -r", system.file("extdata", "hisafe_template", package = "hisafer"), sim.path))
-  HISAFE.LIBRARY <- system.file("extdata", "hisafe_library", package = "hisafer")
+  system(paste("cp -r", HISAFE.TEMPLATE, sim.path))
 
   ## Write out experiment summary
   readr::write_csv(hip, gsub("//", "/", paste0(sim.path, "/", hip$SimulationName, "_simu_summary.csv")))
 
-  ## Build pld & sim files
-  build_pld(hip, sim.path)
-  build_sim(hip, sim.path, profiles, saveProjectOption)
-
   ## Move weather file if one was provided
   if(hip$weatherFile != "default") file.copy(hip$weatherFile, paste0(sim.path, "/weather/weather.wth"), overwrite = TRUE)
 
-  ## Copy required .plt files to cropSpecies
-  required.plts <- paste0(HISAFE.LIBRARY, "/cropSpecies/", c(hip$mainCropSpecies, hip$interCropSpecies), ".plt")
-  dum <- purrr::map(required.plts, file.copy, to = paste0(sim.path, "/cropSpecies"))
+  ## Remove unused .plt files from cropSpecies
+  existing.plt <- list.files(paste0(sim.path, "/cropSpecies"), full.names = TRUE)
+  required.plt <- paste0(sim.path, "/cropSpecies/", c(hip$mainCropSpecies, hip$interCropSpecies), ".plt")
+  remove.plt <- existing.plt[!(existing.plt %in% required.plt)]
+  dum <- purrr::map(remove.plt, file.remove)
 
-  ## Copy required .tec files to itk
-  required.tecs <- paste0(HISAFE.LIBRARY, "/itk/", c(hip$mainCropItk, hip$interCropItk), ".tec")
-  dum <- purrr::map(required.tecs, file.copy, to = paste0(sim.path, "/itk"))
+  ## Remove unused .tec files from itk
+  existing.itk <- list.files(paste0(sim.path, "/itk"), full.names = TRUE)
+  required.itk <- paste0(sim.path, "/itk/", c(hip$mainCropItk, hip$interCropItk), ".tec")
+  remove.itk <- existing.itk[!(existing.itk %in% required.itk)]
+  dum <- purrr::map(remove.itk, file.remove)
 
-  ## Copy required .tree files to treeSpecies
-  required.trees <- paste0(HISAFE.LIBRARY, "/treeSpecies/", hip$treeSpecies, ".tree")
-  dum <- purrr::map(required.trees, file.copy, to = paste0(sim.path, "/treeSpecies"))
+  ## Remove unused .tree files from treeSpecies
+  existing.tree <- list.files(paste0(sim.path, "/treeSpecies"), full.names = TRUE)
+  required.tree <- paste0(sim.path, "/treeSpecies/", hip$treeSpecies, ".tree")
+  remove.tree <- existing.tree[!(existing.tree %in% required.tree)]
+  dum <- purrr::map(remove.tree, file.remove)
 
-  ## Copy required exportProfiles
+  ## Remove unused export profiles files from exportProfiles
   if(!all(profiles %in% SUPPORTED.PROFILES$profiles)) {
     missing.profiles      <- profiles[!(profiles %in% SUPPORTED.PROFILES$profiles)]
     missing.profile.error <- paste(c("The following profiles are not available:", missing.profiles), collapse = "\n")
     stop(missing.profile.error)
   }
 
-  export.profile.paths <- paste0(HISAFE.LIBRARY, "/exportParameters/", profiles, ".pro")
-  dum <- purrr::map(export.profile.paths, file.copy, to = paste0(sim.path, "/exportParameters"))
+  existing.EP <- list.files(paste0(sim.path, "/exportProfiles"), full.names = TRUE)
+  required.EP <- paste0(sim.path, "/exportProfiles/", profiles, ".pro")
+  remove.EP <- existing.EP[!(existing.EP %in% required.EP)]
+  dum <- purrr::map(remove.EP, file.remove)
 
-  ## Edit tree file
+  ## Edit pld & sim files
+  build_pld( hip, sim.path)
+  build_sim( hip, sim.path, profiles, saveProjectOption)
   build_tree(hip, sim.path, hip$treeSpecies)
 
   hip.aug <- list(hip = hip, path = path)

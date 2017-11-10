@@ -5,7 +5,7 @@
 \title{Builds a Hi-sAFe simulation or experiment}
 \usage{
 build_hisafe(hip, path, exp.name = "experiment", profiles = "all",
-  saveProjectOption = FALSE, controls = FALSE)
+  template.path = "default", saveProjectOption = FALSE, controls = FALSE)
 }
 \arguments{
 \item{hip}{An object of class "hip".}
@@ -17,6 +17,9 @@ folder should be created.}
 "hip" object contains more than one simulation.}
 
 \item{profiles}{A character vector of output profiles the simulation to export.}
+
+\item{template.path}{A character string of the path to the Hi-sAFe directory structure/files to use as a template.
+If "default", then the default template inluded with hisafer (i.e. the files used for Hi-sAFe calibtation) will be used.}
 
 \item{saveProjectOption}{Logical, sets the saveProjectOption parameter in the .sim file, which
 tells Hi-sAFe to save a (large) file at the end of the simulation which allows a subsequent simulation to

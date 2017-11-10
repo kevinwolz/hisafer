@@ -4,7 +4,7 @@
 \alias{build_structure}
 \title{Builds a Hi-sAFe simulation}
 \usage{
-build_structure(hip, path, profiles, saveProjectOption)
+build_structure(hip, path, profiles, template.path, saveProjectOption)
 }
 \arguments{
 \item{hip}{An object of class "hip" containing a single simulation (row).}
@@ -12,6 +12,9 @@ build_structure(hip, path, profiles, saveProjectOption)
 \item{path}{A character string of the path to the simulation folder.}
 
 \item{profiles}{A character vector of output profiles the simulation to export.}
+
+\item{template.path}{A character string of the path to the Hi-sAFe directory structure/files to use as a template.
+If "default", then the default template inluded with hisafer (i.e. the files used for Hi-sAFe calibtation) will be used.}
 
 \item{saveProjectOption}{Logical, sets the saveProjectOption parameter in the .sim file.}
 }
