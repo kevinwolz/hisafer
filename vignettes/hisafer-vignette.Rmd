@@ -134,11 +134,14 @@ Hi-sAFe can generate quite a lot of output data. All of this data is created wit
 
 To read in our previous experiment on **latitude** and **treeLineOrientation** we will use `read_hisafe_exp()`. The only required input is a `hip` object that has been modified by `build_hisafe()` to include the experiment's path. Alternatively, a `path` can by manually provided. You can also specify which Hi-sAFe output profiles to read in using `profiles`. While the default is to read all profiles, you may not want to read in any created "cells" or "voxels" data if you simply want to analyze annual tree growth data. 
 
-The resulting object created `read_hisafe_exp()` is a `hop` obeject (for "Hi-sAFe OutPut") of class "hop" and "hop-group". This is a list of 12 tibbles (data frames): 
+The resulting object created `read_hisafe_exp()` is a `hop` obeject (for "Hi-sAFe OutPut") of class "hop" and "hop-group". This is a list of 15 tibbles (data frames): 
 
-- `annual` - includes data from annualtree and annualplot profiles
-- `daily` - includes data from trees, plot, and climate profiles
+- `annualtree`
 - `annualcrop`
+- `annualplot`
+- `trees`
+- `plot`
+- `climate`
 - `roots`
 - `monthCells`
 - `cells`

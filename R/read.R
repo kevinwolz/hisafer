@@ -1,9 +1,21 @@
 #' Read output from a Hi-sAFe experiment
 #' @description Reads the designated output profiles from a Hi-sAFe experiiment (i.e. a group of Hi-sAFe simulations).
-#' @return An object of class "hop-group". This is a list of 13 data frames (tibbles):
-#' \code{annual} (includes data from annualtree and annualplot profiles), \code{daily} (includes data from trees, plot, and climate profiles), \code{annualcrop},
-#' \code{roots}, \code{monthCells}, \code{cells}, \code{voxels}, \code{variables} (variable descriptions and units from all profiles),
-#' \code{inputs} (the hip object that generated the simulation), \code{path} (the paths to the simulation folders), \code{exp.plan} (the manipulated input variables in the experiment), and \code{exp.path} (the path to the experiment folder).
+#' @return An object of class "hop-group". This is a list of 15 data frames (tibbles):
+#' \code{annualtree},
+#' \code{annualcrop},
+#' \code{annualplot},
+#' \code{trees},
+#' \code{plot},
+#' \code{climate},
+#' \code{roots},
+#' \code{monthCells},
+#' \code{cells},
+#' \code{voxels},
+#' \code{variables} (variable descriptions and units from all profiles),
+#' \code{inputs} (the hip object that generated the simulation),
+#' \code{path} (the path to the simulation folder),
+#' \code{exp.plan} (the manipulated input variables in the experiment), and
+#' \code{exp.path} (the path to the experiment folder).
 #' @param hip An object of class "hip". To create a hip object see \code{\link{define_exp}}.
 #' If the hip object contains a \code{path} value, then this can be used without providing \code{path} directly to \code{read_hisafe_exp}.
 #' If \code{hip} is not provided, then \code{path} is required and the input data for the experiment is read from the experiment
@@ -28,12 +40,19 @@ read_hisafe_exp <- function(hip = NULL, path = NULL, profiles = "all") {
   if(!is.null(hip) & !("hip" %in% class(hip))) stop("data not of class hip", call. = FALSE)
   if(is.null(hip) == is.null(path))            stop("must provide hip OR path", call. = FALSE)
 
+  ## Read simulation inputs & extract cols that vary for binding to output data
   if(!is.null(hip)) {
     exp.plan <- hip$hip
     path     <- hip$path
   } else {
     exp.name <- tail(strsplit(path, "/")[[1]], n = 1)
-    exp.plan <- readr::read_csv(gsub("//", "/", paste0(path, "/", exp.name, "_exp_summary.csv")), col_types = readr::cols())
+    exp.summary.file <- gsub("//", "/", paste0(path, "/", exp.name, "_exp_summary.csv"))
+    if(file.exists(exp.summary.file)) {
+      exp.plan <- readr::read_csv(exp.summary.file, col_types = readr::cols())
+    } else {
+      warning("No experiment summary to read. This experiment was not created with hisafer.", call. = FALSE)
+      exp.plan <- tibble()
+    }
   }
 
   exp.plan <- exp.plan[, purrr::map_lgl(exp.plan, function(x) (length(unique(x)) != 1))]
@@ -57,9 +76,12 @@ read_hisafe_exp <- function(hip = NULL, path = NULL, profiles = "all") {
     return(x)
   }
 
-  data$annual      <- data_tidy(data$annual)
-  data$daily       <- data_tidy(data$daily)
+  data$annualtree  <- data_tidy(data$annualtree)
   data$annualcrop  <- data_tidy(data$annualcrop)
+  data$annualplot  <- data_tidy(data$annualplot)
+  data$trees       <- data_tidy(data$trees)
+  data$plot        <- data_tidy(data$plot)
+  data$climate     <- data_tidy(data$climate)
   data$roots       <- data_tidy(data$roots)
   data$monthCells  <- data_tidy(data$monthCells)
   data$cells       <- data_tidy(data$cells)
@@ -87,10 +109,20 @@ read_hisafe_exp <- function(hip = NULL, path = NULL, profiles = "all") {
 
 #' Read output from a single Hi-sAFe simulation
 #' @description Reads the designated output profiles from a single Hi-sAFe simulation.
-#' @return An object of class "hop". This is a list of 10 data frames (tibbles):
-#' \code{annual} (includes data from annualtree and annualplot profiles), \code{daily} (includes data from trees, plot, and climate profiles), \code{annualcrop},
-#' \code{roots}, \code{monthCells}, \code{cells}, \code{voxels}, \code{variables} (variable descriptions and units from all profiles),
-#' \code{inputs} (the hip object that generated the simulation), and \code{path} (the path to the simulation folder).
+#' @return An object of class "hop". This is a list of 13 data frames (tibbles):
+#' \code{annualtree},
+#' \code{annualcrop},
+#' \code{annualplot},
+#' \code{trees},
+#' \code{plot},
+#' \code{climate},
+#' \code{roots},
+#' \code{monthCells},
+#' \code{cells},
+#' \code{voxels},
+#' \code{variables} (variable descriptions and units from all profiles),
+#' \code{inputs} (the hip object that generated the simulation), and
+#' \code{path} (the path to the simulation folder).
 #' @param hip An object of class "hip". To create a hip object see \code{\link{define_exp}}.
 #' If object contains a \code{path} value, then this can be used without providing \code{path} directly to \code{read_hisafe}.
 #' Cannot provided both \code{hip} and \code{simu.name}.
@@ -116,16 +148,26 @@ read_hisafe_exp <- function(hip = NULL, path = NULL, profiles = "all") {
 read_hisafe <- function(hip = NULL, simu.name = NULL, path = NULL, profiles = "all") {
 
   if(!is.null(hip) & !("hip" %in% class(hip)))                stop("data not of class hip", call. = FALSE)
-  if(is.null(hip)  == (is.null(simu.name)  |  is.null(path))) stop("must provide hip OR (simu.name & path)", call. = FALSE)
+  if(is.null(hip) == (is.null(simu.name)  |  is.null(path)))  stop("must provide hip OR (simu.name & path)", call. = FALSE)
 
+  ## Read simulation inputs
   if(!is.null(hip)) {
-    path     <- hip$path
-    sim.name <- hip$hip$SimulationName
+    path      <- hip$path
+    simu.name <- hip$hip$SimulationName
+  } else {
+    cat("\nreading:  simulation inputs (hip)")
+    simu.path <- gsub("//", "/", paste0(path, "/" , simu.name))
+    simu.summary.file <- paste0(simu.path, "/", simu.name, "_simu_summary.csv")
+    if(file.exists(simu.summary.file)){
+      hip <- readr::read_csv(paste0(simu.path, "/", simu.name, "_simu_summary.csv"), col_types = readr::cols())
+    } else {
+      warning("No simulation inputs summary (hip) to read from simulation directory. This simulation was not created with hisafer.", call. = FALSE)
+      hip <- tibble()
+    }
   }
 
   ## Create profile paths
   if(profiles[1] == "all") profiles <- SUPPORTED.PROFILES$profiles
-  simu.path   <- gsub("//", "/", paste0(path, "/" , simu.name))
   file.prefix <- paste0(simu.path, "/output-", simu.name, ".sim", "/", simu.name, "_")
   files       <- paste0(file.prefix, profiles, ".txt" )
 
@@ -141,110 +183,57 @@ read_hisafe <- function(hip = NULL, simu.name = NULL, path = NULL, profiles = "a
     profiles <- profiles[file.exists(files)]
   }
 
+  ## Read profiles
   cat("\n\nReading: ", simu.name, "\nProfiles:", paste0(profiles, collapse = ", "))
 
-  ## Read simulation inputs & extract cols that vary for binding to output data
-  if(is.null(hip)){
-    cat("\nreading:  simulation inputs")
-    hip <- readr::read_csv(paste0(simu.path, "/", simu.name, "_simu_summary.csv"), col_types = readr::cols())
-  }
-
-  ## Function for reading timeseries (Annual, Daily) profiles
-  read.ts.profiles <- function(profiles, time.class) {
-
-    ## Common columns at the start of all profiles
-    join.cols <- c("SimulationName", "Date", "Day", "Month", "Year", "JulianDay", "stepNum")
-
-    if(length(profiles) >= 1) {
-
-      cat(paste0("\nreading:  ", profiles))
-
-      ## Read in all profiles
-      dat.list <- purrr::map(profiles, function(x) read_hisafe_output_file(paste0(file.prefix, x, ".txt" )))
-
-      ## Extract & tidy data
-      dat.data <- dat.list %>%
-        purrr::map(1) %>%                                    # extract first element (data) of each profile
-        purrr::reduce(dplyr::full_join, by = join.cols) %>%  # bind all profiles togeter
-        dplyr::mutate_if(is.logical, as.numeric)             # columns read as logical must be coered to numeric to prevent plotting errors
-      ## Extract & tidy variable definitions
-      dat.variables <- dat.list %>%
-        purrr::map(2) %>%                              # extract second element (variable descriptions) of each profile
-        dplyr::bind_rows() %>%                         # bind all variable descriptions togeter
-        dplyr::mutate(VariableClass = time.class)      # add a column that indicates which data class the variable definition is from
-    } else {
-      dat.data <- dat.variables <- dplyr::tibble()     # if no profiles were requested from this data class, return empty tibbles
-    }
-    return(list(data = dat.data, variables = dat.variables))
-  }
-
-  ## Function for reading other profiles
-  read.other.profiles <- function(profile) {
-    file <- paste0(file.prefix, profile, ".txt")
-    cat(paste0("\nreading:  ", profile, collapse = ", "))
-    if(file.info(file)$size < 3e8) {
-      profile.list      <- read_hisafe_output_file(file)
-      profile.data      <- profile.list$data %>%
-        dplyr::mutate_if(is.logical, as.numeric)   # columns read as logical must be coered to numeric to prevent plotting errors
-      profile.variables <- profile.list$variables %>% dplyr::mutate(VariableClass = profile)
-    } else {
-      warning(paste(profile, "profile too large (> 300 MB) to read"), call. = FALSE)
-      profile.data <- profile.variables <- dplyr::tibble()
-    }
-    return(list(data = profile.data, variables = profile.variables))
-  }
-
-  ## Read annual data & associated variables
-  annual.profiles <- profiles[profiles %in% c("annualtree", "annualplot")]
-  annual.dv       <- read.ts.profiles(annual.profiles, "annual")
-
-  ## Read daily data & associated variables
-  daily.profiles  <- profiles[profiles %in% c("trees", "plot", "climate")]
-  daily.dv        <- read.ts.profiles(daily.profiles, "daily")
-
-  ## Read non-annual or daily variables
-  other.profiles    <- profiles[profiles %in% c("annualcrop", "roots", "monthCells", "cells", "voxels")]
-  if(length(other.profiles) >= 1) {
-    other        <- purrr::map(other.profiles, read.other.profiles)
-    names(other) <- other.profiles
-
-    get_other <- function(other, prof) {
-      if(is.null(other[[prof]])) {
-        dv <- list(data = dplyr::tibble(), variables = dplyr::tibble())
-      } else {
-        dv <- other[[prof]]
-      }
-      return(dv)
-    }
-
-      annualcrop.dv <- get_other(other, "annualcrop")
-      roots.dv      <- get_other(other, "roots")
-      monthCells.dv <- get_other(other, "monthCells")
-      cells.dv      <- get_other(other, "cells")
-      voxels.dv     <- get_other(other, "voxels")
-
+  if(length(profiles) >= 1) {
+    out <- purrr::map(profiles, read.profile, path = file.prefix)
+    names(out) <- profiles
   } else {
-    annualcrop.dv <- roots.dv <- monthCells.dv <- cells.dv <- voxels.dv <- list(data = dplyr::tibble(), variables = dplyr::tibble())
+    out <- list()
   }
+
+  get_prof <- function(out, prof) {
+    if(is.null(out[[prof]])) {
+      dv <- list(data = dplyr::tibble(), variables = dplyr::tibble())
+    } else {
+      dv <- out[[prof]]
+    }
+    return(dv)
+  }
+
+  annualtree.dv <- get_prof(out, "annualtree")
+  annualcrop.dv <- get_prof(out, "annualcrop")
+  annualplot.dv <- get_prof(out, "annualplot")
+  trees.dv      <- get_prof(out, "trees")
+  plot.dv       <- get_prof(out, "plot")
+  climate.dv    <- get_prof(out, "climate")
+  roots.dv      <- get_prof(out, "roots")
+  monthCells.dv <- get_prof(out, "monthCells")
+  cells.dv      <- get_prof(out, "cells")
+  voxels.dv     <- get_prof(out, "voxels")
 
   ## Combine variables into one tibble, remove duplicates, rename col headers in English
-  vars.to.pull <- list(annual.dv, daily.dv, annualcrop.dv, roots.dv, monthCells.dv, cells.dv, voxels.dv)
+  vars.to.pull <- list(annualtree.dv, annualcrop.dv, annualplot.dv, trees.dv, plot.dv, climate.dv, roots.dv, monthCells.dv, cells.dv, voxels.dv)
   variables <- purrr::map(vars.to.pull, "variables") %>%
     dplyr::bind_rows() %>%
     dplyr::distinct()
   if(ncol(variables) > 0) names(variables) <- c("Subject", "SubjectId", "VariableName", "Units", "Description", "VariableClass")
 
   ## Creat output list & assign class
-  output <- list(annual      = annual.dv$data,
-                 daily       = daily.dv$data,
-                 annualcrop  = annualcrop.dv$data,
-                 roots       = roots.dv$data,
-                 monthCells  = monthCells.dv$data,
-                 cells       = cells.dv$data,
-                 voxels      = voxels.dv$data,
-                 variables   = variables,
-                 inputs      = hip,
-                 path        = dplyr::tibble(path = simu.path))
+  output <- list(annualtree = annualtree.dv$data,
+                 annualcrop = annualcrop.dv$data,
+                 annualplot = annualplot.dv$data,
+                 trees      = trees.dv$data,
+                 plot       = plot.dv$data,
+                 climate    = climate.dv$data,
+                 roots      = roots.dv$data,
+                 monthCells = monthCells.dv$data,
+                 cells      = cells.dv$data,
+                 voxels     = voxels.dv$data,
+                 variables  = variables,
+                 inputs     = hip,
+                 path       = dplyr::tibble(path = simu.path))
 
   class(output)<-c("hop", class(output))
   return(output)
@@ -292,4 +281,24 @@ read_table_hisafe <- function(file, ...) {
                               stringsAsFactors = FALSE,
                               na.strings = c("NA", "error!"), # "error!" is output by HISAFE & causes table merge errors if left
                               encoding = "latin1", ...))
+}
+
+#' Read a Hi-sAFe output profile
+#' @description Wrapper for read_hisafe_output_file.
+#' @return A list containing the profile data and the profile variable definitions.
+#' @param profile A character string of the profile name.
+#' @param path A character string of the path to the folder containing the profiles.
+read.profile <- function(profile, path) {
+  file <- paste0(path, profile, ".txt")
+  cat(paste0("\nreading:  ", profile, collapse = ", "))
+  if(file.info(file)$size < 3e8) {
+    profile.list      <- read_hisafe_output_file(file)
+    profile.data      <- profile.list$data %>%
+      dplyr::mutate_if(is.logical, as.numeric)   # columns read as logical must be coered to numeric to prevent plotting errors
+    profile.variables <- profile.list$variables %>% dplyr::mutate(VariableClass = profile)
+  } else {
+    warning(paste(profile, "profile too large (> 300 MB) to read"), call. = FALSE)
+    profile.data <- profile.variables <- dplyr::tibble()
+  }
+  return(list(data = profile.data, variables = profile.variables))
 }

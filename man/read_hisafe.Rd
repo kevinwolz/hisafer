@@ -24,10 +24,20 @@ If \code{hip} is not provided, then \code{path} is required. If both \code{hip} 
 Defaults to reading all supported Hi-sAFe output profiles via "all". For currently supported profiles see: \code{\link{hisafe_profiles}}}
 }
 \value{
-An object of class "hop". This is a list of 10 data frames (tibbles):
-\code{annual} (includes data from annualtree and annualplot profiles), \code{daily} (includes data from trees, plot, and climate profiles), \code{annualcrop},
-\code{roots}, \code{monthCells}, \code{cells}, \code{voxels}, \code{variables} (variable descriptions and units from all profiles),
-\code{inputs} (the hip object that generated the simulation), and \code{path} (the path to the simulation folder).
+An object of class "hop". This is a list of 13 data frames (tibbles):
+\code{annualtree},
+\code{annualcrop},
+\code{annualplot},
+\code{trees},
+\code{plot},
+\code{climate},
+\code{roots},
+\code{monthCells},
+\code{cells},
+\code{voxels},
+\code{variables} (variable descriptions and units from all profiles),
+\code{inputs} (the hip object that generated the simulation), and
+\code{path} (the path to the simulation folder).
 }
 \description{
 Reads the designated output profiles from a single Hi-sAFe simulation.
