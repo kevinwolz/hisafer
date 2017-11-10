@@ -6,7 +6,7 @@
 #' If the data contains two more tree ids, the plots will be faceted by tree id.
 #' @param hop An object of class "hop" or "hop-group" containing output data from one or more Hi-sAFe simulations.
 #' @param profile The profile for which to plot a timeseries. If 'annualtree' or 'annualplot', annual timeseries are created.
-#' If 'tree', 'plot', or 'climate', daily timeseries are created.
+#' If 'trees', 'plot', or 'climate', daily timeseries are created.
 #' @param output.path A character stting indicating the path to the directory where plots should be saved.
 #' Plots aresaved in a subdirectory within this directory named by \code{profile}.
 #' If no value is provided, the experiment/simulation path is read from the hop object, and a folder is created there called "diagnostics".

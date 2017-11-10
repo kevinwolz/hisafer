@@ -5,4 +5,5 @@
 inst/doc
 inst/extdata
 inst/extdata/*
+vignettes/experiment/
 vignettes/experiment/*

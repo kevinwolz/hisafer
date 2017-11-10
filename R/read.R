@@ -187,7 +187,7 @@ read_hisafe <- function(hip = NULL, simu.name = NULL, path = NULL, profiles = "a
   cat("\n\nReading: ", simu.name, "\nProfiles:", paste0(profiles, collapse = ", "))
 
   if(length(profiles) >= 1) {
-    out <- purrr::map(profiles, read.profile, path = file.prefix)
+    out <- purrr::map(profiles, read_profile, path = file.prefix)
     names(out) <- profiles
   } else {
     out <- list()
@@ -288,7 +288,7 @@ read_table_hisafe <- function(file, ...) {
 #' @return A list containing the profile data and the profile variable definitions.
 #' @param profile A character string of the profile name.
 #' @param path A character string of the path to the folder containing the profiles.
-read.profile <- function(profile, path) {
+read_profile <- function(profile, path) {
   file <- paste0(path, profile, ".txt")
   cat(paste0("\nreading:  ", profile, collapse = ", "))
   if(file.info(file)$size < 3e8) {

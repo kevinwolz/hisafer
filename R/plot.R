@@ -6,7 +6,7 @@
 #' @param hop An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
 #' @param variable A character string of the name of the variable to plot.
 #' @param profile The profile for which to plot a timeseries. If 'annualtree' or 'annualplot', annual timeseries are created.
-#' If 'tree', 'plot', or 'climate', daily timeseries are created.
+#' If 'trees', 'plot', or 'climate', daily timeseries are created.
 #' @param time.lim If profile is an annual profile, a numeric vector of length two providing the \code{c(minimum, maximum)} of years (since planting) to plot.
 #' If profile is daily profile, a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
 #' If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.
