@@ -11,7 +11,7 @@ diag_hisafe_ts(hop, profile, output.path = NULL, time.lim = NULL,
 \item{hop}{An object of class "hop" or "hop-group" containing output data from one or more Hi-sAFe simulations.}
 
 \item{profile}{The profile for which to plot a timeseries. If 'annualtree' or 'annualplot', annual timeseries are created.
-If 'tree', 'plot', or 'climate', daily timeseries are created.}
+If 'trees', 'plot', or 'climate', daily timeseries are created.}
 
 \item{output.path}{A character stting indicating the path to the directory where plots should be saved.
 Plots aresaved in a subdirectory within this directory named by \code{profile}.
