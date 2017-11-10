@@ -4,24 +4,27 @@
 \alias{diag_hisafe_ts}
 \title{Plot timeseries diagnostics of Hi-sAFe output}
 \usage{
-diag_hisafe_ts(hop, time.class = "annual", output.path = NULL,
-  time.lim = NULL, tree.id = NULL)
+diag_hisafe_ts(hop, profile, output.path = NULL, time.lim = NULL,
+  tree.id = NULL, color.palette = NULL)
 }
 \arguments{
 \item{hop}{An object of class "hop" or "hop-group" containing output data from one or more Hi-sAFe simulations.}
 
-\item{time.class}{If 'annual', the default, annual timeseries are created. If 'daily', daily timeseries are created.}
+\item{profile}{The profile for which to plot a timeseries. If 'annualtree' or 'annualplot', annual timeseries are created.
+If 'tree', 'plot', or 'climate', daily timeseries are created.}
 
-\item{output.path}{A character stting indicating the path to the directory where plots should be saved. Plots are
-saved in a subdirectory within this directory named by \code{time.class}.
+\item{output.path}{A character stting indicating the path to the directory where plots should be saved.
+Plots aresaved in a subdirectory within this directory named by \code{profile}.
 If no value is provided, the experiment/simulation path is read from the hop object, and a folder is created there called "diagnostics".}
 
-\item{time.lim}{If time.class is 'annual', the default, a numeric vector of length two providing
-the \code{c(minimum, maximum)} of years (since planting) to plot.
-If time.class is 'daily', a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
+\item{time.lim}{If profile is an annual profile, a numeric vector of length two providing the \code{c(minimum, maximum)} of years (since planting) to plot.
+If profile is daily profile, a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
 If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.}
 
 \item{tree.id}{A numeric vector indicating the ids of a subset of tree ids to plot. If no input, all trees will be plotted.}
+
+\item{color.palette}{A character stirng of hex values  or R standard color names defining the color palette to use in plots with multiple simulations.
+If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette.}
 }
 \value{
 Invisibly returns a list of \code{ggplot} objects. If the data is of class "hop-group" and contains
@@ -29,8 +32,8 @@ data from more than one Hi-sAFe simulation, the plots will contain multiple line
 If the data contains two more tree ids, the plots will be faceted by tree id.
 }
 \description{
-Plots a daily or annual timeseries of every Hi-sAFe output variable. All plots are saved as
-png files to a specifified output path.
+Plots a daily or annual timeseries of every Hi-sAFe output variable in a specified output profile.
+All plots are saved as png files to a specifified output path.
 }
 \examples{
 \dontrun{

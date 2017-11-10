@@ -4,22 +4,25 @@
 \alias{plot_hisafe_ts}
 \title{Plot timeseries of Hi-sAFe output variable}
 \usage{
-plot_hisafe_ts(hop, variable, time.class = "annual", time.lim = NULL,
-  tree.id = NULL)
+plot_hisafe_ts(hop, variable, profile, time.lim = NULL, tree.id = NULL,
+  color.palette = NULL)
 }
 \arguments{
 \item{hop}{An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.}
 
 \item{variable}{A character string of the name of the variable to plot.}
 
-\item{time.class}{If 'annual', the default, an annual timeseries is created. If 'daily', a daily timeseries is created.}
+\item{profile}{The profile for which to plot a timeseries. If 'annualtree' or 'annualplot', annual timeseries are created.
+If 'tree', 'plot', or 'climate', daily timeseries are created.}
 
-\item{time.lim}{If time.class is 'annual', the default, a numeric vector of length two providing
-the \code{c(minimum, maximum)} of years (since planting) to plot.
-If time.class is 'daily', a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
+\item{time.lim}{If profile is an annual profile, a numeric vector of length two providing the \code{c(minimum, maximum)} of years (since planting) to plot.
+If profile is daily profile, a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
 If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.}
 
 \item{tree.id}{A numeric vector indicating the ids of a subset of tree ids to plot. If no input, all trees will be plotted.}
+
+\item{color.palette}{A character stirng of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
+If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette.}
 }
 \value{
 Invisibly returns a ggplot object. If the data is of class \code{hop-group} and contains data from more than one

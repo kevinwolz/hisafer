@@ -5,12 +5,14 @@
 #' contains two more tree ids, the plot will be faceted by tree id.
 #' @param hop An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
 #' @param variable A character string of the name of the variable to plot.
-#' @param time.class If 'annual', the default, an annual timeseries is created. If 'daily', a daily timeseries is created.
-#' @param time.lim If time.class is 'annual', the default, a numeric vector of length two providing
-#' the \code{c(minimum, maximum)} of years (since planting) to plot.
-#' If time.class is 'daily', a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
+#' @param profile The profile for which to plot a timeseries. If 'annualtree' or 'annualplot', annual timeseries are created.
+#' If 'tree', 'plot', or 'climate', daily timeseries are created.
+#' @param time.lim If profile is an annual profile, a numeric vector of length two providing the \code{c(minimum, maximum)} of years (since planting) to plot.
+#' If profile is daily profile, a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
 #' If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.
 #' @param tree.id A numeric vector indicating the ids of a subset of tree ids to plot. If no input, all trees will be plotted.
+#' @param color.palette A character stirng of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
+#' If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette.
 #' @export
 #' @importFrom dplyr %>%
 #' @import ggplot2
@@ -32,29 +34,37 @@
 #' }
 plot_hisafe_ts <- function(hop,
                            variable,
-                           time.class = "annual",
-                           time.lim   = NULL,
-                           tree.id    = NULL) {
-  time.class <- tolower(time.class) # prevents error if improper capitalization not input by user
+                           profile,
+                           time.lim      = NULL,
+                           tree.id       = NULL,
+                           color.palette = NULL) {
+
+  annual.profiles <- c("annualtree", "annualplot")
+  daily.profiles  <- c("trees", "plot", "climate")
 
   ## Check for data class and if profile exists
-  if(!any(c("hop", "hop-group") %in% class(hop))) stop("data not of class hop or hop-group", call. = FALSE)
-  if(nrow(hop[[time.class]]) == 0)                stop(paste("no data from any", time.class, "profiles found"), call. = FALSE)
+  if(!any(c("hop", "hop-group") %in% class(hop)))        stop("data not of class hop or hop-group", call. = FALSE)
+  if(!(profile %in% c(annual.profiles, daily.profiles))) stop("supplied profile is not supported", call. = FALSE)
+  if(nrow(hop[[profile]]) == 0)                          stop(paste("no data from", profile, "profile found"), call. = FALSE)
 
   ## Color blind-friendly palette
-  cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+  if(is.null(color.palette)) {
+    cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+    color.palette <- cbPalette
+  }
+
 
   ## Exract units of supplied variable from the "variables" slot
   var.unit <- hop$variables %>%
-    dplyr::filter(VariableClass == time.class, VariableName == variable) %>%
+    dplyr::filter(VariableClass == profile, VariableName == variable) %>%
     .$Units %>%
     gsub(pattern = "\\.", replacement = " ")
 
-  ## Create time.class-specific x aesthetic, axis label, plot theme, and time.lim filter
-  if(time.class == "annual"){
+  ## Create profile-specific x aesthetic, axis label, plot theme, and time.lim filter
+  if(profile %in% annual.profiles){
     x.var      <- "Year"
     x.label    <- "Years after establishment"
-    plot.data  <- hop$annual %>%
+    plot.data  <- hop[[profile]] %>%
       dplyr::mutate(Year = Year - min(Year) + 1) # Create 0+ year values
     scale_x_ts <- scale_x_continuous(sec.axis = sec_axis(~ ., labels = NULL))
     if(!is.null(time.lim)) {
@@ -65,7 +75,7 @@ plot_hisafe_ts <- function(hop,
   } else {
     x.var      <- "Date"
     x.label    <- "Date"
-    plot.data  <- hop$daily
+    plot.data  <- hop[[profile]]
     scale_x_ts <- scale_x_date()
     if(!is.null(time.lim)) {
       time.lim <- lubridate::ymd(time.lim)
@@ -74,6 +84,12 @@ plot_hisafe_ts <- function(hop,
       plot.data <- dplyr::filter(plot.data, Date >= time.lim[1], Date <= time.lim[2])
     }
   }
+
+  ## Check for existence of variable within hop profile
+  if(!(variable %in% names(plot.data))) stop(paste0(variable, " does not exist within ", profile, " profile.",
+                                                    "\nCheck spelling and capitalization of variable name.",
+                                                    "\nAlso check to ensure that this variable was included within the output profile definition."),
+                                             call. = FALSE)
 
   ## Filter by supplied tree.id
   if(!is.null(tree.id)) {
@@ -102,7 +118,7 @@ plot_hisafe_ts <- function(hop,
     scale_x_ts +
     scale_y_continuous(sec.axis = sec_axis(~ ., labels = NULL)) +
     geom_line(size = 1, na.rm = TRUE) +
-    scale_color_manual(values = rep(cbPalette, 10),
+    scale_color_manual(values = rep(color.palette, 10),
                        guide = guide_legend(ncol = 2, byrow = TRUE)) +
     theme_hisafe_ts()
 
@@ -184,6 +200,12 @@ plot_hisafe_monthcells <- function(hop,
     dplyr::filter(Year %in% years) %>%
     dplyr::filter(Month %in% months)
 
+  ## Check for existence of variable within hop profile
+  if(!(variable %in% names(plot.data))) stop(paste0(variable, " does not exist within monthCells profile.",
+                                                   "\nCheck spelling and capitalization of variable name.",
+                                                   "\nAlso check to ensure that this variable was included within the output profile definition."),
+                                             call. = FALSE)
+
   ## Find tree locations for each simulation
   tree.locations <- plot.data %>%
     dplyr::summarize(x = median(x), y = median(y))
@@ -250,6 +272,12 @@ plot_hisafe_cells <- function(hop, variable, dates) {
   plot.data <- hop$cells %>%
     dplyr::filter(Date %in% lubridate::ymd(dates))
 
+  ## Check for existence of variable within hop profile
+  if(!(variable %in% names(plot.data))) stop(paste0(variable, " does not exist within cells profile.",
+                                                    "\nCheck spelling and capitalization of variable name.",
+                                                    "\nAlso check to ensure that this variable was included within the output profile definition."),
+                                             call. = FALSE)
+
   ## Find tree locations for each simulation
   tree.locations <- plot.data %>%
     dplyr::summarize(x = median(x), y = median(y))
@@ -271,7 +299,6 @@ plot_hisafe_cells <- function(hop, variable, dates) {
     y.lab       <- ""
     title.lab   <- paste0(variable, " (", lubridate::ymd(dates), ")")
   }
-
 
   ## Create plot
   plot.obj <- ggplot(plot.data, aes(x = x, y = y)) +
@@ -336,6 +363,12 @@ plot_hisafe_voxels <- function(hop, variable, dates) {
   ## Filter for provided dates
   plot.data <- hop$voxels %>%
     dplyr::filter(Date %in% lubridate::ymd(dates))
+
+  ## Check for existence of variable within hop profile
+  if(!(variable %in% names(plot.data))) stop(paste0(variable, " does not exist within voxels profile.",
+                                                    "\nCheck spelling and capitalization of variable name.",
+                                                    "\nAlso check to ensure that this variable was included within the output profile definition."),
+                                             call. = FALSE)
 
   ## Find tree locations for each simulation
   tree.locations <- plot.data %>%
