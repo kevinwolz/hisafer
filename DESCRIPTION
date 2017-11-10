@@ -15,14 +15,14 @@ Imports: ggplot2 (>= 2.2.1),
     purrr (>= 0.2.3),
     readr (>= 1.1.1),
     lubridate (>= 1.6.0),
-    viridis (>= 0.4.0),
-    foreach (>= 1.4.3),
-    doParallel (>= 1.0.11),
-    parallel (>= 3.4.1)
+    viridis (>= 0.4.0)
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
 Suggests: knitr,
-    rmarkdown
+    rmarkdown,
+    foreach (>= 1.4.3),
+    doParallel (>= 1.0.11),
+    parallel (>= 3.4.1)
 VignetteBuilder: knitr

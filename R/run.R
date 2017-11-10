@@ -56,6 +56,15 @@ run_hisafe_exp <- function(hip         = NULL,
   }
 
   if(parallel) {
+    ## Check for packages required for parallel computing
+    parallel.packages <- c("foreach", "parallel", "doParallel")
+    package.check <- purrr::map_lgl(parallel.packages, requireNamespace, quietly = TRUE)
+    if(any(!package.check)) {
+      missing.packages <- parallel.packages[!package.check]
+      stop(paste0("The following packages are needed for parallel computing with hisafer. Please install them.\n",
+           paste(missing.packages, collapse = "\n")), call. = FALSE)
+    }
+
     if(is.null(num.cores)) num.cores <- parallel::detectCores() - 1
     if(num.cores < 2) stop("There are less than 2 detectable cores on this computer. Parallel computing not possible.")
     cat("\nInitializing simulations on", num.cores, "cores")
