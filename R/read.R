@@ -155,7 +155,7 @@ read_hisafe <- function(hip = NULL, simu.name = NULL, path = NULL, profiles = "a
     path      <- hip$path
     simu.name <- hip$hip$SimulationName
   } else {
-    cat("\nreading:  simulation inputs (hip)")
+    #cat("\nreading:  simulation inputs (hip)")
     simu.path <- gsub("//", "/", paste0(path, "/" , simu.name))
     simu.summary.file <- paste0(simu.path, "/", simu.name, "_simu_summary.csv")
     if(file.exists(simu.summary.file)){

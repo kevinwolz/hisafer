@@ -97,11 +97,12 @@ plot_hisafe_ts <- function(hop,
   }
 
   ## If number of trees in scene is > 1, then facet by tree id
-  if(length(unique(plot.data$id)) == 1) {
-    facet_annual <- geom_blank()
-  } else {
-    plot.data <- plot.data %>% dplyr::mutate(id = paste("Tree", id))
-    facet_annual <- facet_wrap(~id, nrow = 1)
+  facet_annual <- geom_blank()
+  if(profile %in% c("annualtree", "trees")) {
+    if(length(unique(plot.data$id)) > 1) {
+      plot.data <- plot.data %>% dplyr::mutate(id = paste("Tree", id))
+      facet_annual <- facet_wrap(~id, nrow = 1)
+    }
   }
 
   ## Pad SimulationName for legend clarity (until bug in legend.text response to margin is fixed)
@@ -202,8 +203,8 @@ plot_hisafe_monthcells <- function(hop,
 
   ## Check for existence of variable within hop profile
   if(!(variable %in% names(plot.data))) stop(paste0(variable, " does not exist within monthCells profile.",
-                                                   "\nCheck spelling and capitalization of variable name.",
-                                                   "\nAlso check to ensure that this variable was included within the output profile definition."),
+                                                    "\nCheck spelling and capitalization of variable name.",
+                                                    "\nAlso check to ensure that this variable was included within the output profile definition."),
                                              call. = FALSE)
 
   ## Find tree locations for each simulation

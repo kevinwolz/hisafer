@@ -75,6 +75,7 @@ run_hisafe_exp <- function(hip         = NULL,
   } else {
     run.log <- foreach::foreach(i = simu.names) %do% run_hisafe(path = exp.path, simu.name = i)
   }
+  cat("\nAll simulations complete")
   invisible(run.log)
 }
 

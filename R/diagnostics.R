@@ -58,11 +58,13 @@ diag_hisafe_ts <- function(hop,
   ## Clean columns & extract names of variables to plot
   # cols with only "error!" output are all NA's and cause plot errors
   if(profile %in% annual.profiles) {
-    hop[[profile]]  <- hop[[profile]] %>% dplyr::select_if(~sum(!is.na(.)) > 0)
-    var.names       <- names(hop[[profile]])[(which(names(hop[[profile]]) == "id") + 1):length(names(hop[[profile]]))]
+    hop[[profile]]   <- hop[[profile]] %>% dplyr::select_if(~sum(!is.na(.)) > 0)
+    last.no.plot.col <- ifelse(profile == "annualtree", "id", "mainCropName")
+    var.names        <- names(hop[[profile]])[(which(names(hop[[profile]]) == last.no.plot.col) + 1):length(names(hop[[profile]]))]
   } else {
-    hop[[profile]]  <- hop[[profile]] %>% dplyr::select_if(~sum(!is.na(.)) > 0)
-    var.names       <- names(hop[[profile]])[(which(names(hop[[profile]]) == "id") + 1):length(names(hop[[profile]]))]
+    hop[[profile]]   <- hop[[profile]] %>% dplyr::select_if(~sum(!is.na(.)) > 0)
+    last.no.plot.col <- ifelse(profile == "trees", "id", ifelse(profile == "plot", "mainCropName", "stepNum"))
+    var.names        <- names(hop[[profile]])[(which(names(hop[[profile]]) == last.no.plot.col) + 1):length(names(hop[[profile]]))]
   }
 
   ## Create plots
