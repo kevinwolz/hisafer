@@ -77,8 +77,58 @@ simu_rename <- function(hop, old.names, new.names) {
   profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
 
   for(i in profiles) {
-    levels(hop[[i]]$SimulationName) <- new.names[match(levels(hop[[i]]$SimulationName), old.names)]
+    #if(!is.factor(hop[[i]]$SimulationName)) hop[[i]]$SimulationName <- factor(hop[[i]]$SimulationName)
+    hop[[i]]$SimulationName <- new.names[match(hop[[i]]$SimulationName, old.names)]
   }
 
   return(hop)
+}
+
+#' Merge multiple hop objects
+#' @description Merges multiple hop objects, renaming simulation names if there are duplicates
+#' @return Returns a hop object.
+#' @param hops A list of hop objects to merge.
+#' @export
+#' @importFrom dplyr %>%
+#' @family hisafe helper functions
+#' @examples
+#' \dontrun{
+#' new_hop <- hop_merge(list(hop1, hop2, hop3))
+#' }
+hop_merge <- function(hops) {
+
+  check_class <- function(x) { any(c("hop", "hop-group") %in% class(x)) }
+  if(!all(purrr::map_lgl(hops, check_class))) stop("one or most list elements not of class hop or hop-group", call. = FALSE)
+
+  make_names_unique <- function(x, num){ paste0(num, "-", x) }
+  old.names <- purrr::map(purrr::map(hops, "inputs"), "SimulationName")
+
+  if(any(duplicated(as.character(unlist(old.names))))) {
+    hops <- purrr::pmap(list(hop = hops,
+                             old.names = old.names,
+                             new.names = map2(old.names, 1:length(old.names), make_names_unique)),
+                        simu_rename)
+  }
+
+  clear_elements <- function(x) {
+    x$exp.path <- NA
+    return(x)
+  }
+
+  merged_hop <- hops %>%
+    purrr::map(clear_elements) %>%
+    purrr::pmap(dplyr::bind_rows)
+
+  hip <- merged_hop$inputs
+
+  unique.cols <- names(hip)[purrr::map_lgl(hip, function(x) (length(unique(x)) != 1))]
+  unique.cols <- unique.cols[unique.cols != "SimulationName"]
+  other.cols  <- names(hip)[!(names(hip) %in% c("SimulationName", unique.cols))]
+
+  merged_hop$inputs <- dplyr::bind_cols(hip[, "SimulationName"], hip[,  unique.cols], hip[, other.cols])
+
+  merged_hop$exp.plan <- select(merged_hop$inputs, "SimulationName", unique.cols)
+
+  class(merged_hop) <- c("hop-group", "hop", class(merged_hop))
+  return(merged_hop)
 }

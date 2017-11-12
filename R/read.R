@@ -25,6 +25,7 @@
 #' If \code{hip} is not provided, then \code{path} is required. If both \code{hip} and \code{path} are provided, \code{path} is used.
 #' @param profiles A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading all supported Hi-sAFe output profiles via "all".
 #' Currently supported profiles are: annualplot, annualtree, annualcrop, plot, trees, roots, cells, voxels, climate, monthCells.
+#' @param show.progress Logical indicating whether progress messsages should be printed to the console.
 #' @export
 #' @importFrom dplyr %>%
 #' @examples
@@ -35,7 +36,7 @@
 #' # If only the annual tree data is required:
 #' mytreeexp <- read_hisafe(MyExpPlan, "./", profiles = "annualtree")
 #' }
-read_hisafe_exp <- function(hip = NULL, path = NULL, profiles = "all") {
+read_hisafe_exp <- function(hip = NULL, path = NULL, profiles = "all", show.progress = TRUE) {
 
   if(!is.null(hip) & !("hip" %in% class(hip))) stop("data not of class hip", call. = FALSE)
   if(is.null(hip) == is.null(path))            stop("must provide hip OR path", call. = FALSE)
@@ -58,7 +59,7 @@ read_hisafe_exp <- function(hip = NULL, path = NULL, profiles = "all") {
   exp.plan <- exp.plan[, purrr::map_lgl(exp.plan, function(x) (length(unique(x)) != 1))]
 
   ## Read all data from all simulations & combine
-  data <- purrr::map(exp.plan$SimulationName, read_hisafe, hip = NULL, path = path, profiles = profiles) %>%
+  data <- purrr::map(exp.plan$SimulationName, read_hisafe, hip = NULL, path = path, profiles = profiles, show.progress = show.progress) %>%
     purrr::pmap(dplyr::bind_rows) # a more generic version of this line that handles cases where the number
   # of elements and order of names in each sublist can vary is:
   # purrr::map(map_df(data, ~ as.data.frame(purrr::map(.x, ~ unname(nest(.))))), bind_rows)
@@ -69,9 +70,9 @@ read_hisafe_exp <- function(hip = NULL, path = NULL, profiles = "all") {
   data_tidy <- function(x){
     if(nrow(x) > 0) {
       x <- dplyr::left_join(exp.plan, x, by = "SimulationName") %>%   # add exp.plan cols to annual data
-        dplyr::filter(!is.na(Date)) %>%                               # output profiles with no data will have NA's in all columns
-        dplyr::mutate_at(names(exp.plan), factor) %>%
-        dplyr::group_by(SimulationName)                               # group annual data by simulaton
+        dplyr::filter(!is.na(Date)) #%>%                               # output profiles with no data will have NA's in all columns
+        #dplyr::mutate_at(names(exp.plan), factor) #%>%
+        #dplyr::group_by(SimulationName)                               # group annual data by simulaton
     }
     return(x)
   }
@@ -103,7 +104,7 @@ read_hisafe_exp <- function(hip = NULL, path = NULL, profiles = "all") {
     warning(year.length.warning, call. = FALSE)
   }
 
-  class(data)<-c("hop-group", "hop", class(data))
+  class(data) <- c("hop-group", "hop", class(data))
   return(data)
 }
 
@@ -135,6 +136,7 @@ read_hisafe_exp <- function(hip = NULL, path = NULL, profiles = "all") {
 #' If \code{hip} is not provided, then \code{path} is required. If both \code{hip} and \code{path} are provided, \code{path} is used.
 #' @param profiles A character vector of the names of Hi-sAFe output profiles to read.
 #' Defaults to reading all supported Hi-sAFe output profiles via "all". For currently supported profiles see: \code{\link{hisafe_profiles}}
+#' @param show.progress Logical indicating whether progress messsages should be printed to the console.
 #' @export
 #' @importFrom dplyr %>%
 #' @examples
@@ -145,7 +147,7 @@ read_hisafe_exp <- function(hip = NULL, path = NULL, profiles = "all") {
 #' # If only the annual tree data is required:
 #' mytreedata <- read_hisafe("MySimulation", "./", profiles = "annualtree")
 #' }
-read_hisafe <- function(hip = NULL, simu.name = NULL, path = NULL, profiles = "all") {
+read_hisafe <- function(hip = NULL, simu.name = NULL, path = NULL, profiles = "all", show.progress = TRUE) {
 
   if(!is.null(hip) & !("hip" %in% class(hip)))                stop("data not of class hip", call. = FALSE)
   if(is.null(hip) == (is.null(simu.name)  |  is.null(path)))  stop("must provide hip OR (simu.name & path)", call. = FALSE)
@@ -159,7 +161,8 @@ read_hisafe <- function(hip = NULL, simu.name = NULL, path = NULL, profiles = "a
     simu.path <- gsub("//", "/", paste0(path, "/" , simu.name))
     simu.summary.file <- paste0(simu.path, "/", simu.name, "_simu_summary.csv")
     if(file.exists(simu.summary.file)){
-      hip <- readr::read_csv(paste0(simu.path, "/", simu.name, "_simu_summary.csv"), col_types = readr::cols())
+      hip <- readr::read_csv(paste0(simu.path, "/", simu.name, "_simu_summary.csv"), col_types = readr::cols()) #%>%
+        #mutate(SimulationName = factor(SimulationName))
     } else {
       warning("No simulation inputs summary (hip) to read from simulation directory. This simulation was not created with hisafer.", call. = FALSE)
       hip <- tibble()
@@ -184,10 +187,10 @@ read_hisafe <- function(hip = NULL, simu.name = NULL, path = NULL, profiles = "a
   }
 
   ## Read profiles
-  cat("\n\nReading: ", simu.name, "\nProfiles:", paste0(profiles, collapse = ", "))
+  if(show.progress) cat("\n\nReading: ", simu.name, "\nProfiles:", paste0(profiles, collapse = ", "))
 
   if(length(profiles) >= 1) {
-    out <- purrr::map(profiles, read_profile, path = file.prefix)
+    out <- purrr::map(profiles, read_profile, path = file.prefix, show.progress = show.progress)
     names(out) <- profiles
   } else {
     out <- list()
@@ -235,7 +238,7 @@ read_hisafe <- function(hip = NULL, simu.name = NULL, path = NULL, profiles = "a
                  inputs     = hip,
                  path       = dplyr::tibble(path = simu.path))
 
-  class(output)<-c("hop", class(output))
+  class(output) <- c("hop", class(output))
   return(output)
 }
 
@@ -288,9 +291,10 @@ read_table_hisafe <- function(file, ...) {
 #' @return A list containing the profile data and the profile variable definitions.
 #' @param profile A character string of the profile name.
 #' @param path A character string of the path to the folder containing the profiles.
-read_profile <- function(profile, path) {
+#' @param show.progress Logical indicating whether progress messsages should be printed to the console.
+read_profile <- function(profile, path, show.progress = TRUE) {
   file <- paste0(path, profile, ".txt")
-  cat(paste0("\nreading:  ", profile, collapse = ", "))
+  if(show.progress) cat(paste0("\nreading:  ", profile, collapse = ", "))
   if(file.info(file)$size < 3e8) {
     profile.list      <- read_hisafe_output_file(file)
     profile.data      <- profile.list$data %>%
