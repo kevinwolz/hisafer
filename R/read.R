@@ -71,8 +71,8 @@ read_hisafe_exp <- function(hip = NULL, path = NULL, profiles = "all", show.prog
     if(nrow(x) > 0) {
       x <- dplyr::left_join(exp.plan, x, by = "SimulationName") %>%   # add exp.plan cols to annual data
         dplyr::filter(!is.na(Date)) #%>%                               # output profiles with no data will have NA's in all columns
-        #dplyr::mutate_at(names(exp.plan), factor) #%>%
-        #dplyr::group_by(SimulationName)                               # group annual data by simulaton
+      #dplyr::mutate_at(names(exp.plan), factor) #%>%
+      #dplyr::group_by(SimulationName)                               # group annual data by simulaton
     }
     return(x)
   }
@@ -93,6 +93,7 @@ read_hisafe_exp <- function(hip = NULL, path = NULL, profiles = "all", show.prog
 
   ## Warn if lengths of all simulations are not equal
   year.summary <- data[[as.numeric(which.max(purrr::map_int(data[names(data) != "exp.path"], nrow)))]] %>%
+    dplyr::group_by(SimulationName) %>%
     dplyr::summarize(n = dplyr::n_distinct(Year) - 1) %>%
     tidyr::unite(label, SimulationName, n, sep = ": ", remove = FALSE)
   if(length(unique(year.summary$n)) != 1) {
@@ -162,7 +163,7 @@ read_hisafe <- function(hip = NULL, simu.name = NULL, path = NULL, profiles = "a
     simu.summary.file <- paste0(simu.path, "/", simu.name, "_simu_summary.csv")
     if(file.exists(simu.summary.file)){
       hip <- readr::read_csv(paste0(simu.path, "/", simu.name, "_simu_summary.csv"), col_types = readr::cols()) #%>%
-        #mutate(SimulationName = factor(SimulationName))
+      #mutate(SimulationName = factor(SimulationName))
     } else {
       warning("No simulation inputs summary (hip) to read from simulation directory. This simulation was not created with hisafer.", call. = FALSE)
       hip <- tibble()
@@ -240,6 +241,21 @@ read_hisafe <- function(hip = NULL, simu.name = NULL, path = NULL, profiles = "a
 
   class(output) <- c("hop", class(output))
   return(output)
+}
+
+#' Read example Hi-sAFe experiment output
+#' @description Reads in an example Hi-sAFe experiment. For more details see \code{?read_hisafe_exp}.
+#' @return An object of class "hop". For more details see \code{?read_hisafe_exp}.
+#' @param profiles A character vector of the names of Hi-sAFe output profiles to read.
+#' Defaults to reading all supported Hi-sAFe output profiles via "all". For currently supported profiles see: \code{\link{hisafe_profiles}}
+#' @param show.progress Logical indicating whether progress messsages should be printed to the console.
+#' @export
+read_hisafe_example <- function(profiles = c("annualplot", "annualtree", "annualcrop", "plot", "trees", "climate", "monthCells"),
+                                show.progress = TRUE) {
+  hop <- read_hisafe_exp(path = gsub("//", "/", paste0(system.file("extdata", "example_output", package = "hisafer"), "/")),
+                         profiles = profiles,
+                         show.progress = show.progress)
+  return(hop)
 }
 
 #' Read a single Hi-sAFe output profile

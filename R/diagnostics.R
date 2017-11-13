@@ -35,7 +35,8 @@ diag_hisafe_ts <- function(hop,
                            output.path   = NULL,
                            time.lim      = NULL,
                            tree.id       = NULL,
-                           color.palette = NULL) {
+                           color.palette = NULL,
+                           lty.palette   = NULL) {
 
   annual.profiles <- c("annualtree", "annualplot")
   daily.profiles  <- c("trees", "plot", "climate")
@@ -73,7 +74,8 @@ diag_hisafe_ts <- function(hop,
                           profile       = profile,
                           time.lim      = time.lim,
                           tree.id       = tree.id,
-                          color.palette = color.palette)
+                          color.palette = color.palette,
+                          lty.palette   = lty.palette)
 
   ## Write plots to disk
   file.names <- paste0(profile, "_", var.names, ".png")

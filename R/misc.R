@@ -87,7 +87,7 @@ simu_rename <- function(hop, old.names, new.names) {
 #' Merge multiple hop objects
 #' @description Merges multiple hop objects, renaming simulation names if there are duplicates
 #' @return Returns a hop object.
-#' @param hops A list of hop objects to merge.
+#' @param ... Any number of individual hop objects to merge.
 #' @export
 #' @importFrom dplyr %>%
 #' @family hisafe helper functions
@@ -95,7 +95,9 @@ simu_rename <- function(hop, old.names, new.names) {
 #' \dontrun{
 #' new_hop <- hop_merge(list(hop1, hop2, hop3))
 #' }
-hop_merge <- function(hops) {
+hop_merge <- function(...) {
+
+  hops <- list(...)
 
   check_class <- function(x) { any(c("hop", "hop-group") %in% class(x)) }
   if(!all(purrr::map_lgl(hops, check_class))) stop("one or most list elements not of class hop or hop-group", call. = FALSE)
@@ -106,12 +108,12 @@ hop_merge <- function(hops) {
   if(any(duplicated(as.character(unlist(old.names))))) {
     hops <- purrr::pmap(list(hop = hops,
                              old.names = old.names,
-                             new.names = map2(old.names, 1:length(old.names), make_names_unique)),
+                             new.names = purrr::map2(old.names, 1:length(old.names), make_names_unique)),
                         simu_rename)
   }
 
   clear_elements <- function(x) {
-    x$exp.path <- NA
+    x$exp.path <- NULL
     return(x)
   }
 

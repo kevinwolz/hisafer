@@ -4,7 +4,8 @@
 \alias{read_hisafe}
 \title{Read output from a single Hi-sAFe simulation}
 \usage{
-read_hisafe(hip = NULL, simu.name = NULL, path = NULL, profiles = "all")
+read_hisafe(hip = NULL, simu.name = NULL, path = NULL, profiles = "all",
+  show.progress = TRUE)
 }
 \arguments{
 \item{hip}{An object of class "hip". To create a hip object see \code{\link{define_exp}}.
@@ -22,6 +23,8 @@ If \code{hip} is not provided, then \code{path} is required. If both \code{hip} 
 
 \item{profiles}{A character vector of the names of Hi-sAFe output profiles to read.
 Defaults to reading all supported Hi-sAFe output profiles via "all". For currently supported profiles see: \code{\link{hisafe_profiles}}}
+
+\item{show.progress}{Logical indicating whether progress messsages should be printed to the console.}
 }
 \value{
 An object of class "hop". This is a list of 13 data frames (tibbles):

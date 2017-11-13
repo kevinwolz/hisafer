@@ -5,7 +5,7 @@
 \title{Plot timeseries diagnostics of Hi-sAFe output}
 \usage{
 diag_hisafe_ts(hop, profile, output.path = NULL, time.lim = NULL,
-  tree.id = NULL, color.palette = NULL)
+  tree.id = NULL, color.palette = NULL, lty.palette = NULL)
 }
 \arguments{
 \item{hop}{An object of class "hop" or "hop-group" containing output data from one or more Hi-sAFe simulations.}

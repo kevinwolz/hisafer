@@ -19,5 +19,5 @@ hisafe_profiles()
 }
 \seealso{
 Other hisafe helper functions: \code{\link{hisafe_params}},
-  \code{\link{simu_rename}}
+  \code{\link{hop_merge}}, \code{\link{simu_rename}}
 }

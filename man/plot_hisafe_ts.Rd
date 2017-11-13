@@ -5,7 +5,7 @@
 \title{Plot timeseries of Hi-sAFe output variable}
 \usage{
 plot_hisafe_ts(hop, variable, profile, time.lim = NULL, tree.id = NULL,
-  color.palette = NULL)
+  color.palette = NULL, lty.palette = NULL)
 }
 \arguments{
 \item{hop}{An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.}

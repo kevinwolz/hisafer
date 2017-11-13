@@ -25,6 +25,7 @@ theme_hisafe_ts <- function(base_size = 18) {
       legend.position   = "bottom",
       legend.title      = element_blank(),
       legend.key        = element_blank(),
+      legend.key.width  = unit(1.5, "cm"),
       #legend.text      = element_text(margin = margin(r = 24, unit = "pt")), # does not work; known ggplot bug
       aspect.ratio      = 0.75
     )

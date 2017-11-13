@@ -37,7 +37,8 @@ plot_hisafe_ts <- function(hop,
                            profile,
                            time.lim      = NULL,
                            tree.id       = NULL,
-                           color.palette = NULL) {
+                           color.palette = NULL,
+                           lty.palette   = NULL) {
 
   annual.profiles <- c("annualtree", "annualplot")
   daily.profiles  <- c("trees", "plot", "climate")
@@ -52,6 +53,11 @@ plot_hisafe_ts <- function(hop,
     cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
     color.palette <- cbPalette
   }
+
+  if(is.null(lty.palette)) {
+    lty.palette <- "solid"
+  }
+
 
 
   ## Exract units of supplied variable from the "variables" slot
@@ -111,16 +117,18 @@ plot_hisafe_ts <- function(hop,
   }
 
   ## Create plot
-  plot.obj <- ggplot(plot.data, aes_string(x = x.var, y = variable, color = "SimulationName")) +
+  plot.obj <- ggplot(plot.data, aes_string(x = x.var, y = variable, color = "SimulationName", linetype = "SimulationName")) +
     labs(x = x.label,
          y = paste0(variable, " (", var.unit, ")"),
-         title = variable) +
+         title = variable,
+         color = "", linetype = "") +
     facet_annual +
     scale_x_ts +
     scale_y_continuous(sec.axis = sec_axis(~ ., labels = NULL)) +
     geom_line(size = 1, na.rm = TRUE) +
     scale_color_manual(values = rep(color.palette, 10),
-                       guide = guide_legend(ncol = 2, byrow = TRUE)) +
+                       guide = guide_legend(ncol = 3, byrow = TRUE)) +
+    scale_linetype_manual(values = rep(lty.palette, 100)) +
     theme_hisafe_ts()
 
   invisible(plot.obj)

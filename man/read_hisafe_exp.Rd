@@ -4,7 +4,8 @@
 \alias{read_hisafe_exp}
 \title{Read output from a Hi-sAFe experiment}
 \usage{
-read_hisafe_exp(hip = NULL, path = NULL, profiles = "all")
+read_hisafe_exp(hip = NULL, path = NULL, profiles = "all",
+  show.progress = TRUE)
 }
 \arguments{
 \item{hip}{An object of class "hip". To create a hip object see \code{\link{define_exp}}.
@@ -18,6 +19,8 @@ If \code{hip} is not provided, then \code{path} is required. If both \code{hip} 
 
 \item{profiles}{A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading all supported Hi-sAFe output profiles via "all".
 Currently supported profiles are: annualplot, annualtree, annualcrop, plot, trees, roots, cells, voxels, climate, monthCells.}
+
+\item{show.progress}{Logical indicating whether progress messsages should be printed to the console.}
 }
 \value{
 An object of class "hop-group". This is a list of 15 data frames (tibbles):
