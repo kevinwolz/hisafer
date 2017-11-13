@@ -90,11 +90,6 @@ build_structure <- function(hip, path, profiles, template.path, saveProjectOptio
 
   if(profiles[1] == "all") profiles <- SUPPORTED.PROFILES$profiles
 
-  ## Check if data has class hip and nrow == 1
-  if(!("hip" %in% class(hip))) stop("data not of class hip", call. = FALSE)
-  if(nrow(hip) > 1)            stop("build_hisafe only handles hip objects containing a single simulation (1 row).
-                                     Use build_hisafe_exp to build multiple simulations.", call. = FALSE)
-
   ## Check if path already exists
   if(!dir.exists(path)) stop("path does not exist.", call. = FALSE)
 

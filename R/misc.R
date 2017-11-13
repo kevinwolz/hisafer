@@ -131,6 +131,8 @@ hop_merge <- function(...) {
 
   merged_hop$exp.plan <- select(merged_hop$inputs, "SimulationName", unique.cols)
 
+  merged_hop$variables <- dplyr::distinct(merged_hop$variables)
+
   class(merged_hop) <- c("hop-group", "hop", class(merged_hop))
   return(merged_hop)
 }
