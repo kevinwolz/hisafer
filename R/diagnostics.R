@@ -58,15 +58,13 @@ diag_hisafe_ts <- function(hop,
 
   ## Clean columns & extract names of variables to plot
   # cols with only "error!" output are all NA's and cause plot errors
-  if(profile %in% annual.profiles) {
-    hop[[profile]]   <- hop[[profile]] %>% dplyr::select_if(~sum(!is.na(.)) > 0)
-    last.no.plot.col <- ifelse(profile == "annualtree", "id", "mainCropName")
-    var.names        <- names(hop[[profile]])[(which(names(hop[[profile]]) == last.no.plot.col) + 1):length(names(hop[[profile]]))]
+  if(which(names(hop[[profile]]) == "Date") > 1){
+    exp.plan.vars <- names(hop[[profile]])[1:(which(names(hop[[profile]]) == "Date")-1)]
   } else {
-    hop[[profile]]   <- hop[[profile]] %>% dplyr::select_if(~sum(!is.na(.)) > 0)
-    last.no.plot.col <- ifelse(profile == "trees", "id", ifelse(profile == "plot", "mainCropName", "stepNum"))
-    var.names        <- names(hop[[profile]])[(which(names(hop[[profile]]) == last.no.plot.col) + 1):length(names(hop[[profile]]))]
+    exp.plan.vars <- NULL
   }
+  dont.plot.vars <- c(exp.plan.vars, "Date", "Day", "Month", "Year", "JulianDay", "stepNum", "id", "x", "y", "mainCropName")
+  var.names <- names(hop[[profile]])[!(names(hop[[profile]]) %in% dont.plot.vars)]
 
   ## Create plots
   plot.list <- purrr::map(var.names, plot_hisafe_ts,

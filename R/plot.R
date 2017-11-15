@@ -58,8 +58,6 @@ plot_hisafe_ts <- function(hop,
     lty.palette <- "solid"
   }
 
-
-
   ## Exract units of supplied variable from the "variables" slot
   var.unit <- hop$variables %>%
     dplyr::filter(VariableClass == profile, VariableName == variable) %>%
@@ -136,6 +134,7 @@ plot_hisafe_ts <- function(hop,
 
 #' Tile plot of Hi-sAFe monthCells output variable
 #' @description Plots a tile plot of a single Hi-sAFe monthCells output variable.
+#' If the hop objectcontains the "trees" profile with crown diameter variables, the tree locations and crown outlines are also drawn.
 #' @details This function is very picky! You can only facet by two of the three manipulable variables: SimulationName, Year, Month.
 #' You must ensure that the one varibale not used for faceting is fixed at a single value.
 #' @return Returns a ggplot object.
@@ -184,9 +183,9 @@ plot_hisafe_monthcells <- function(hop,
   if(nrow(hop$monthCells) == 0)                   stop("no data from monthCells profile found", call. = FALSE)
 
   ## Convert "all" arguements to actual values
-  if(sim.names[1] == "all") { sim.names <- unique(hop$monthCells$SimulationName) }
-  if(years[1]     == "all") { years     <- unique(hop$monthCells$Year) -  min(hop$monthCells$Year) }
-  if(months[1]    == "all") { months    <- unique(hop$monthCells$Month) }
+  if(sim.names[1] == "all") sim.names <- unique(hop$monthCells$SimulationName)
+  if(years[1]     == "all") years     <- unique(hop$monthCells$Year) -  min(hop$monthCells$Year)
+  if(months[1]    == "all") months    <- unique(hop$monthCells$Month)
 
   ## Determine which variable is not part of faceting & trigger associated error
   vars <- c("SimulationName", "Year", "Month")
@@ -214,17 +213,22 @@ plot_hisafe_monthcells <- function(hop,
 
   ## Filter for sim.names & combine with canopy diameter
   if(nrow(hop$tree.info) > 0 & nrow(hop$trees) > 0) {
-  tree.data <- hop$tree.info %>%
-    dplyr::filter(SimulationName %in% sim.names)
+    tree.data <- hop$tree.info %>%
+      dplyr::filter(SimulationName %in% sim.names)
 
-  diam.data <- hop$trees %>%
-    dplyr::mutate(Year = Year - min(Year) + 1) %>% # Create 0+ year values
-    dplyr::filter(SimulationName %in% sim.names) %>%
-    dplyr::filter(Year %in% years) %>%
-    dplyr::filter(Month %in% months) %>%
-    dplyr::filter(Day == 1) %>%
-    dplyr::select(SimulationName, Year, Month, id, dbh, crownRadiusInterRow, crownRadiusTreeLine) %>%
-    dplyr::left_join(tree.data, by = c("SimulationName", "id"))
+    diam.data <- hop$trees %>%
+      dplyr::mutate(Year = Year - min(Year) + 1) %>% # Create 0+ year values
+      dplyr::filter(SimulationName %in% sim.names) %>%
+      dplyr::filter(Year %in% years) %>%
+      dplyr::filter(Month %in% months) %>%
+      dplyr::filter(Day == 1) %>%
+      dplyr::select(SimulationName, Year, Month, id, crownRadiusInterRow, crownRadiusTreeLine) %>%
+      dplyr::left_join(tree.data, by = c("SimulationName", "id"))
+  } else {
+    years <- years[years %in% (unique(hop$monthCells$Year) -  min(hop$monthCells$Year))]
+    years <- years[years != 0]
+    diam.data <- dplyr::as_tibble(expand.grid(SimulationName = sim.names, Year = years, Month = months, id = NA,
+                        crownRadiusInterRow = NA, crownRadiusTreeLine = NA, species = NA, x = NA, y = NA))
   }
 
   ## Check for existence of variable within hop profile
@@ -246,14 +250,16 @@ plot_hisafe_monthcells <- function(hop,
     geom_point(data = diam.data,
                color = "green",
                aes(x = (x+x.center), y = (y+y.center)),
-               inherit.aes = FALSE) +
+               inherit.aes = FALSE,
+               na.rm = TRUE) +
     geom_ellipsis(data = diam.data,
                   color = "green",
                   aes(x0 = (x+x.center), y0 = (y+y.center),
                       a = crownRadiusInterRow,
                       b = crownRadiusTreeLine,
                       angle = 0),
-                  inherit.aes = FALSE) +
+                  inherit.aes = FALSE,
+                  na.rm = TRUE) +
     viridis::scale_fill_viridis(option = "magma") +
     guides(fill = guide_colourbar(barwidth = 15,
                                   barheight = 1.5,
