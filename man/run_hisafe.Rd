@@ -8,9 +8,7 @@ run_hisafe(hip = NULL, path = NULL, simu.name = NULL,
   capsis.path = "/Applications/Capsis/")
 }
 \arguments{
-\item{hip}{An object of class "hip" with a single simulation (row).
-If the hip object contains a \code{path} value, then this can be used without providing \code{path} directly to \code{run_hisafe}.
-If \code{hip} is not provided, then \code{path} and \code{simu.name} are required.}
+\item{hip}{An object of class "hip" with a single simulation (row). Required if \code{path} and \code{simu.name} are not provided.}
 
 \item{path}{A character string of the path to the folder containing the simulation folder. Required if \code{hip} is not provided.}
 
@@ -27,10 +25,10 @@ Runs a Hi-sAFe simulation - calls Hi-sAFe from command line.
 \examples{
 \dontrun{
 # Once a group Hi-sAFe simulations (experiment) is defined...
-myexp <- define_hisafe()
+myexp <- define_hisafe(path = "./simulations")
 
 # ...and built...
-myexp <- build_hisafe(myexp, "./simulations")
+build_hisafe(myexp)
 
 # the simulations can all be run:
 run_hisafe(myexp)

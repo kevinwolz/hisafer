@@ -1,66 +1,65 @@
-# SIMULATION 
+## SIMULATION 
 pldFileName = template.pld
-nbSimulations = 1
-simulationYearStart = 1995
-simulationDayStart = 290
-simulationNbrDays = 365
-saveProjectOption = 0
+nbSimulations = 30         #[1,NA]  #NA
+simulationYearStart = 1995 #[1,NA]  #NA
+simulationDayStart = 290   #[1,365] #NA
+simulationNbrDays = 365    #[1,365] #NA
+saveProjectOption = 0      #NA      #[0,1]
 
-# CROP ROTATION
+## CROP ROTATION
 mainCropSpecies = durum-wheat-allur.plt
 interCropSpecies = grass.plt
 mainCropItk = durum-wheat.tec
 interCropItk = grass.tec
-treeCropDistance = 0.5
-weededAreaRadius = 0
+treeCropDistance = 0.5 #(0,NA) #NA
+weededAreaRadius = 0   #(0,NA) #NA
 
-# WEATHER
+## WEATHER
 weatherFile = weather.wth
 
-# EXPORTS
+## EXPORTS
 profileNames = annualplot,annualtree,annualcrop,plot,trees,cells
 exportFrequencies = 365,365,365,1,1,1
 
-# TORIC SYMETRY
-toreXp = 1
-toreXn = 1
-toreYp = 1
-toreYn = 1
+## TORIC SYMETRY
+toreXp = 1 #NA #[0,1]
+toreXn = 1 #NA #[0,1]
+toreYp = 1 #NA #[0,1]
+toreYn = 1 #NA #[0,1]
 
-# TREE PRUNING (years separated with ,)
-#treePruningYears = 2,4,6,8,10,12,14,16,18,20,22,24,26,28,30
-#treePruningProp = 0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3
-#treePruningMaxHeight = 4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0
-#treePruningDays = 365,365,365,365,365,365,365,365,365,365,365,365,365,365,365
+## TREE PRUNING
+#treePruningYears = 2,4,6,8,10,12,14,16,18,20,22,24,26,28,30                        #[1,NA]  #NA
+#treePruningProp = 0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3      #(0,1)   #NA
+#treePruningMaxHeight = 4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0 #(0,NA)  #NA
+#treePruningDays = 365,365,365,365,365,365,365,365,365,365,365,365,365,365,365      #[1,365] #NA
 
-# TREE THINNING
-#treeThinningIds = 1
-#treeThinningYears = 10
-#treeThinningDays = 365
+## TREE THINNING
+#treeThinningIds = 1     #[1,NA]  #NA
+#treeThinningYears = 10  #[1,NA]  #NA
+#treeThinningDays = 365  #[0,365] #NA
 
-# TREE ROOT PRUNING
-#treeRootPruningYears = 1
-#treeRootPruningDays = 365
-#treeRootPruningDistance = 1.5
-#treeRootPruningDepth = 1.0
+## TREE ROOT PRUNING
+#treeRootPruningYears = 1       #[1,NA]  #NA
+#treeRootPruningDays = 365      #[1,365] #NA
+#treeRootPruningDistance = 1.5  #(0,NA)  #NA
+#treeRootPruningDepth = 1.0     #(0,NA)  #NA
 
-# INITILIZATION OF PERENNIAL CROPS	
-# Main Crop
+## INITILIZATION OF PERENNIAL MAIN CROP
 #mainCropStage = 5
-#mainCropLai = 0.2
-#mainCropBiomass = 0.2
-#mainCropRootDepth = 1
-#mainCropGrainBiomass = 0
-#mainCropNitrogen = 50
-#mainCropCarbon = 0
+#mainCropLai = 0.2              #(0,NA) #NA
+#mainCropBiomass = 0.2          #(0,NA) #NA
+#mainCropRootDepth = 1          #(0,NA) #NA
+#mainCropGrainBiomass = 0       #(0,NA) #NA
+#mainCropNitrogen = 50          #(0,NA) #NA
+#mainCropCarbon = 0             #(0,NA) #NA
 #mainCropRootDensity = 4,8,0.2,0,0
-	
-# Inter Crop
+
+## INITILIZATION OF PERENNIAL INTER CROP
 #interCropStage = 5
-#interCropLai = 0.2
-#interCropBiomass = 0.2
-#interCropRootDepth = 1
-#interCropGrainBiomass = 0
-#interCropNitrogen = 50
-#interCropCarbon = 0
+#interCropLai = 0.2             #(0,NA) #NA
+#interCropBiomass = 0.2         #(0,NA) #NA
+#interCropRootDepth = 1         #(0,NA) #NA
+#interCropGrainBiomass = 0      #(0,NA) #NA
+#interCropNitrogen = 50         #(0,NA) #NA
+#interCropCarbon = 0            #(0,NA) #NA
 #interCropRootDensity = 4,8,0.2,0,0

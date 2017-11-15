@@ -9,7 +9,7 @@ read_hisafe_example(profiles = c("annualplot", "annualtree", "annualcrop",
 }
 \arguments{
 \item{profiles}{A character vector of the names of Hi-sAFe output profiles to read.
-Defaults to reading all supported Hi-sAFe output profiles via "all". For currently supported profiles see: \code{\link{hisafe_profiles}}}
+"cells", "roots" and "voxels" profiles are not available in the example.}
 
 \item{show.progress}{Logical indicating whether progress messsages should be printed to the console.}
 }
@@ -17,5 +17,5 @@ Defaults to reading all supported Hi-sAFe output profiles via "all". For current
 An object of class "hop". For more details see \code{?read_hisafe_exp}.
 }
 \description{
-Reads in an example Hi-sAFe experiment. For more details see \code{?read_hisafe_exp}.
+Reads in an example Hi-sAFe experiment. For more details see \code{\link{read_hisafe_exp}}.
 }

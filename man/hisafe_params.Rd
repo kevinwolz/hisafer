@@ -4,7 +4,8 @@
 \alias{hisafe_params}
 \title{Display supported Hi-sAFe input parameters}
 \usage{
-hisafe_params(variable = "names")
+hisafe_params(variable = "names", template = "default",
+  template.tree = "walnut-hybrid")
 }
 \arguments{
 \item{variable}{If "names", the default, then just the names of supported Hi-sAFe parameters is printed to the console.

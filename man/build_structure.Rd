@@ -2,25 +2,25 @@
 % Please edit documentation in R/build.R
 \name{build_structure}
 \alias{build_structure}
-\title{Builds a Hi-sAFe simulation}
+\title{Builds the structure of a Hi-sAFe simulation}
 \usage{
-build_structure(hip, path, profiles, template.path, saveProjectOption)
+build_structure(exp.plan, exp.plan.to.write, path, profiles, template)
 }
 \arguments{
-\item{hip}{An object of class "hip" containing a single simulation (row).}
+\item{exp.plan}{The exp.plan element of a "hip" object, containing a single row.}
+
+\item{exp.plan.to.write}{Same as \code{exp.plan} except that complex list/tibble elements are simplified to a number.}
 
 \item{path}{A character string of the path to the simulation folder.}
 
-\item{profiles}{A character vector of output profiles the simulation to export.}
+\item{profiles}{A character vector of export profiles the simulation to export.}
 
-\item{template.path}{A character string of the path to the Hi-sAFe directory structure/files to use as a template.
+\item{template}{A character string of the path to the Hi-sAFe directory structure/files to use as a template.
 If "default", then the default template inluded with hisafer (i.e. the files used for Hi-sAFe calibtation) will be used.}
-
-\item{saveProjectOption}{Logical, sets the saveProjectOption parameter in the .sim file.}
 }
 \value{
 Invisibly returns a list containing the original hip object and supplied path.
 }
 \description{
-Builds a Hi-sAFe simulation - creates the folder structure and input files.
+Does the heavy lifting for \code{\link{build_hisafe}}.
 }

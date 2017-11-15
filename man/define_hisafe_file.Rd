@@ -4,29 +4,40 @@
 \alias{define_hisafe_file}
 \title{Define a Hi-sAFe experiment from a file}
 \usage{
-define_hisafe_file(file)
+define_hisafe_file(file, path, profiles = "all", template = "default")
 }
 \arguments{
 \item{file}{A character string of the path to a csv file.
 Each row in the file should represent a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
-For more information on supported parameters, use \code{hisafe_params()}.}
+For more information on supported parameters, use \code{\link{hisafe_params}}.}
+
+\item{path}{A character string of the path (relative or absolute) to the directory where the simulation/experiment is to be built.}
+
+\item{profiles}{A character vector of Hi-sAFe export profiles to be exported by Hi-sAFe. If "all" (the default), then all supported profiles will be exported.}
+
+\item{template}{A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.}
 }
 \value{
-An object of class "hip". This is a data frame (tibble) with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
+An object of class "hip". See \code{\link{define_hisafe}} for more details.
 }
 \description{
 Defines a Hi-sAFe experiment - the input parameters to one or more Hi-sAFe simulations.
+\code{define_hisafe_file} cannot handle parameters that require numeric vectors or are within parameters tables. Use \code{\link{define_hisafe}} instead.
 }
 \details{
 It is strongly recommended to name each simulation in your experiment. This can be done via the \code{SimulationName} parameter.
-If no names are provided, then \code{define_hisafe_file} will provide generic names of "Sim_1", "Sim_2", etc.
+If no names are provided, then generic names of "Sim_1", "Sim_2", etc. will be generated.
 }
 \examples{
 \dontrun{
 # To define a Hi-sAFe experiment from a file:
-myexp <- define_hisafe_file("./data/example_exp.csv")
+myexp <- define_hisafe_file("./example_exp.csv")
 }
 }
 \seealso{
-Other hisafe definition functions: \code{\link{define_hisafe}}
+Other hisafe definition functions: \code{\link{define_hisafe}},
+  \code{\link{layer_init_params}},
+  \code{\link{layer_params}},
+  \code{\link{root_init_params}},
+  \code{\link{tree_init_params}}
 }

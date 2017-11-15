@@ -4,16 +4,14 @@
 \alias{run_hisafe_exp}
 \title{Run a Hi-sAFe experiment}
 \usage{
-run_hisafe_exp(hip = NULL, exp.path = NULL, simu.names = "all",
+run_hisafe_exp(hip = NULL, path = NULL, simu.names = "all",
   parallel = FALSE, num.cores = NULL,
   capsis.path = "/Applications/Capsis/")
 }
 \arguments{
-\item{hip}{An object of class "hip" with multiple simulations (rows).
-If the hip object contains a \code{path} value, then this can be used without providing \code{exp.path} directly to \code{run_hisafe_exp}.
-If \code{hip} is not provided, then \code{exp.path} is required.}
+\item{hip}{An object of class "hip" with multiple simulations (rows). Required if \code{path} is not provided.}
 
-\item{exp.path}{A character string of the path to the experiment folder containing the simulation folders. Required if \code{hip} is not provided.}
+\item{path}{A character string of the path to the experiment folder containing the simulation folders. Required if \code{hip} is not provided.}
 
 \item{simu.names}{Names of the simulations to run. Default is to run all simulations in the experiment folder via "all".}
 
@@ -32,10 +30,10 @@ Runs a Hi-sAFe experiment (a group of simulations) - calls Hi-sAFe from command 
 \examples{
 \dontrun{
 # Once a group Hi-sAFe simulations (experiment) is defined...
-myexp <- define_hisafe(latitude = c(30,60))
+myexp <- define_hisafe(path = "./simulations", latitude = c(30,60))
 
 # ...and built...
-myexp <- build_hisafe_exp(myexp, "./simulations", exp.name = "lat_exp")
+build_hisafe_exp(myexp, exp.name = "lat_exp")
 
 # the simulations can all be run:
 run_hisafe_exp(myexp)

@@ -8,37 +8,36 @@ read_hisafe_exp(hip = NULL, path = NULL, profiles = "all",
   show.progress = TRUE)
 }
 \arguments{
-\item{hip}{An object of class "hip". To create a hip object see \code{\link{define_exp}}.
-If the hip object contains a \code{path} value, then this can be used without providing \code{path} directly to \code{read_hisafe_exp}.
+\item{hip}{An object of class "hip". To create a hip object see \code{\link{define_hisafe}}.
 If \code{hip} is not provided, then \code{path} is required and the input data for the experiment is read from the experiment
 summary .csv file created when building the experiment.}
 
-\item{path}{A character string of the path to the directory containing the Hi-sAFe simulation folders
-(which each contain the standard subdirectories with the outputs).
+\item{path}{A character string of the path to the directory containing the Hi-sAFe simulation folders.
 If \code{hip} is not provided, then \code{path} is required. If both \code{hip} and \code{path} are provided, \code{path} is used.}
 
-\item{profiles}{A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading all supported Hi-sAFe output profiles via "all".
-Currently supported profiles are: annualplot, annualtree, annualcrop, plot, trees, roots, cells, voxels, climate, monthCells.}
+\item{profiles}{A character vector of the names of Hi-sAFe output profiles to read.
+#' If "all" the default, reads all supported Hi-sAFe output profiles. For currently supported profiles see: \code{\link{hisafe_profiles}}}
 
 \item{show.progress}{Logical indicating whether progress messsages should be printed to the console.}
 }
 \value{
-An object of class "hop-group". This is a list of 15 data frames (tibbles):
-\code{annualtree},
-\code{annualcrop},
-\code{annualplot},
-\code{trees},
-\code{plot},
-\code{climate},
-\code{roots},
-\code{monthCells},
-\code{cells},
-\code{voxels},
-\code{variables} (variable descriptions and units from all profiles),
-\code{inputs} (the hip object that generated the simulation),
-\code{path} (the path to the simulation folder),
-\code{exp.plan} (the manipulated input variables in the experiment), and
-\code{exp.path} (the path to the experiment folder).
+An object of class "hop-group". This is a list of 14 data frames (tibbles):
+\itemize{
+ \item{annualtree}
+ \item{annualcrop}
+ \item{annualplot}
+ \item{trees}
+ \item{plot}
+ \item{climate}
+ \item{roots}
+ \item{monthCells}
+ \item{cells}
+ \item{voxels}
+ \item{variables}{ - variable descriptions and units from all profiles}
+ \item{exp.plan}{ - the exp.plan of the hip object that generated the simulation}
+ \item{path}{ - the path to the simulation folder}
+ \item{exp.path}{ - the path to the experiment folder}
+}
 }
 \description{
 Reads the designated output profiles from a Hi-sAFe experiiment (i.e. a group of Hi-sAFe simulations).
@@ -46,9 +45,9 @@ Reads the designated output profiles from a Hi-sAFe experiiment (i.e. a group of
 \examples{
 \dontrun{
 # After reading in Hi-sAFe simulation data via:
-myexp <- read_hisafe_exp(MyExpPlan, "./")
+myexp <- read_hisafe_exp(myexphip)
 
 # If only the annual tree data is required:
-mytreeexp <- read_hisafe(MyExpPlan, "./", profiles = "annualtree")
+mytreeexp <- read_hisafe(myexphip, profiles = "annualtree")
 }
 }

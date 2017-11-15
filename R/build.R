@@ -1,126 +1,185 @@
 #' Builds a Hi-sAFe simulation or experiment
 #' @description Builds a Hi-sAFe simulation or experiment (a group of simulations) - creates the folder structure and input files.
-#' @return Invisibly returns a list containing the original hip object and path to the simulation/experiment folder.
-#' @param hip An object of class "hip".
-#' @param path A character string of the path to the folder in which the simulation/experiment
-#' folder should be created.
-#' @param exp.name A character vector of the name of the experiment folder. Only used if the supllie d
-#' "hip" object contains more than one simulation.
-#' @param profiles A character vector of output profiles the simulation to export.
-#' @param template.path A character string of the path to the Hi-sAFe directory structure/files to use as a template.
-#' If "default", then the default template inluded with hisafer (i.e. the files used for Hi-sAFe calibtation) will be used.
-#' @param saveProjectOption Logical, sets the saveProjectOption parameter in the .sim file, which
-#' tells Hi-sAFe to save a (large) file at the end of the simulation which allows a subsequent simulation to
-#' start where this one left off.
-#' @param controls Logical for whether or not to also build simulations for crop and tree controls.
+#' @return Invisibly returns a list containing the original hip object.
+#' @param hip An object of class "hip". To create a hip object see \code{\link{define_hisafe}}.
 #' @export
 #' @importFrom dplyr %>%
 #' @family hisafe build functions
 #' @examples
 #' \dontrun{
 #' # For a single Hi-sAFe simulation
-#' mysim <- define_hisafe(latitude = 30)
+#' mysim <- define_hisafe(path = "./simulations", latitude = 30)
 #'
 #' # Building the simulation folder structure & files:
-#' build_hisafe(mysim, "./simulations")
+#' build_hisafe(mysim)
 #'
 #' # Once a group Hi-sAFe simulations (experiment) is defined:
-#' myexp <- define_hisafe(latitude = c(30,60))
+#' myexp <- define_hisafe(path = "./simulations", latitude = c(30,60))
 #'
 #' # Building the experiment folder structure & files:
-#' build_hisafe(myexp, "./simulations", exp.name = "lat_exp")
+#' build_hisafe(myexp)
 #' }
-build_hisafe <- function(hip,
-                         path,
-                         exp.name          = "experiment",
-                         profiles          = "all",
-                         template.path     = "default",
-                         saveProjectOption = FALSE,
-                         controls          = FALSE) {
+build_hisafe <- function(hip) {
 
   ## Check if data has class hip
   if(!("hip" %in% class(hip))) stop("data not of class hip", call. = FALSE)
 
-  ## For experiment
-  if(nrow(hip) > 1) {
-    exp.path <- gsub("//", "/", paste0(path, "/", exp.name))
-    dir.create(exp.path, showWarnings = FALSE, recursive = TRUE)
-    readr::write_csv(hip, gsub("//", "/", paste0(exp.path, "/", exp.name, "_exp_summary.csv")))
+  EXP.PLAN <- hip$exp.plan
+  profiles <- if(hip$profiles[1] == "all") profiles <- SUPPORTED.PROFILES$profiles else profiles <- hip$profiles
+  path     <- hip$path
+  dir.create(path, showWarnings = FALSE, recursive = TRUE)
+
+  if(nrow(EXP.PLAN) > 1) exp.name <- tail(strsplit(path, split = "/", fixed = TRUE)[[1]], 1)
+
+  ## Deal with tibble/list cols
+  tibble.params <- c("tree.initialization", "root.initialization", "layers", "layer.initialiation")
+  isnt_tibble_col <- function(x) !("tbl" %in% class(x[[1]]))
+  paste_together  <- function(x) unlist(purrr::map(x, paste, collapse = ","))
+  if(any(tibble.params %in% names(EXP.PLAN))) {
+    tibble.cols <- tibble.params[which(tibble.params %in% names(EXP.PLAN))]
+    exp.plan.to.write <- dplyr::select_if(EXP.PLAN, isnt_tibble_col) %>%
+      dplyr::mutate_if(is.list, paste_together)
+    find.unique.tibbles <- function(x, tibble.col) {
+      comps <- as.list(unique(x[tibble.col]))[[1]]
+      des <- 1:length(comps)
+      designators <- list()
+      for(i in 1:nrow(x)) {
+        designator <- des[purrr::map_lgl(comps, identical, y = x[i, tibble.col][[1]][[1]])]
+        designators <- c(designators, designator)
+      }
+      return(unlist(designators))
+    }
+    for(i in tibble.cols){
+      exp.plan.to.write[[i]] <- find.unique.tibbles(EXP.PLAN, i)
+      add_sim_names <- function(x, sim.name) {
+        x$SimulationName <- sim.name
+        x <- select(x, SimulationName, everything())
+        return(x)
+      }
+      tibble.out <- purrr::map2_df(as.list(EXP.PLAN[i])[[1]], EXP.PLAN$SimulationName, add_sim_names)
+
+      if(nrow(EXP.PLAN) > 1) {
+        readr::write_csv(tibble.out, gsub("//", "/", paste0(path, "/", exp.name, "_", gsub("\\.", "_", i), "_summary.csv")))
+      } else {
+        readr::write_csv(tibble.out, gsub("//", "/", paste0(path, "/", EXP.PLAN$SimulationName, "_", gsub("\\.", "_", i), "_summary.csv")))
+      }
+    }
   } else {
-    exp.path <- gsub("//", "/", paste0(path, "/", exp.name))
-    exp.path <- gsub(paste0("/", exp.name), "", exp.path)
-    dir.create(exp.path, showWarnings = FALSE, recursive = TRUE)
+    exp.plan.to.write <- EXP.PLAN
   }
+  if(nrow(EXP.PLAN) > 1) readr::write_csv(exp.plan.to.write, gsub("//", "/", paste0(path, "/", exp.name, "_exp_summary.csv")))
 
   ## build folder tree & input files for each simulation in experiment
-  make_hip <- function(x) {
-    class(x) <- c("hip", class(x))
-    return(x)
+  create_tibble <- function(x) {
+    y <- list()
+    for(i in names(x)) {
+      if(length(x[[i]]) > 1){
+        y[[i]] <- list(x[[i]])
+      } else {
+        y[[i]] <- x[[i]]
+      }
+
+    }
+    return(dplyr::as_tibble(y))
   }
-  hip.list <- as.list(hip) %>%
+  hip.list <- as.list(EXP.PLAN) %>%
     purrr::pmap(list) %>%
-    purrr::map(dplyr::as_tibble) %>%
-    purrr::map(make_hip) %>%
-    purrr::walk(build_structure, path = exp.path, profiles = profiles, template.path = template.path, saveProjectOption = saveProjectOption)
+    purrr::map(create_tibble)
 
-  ## Run control simulations
-  if(controls) stop("support for running control simulations not yet supported", call. = FALSE)
+  hip.to.write.list <- as.list(exp.plan.to.write) %>%
+    purrr::pmap(list) %>%
+    purrr::map(dplyr::as_tibble)
 
-  hip.aug <- list(hip = hip, path = exp.path)
-  class(hip.aug) <- c("hip", class(hip.aug))
-  invisible(hip.aug)
+  purrr::walk2(hip.list,
+               hip.to.write.list,
+               build_structure,
+               path = path,
+               profiles = profiles,
+               template = hip$template)
+
+  invisible(hip)
 }
 
-#' Builds a Hi-sAFe simulation
-#' @description Builds a Hi-sAFe simulation - creates the folder structure and input files.
+#' Builds the structure of a Hi-sAFe simulation
+#' @description Does the heavy lifting for \code{\link{build_hisafe}}.
 #' @return Invisibly returns a list containing the original hip object and supplied path.
-#' @param hip An object of class "hip" containing a single simulation (row).
+#' @param exp.plan The exp.plan element of a "hip" object, containing a single row.
+#' @param exp.plan.to.write Same as \code{exp.plan} except that complex list/tibble elements are simplified to a number.
 #' @param path A character string of the path to the simulation folder.
-#' @param profiles A character vector of output profiles the simulation to export.
-#' @param template.path A character string of the path to the Hi-sAFe directory structure/files to use as a template.
+#' @param profiles A character vector of export profiles the simulation to export.
+#' @param template A character string of the path to the Hi-sAFe directory structure/files to use as a template.
 #' If "default", then the default template inluded with hisafer (i.e. the files used for Hi-sAFe calibtation) will be used.
-#' @param saveProjectOption Logical, sets the saveProjectOption parameter in the .sim file.
-build_structure <- function(hip, path, profiles, template.path, saveProjectOption) {
+build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, template) {
 
-  if(template.path == "default") {
+  if(template == "default") {
     HISAFE.TEMPLATE <- gsub("//", "/", paste0(system.file("extdata", "hisafe_template", package = "hisafer"), "/"))
   } else {
-    HISAFE.TEMPLATE <- gsub("//", "/", paste0(template.path, "/"))
+    HISAFE.TEMPLATE <- gsub("//", "/", paste0(template, "/"))
   }
 
-  if(profiles[1] == "all") profiles <- SUPPORTED.PROFILES$profiles
-
-  ## Check if path already exists
-  if(!dir.exists(path)) stop("path does not exist.", call. = FALSE)
+  TEMPLATE_PARAMS <- get_template_params(template)
+  PARAM_NAMES     <- get_param_names(TEMPLATE_PARAMS)
+  PARAM_DEFAULTS  <- get_param_vals(TEMPLATE_PARAMS, "value")
 
   ## Copy over folder structure & template files from Hi-sAFe template path
   ## Any newly built files below will overwrite these files
-  sim.path <- gsub("//", "/", paste0(path, "/", hip$SimulationName))
-  if(dir.exists(sim.path)) stop(paste0("A simulation with the name <", hip$SimulationName, "> already exisits in this location."), call. = FALSE)
-  system(paste("cp -r", HISAFE.TEMPLATE, sim.path))
+  simu.path <- gsub("//", "/", paste0(path, "/", exp.plan$SimulationName))
+  if(dir.exists(simu.path)) stop(paste0("A simulation with the name <", exp.plan$SimulationName, "> already exisits in this location."), call. = FALSE)
+  system(paste("cp -r", HISAFE.TEMPLATE, simu.path))
 
   ## Write out experiment summary
-  readr::write_csv(hip, gsub("//", "/", paste0(sim.path, "/", hip$SimulationName, "_simu_summary.csv")))
+  readr::write_csv(exp.plan.to.write, gsub("//", "/", paste0(simu.path, "/", exp.plan$SimulationName, "_simu_summary.csv")))
 
   ## Move weather file if one was provided
-  if(hip$weatherFile != "default") file.copy(hip$weatherFile, paste0(sim.path, "/weather/weather.wth"), overwrite = TRUE)
+  wth.name <- "weather.wth"
+  if(!is.null(exp.plan$weatherFile)) {
+    wth.name <- tail(strsplit(exp.plan$weatherFile, split = "/", fixed = TRUE)[[1]], 1)
+    dum <- file.remove(paste0(simu.path, "/weather/weather.wth"))
+    dum <- file.copy(exp.plan$weatherFile, paste0(simu.path, "/weather/", wth.name))
+  }
 
   ## Remove unused .plt files from cropSpecies
-  existing.plt <- list.files(paste0(sim.path, "/cropSpecies"), full.names = TRUE)
-  required.plt <- paste0(sim.path, "/cropSpecies/", c(hip$mainCropSpecies, hip$interCropSpecies), ".plt")
-  remove.plt <- existing.plt[!(existing.plt %in% required.plt)]
+  if(!is.null(exp.plan$mainCropSpecies)){
+    main.crop.used <- exp.plan$mainCropSpecies
+  } else {
+    main.crop.used <- PARAM_DEFAULTS$mainCropSpecies
+  }
+  if(!is.null(exp.plan$interCropSpecies)){
+    inter.crop.used <- exp.plan$interCropSpecies
+  } else {
+    inter.crop.used <- PARAM_DEFAULTS$interCropSpecies
+  }
+  existing.plt    <- list.files(paste0(simu.path, "/cropSpecies"), full.names = TRUE)
+  required.plt    <- paste0(simu.path, "/cropSpecies/", c(main.crop.used, inter.crop.used))
+  remove.plt      <- existing.plt[!(existing.plt %in% required.plt)]
   dum <- purrr::map(remove.plt, file.remove)
 
   ## Remove unused .tec files from itk
-  existing.itk <- list.files(paste0(sim.path, "/itk"), full.names = TRUE)
-  required.itk <- paste0(sim.path, "/itk/", c(hip$mainCropItk, hip$interCropItk), ".tec")
-  remove.itk <- existing.itk[!(existing.itk %in% required.itk)]
+  if(!is.null(exp.plan$mainCropItk)){
+    main.itk.used <- exp.plan$mainCropItk
+  } else {
+    main.itk.used <- PARAM_DEFAULTS$mainCropItk
+  }
+  if(!is.null(exp.plan$interCropItk)){
+    inter.itk.used <- exp.plan$interCropItk
+  } else {
+    inter.itk.used <- PARAM_DEFAULTS$interCropItk
+  }
+  existing.itk   <- list.files(paste0(simu.path, "/itk"), full.names = TRUE)
+  required.itk   <- paste0(simu.path, "/itk/", c(main.itk.used, inter.itk.used))
+  remove.itk     <- existing.itk[!(existing.itk %in% required.itk)]
   dum <- purrr::map(remove.itk, file.remove)
 
   ## Remove unused .tree files from treeSpecies
-  existing.tree <- list.files(paste0(sim.path, "/treeSpecies"), full.names = TRUE)
-  required.tree <- paste0(sim.path, "/treeSpecies/", hip$treeSpecies, ".tree")
-  remove.tree <- existing.tree[!(existing.tree %in% required.tree)]
+  if(!is.null(exp.plan$tree.initialization)){
+    trees.used <- exp.plan$tree.initialization[[1]]$species
+  } else {
+    trees.used <- PARAM_DEFAULTS$tree.initialization$species
+  }
+  num.trees <- length(trees.used)
+  existing.tree <- list.files(paste0(simu.path, "/treeSpecies"), full.names = TRUE)
+  required.tree <- paste0(simu.path, "/treeSpecies/", trees.used, ".tree")
+  remove.tree   <- existing.tree[!(existing.tree %in% required.tree)]
   dum <- purrr::map(remove.tree, file.remove)
 
   ## Remove unused export profiles files from exportProfiles
@@ -130,129 +189,46 @@ build_structure <- function(hip, path, profiles, template.path, saveProjectOptio
     stop(missing.profile.error)
   }
 
-  existing.EP <- list.files(paste0(sim.path, "/exportProfiles"), full.names = TRUE)
-  required.EP <- paste0(sim.path, "/exportProfiles/", profiles, ".pro")
-  remove.EP <- existing.EP[!(existing.EP %in% required.EP)]
+  existing.EP <- list.files(paste0(simu.path, "/exportParameters"), pattern = "\\.pro", full.names = TRUE)
+  required.EP <- paste0(simu.path, "/exportParameters/", profiles, ".pro")
+  remove.EP   <- existing.EP[!(existing.EP %in% required.EP)]
   dum <- purrr::map(remove.EP, file.remove)
 
-  ## Edit pld & sim files
-  build_pld( hip, sim.path)
-  build_sim( hip, sim.path, profiles, saveProjectOption)
-  build_tree(hip, sim.path, hip$treeSpecies)
+  ## Edit files
+  params.to.edit <- names(dplyr::select(exp.plan, -SimulationName))
+  sim.params.to.edit  <- params.to.edit[params.to.edit %in% PARAM_NAMES$sim]
+  pld.params.to.edit  <- params.to.edit[params.to.edit %in% PARAM_NAMES$pld]
+  tree.params.to.edit <- params.to.edit[params.to.edit %in% PARAM_NAMES$tree]
 
-  hip.aug <- list(hip = hip, path = path)
-  class(hip.aug) <- c("hip", class(hip.aug))
-  invisible(hip.aug)
-}
+  ## Edit pld file
+  pld.path <- paste0(simu.path, "/plotDescription/template.pld")
+  pld <- read_param_file(pld.path)
+  pld.new <- edit_param_file(pld, dplyr::select(exp.plan, pld.params.to.edit)) %>%
+    edit_param_element("nbTrees", num.trees)
+  write_param_file(pld.new, pld.path)
+  dum <- file.rename(pld.path, paste0(simu.path, "/plotDescription/", exp.plan$SimulationName, ".pld"))
 
-#' Build .pld file for Hi-sAFe simulation
-#' @description Builds .pld file for a Hi-sAFe simulation. Used within \code{build_hisafe}.
-#' @return Invisibly returns \code{TRUE}.
-#' @param plan A single simulation (row) from an object of class "hip"
-#' @param path A character string of the path to the simulation folder.
-build_pld <- function(plan, path) {
-  pld.file <- gsub("//", "/", paste0(path, "/plotDescription/template.pld"))
-  pld <- readLines(pld.file)
+  ## Edit sim file
+  sim.path <- paste0(simu.path, "/template.sim")
+  sim <- read_param_file(sim.path)
+  sim.new <- edit_param_file(sim, dplyr::select(exp.plan, sim.params.to.edit)) %>%
+    edit_param_element("pldFileName", paste0(exp.plan$SimulationName, ".pld")) %>%
+    edit_param_element("weatherFile", wth.name) %>%
+    edit_param_element("profileNames", paste0(SUPPORTED.PROFILES$profiles[SUPPORTED.PROFILES$profiles %in% profiles], collapse = ",")) %>%
+    edit_param_element("exportFrequencies", paste0(SUPPORTED.PROFILES$freqs[SUPPORTED.PROFILES$profiles %in% profiles], collapse = ","))
+  write_param_file(sim.new, sim.path)
+  dum <- file.rename(sim.path, paste0(simu.path, "/", exp.plan$SimulationName, ".sim"))
 
-  pld[6]   <- paste0("latitude = ",            plan$latitude)
-  pld[11]  <- paste0("cellWidth = ",           plan$cellWidth)
-  pld[13]  <- paste0("treeLineOrientation = ", plan$treeLineOrientation)
-  pld[14]  <- paste0("spacingBetweenRows = ",  plan$spacingBetweenRows)
-  pld[15]  <- paste0("spacingWithinRows = ",   plan$spacingWithinRows)
-  pld[19]  <- paste0("slopeIntensity = ",      plan$slopeIntensity)
-  pld[20]  <- paste0("slopeAspect = ",         plan$slopeAspect)
-  pld[21]  <- paste0("windMeanForce = ",       plan$windMeanForce)
-  pld[24]  <- paste0("waterTable = ",          plan$waterTable)
-  pld[96]  <- paste0("TreeInit\t",             plan$treeSpecies, "\t1\t", plan$treeHeight, "\t0.5\t0\t0.5\t0.25\t0\t0")
-  pld[101] <- paste0("RootInit\t",             plan$rootShape, "\t3\t0.6\t0\t0\t0.5")
-
-  writeLines(pld, pld.file)
-  dum <- file.rename(paste0(path, "/plotDescription/template.pld"), paste0(path, "/plotDescription/", plan$SimulationName, ".pld"))
-
-  invisible(TRUE)
-}
-
-#' Build .sim file for Hi-sAFe simulation
-#' @description Builds .sim file for a Hi-sAFe simulation. Used within \code{build_hisafe}.
-#' @return Invisibly returns \code{TRUE}.
-#' @param plan A single simulation (row) from an object of class "hip"
-#' @param path A character string of the path to the simulation folder.
-#' @param profiles A character vector of output profiles the simulation to export.
-#' @param saveProjectOption Logical, sets the saveProjectOption parameter in the .sim file.
-build_sim <- function(plan, path, profiles, saveProjectOption) {
-  sim.file <- gsub("//", "/", paste0(path, "/template.sim"))
-  sim <- readLines(sim.file)
-
-  nyears <- plan$nbSimulations
-
-  sim[2]  <- paste0("pldFileName = ",         plan$SimulationName, ".pld")
-  sim[3]  <- paste0("nbSimulations = ",       plan$nbSimulations)
-  sim[4]  <- paste0("simulationYearStart = ", plan$simulationYearStart)
-  sim[5]  <- paste0("simulationDayStart = ",  plan$simulationDayStart)
-  sim[6]  <- paste0("simulationNbrDays = ",   plan$simulationNbrDays)
-  sim[7]  <- paste0("saveProjectOption = ",   as.numeric(saveProjectOption))
-  sim[10] <- paste0("mainCropSpecies = ",     plan$mainCropSpecies,  ".plt")
-  sim[11] <- paste0("interCropSpecies = ",    plan$interCropSpecies, ".plt")
-  sim[12] <- paste0("mainCropItk = ",         plan$mainCropItk,  ".tec")
-  sim[13] <- paste0("interCropItk = ",        plan$interCropItk, ".tec")
-  sim[14] <- paste0("treeCropDistance = ",    plan$treeCropDistance)
-  sim[15] <- paste0("weededAreaRadius = ",    plan$weededAreaRadius)
-
-  sim[18] <- "weatherFile = weather.wth"
-
-  sim[21] <- paste0("profileNames = ",        paste0(SUPPORTED.PROFILES$profiles[SUPPORTED.PROFILES$profiles %in% profiles], collapse = ","))
-  sim[22] <- paste0("exportFrequencies = ",   paste0(SUPPORTED.PROFILES$freqs[SUPPORTED.PROFILES$profiles %in% profiles], collapse = ","))
-
-  X <- as.numeric(grepl("X", plan$toricSymmetry))
-  Y <- as.numeric(grepl("Y", plan$toricSymmetry))
-  sim[25] <- paste0("toreXp = ", X)
-  sim[26] <- paste0("toreXn = ", X)
-  sim[27] <- paste0("toreYp = ", Y)
-  sim[28] <- paste0("toreYn = ", Y)
-
-  if(plan$treePruningFreq > 0) {
-    tree.prune.years   <- seq(1, nyears, plan$treePruningFreq)
-    n.tree.prune.years <- length(tree.prune.years)
-    sim[31] <- paste0("treePruningYears = ",     paste0(tree.prune.years, collapse=","))
-    sim[32] <- paste0("treePruningProp = ",      paste0(rep(plan$treePruningProp, n.tree.prune.years), collapse=","))
-    sim[33] <- paste0("treePruningMaxHeight = ", paste0(rep(plan$treePruningMaxHeight, n.tree.prune.years), collapse=","))
-    sim[34] <- paste0("treePruningDays = ",      paste0(rep(365, n.tree.prune.years), collapse=","))
+  ## Edit tree file
+  tree.path <- list.files(paste0(simu.path, "/treeSpecies"), pattern = "\\.tree", full.names = TRUE)
+  for(i in tree.path) {
+    tree <- read_param_file(i)
+    if(length(tree.params.to.edit > 0)) {
+      tree.new <- edit_param_file(tree, dplyr::select(exp.plan, tree.params.to.edit))
+    } else {
+      tree.new <- tree
+    }
+    write_param_file(tree.new, i)
   }
-
-  if(plan$treeRootPruningFreq > 0) {
-    root.prune.years   <- seq(1, nyears, plan$treeRootPruningFreq)
-    n.root.prune.years <- length(root.prune.years)
-    sim[42] <- paste0("treeRootPruningYears = ",    paste0(root.prune.years, collapse=","))
-    sim[43] <- paste0("treeRootPruningDays = ",     paste0(rep(365, n.root.prune.years), collapse=","))
-    sim[44] <- paste0("treeRootPruningDistance = ", paste0(rep(plan$treeRootPruningDistance, n.root.prune.years), collapse=","))
-    sim[45] <- paste0("treeRootPruningDepth = ",    paste0(rep(plan$treeRootPruningDepth, n.root.prune.years), collapse=","))
-  }
-
-  writeLines(sim, sim.file)
-  dum <- file.rename(paste0(path, "/template.sim"), paste0(path, "/", plan$SimulationName, ".sim"))
-
-  invisible(TRUE)
-}
-
-#' Edit .tree file for Hi-sAFe simulation
-#' @description Edits .tree file for a Hi-sAFe simulation. Used within \code{build_hisafe}.
-#' @return Invisibly returns \code{TRUE}.
-#' @param plan A single simulation (row) from an object of class "hip"
-#' @param path A character string of the path to the simulation folder.
-#' @param species A character string of the tree species to edit.
-build_tree <- function(plan, path, species) {
-  tree.file <- gsub("//", "/", paste0(path, "/treeSpecies/", species, ".tree"))
-  tree <- readLines(tree.file)
-
-  tree[23]  <- paste0("budBurstTempAccumulationDateStart = ", plan$budBurstTempAccumulationDateStart)
-  tree[25]  <- paste0("budBurstAccumulatedTemp = ",           plan$budBurstAccumulatedTemp)
-  tree[46]  <- paste0("lueMax = ",                            plan$lueMax)
-  tree[80]  <- paste0("coarseRootAnoxiaResistance = ",        plan$coarseRootAnoxiaResistance)
-  tree[82]  <- paste0("rootHalfLife = ",                      plan$rootHalfLife)
-  tree[83]  <- paste0("rootAnoxiaHalfLife = ",                plan$rootAnoxiaHalfLife)
-  tree[84]  <- paste0("colonisationThreshold = ",             plan$colonisationThreshold)
-
-  writeLines(tree, tree.file)
-
-  invisible(TRUE)
+  invisible(hip)
 }

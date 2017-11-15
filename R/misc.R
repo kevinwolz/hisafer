@@ -12,34 +12,38 @@
 #' hisafe_params("cellWidth") # details of cellWidth parameter
 #' hisafe_params("all")       # details of all parameters
 #' }
-hisafe_params <- function(variable = "names") {
-  param.names <- sort(names(HISAFE.PARAMS))
+hisafe_params <- function(variable = "names", template = "default", template.tree = "walnut-hybrid") {
 
-  acceptable <- c(param.names, "names", "all")
+  TEMPLATE_PARAMS <- get_template_params(template = template, template.tree = template.tree)
+  PARAM_NAMES     <- unlist(get_param_names(TEMPLATE_PARAMS), use.names = FALSE)
+  PARAM_DEFAULTS  <- get_param_vals(TEMPLATE_PARAMS, "value")
+  PARAM_RANGES    <- get_param_vals(TEMPLATE_PARAMS, "range")
+  PARAM_ACCEPTED  <- get_param_vals(TEMPLATE_PARAMS, "accepted")
+
+  acceptable <- c(PARAM_NAMES, "names", "all")
   if(any(!(variable %in% acceptable))) {
     bad.vars <- variable[!(variable %in% acceptable)]
     stop(paste0("The following are not supported Hi-sAFe input parameters: ", bad.vars))
   }
 
   if(variable[1] == "all") {
-    param.details <- str(HISAFE.PARAMS,
-                         comp.str = "",
-                         give.length = FALSE,
-                         give.head = FALSE,
-                         no.list = TRUE)
+    for(i in 1:length(PARAM_NAMES)){
+      cat(paste0("\n\n", PARAM_NAMES[i]))
+      cat(paste0("\nDefault: ", PARAM_DEFAULTS[[i]]))
+      if(!is.na(PARAM_RANGES[[i]]))   cat(paste0("\nAccepted Range: ",   PARAM_RANGES[[i]]))
+      if(!is.na(PARAM_ACCEPTED[[i]])) cat(paste0("\nAccepted Values: ",  PARAM_ACCEPTED[[i]]))
+    }
   } else if (variable[1] == "names") {
-    cat(paste0(param.names, collapse = "\n"))
+    cat(paste0(PARAM_NAMES, collapse = "\n"))
   } else {
     for(i in 1:length(variable)){
       cat(paste0("\n", variable[i], "\n"))
-      param.details <- str(HISAFE.PARAMS[[variable[i]]],
-                           comp.str = "",
-                           give.length = FALSE,
-                           give.head = FALSE,
-                           no.list = TRUE)
+      cat(paste0("Default: ", PARAM_DEFAULTS[[variable]]))
+      if(!is.na(PARAM_RANGES[[variable]]))   cat(paste0("Accepted Range: ",   PARAM_RANGES[[variable]]))
+      if(!is.na(PARAM_ACCEPTED[[variable]])) cat(paste0("Accepted Values: ",  PARAM_ACCEPTED[[variable]]))
     }
   }
-  invisible(param.names)
+  invisible(PARAM_NAMES)
 }
 
 #' Display supported Hi-sAFe output profiles
@@ -100,10 +104,10 @@ hop_merge <- function(...) {
   hops <- list(...)
 
   check_class <- function(x) { any(c("hop", "hop-group") %in% class(x)) }
-  if(!all(purrr::map_lgl(hops, check_class))) stop("one or most list elements not of class hop or hop-group", call. = FALSE)
+  if(!all(purrr::map_lgl(hops, check_class))) stop("one or more list elements not of class hop or hop-group", call. = FALSE)
 
   make_names_unique <- function(x, num){ paste0(num, "-", x) }
-  old.names <- purrr::map(purrr::map(hops, "inputs"), "SimulationName")
+  old.names <- purrr::map(purrr::map(hops, "exp.plan"), "SimulationName")
 
   if(any(duplicated(as.character(unlist(old.names))))) {
     hops <- purrr::pmap(list(hop = hops,
@@ -121,15 +125,15 @@ hop_merge <- function(...) {
     purrr::map(clear_elements) %>%
     purrr::pmap(dplyr::bind_rows)
 
-  hip <- merged_hop$inputs
+  hip <- merged_hop$exp.plan
 
   unique.cols <- names(hip)[purrr::map_lgl(hip, function(x) (length(unique(x)) != 1))]
   unique.cols <- unique.cols[unique.cols != "SimulationName"]
   other.cols  <- names(hip)[!(names(hip) %in% c("SimulationName", unique.cols))]
 
-  merged_hop$inputs <- dplyr::bind_cols(hip[, "SimulationName"], hip[,  unique.cols], hip[, other.cols])
+  merged_hop$exp.plan <- dplyr::bind_cols(hip[, "SimulationName"], hip[,  unique.cols], hip[, other.cols])
 
-  merged_hop$exp.plan <- select(merged_hop$inputs, "SimulationName", unique.cols)
+  merged_hop$exp.plan <- select(merged_hop$exp.plan, "SimulationName", unique.cols)
 
   merged_hop$variables <- dplyr::distinct(merged_hop$variables)
 

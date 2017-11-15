@@ -10,9 +10,10 @@ check_input_values(hip)
 \item{hip}{An object of class "hip".}
 }
 \value{
-Produces errors and/or warnings if issues are found. Otherwise, invisibly returns \code{TRUE}.
+Produces errors if issues are found. Otherwise, invisibly returns \code{TRUE}.
 }
 \description{
-Checks the validity of all Hi-sAFe inputs against \code{HISAFE.PARAMS} and provides errors and/or warnings if issues are found.
-Used within \code{define_hisafe} and \code{define_hisafe_file}.
+Checks the validity of all defined inputs against Hi-sAFe model constraints
+and constraints found in the template file comments. Errors are generated if issues are found.
+Used within \code{\link{define_hisafe}} and \code{\link{define_hisafe_file}}.
 }

@@ -4,44 +4,76 @@
 \alias{define_hisafe}
 \title{Define a Hi-sAFe experiment}
 \usage{
-define_hisafe(factorial = FALSE, ...)
+define_hisafe(path, exp.name = "experiment", profiles = "all",
+  template = "default", factorial = FALSE, ...)
 }
 \arguments{
-\item{factorial}{If \code{FALSE}, the default, then values are recycled (i.e. such as for default behavior of \code{data.frame()}).
+\item{path}{A character string of the path (relative or absolute) to the directory where the simulation/experiment is to be built.}
+
+\item{exp.name}{A character string of the name of the experiment folder. Only used if defining more than one simulation.}
+
+\item{profiles}{A character vector of Hi-sAFe export profiles to be exported by Hi-sAFe.
+If "all" (the default), then all supported profiles will be exported.}
+
+\item{template}{A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
+If "default", then the default template inluded with hisafer (i.e. the files used for Hi-sAFe calibtation) will be used.}
+
+\item{factorial}{If \code{FALSE}, the default, then supplied input values are recycled (i.e. such as for default behavior of \code{\link{data.frame}}).
 If \code{TRUE}, then a factorial experiment is created, in which an experiment is defined for each possible combination of supplied values.}
 
-\item{...}{Any suported Hi-sAFe input parameter in the .sim and .pld files can be passed.
-Parameters should be passed as \code{parameterName = values}. For more information on supported parameters, use \code{hisafe_params()}.}
+\item{...}{Any Hi-sAFe input parameter in the .sim, .pld, and .tree files can be passed.
+To display supported parameters, use \code{\link{hisafe_params}}. See below for further details.
+There are three methods for passing parameters to \code{define_hisafe}, one for each of the three types of parameters within the parameter files:
+\itemize{
+ \item{individual numeric or character values}{ - For parameters that require a single value (most parameters),
+ a simulation can be defined via \code{parameterName = value}. To define an experiment, use \code{parameterName = c(value1, value2)}}
+ \item{multiple numeric values}{ - For parameters that require multiple numeric values (e.g. tree pruning, tree thinning, and root pruning parameters),
+ a simulation can be defined by wrapping one or more numeric vectors within a list.
+ For a single simulation, use \code{parameterName = list(c(value1, value2, ...))}.
+ For an experiment, use \code{parameterName = list(c(value1, value2, ...), c(value3, value4, ...))}.}
+ \item{"tables"}{ - There are four parameter tables within the .pld file (layers, layer.initialization, tree.initialization, root.initialization).
+ To define prameters within these tables, use the helper functions
+ \code{\link{layer_params}}, \code{\link{layer_init_params}}, \code{\link{tree_init_params}}, and \code{\link{root_init_params}}.
+ These functions create a list of data frames (tibbles).}
+}}
 }
 \value{
-An object of class "hip". This is a data frame (tibble) with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
+An object of class "hip". This is a list of 4 elements:
+\itemize{
+ \item{"exp.plan"}{ - A data frame (tibble) of manipulated Hi-sAFe input parameters, with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.}
+ \item{"template"}{ - A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files used.}
+ \item{"profiles"}{ - A character vector of the names of the Hi-sAFe export profiles that will be exported by Hi-sAFe.}
+ \item{"path"}{ - A character string of the path to the directory where the simulation/experiment is to be built.
+}
+If a relative path is via \code{path}, it is converted to an absolute path to maximize "hip" object versaitility.}
 }
 \description{
 Defines a Hi-sAFe experiment - the input parameters to one or more Hi-sAFe simulations.
 }
 \details{
 It is strongly recommended to name each simulation in your experiment. This can be done via the \code{SimulationName} parameter.
-If no names are provided, then \code{define_hisafe} will provide generic names of "Sim_1", "Sim_2", etc.
-If \code{factorial = FALSE}, the default, then supply a value of \code{SimulationName} for each experiment.
-If \code{factorial = TRUE}, then supply a single value of \code{SimulationName} as a prefix.
-\code{define_hisafe} will append "_1", "_2", etc. for each of the (unknown number of) factorial experiments.
+If no names are provided, then generic names of "Sim_1", "Sim_2", etc. will be generated.
 }
 \examples{
 \dontrun{
 # To define a Hi-sAFe simulation using all default parameter values:
-default.exp <- define_hisfafe()
+default.exp <- define_hisafe(path = "./")
 
 # To define a Hi-sAFe experiment analyzing only variation in latitude:
-latitude.exp <- define_hisfafe(SimulationName = c("Lat15", "Lat30", "Lat45", "Lat60"),
+latitude.exp <- define_hisafe(path = "./", SimulationName = c("Lat15", "Lat30", "Lat45", "Lat60"),
                                latitude = seq(15, 60, 15))
 
 # To define a factorial Hi-sAFe experiment analyzing
 # simultaneous variation in latitude and tree line orientation:
-lat.orient.exp <- define_hisfafe(SimulationName = c("Lat15", "Lat30", "Lat45", "Lat60"),
+lat.orient.exp <- define_hisafe(path = "./",
                                  latitude = seq(15, 60, 15),
                                  treeLineOrientation = c(0,90))
 }
 }
 \seealso{
-Other hisafe definition functions: \code{\link{define_hisafe_file}}
+Other hisafe definition functions: \code{\link{define_hisafe_file}},
+  \code{\link{layer_init_params}},
+  \code{\link{layer_params}},
+  \code{\link{root_init_params}},
+  \code{\link{tree_init_params}}
 }

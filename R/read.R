@@ -1,45 +1,44 @@
 #' Read output from a Hi-sAFe experiment
 #' @description Reads the designated output profiles from a Hi-sAFe experiiment (i.e. a group of Hi-sAFe simulations).
-#' @return An object of class "hop-group". This is a list of 15 data frames (tibbles):
-#' \code{annualtree},
-#' \code{annualcrop},
-#' \code{annualplot},
-#' \code{trees},
-#' \code{plot},
-#' \code{climate},
-#' \code{roots},
-#' \code{monthCells},
-#' \code{cells},
-#' \code{voxels},
-#' \code{variables} (variable descriptions and units from all profiles),
-#' \code{inputs} (the hip object that generated the simulation),
-#' \code{path} (the path to the simulation folder),
-#' \code{exp.plan} (the manipulated input variables in the experiment), and
-#' \code{exp.path} (the path to the experiment folder).
-#' @param hip An object of class "hip". To create a hip object see \code{\link{define_exp}}.
-#' If the hip object contains a \code{path} value, then this can be used without providing \code{path} directly to \code{read_hisafe_exp}.
+#' @return An object of class "hop-group". This is a list of 14 data frames (tibbles):
+#' \itemize{
+#'  \item{annualtree}
+#'  \item{annualcrop}
+#'  \item{annualplot}
+#'  \item{trees}
+#'  \item{plot}
+#'  \item{climate}
+#'  \item{roots}
+#'  \item{monthCells}
+#'  \item{cells}
+#'  \item{voxels}
+#'  \item{variables}{ - variable descriptions and units from all profiles}
+#'  \item{exp.plan}{ - the exp.plan of the hip object that generated the simulation}
+#'  \item{path}{ - the path to the simulation folder}
+#'  \item{exp.path}{ - the path to the experiment folder}
+#' }
+#' @param hip An object of class "hip". To create a hip object see \code{\link{define_hisafe}}.
 #' If \code{hip} is not provided, then \code{path} is required and the input data for the experiment is read from the experiment
 #' summary .csv file created when building the experiment.
-#' @param path A character string of the path to the directory containing the Hi-sAFe simulation folders
-#' (which each contain the standard subdirectories with the outputs).
+#' @param path A character string of the path to the directory containing the Hi-sAFe simulation folders.
 #' If \code{hip} is not provided, then \code{path} is required. If both \code{hip} and \code{path} are provided, \code{path} is used.
-#' @param profiles A character vector of the names of Hi-sAFe output profiles to read. Defaults to reading all supported Hi-sAFe output profiles via "all".
-#' Currently supported profiles are: annualplot, annualtree, annualcrop, plot, trees, roots, cells, voxels, climate, monthCells.
+#' @param profiles A character vector of the names of Hi-sAFe output profiles to read.
+#' #' If "all" the default, reads all supported Hi-sAFe output profiles. For currently supported profiles see: \code{\link{hisafe_profiles}}
 #' @param show.progress Logical indicating whether progress messsages should be printed to the console.
 #' @export
 #' @importFrom dplyr %>%
 #' @examples
 #' \dontrun{
 #' # After reading in Hi-sAFe simulation data via:
-#' myexp <- read_hisafe_exp(MyExpPlan, "./")
+#' myexp <- read_hisafe_exp(myexphip)
 #'
 #' # If only the annual tree data is required:
-#' mytreeexp <- read_hisafe(MyExpPlan, "./", profiles = "annualtree")
+#' mytreeexp <- read_hisafe(myexphip, profiles = "annualtree")
 #' }
 read_hisafe_exp <- function(hip = NULL, path = NULL, profiles = "all", show.progress = TRUE) {
 
   if(!is.null(hip) & !("hip" %in% class(hip))) stop("data not of class hip", call. = FALSE)
-  if(is.null(hip) == is.null(path))            stop("must provide hip OR path", call. = FALSE)
+  if(is.null(hip) & is.null(path))             stop("must provide hip or path", call. = FALSE)
 
   ## Read simulation inputs & extract cols that vary for binding to output data
   if(!is.null(hip)) {
@@ -88,7 +87,6 @@ read_hisafe_exp <- function(hip = NULL, path = NULL, profiles = "all", show.prog
   data$cells       <- data_tidy(data$cells)
   data$voxels      <- data_tidy(data$voxels)
   data$variables   <- dplyr::distinct(data$variables)            # remove duplicate variable descriptions
-  data$exp.plan    <- dplyr::mutate_all(exp.plan, factor)        # make all columns factors
   data$exp.path    <- path
 
   ## Warn if lengths of all simulations are not equal
@@ -112,41 +110,41 @@ read_hisafe_exp <- function(hip = NULL, path = NULL, profiles = "all", show.prog
 #' Read output from a single Hi-sAFe simulation
 #' @description Reads the designated output profiles from a single Hi-sAFe simulation.
 #' @return An object of class "hop". This is a list of 13 data frames (tibbles):
-#' \code{annualtree},
-#' \code{annualcrop},
-#' \code{annualplot},
-#' \code{trees},
-#' \code{plot},
-#' \code{climate},
-#' \code{roots},
-#' \code{monthCells},
-#' \code{cells},
-#' \code{voxels},
-#' \code{variables} (variable descriptions and units from all profiles),
-#' \code{inputs} (the hip object that generated the simulation), and
-#' \code{path} (the path to the simulation folder).
-#' @param hip An object of class "hip". To create a hip object see \code{\link{define_exp}}.
-#' If object contains a \code{path} value, then this can be used without providing \code{path} directly to \code{read_hisafe}.
+#' \itemize{
+#'  \item{annualtree}
+#'  \item{annualcrop}
+#'  \item{annualplot}
+#'  \item{trees}
+#'  \item{plot}
+#'  \item{climate}
+#'  \item{roots}
+#'  \item{monthCells}
+#'  \item{cells}
+#'  \item{voxels}
+#'  \item{variables}{ - variable descriptions and units from all profiles}
+#'  \item{exp.plan}{ - the exp.plan of the hip object that generated the simulation}
+#'  \item{path}{ - the path to the simulation folder}
+#' }
+#' @param hip An object of class "hip". To create a hip object see \code{\link{define_hisafe}}.
 #' Cannot provided both \code{hip} and \code{simu.name}.
 #' If \code{hip} is not provided, then \code{path} is required and the input data for the experiment is read from the experiment
 #' summary .csv file created when building the experiment.
 #' @param simu.name The \code{SimulationName} of the Hi-sAFe simulation to read. This must be the same as the name of the Hi-sAFe simulation folder.
 #' Cannot provided both \code{hip} and \code{simu.name}.
-#' @param path A character string of the path to the directory containing the Hi-sAFe simulation folder
-#' (which contains the standard subdirectory with the output).
+#' @param path A character string of the path to the directory containing the Hi-sAFe simulation folder.
 #' If \code{hip} is not provided, then \code{path} is required. If both \code{hip} and \code{path} are provided, \code{path} is used.
 #' @param profiles A character vector of the names of Hi-sAFe output profiles to read.
-#' Defaults to reading all supported Hi-sAFe output profiles via "all". For currently supported profiles see: \code{\link{hisafe_profiles}}
+#' If "all" the default, reads all supported Hi-sAFe output profiles. For currently supported profiles see: \code{\link{hisafe_profiles}}
 #' @param show.progress Logical indicating whether progress messsages should be printed to the console.
 #' @export
 #' @importFrom dplyr %>%
 #' @examples
 #' \dontrun{
 #' # After reading in Hi-sAFe simulation data via:
-#' mydata <- read_hisafe("MySimulation", "./")
+#' mydata <- read_hisafe(mysimhip)
 #'
 #' # If only the annual tree data is required:
-#' mytreedata <- read_hisafe("MySimulation", "./", profiles = "annualtree")
+#' mytreedata <- read_hisafe(mysimhip, profiles = "annualtree")
 #' }
 read_hisafe <- function(hip = NULL, simu.name = NULL, path = NULL, profiles = "all", show.progress = TRUE) {
 
@@ -156,7 +154,7 @@ read_hisafe <- function(hip = NULL, simu.name = NULL, path = NULL, profiles = "a
   ## Read simulation inputs
   if(!is.null(hip)) {
     path      <- hip$path
-    simu.name <- hip$hip$SimulationName
+    simu.name <- hip$exp.plan$SimulationName
   } else {
     #cat("\nreading:  simulation inputs (hip)")
     simu.path <- gsub("//", "/", paste0(path, "/" , simu.name))
@@ -236,7 +234,7 @@ read_hisafe <- function(hip = NULL, simu.name = NULL, path = NULL, profiles = "a
                  cells      = cells.dv$data,
                  voxels     = voxels.dv$data,
                  variables  = variables,
-                 inputs     = hip,
+                 exp.plan   = hip,
                  path       = dplyr::tibble(path = simu.path))
 
   class(output) <- c("hop", class(output))
@@ -244,10 +242,10 @@ read_hisafe <- function(hip = NULL, simu.name = NULL, path = NULL, profiles = "a
 }
 
 #' Read example Hi-sAFe experiment output
-#' @description Reads in an example Hi-sAFe experiment. For more details see \code{?read_hisafe_exp}.
+#' @description Reads in an example Hi-sAFe experiment. For more details see \code{\link{read_hisafe_exp}}.
 #' @return An object of class "hop". For more details see \code{?read_hisafe_exp}.
 #' @param profiles A character vector of the names of Hi-sAFe output profiles to read.
-#' Defaults to reading all supported Hi-sAFe output profiles via "all". For currently supported profiles see: \code{\link{hisafe_profiles}}
+#' "cells", "roots" and "voxels" profiles are not available in the example.
 #' @param show.progress Logical indicating whether progress messsages should be printed to the console.
 #' @export
 read_hisafe_example <- function(profiles = c("annualplot", "annualtree", "annualcrop", "plot", "trees", "climate", "monthCells"),
