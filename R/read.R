@@ -1,6 +1,6 @@
 #' Read output from a Hi-sAFe experiment
 #' @description Reads the designated output profiles from a Hi-sAFe experiiment (i.e. a group of Hi-sAFe simulations).
-#' @return An object of class "hop-group". This is a list of 14 data frames (tibbles):
+#' @return An object of class "hop-group". This is a list of 15 data frames (tibbles):
 #' \itemize{
 #'  \item{annualtree}
 #'  \item{annualcrop}
@@ -13,6 +13,7 @@
 #'  \item{cells}
 #'  \item{voxels}
 #'  \item{variables}{ - variable descriptions and units from all profiles}
+#'  \item{tree.info}{ - tree species and location data}
 #'  \item{exp.plan}{ - the exp.plan of the hip object that generated the simulation}
 #'  \item{path}{ - the path to the simulation folder}
 #'  \item{exp.path}{ - the path to the experiment folder}
@@ -109,7 +110,7 @@ read_hisafe_exp <- function(hip = NULL, path = NULL, profiles = "all", show.prog
 
 #' Read output from a single Hi-sAFe simulation
 #' @description Reads the designated output profiles from a single Hi-sAFe simulation.
-#' @return An object of class "hop". This is a list of 13 data frames (tibbles):
+#' @return An object of class "hop". This is a list of 14 data frames (tibbles):
 #' \itemize{
 #'  \item{annualtree}
 #'  \item{annualcrop}
@@ -122,6 +123,7 @@ read_hisafe_exp <- function(hip = NULL, path = NULL, profiles = "all", show.prog
 #'  \item{cells}
 #'  \item{voxels}
 #'  \item{variables}{ - variable descriptions and units from all profiles}
+#'  \item{tree.info}{ - tree species and location data}
 #'  \item{exp.plan}{ - the exp.plan of the hip object that generated the simulation}
 #'  \item{path}{ - the path to the simulation folder}
 #' }
@@ -234,6 +236,7 @@ read_hisafe <- function(hip = NULL, simu.name = NULL, path = NULL, profiles = "a
                  cells      = cells.dv$data,
                  voxels     = voxels.dv$data,
                  variables  = variables,
+                 tree.info  = read_tree_info(path, simu.name),
                  exp.plan   = hip,
                  path       = dplyr::tibble(path = simu.path))
 
@@ -319,4 +322,19 @@ read_profile <- function(profile, path, show.progress = TRUE) {
     profile.data <- profile.variables <- dplyr::tibble()
   }
   return(list(data = profile.data, variables = profile.variables))
+}
+
+#' Read tree information from a Hi-sAFe pld file
+#' @description Reads tree information from a Hi-sAFe pld file. Used by \code{\link{read_hisafe}}.
+#' @return A data frame (tibble) containing tree id, species, x and y.
+#' @param path A character string of the path to the directory containing the simulation folder.
+#' @param simu.name A character string of the simualation name.
+read_tree_info <- function(path, simu.name) {
+  pld <- read_param_file(gsub("//", "/", paste0(path, "/", simu.name, "/plotDescription/", simu.name, ".pld"), fixed = TRUE))
+  tree.info <- pld$TREE_INITIALIZATION$tree.initialization$value %>%
+    mutate(x = treeX, y = treeY) %>%
+    dplyr::select(species, x, y)
+  tree.info$id <- 1:nrow(tree.info)
+  tree.info$SimulationName <- rep(simu.name, nrow(tree.info))
+  tree.info <- select(tree.info, SimulationName, id, everything())
 }

@@ -25,7 +25,7 @@ If "all" the default, reads all supported Hi-sAFe output profiles. For currently
 \item{show.progress}{Logical indicating whether progress messsages should be printed to the console.}
 }
 \value{
-An object of class "hop". This is a list of 13 data frames (tibbles):
+An object of class "hop". This is a list of 14 data frames (tibbles):
 \itemize{
  \item{annualtree}
  \item{annualcrop}
@@ -38,6 +38,7 @@ An object of class "hop". This is a list of 13 data frames (tibbles):
  \item{cells}
  \item{voxels}
  \item{variables}{ - variable descriptions and units from all profiles}
+ \item{tree.info}{ - tree species and location data}
  \item{exp.plan}{ - the exp.plan of the hip object that generated the simulation}
  \item{path}{ - the path to the simulation folder}
 }
