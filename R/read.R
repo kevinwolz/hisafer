@@ -329,12 +329,14 @@ read_profile <- function(profile, path, show.progress = TRUE) {
 #' @return A data frame (tibble) containing tree id, species, x and y.
 #' @param path A character string of the path to the directory containing the simulation folder.
 #' @param simu.name A character string of the simualation name.
+#' @importFrom dplyr %>%
 read_tree_info <- function(path, simu.name) {
   pld <- read_param_file(gsub("//", "/", paste0(path, "/", simu.name, "/plotDescription/", simu.name, ".pld"), fixed = TRUE))
   tree.info <- pld$TREE_INITIALIZATION$tree.initialization$value %>%
-    mutate(x = treeX, y = treeY) %>%
+    dplyr::mutate(x = treeX, y = treeY) %>%
     dplyr::select(species, x, y)
-  tree.info$id <- 1:nrow(tree.info)
-  tree.info$SimulationName <- rep(simu.name, nrow(tree.info))
-  tree.info <- select(tree.info, SimulationName, id, everything())
+  tree.info <- tree.info %>%
+    dplyr::mutate(id = 1:nrow(tree.info)) %>%
+    dplyr::mutate(SimulationName = rep(simu.name, nrow(tree.info))) %>%
+    dplyr::select(SimulationName, id, dplyr::everything())
 }

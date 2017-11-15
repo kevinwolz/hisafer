@@ -1,6 +1,6 @@
 #' Plot timeseries of Hi-sAFe output variable
 #' @description Plots a daily or annual timeseries of a single Hi-sAFe output variable.
-#' @return Invisibly returns a ggplot object. If the data is of class \code{hop-group} and contains data from more than one
+#' @return Returns a ggplot object. If the data is of class \code{hop-group} and contains data from more than one
 #' Hi-sAFe simulation, the plot will contain multiple lines, colored and labeled by SimulationName. If the data
 #' contains two more tree ids, the plot will be faceted by tree id.
 #' @param hop An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
@@ -131,14 +131,14 @@ plot_hisafe_ts <- function(hop,
     scale_linetype_manual(values = rep(lty.palette, 100)) +
     theme_hisafe_ts()
 
-  invisible(plot.obj)
+  return(plot.obj)
 }
 
 #' Tile plot of Hi-sAFe monthCells output variable
 #' @description Plots a tile plot of a single Hi-sAFe monthCells output variable.
 #' @details This function is very picky! You can only facet by two of the three manipulable variables: SimulationName, Year, Month.
 #' You must ensure that the one varibale not used for faceting is fixed at a single value.
-#' @return Invisibly returns a ggplot object.
+#' @return Returns a ggplot object.
 #' @param hop An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
 #' @param variable A character string of the name of the variable to color the tiles.
 #' @param rowfacet One of "Year", "Month", or "SimulationName", indicating which variable to use for row faceting.
@@ -209,15 +209,29 @@ plot_hisafe_monthcells <- function(hop,
     dplyr::filter(Year %in% years) %>%
     dplyr::filter(Month %in% months)
 
+  x.center <- mean(plot.data$x)
+  y.center <- mean(plot.data$y)
+
+  ## Filter for sim.names & combine with canopy diameter
+  if(nrow(hop$tree.info) > 0 & nrow(hop$trees) > 0) {
+  tree.data <- hop$tree.info %>%
+    dplyr::filter(SimulationName %in% sim.names)
+
+  diam.data <- hop$trees %>%
+    dplyr::mutate(Year = Year - min(Year) + 1) %>% # Create 0+ year values
+    dplyr::filter(SimulationName %in% sim.names) %>%
+    dplyr::filter(Year %in% years) %>%
+    dplyr::filter(Month %in% months) %>%
+    dplyr::filter(Day == 1) %>%
+    dplyr::select(SimulationName, Year, Month, id, dbh, crownRadiusInterRow, crownRadiusTreeLine) %>%
+    dplyr::left_join(tree.data, by = c("SimulationName", "id"))
+  }
+
   ## Check for existence of variable within hop profile
   if(!(variable %in% names(plot.data))) stop(paste0(variable, " does not exist within monthCells profile.",
                                                     "\nCheck spelling and capitalization of variable name.",
                                                     "\nAlso check to ensure that this variable was included within the output profile definition."),
                                              call. = FALSE)
-
-  ## Find tree locations for each simulation
-  tree.locations <- plot.data %>%
-    dplyr::summarize(x = median(x), y = median(y))
 
   ## Create plot
   plot.obj <- ggplot(plot.data, aes(x = x, y = y)) +
@@ -229,7 +243,17 @@ plot_hisafe_monthcells <- function(hop,
     scale_y_continuous(expand = c(0,0)) +
     facet_grid(reformulate(rowfacet, colfacet), switch = "both") +
     geom_tile(aes_string(fill = variable), na.rm = TRUE, color = "black") +
-    geom_point(data = tree.locations, fill = "black", color = "white", shape = 21) +
+    geom_point(data = diam.data,
+               color = "green",
+               aes(x = (x+x.center), y = (y+y.center)),
+               inherit.aes = FALSE) +
+    geom_ellipsis(data = diam.data,
+                  color = "green",
+                  aes(x0 = (x+x.center), y0 = (y+y.center),
+                      a = crownRadiusInterRow,
+                      b = crownRadiusTreeLine,
+                      angle = 0),
+                  inherit.aes = FALSE) +
     viridis::scale_fill_viridis(option = "magma") +
     guides(fill = guide_colourbar(barwidth = 15,
                                   barheight = 1.5,
@@ -238,14 +262,14 @@ plot_hisafe_monthcells <- function(hop,
     coord_equal() +
     theme_hisafe_tile()
 
-  invisible(plot.obj)
+  return(plot.obj)
 }
 
 
 #' Tile plot of Hi-sAFe cells output variable
 #' @description Plots a tile plot of a single Hi-sAFe cells output variable.
 #' SimulationName is used as the column facet. Date is used as the row facet.
-#' @return Invisibly returns a ggplot object.
+#' @return Returns a ggplot object.
 #' @param hop An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
 #' @param variable A character string of the name of the variable to color the tiles.
 #' @param dates A character vector containing the dates (yyyy-mm-dd) to include.
@@ -328,14 +352,14 @@ plot_hisafe_cells <- function(hop, variable, dates) {
     coord_equal() +
     theme_hisafe_tile()
 
-  invisible(plot.obj)
+  return(plot.obj)
 }
 
 
 #' Tile plot of Hi-sAFe voxels output variable
 #' @description Plots a tile plot of a single Hi-sAFe voxels output variable.
 #' If a single date is provided, SimulationName is used as the column facet. Otherwise, Date is used as the column facet.
-#' @return Invisibly returns ggplot object.
+#' @return Returns ggplot object.
 #' @param hop An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
 #' @param variable A character string of the name of the variable to color the tiles.
 #' @param dates A character vector containing the dates (yyyy-mm-dd) to include.
@@ -418,5 +442,5 @@ plot_hisafe_voxels <- function(hop, variable, dates) {
     coord_equal() +
     theme_hisafe_tile()
 
-  invisible(plot.obj)
+  return(plot.obj)
 }

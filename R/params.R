@@ -4,6 +4,7 @@
 #' @return A list containing all parameter values and constraints.
 #' @param path A character string of the path to the file to read.
 #' @export
+#' @importFrom dplyr %>%
 #' @family hisafe param functions
 read_param_file <- function(path) {
   sim <- scan(file = path, what = "character", encoding = "latin1", sep = "\n", quiet = TRUE)
@@ -18,7 +19,7 @@ read_param_file <- function(path) {
   read_element_table <- function(sim, i, titles, table.names) {
     if(any(which(titles) > i)) {
       next.header <- which(titles)[which(titles) > i][[1]]
-      table.elements <- strsplit(sim[i:(next.header - 1)], split = "\t")
+      table.elements <- strsplit(gsub("^\\s+|\\s+$", "", sim[i:(next.header - 1)]), split = "\t")
     } else {
       table.elements <- strsplit(sim[i], split = "\t")
     }

@@ -81,7 +81,7 @@ define_hisafe <- function(path,
   }
 
   if(is.null(exp.plan$SimulationName)) exp.plan$SimulationName <- paste0("Sim_", 1:nrow(exp.plan))
-  exp.plan <- select(exp.plan, SimulationName, everything())
+  exp.plan <- dplyr::select(exp.plan, SimulationName, dplyr::everything())
 
   if(nrow(exp.plan) > 1) path <- gsub("//", "/", paste0(path, "/", exp.name), fixed = TRUE)
   hip <- list(exp.plan = exp.plan,
@@ -120,7 +120,7 @@ define_hisafe_file <- function(file, path, profiles = "all", template = "default
   if(profiles[1] == "all") profiles <- SUPPORTED.PROFILES$profiles
 
   if(is.null(exp.plan$SimulationName)) exp.plan$SimulationName <- paste0("Sim_", 1:nrow(exp.plan))
-  exp.plan <- select(exp.plan, SimulationName, everything())
+  exp.plan <- dplyr::select(exp.plan, SimulationName, dplyr::everything())
 
   hip <- list(exp.plan = exp.plan,
               template = template,

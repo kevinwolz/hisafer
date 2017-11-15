@@ -14,7 +14,7 @@ plot_hisafe_cells(hop, variable, dates)
 \item{dates}{A character vector containing the dates (yyyy-mm-dd) to include.}
 }
 \value{
-Invisibly returns a ggplot object.
+Returns a ggplot object.
 }
 \description{
 Plots a tile plot of a single Hi-sAFe cells output variable.

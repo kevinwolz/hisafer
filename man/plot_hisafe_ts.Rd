@@ -25,7 +25,7 @@ If no input, the full available time range is plotted. Use \code{NA} to refer to
 If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette.}
 }
 \value{
-Invisibly returns a ggplot object. If the data is of class \code{hop-group} and contains data from more than one
+Returns a ggplot object. If the data is of class \code{hop-group} and contains data from more than one
 Hi-sAFe simulation, the plot will contain multiple lines, colored and labeled by SimulationName. If the data
 contains two more tree ids, the plot will be faceted by tree id.
 }
