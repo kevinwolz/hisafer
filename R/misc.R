@@ -140,3 +140,28 @@ hop_merge <- function(...) {
   class(merged_hop) <- c("hop-group", "hop", class(merged_hop))
   return(merged_hop)
 }
+
+#' Display version numbers of Hi-sAFe and Java
+#' @description Displays the version numbers of Hi-sAFe and Java.
+#' @return Invisibly returns the Hi-sAFe version number
+#' @param capsis.path A character string of the path to the Capsis folder
+#' @export
+#' @examples
+#' \dontrun{
+#' hisafe_info()
+#' }
+hisafe_info <- function(capsis.path = "/Applications/Capsis") {
+  #cat("Capsis Version:",  capsis.version)
+
+  hisafe.id.card <- gsub("//", "/", paste0(capsis.path, "/src/safe/idcard.properties"), fixed = TRUE)
+  hisafe.info <- scan(hisafe.id.card, what = "character", encoding = "latin1", sep = "\n", quiet = TRUE)
+  hisafe.version <- strsplit(grep("Version = ", hisafe.info, value = TRUE), split = " = ", fixed = TRUE)[[1]][2]
+  cat("Hi-sAFe Version:", hisafe.version)
+
+  #cat("\n\nSTICS Version:",   stics.version)
+
+  cat("\n\nJava Version:")
+  system("java -version", wait = TRUE)
+
+  invisible(hisafe.version)
+}
