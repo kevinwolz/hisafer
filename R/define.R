@@ -15,6 +15,14 @@
 #' @param profiles A character vector of Hi-sAFe export profiles to be exported by Hi-sAFe.
 #' If "all" (the default), then all supported profiles will be exported.
 #' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
+#' hisafer comes with three "default" templates than can be used by specificying specific character strings:
+#' \itemize{
+#'  \item{"agroforestry_default"}{ - An agroforestry template based on the calibration simulation of Hi-sAFe using the Restinclieres A2
+#'  walnut-wheat agroforestry plot in Montpellier, France. Spacing is 13m between rows and 8m within rows.}
+#'  \item{"forestry_default"}{ - Walnut plantation forestry at tigher tree spacing of 5m between row and 3m within rows.
+#'  Crop is grass in all cells except for where the tree trunk is. Serves as a forestry control.}
+#'  \item{"monocrop_default"}{ - No trees. A scene with just a single cell of wheat. Serves as a monocrop control.}
+#' }
 #' If "default", then the default template inluded with hisafer (i.e. the files used for Hi-sAFe calibtation) will be used.
 #' @param factorial If \code{FALSE}, the default, then supplied input values are recycled (i.e. such as for default behavior of \code{\link{data.frame}}).
 #' If \code{TRUE}, then a factorial experiment is created, in which an experiment is defined for each possible combination of supplied values.
@@ -54,7 +62,7 @@
 define_hisafe <- function(path,
                           exp.name = "experiment",
                           profiles = "all",
-                          template = "default",
+                          template = "agroforestry_default",
                           factorial = FALSE, ...) {
 
   # FOR TESTING
@@ -63,7 +71,14 @@ define_hisafe <- function(path,
 
   param.list <- list(...)
 
-  if(profiles[1] == "all") profiles <- SUPPORTED.PROFILES$profiles
+  ## Get profile names and check that they are present in template directory
+  available.profiles <- get_available_profiles(get_template_path(template))
+  if(profiles[1] == "all") {
+    profiles <- available.profiles
+  } else if(!all(profiles %in% available.profiles)) {
+    missing.profiles      <- profiles[!(profiles %in% available.profiles)]
+    stop(paste(c("The following profiles are not available:", missing.profiles), collapse = "\n"), call. = FALSE)
+  }
 
   if(factorial) {
     exp.plan <- dplyr::as_tibble(expand.grid(param.list, stringsAsFactors = FALSE))
@@ -77,7 +92,7 @@ define_hisafe <- function(path,
     param.list.filled <- purrr::map2(param.list, reps.to.make, rep.int)
     exp.plan <- dplyr::as_tibble(param.list.filled)
   } else {
-    exp.plan <- dplyr::tibble(SimulationName = "Restinclieres_A2")
+    exp.plan <- dplyr::tibble(SimulationName = "Sim_1")
   }
 
   if(!("SimulationName" %in% names(exp.plan))) exp.plan$SimulationName <- paste0("Sim_", 1:nrow(exp.plan))
@@ -106,6 +121,7 @@ define_hisafe <- function(path,
 #' @param path A character string of the path (relative or absolute) to the directory where the simulation/experiment is to be built.
 #' @param profiles A character vector of Hi-sAFe export profiles to be exported by Hi-sAFe. If "all" (the default), then all supported profiles will be exported.
 #' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
+#' See \code{\link{define_hisafe}} for more details.
 #' @export
 #' @importFrom dplyr %>%
 #' @family hisafe definition functions
@@ -114,10 +130,17 @@ define_hisafe <- function(path,
 #' # To define a Hi-sAFe experiment from a file:
 #' myexp <- define_hisafe_file("./example_exp.csv")
 #' }
-define_hisafe_file <- function(file, path, profiles = "all", template = "default") {
+define_hisafe_file <- function(file, path, profiles = "all", template = "agroforestry_default") {
   exp.plan <- dplyr::as_tibble(read.csv(file, header = TRUE, stringsAsFactors = FALSE))
 
-  if(profiles[1] == "all") profiles <- SUPPORTED.PROFILES$profiles
+  ## Get profile names and check that they are present in template directory
+  available.profiles <- get_available_profiles(get_template_path(template))
+  if(profiles[1] == "all") {
+    profiles <- available.profiles
+  } else if(!all(profiles %in% available.profiles)) {
+    missing.profiles      <- profiles[!(profiles %in% available.profiles)]
+    stop(paste(c("The following profiles are not available:", missing.profiles), collapse = "\n"), call. = FALSE)
+  }
 
   if(!("SimulationName" %in% names(exp.plan))) exp.plan$SimulationName <- paste0("Sim_", 1:nrow(exp.plan))
   exp.plan <- dplyr::select(exp.plan, SimulationName, dplyr::everything())
@@ -139,16 +162,11 @@ define_hisafe_file <- function(file, path, profiles = "all", template = "default
 #' @return Produces errors if issues are found. Otherwise, invisibly returns \code{TRUE}.
 #' @param hip An object of class "hip".
 check_input_values <- function(hip) {
-
-  EXP.PLAN <- hip$exp.plan
-  if(hip$template == "default") {
-    template.path <- clean_path(paste0(system.file("extdata", "hisafe_template", package = "hisafer"), "/"))
-  } else {
-    template.path <- hip$template
-  }
+  EXP.PLAN      <- hip$exp.plan
 
   ## Get template params & names
-  TEMPLATE_PARAMS <- get_template_params(hip$template)
+  template.path   <- get_template_path(hip$template)
+  TEMPLATE_PARAMS <- get_template_params(template.path)
   PARAM_NAMES     <- get_param_names(TEMPLATE_PARAMS)
   PARAM_DEFAULTS  <- get_param_vals(TEMPLATE_PARAMS, "value")
   PARAM_COMMENTED <- get_param_vals(TEMPLATE_PARAMS, "commented")
@@ -346,7 +364,7 @@ check_input_values <- function(hip) {
   get_n_species <- function(x) length(unique(x$species))
   n.tree.species <- purrr::map_dbl(tree.init, get_n_species)
   species.error <- ifelse(any(USED_PARAMS$geometryOption$value == 1 & n.tree.species > 1),
-                         "-- when geompetryOption = 1, there can only be one tree species", "")
+                          "-- when geompetryOption = 1, there can only be one tree species", "")
 
   weed.error <- ifelse(any(USED_PARAMS$treeCropDistance$value > 0 & USED_PARAMS$weededAreaRadius$value > 0),
                        "-- treeCropDistance and weededAreaRadius cannont both be greater than 0", "")

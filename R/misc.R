@@ -12,9 +12,10 @@
 #' hisafe_params("cellWidth") # details of cellWidth parameter
 #' hisafe_params("all")       # details of all parameters
 #' }
-hisafe_params <- function(variable = "names", template = "default", template.tree = "walnut-hybrid") {
+hisafe_params <- function(variable = "names", template = "agroforestry_default") {
 
-  TEMPLATE_PARAMS <- get_template_params(template = template, template.tree = template.tree)
+  template.path   <- default_template_path(template)
+  TEMPLATE_PARAMS <- get_template_params(template.path)
   PARAM_NAMES     <- unlist(get_param_names(TEMPLATE_PARAMS), use.names = FALSE)
   PARAM_DEFAULTS  <- get_param_vals(TEMPLATE_PARAMS, "value")
   PARAM_RANGES    <- get_param_vals(TEMPLATE_PARAMS, "range")
@@ -77,11 +78,10 @@ simu_rename <- function(hop, old.names, new.names) {
   profiles.to.check <- c("annualtree", "annualcrop", "annualplot",
                          "trees", "plot", "climate", "roots",
                          "monthCells", "cells", "voxels",
-                         "inputs", "exp.plan")
+                         "tree.info", "exp.plan", "path")
   profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
 
   for(i in profiles) {
-    #if(!is.factor(hop[[i]]$SimulationName)) hop[[i]]$SimulationName <- factor(hop[[i]]$SimulationName)
     hop[[i]]$SimulationName <- new.names[match(hop[[i]]$SimulationName, old.names)]
   }
 
@@ -97,14 +97,14 @@ simu_rename <- function(hop, old.names, new.names) {
 #' @family hisafe helper functions
 #' @examples
 #' \dontrun{
-#' new_hop <- hop_merge(list(hop1, hop2, hop3))
+#' new_hop <- hop_merge(hop1, hop2, hop3)
 #' }
 hop_merge <- function(...) {
 
   hops <- list(...)
 
   check_class <- function(x) { any(c("hop", "hop-group") %in% class(x)) }
-  if(!all(purrr::map_lgl(hops, check_class))) stop("one or more list elements not of class hop or hop-group", call. = FALSE)
+  if(!all(purrr::map_lgl(hops, check_class))) stop("one or more supplied objects not of class hop", call. = FALSE)
 
   make_names_unique <- function(x, num){ paste0(num, "-", x) }
   old.names <- purrr::map(purrr::map(hops, "exp.plan"), "SimulationName")

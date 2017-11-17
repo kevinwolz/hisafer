@@ -52,7 +52,7 @@ read_hisafe_exp <- function(hip = NULL, path = NULL, profiles = "all", show.prog
       exp.plan <- readr::read_csv(exp.summary.file, col_types = readr::cols())
     } else {
       warning("No experiment summary to read. This experiment was not created with hisafer.", call. = FALSE)
-      exp.plan <- tibble()
+      exp.plan <- dplyr::tibble()
     }
   }
 
@@ -166,7 +166,7 @@ read_hisafe <- function(hip = NULL, simu.name = NULL, path = NULL, profiles = "a
       #mutate(SimulationName = factor(SimulationName))
     } else {
       warning("No simulation inputs summary (hip) to read from simulation directory. This simulation was not created with hisafer.", call. = FALSE)
-      hip <- tibble()
+      hip <- dplyr::tibble()
     }
   }
 
@@ -238,7 +238,7 @@ read_hisafe <- function(hip = NULL, simu.name = NULL, path = NULL, profiles = "a
                  variables  = variables,
                  tree.info  = read_tree_info(path, simu.name),
                  exp.plan   = hip,
-                 path       = dplyr::tibble(path = simu.path))
+                 path       = dplyr::tibble(SimulationName = simu.name, path = simu.path))
 
   class(output) <- c("hop", class(output))
   return(output)

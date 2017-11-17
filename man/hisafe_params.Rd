@@ -4,8 +4,7 @@
 \alias{hisafe_params}
 \title{Display supported Hi-sAFe input parameters}
 \usage{
-hisafe_params(variable = "names", template = "default",
-  template.tree = "walnut-hybrid")
+hisafe_params(variable = "names", template = "agroforestry_default")
 }
 \arguments{
 \item{variable}{If "names", the default, then just the names of supported Hi-sAFe parameters is printed to the console.

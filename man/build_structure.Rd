@@ -15,8 +15,7 @@ build_structure(exp.plan, exp.plan.to.write, path, profiles, template)
 
 \item{profiles}{A character vector of export profiles the simulation to export.}
 
-\item{template}{A character string of the path to the Hi-sAFe directory structure/files to use as a template.
-If "default", then the default template inluded with hisafer (i.e. the files used for Hi-sAFe calibtation) will be used.}
+\item{template}{A character string of the path to the Hi-sAFe directory structure/files to use as a template (or one of the strings signaling a default template)}
 }
 \value{
 Invisibly returns a list containing the original hip object and supplied path.

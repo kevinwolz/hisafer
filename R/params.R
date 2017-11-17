@@ -226,11 +226,11 @@ edit_param_element <- function(param.list, variable, value) {
 #' Read all template parameters from sim, pld, and tree files
 #' @description Reads all template parameter values and constraints from sim, pld, and tree files
 #' @return A list containing all parameter values and constraints.
-#' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
-get_template_params <- function(template) {
-  if(template == "default") template <- clean_path(paste0(system.file("extdata", "hisafe_template", package = "hisafer"), "/"))
+#' @param template.path A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
+get_template_params <- function(template.path) {
 
-  avail.template.trees <- unlist(purrr::map(strsplit(list.files(paste0(template, "treeSpecies")), split = ".", fixed = TRUE), 1))
+  ## Determine which tree species to use from within the template for the .tree params
+  avail.template.trees <- unlist(purrr::map(strsplit(list.files(paste0(template.path, "treeSpecies")), split = ".", fixed = TRUE), 1))
   if(length(avail.template.trees) == 1) {
     template.tree <- avail.template.trees
   } else if("walnut-hybrid" %in% avail.template.trees) {
@@ -239,9 +239,9 @@ get_template_params <- function(template) {
     template.tree <- avail.template.trees[1]
   }
 
-  sim.file  <- clean_path(list.files(template, ".sim", full.names = TRUE))
-  pld.file  <- list.files(clean_path(paste0(template, "/plotDescription")), ".pld", full.names = TRUE)
-  tree.file <- list.files(clean_path(paste0(template, "/treeSpecies")), paste0(template.tree, ".tree"), full.names = TRUE)
+  sim.file  <- clean_path(list.files(template.path, ".sim", full.names = TRUE))
+  pld.file  <- list.files(clean_path(paste0(template.path, "/plotDescription")), ".pld", full.names = TRUE)
+  tree.file <- list.files(clean_path(paste0(template.path, "/treeSpecies")), paste0(template.tree, ".tree"), full.names = TRUE)
 
   sim.params  <- read_param_file(sim.file)
   pld.params  <- read_param_file(pld.file)

@@ -5,7 +5,7 @@
 \title{Define a Hi-sAFe experiment}
 \usage{
 define_hisafe(path, exp.name = "experiment", profiles = "all",
-  template = "default", factorial = FALSE, ...)
+  template = "agroforestry_default", factorial = FALSE, ...)
 }
 \arguments{
 \item{path}{A character string of the path (relative or absolute) to the directory where the simulation/experiment is to be built.}
@@ -16,6 +16,14 @@ define_hisafe(path, exp.name = "experiment", profiles = "all",
 If "all" (the default), then all supported profiles will be exported.}
 
 \item{template}{A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
+hisafer comes with three "default" templates than can be used by specificying specific character strings:
+\itemize{
+ \item{"agroforestry_default"}{ - An agroforestry template based on the calibration simulation of Hi-sAFe using the Restinclieres A2
+ walnut-wheat agroforestry plot in Montpellier, France. Spacing is 13m between rows and 8m within rows.}
+ \item{"forestry_default"}{ - Walnut plantation forestry at tigher tree spacing of 5m between row and 3m within rows.
+ Crop is grass in all cells except for where the tree trunk is. Serves as a forestry control.}
+ \item{"monocrop_default"}{ - No trees. A scene with just a single cell of wheat. Serves as a monocrop control.}
+}
 If "default", then the default template inluded with hisafer (i.e. the files used for Hi-sAFe calibtation) will be used.}
 
 \item{factorial}{If \code{FALSE}, the default, then supplied input values are recycled (i.e. such as for default behavior of \code{\link{data.frame}}).

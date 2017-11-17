@@ -20,19 +20,15 @@
 #' build_hisafe(myexp)
 #' }
 build_hisafe <- function(hip) {
-
-  ## Check if data has class hip
   if(!("hip" %in% class(hip))) stop("data not of class hip", call. = FALSE)
 
   EXP.PLAN <- hip$exp.plan
-  profiles <- if(hip$profiles[1] == "all") profiles <- SUPPORTED.PROFILES$profiles else profiles <- hip$profiles
-  path     <- hip$path
-  dir.create(path, showWarnings = FALSE, recursive = TRUE)
+  dir.create(hip$path, showWarnings = FALSE, recursive = TRUE)
 
-  if(nrow(EXP.PLAN) > 1) exp.name <- tail(strsplit(path, split = "/", fixed = TRUE)[[1]], 1)
+  if(nrow(EXP.PLAN) > 1) exp.name <- tail(strsplit(hip$path, split = "/", fixed = TRUE)[[1]], 1)
 
   for(i in 1:nrow(EXP.PLAN)) {
-    simu.path <- clean_path(paste0(path, "/", EXP.PLAN$SimulationName[i]))
+    simu.path <- clean_path(paste0(hip$path, "/", EXP.PLAN$SimulationName[i]))
     if(dir.exists(simu.path)) stop(paste0("A simulation with the name <", EXP.PLAN$SimulationName[i], "> already exisits in this location."), call. = FALSE)
     dir.create(simu.path, showWarnings = FALSE)
   }
@@ -65,15 +61,20 @@ build_hisafe <- function(hip) {
       tibble.out <- purrr::map2_df(as.list(EXP.PLAN[i])[[1]], EXP.PLAN$SimulationName, add_sim_names)
 
       if(nrow(EXP.PLAN) > 1) {
-        readr::write_csv(tibble.out, clean_path(paste0(path, "/", exp.name, "_", gsub("\\.", "_", i), "_summary.csv")))
+        readr::write_csv(tibble.out, clean_path(paste0(hip$path, "/",
+                                                       exp.name, "_",
+                                                       gsub("\\.", "_", i), "_summary.csv")))
       } else {
-        readr::write_csv(tibble.out, clean_path(paste0(path, "/", EXP.PLAN$SimulationName, "/", EXP.PLAN$SimulationName, "_", gsub("\\.", "_", i), "_summary.csv")))
+        readr::write_csv(tibble.out, clean_path(paste0(hip$path, "/",
+                                                       EXP.PLAN$SimulationName, "/",
+                                                       EXP.PLAN$SimulationName, "_",
+                                                       gsub("\\.", "_", i), "_summary.csv")))
       }
     }
   } else {
     exp.plan.to.write <- EXP.PLAN
   }
-  if(nrow(EXP.PLAN) > 1) readr::write_csv(exp.plan.to.write, clean_path(paste0(path, "/", exp.name, "_exp_summary.csv")))
+  if(nrow(EXP.PLAN) > 1) readr::write_csv(exp.plan.to.write, clean_path(paste0(hip$path, "/", exp.name, "_exp_summary.csv")))
 
   ## build folder tree & input files for each simulation in experiment
   create_tibble <- function(x) {
@@ -100,8 +101,8 @@ build_hisafe <- function(hip) {
   purrr::walk2(hip.list,
                hip.to.write.list,
                build_structure,
-               path = path,
-               profiles = profiles,
+               path     = hip$path,
+               profiles = hip$profiles,
                template = hip$template)
 
   purrr::walk2(as.list(unique(EXP.PLAN$SimulationName)),
@@ -119,24 +120,18 @@ build_hisafe <- function(hip) {
 #' @param exp.plan.to.write Same as \code{exp.plan} except that complex list/tibble elements are simplified to a number.
 #' @param path A character string of the path to the simulation folder.
 #' @param profiles A character vector of export profiles the simulation to export.
-#' @param template A character string of the path to the Hi-sAFe directory structure/files to use as a template.
-#' If "default", then the default template inluded with hisafer (i.e. the files used for Hi-sAFe calibtation) will be used.
+#' @param template A character string of the path to the Hi-sAFe directory structure/files to use as a template (or one of the strings signaling a default template)
 build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, template) {
 
-  if(template == "default") {
-    HISAFE.TEMPLATE <- clean_path(paste0(system.file("extdata", "hisafe_template", package = "hisafer"), "/"))
-  } else {
-    HISAFE.TEMPLATE <- clean_path(paste0(template, "/"))
-  }
-
-  TEMPLATE_PARAMS <- get_template_params(template)
+  template.path   <- default_template_path(template)
+  TEMPLATE_PARAMS <- get_template_params(template.path)
   PARAM_NAMES     <- get_param_names(TEMPLATE_PARAMS)
   PARAM_DEFAULTS  <- get_param_vals(TEMPLATE_PARAMS, "value")
 
   ## Copy over folder structure & template files from Hi-sAFe template path
   ## Any newly built files below will overwrite these files
   simu.path <- clean_path(paste0(path, "/", exp.plan$SimulationName))
-  system(paste("cp -r", HISAFE.TEMPLATE, simu.path))
+  system(paste("cp -r", template.path, simu.path))
 
   ## Write out experiment summary
   readr::write_csv(exp.plan.to.write, clean_path(paste0(simu.path, "/", exp.plan$SimulationName, "_simulation_summary.csv")))
@@ -198,13 +193,6 @@ build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, templat
   remove.tree   <- existing.tree[!(existing.tree %in% required.tree)]
   dum <- purrr::map(remove.tree, file.remove)
 
-  ## Remove unused export profiles files from exportProfiles
-  if(!all(profiles %in% SUPPORTED.PROFILES$profiles)) {
-    missing.profiles      <- profiles[!(profiles %in% SUPPORTED.PROFILES$profiles)]
-    missing.profile.error <- paste(c("The following profiles are not available:", missing.profiles), collapse = "\n")
-    stop(missing.profile.error)
-  }
-
   existing.EP <- list.files(paste0(simu.path, "/exportParameters"), pattern = "\\.pro", full.names = TRUE)
   required.EP <- paste0(simu.path, "/exportParameters/", profiles, ".pro")
   remove.EP   <- existing.EP[!(existing.EP %in% required.EP)]
@@ -220,7 +208,13 @@ build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, templat
   pld.path <- paste0(simu.path, "/plotDescription/template.pld")
   pld <- read_param_file(pld.path)
   pld.new <- edit_param_file(pld, dplyr::select(exp.plan, pld.params.to.edit)) %>%
-    edit_param_element("nbTrees", num.trees)
+    edit_param_element("nbTrees", exp.plan$SimulationName) %>%
+    edit_param_element("country", exp.plan$SimulationName) %>%
+    edit_param_element("townShip", exp.plan$SimulationName) %>%
+    edit_param_element("site", exp.plan$SimulationName) %>%
+    edit_param_element("name", exp.plan$SimulationName) %>%
+    edit_param_element("longitude", "NA") %>%
+    edit_param_element("elevation", "NA")
   write_param_file(pld.new, pld.path)
   dum <- file.rename(pld.path, paste0(simu.path, "/plotDescription/", exp.plan$SimulationName, ".pld"))
 
@@ -230,7 +224,7 @@ build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, templat
   sim.new <- edit_param_file(sim, dplyr::select(exp.plan, sim.params.to.edit)) %>%
     edit_param_element("pldFileName", paste0(exp.plan$SimulationName, ".pld")) %>%
     edit_param_element("weatherFile", wth.name) %>%
-    edit_param_element("profileNames", paste0(SUPPORTED.PROFILES$profiles[SUPPORTED.PROFILES$profiles %in% profiles], collapse = ",")) %>%
+    edit_param_element("profileNames", paste0(profiles, collapse = ",")) %>%
     edit_param_element("exportFrequencies", paste0(SUPPORTED.PROFILES$freqs[SUPPORTED.PROFILES$profiles %in% profiles], collapse = ","))
   write_param_file(sim.new, sim.path)
   dum <- file.rename(sim.path, paste0(simu.path, "/", exp.plan$SimulationName, ".sim"))

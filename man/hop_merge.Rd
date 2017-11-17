@@ -17,7 +17,7 @@ Merges multiple hop objects, renaming simulation names if there are duplicates
 }
 \examples{
 \dontrun{
-new_hop <- hop_merge(list(hop1, hop2, hop3))
+new_hop <- hop_merge(hop1, hop2, hop3)
 }
 }
 \seealso{

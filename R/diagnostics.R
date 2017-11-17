@@ -42,7 +42,7 @@ diag_hisafe_ts <- function(hop,
   daily.profiles  <- c("trees", "plot", "climate")
 
   ## Check for data class and if profile exists
-  if(!any(c("hop", "hop-group") %in% class(hop)))        stop("data not of class hop or hop-group", call. = FALSE)
+  if(!any(c("hop", "hop-group") %in% class(hop)))        stop("hop argument not of class hop", call. = FALSE)
   if(!(profile %in% c(annual.profiles, daily.profiles))) stop("supplied profile is not supported", call. = FALSE)
   if(nrow(hop[[profile]]) == 0)                          stop(paste("no data from", profile, "profile found"), call. = FALSE)
 
@@ -110,7 +110,7 @@ diag_hisafe_ts <- function(hop,
 diag_hisafe_monthcells <- function(hop, output.path = NULL) {
 
   ## Check for data class and if profile exists
-  if(!any(c("hop", "hop-group") %in% class(hop))) stop("data not of class hop or hop-group", call. = FALSE)
+  if(!any(c("hop", "hop-group") %in% class(hop))) stop("hop argument not of class hop", call. = FALSE)
   if(nrow(hop$monthCells) == 0)                   stop("no data from monthCells profile found", call. = FALSE)
 
   ## Create output directories

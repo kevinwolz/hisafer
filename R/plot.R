@@ -44,7 +44,7 @@ plot_hisafe_ts <- function(hop,
   daily.profiles  <- c("trees", "plot", "climate")
 
   ## Check for data class and if profile exists
-  if(!any(c("hop", "hop-group") %in% class(hop)))        stop("data not of class hop or hop-group", call. = FALSE)
+  if(!any(c("hop", "hop-group") %in% class(hop)))        stop("hop argument not of class hop", call. = FALSE)
   if(!(profile %in% c(annual.profiles, daily.profiles))) stop("supplied profile is not supported", call. = FALSE)
   if(nrow(hop[[profile]]) == 0)                          stop(paste("no data from", profile, "profile found"), call. = FALSE)
 
@@ -179,7 +179,7 @@ plot_hisafe_monthcells <- function(hop,
                                    months    = 6) {
 
   ## Check for data class and if profile exists
-  if(!any(c("hop", "hop-group") %in% class(hop))) stop("data not of class hop or hop-group", call. = FALSE)
+  if(!any(c("hop", "hop-group") %in% class(hop))) stop("hop argument not of class hop", call. = FALSE)
   if(nrow(hop$monthCells) == 0)                   stop("no data from monthCells profile found", call. = FALSE)
 
   ## Convert "all" arguements to actual values
@@ -298,7 +298,7 @@ plot_hisafe_monthcells <- function(hop,
 plot_hisafe_cells <- function(hop, variable, dates) {
 
   ## Check for data class and if profile exists
-  if(!any(c("hop", "hop-group") %in% class(hop))) stop("data not of class hop or hop-group", call. = FALSE)
+  if(!any(c("hop", "hop-group") %in% class(hop))) stop("hop argument not of class hop", call. = FALSE)
   if(nrow(hop$cells) == 0)                        stop("no data from cells profile found", call. = FALSE)
 
   ## Exract units of supplied variable from the "variables" slot
@@ -388,7 +388,7 @@ plot_hisafe_cells <- function(hop, variable, dates) {
 plot_hisafe_voxels <- function(hop, variable, dates) {
 
   ## Check for data class and if profile exists
-  if(!any(c("hop", "hop-group") %in% class(hop))) stop("data not of class hop or hop-group", call. = FALSE)
+  if(!any(c("hop", "hop-group") %in% class(hop))) stop("hop argument not of class hop", call. = FALSE)
   if(nrow(hop$voxels) == 0)                       stop("no data from voxels profile found", call. = FALSE)
 
   if("hop-group" %in% class(hop) & length(dates) > 1) stop("cannot supply more than one date for object of class hop-group", call. = FALSE)
