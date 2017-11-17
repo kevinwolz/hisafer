@@ -28,6 +28,7 @@ Returns a ggplot object.
 }
 \description{
 Plots a tile plot of a single Hi-sAFe monthCells output variable.
+If the hop objectcontains the "trees" profile with crown diameter variables, the tree locations and crown outlines are also drawn.
 }
 \details{
 This function is very picky! You can only facet by two of the three manipulable variables: SimulationName, Year, Month.
@@ -57,6 +58,7 @@ ggplot2::ggsave("tiled_monthDirectParIncident.png", tile.plot2)
 }
 \seealso{
 Other hisafe plot functions: \code{\link{plot_hisafe_cells}},
+  \code{\link{plot_hisafe_scene}},
   \code{\link{plot_hisafe_ts}},
   \code{\link{plot_hisafe_voxels}}
 }

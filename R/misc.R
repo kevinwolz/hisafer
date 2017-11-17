@@ -153,7 +153,7 @@ hop_merge <- function(...) {
 hisafe_info <- function(capsis.path = "/Applications/Capsis") {
   #cat("Capsis Version:",  capsis.version)
 
-  hisafe.id.card <- gsub("//", "/", paste0(capsis.path, "/src/safe/idcard.properties"), fixed = TRUE)
+  hisafe.id.card <- clean_path(paste0(capsis.path, "/src/safe/idcard.properties"))
   hisafe.info <- scan(hisafe.id.card, what = "character", encoding = "latin1", sep = "\n", quiet = TRUE)
   hisafe.version <- strsplit(grep("Version = ", hisafe.info, value = TRUE), split = " = ", fixed = TRUE)[[1]][2]
   cat("Hi-sAFe Version:", hisafe.version)

@@ -43,7 +43,7 @@ run_hisafe_exp <- function(hip         = NULL,
     if(length(sims.to.run) == 0) stop("path does not contain any simulation directories")
     simu.names  <- purrr::map_chr(sims.to.run, function(x) tail(strsplit(x, "/")[[1]], n = 1))
   } else {
-    sims.to.run <- gsub("//", "/", paste0(path, "//", simu.names))
+    sims.to.run <- clean_path(paste0(path, "//", simu.names))
     if(!all(dir.exists(sims.to.run))) {
       missing.dirs  <- simu.names[!dir.exists(sims.to.run)]
       missing.error <- paste(c("The following simulations do not exist:",
@@ -114,7 +114,7 @@ run_hisafe <- function(hip         = NULL,
   if(is.null(path)) path <- hip$path
   if(is.null(simu.name)) simu.name <- hip$exp.plan$SimulationName
 
-  sim.path <- gsub("//", "/", paste0(path, "/", simu.name, "/"))
+  sim.path <- clean_path(paste0(path, "/", simu.name, "/"))
 
   if(!dir.exists(sim.path)) stop(paste("The simulation", simu.name, "does not exist."), call. = FALSE)
 

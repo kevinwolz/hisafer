@@ -31,6 +31,12 @@ build_hisafe <- function(hip) {
 
   if(nrow(EXP.PLAN) > 1) exp.name <- tail(strsplit(path, split = "/", fixed = TRUE)[[1]], 1)
 
+  for(i in 1:nrow(EXP.PLAN)) {
+    simu.path <- clean_path(paste0(path, "/", EXP.PLAN$SimulationName[i]))
+    if(dir.exists(simu.path)) stop(paste0("A simulation with the name <", EXP.PLAN$SimulationName[i], "> already exisits in this location."), call. = FALSE)
+    dir.create(simu.path, showWarnings = FALSE)
+  }
+
   ## Deal with tibble/list cols
   tibble.params <- c("tree.initialization", "root.initialization", "layers", "layer.initialiation")
   isnt_tibble_col <- function(x) !("tbl" %in% class(x[[1]]))
@@ -59,15 +65,15 @@ build_hisafe <- function(hip) {
       tibble.out <- purrr::map2_df(as.list(EXP.PLAN[i])[[1]], EXP.PLAN$SimulationName, add_sim_names)
 
       if(nrow(EXP.PLAN) > 1) {
-        readr::write_csv(tibble.out, gsub("//", "/", paste0(path, "/", exp.name, "_", gsub("\\.", "_", i), "_summary.csv")))
+        readr::write_csv(tibble.out, clean_path(paste0(path, "/", exp.name, "_", gsub("\\.", "_", i), "_summary.csv")))
       } else {
-        readr::write_csv(tibble.out, gsub("//", "/", paste0(path, "/", EXP.PLAN$SimulationName, "_", gsub("\\.", "_", i), "_summary.csv")))
+        readr::write_csv(tibble.out, clean_path(paste0(path, "/", EXP.PLAN$SimulationName, "/", EXP.PLAN$SimulationName, "_", gsub("\\.", "_", i), "_summary.csv")))
       }
     }
   } else {
     exp.plan.to.write <- EXP.PLAN
   }
-  if(nrow(EXP.PLAN) > 1) readr::write_csv(exp.plan.to.write, gsub("//", "/", paste0(path, "/", exp.name, "_exp_summary.csv")))
+  if(nrow(EXP.PLAN) > 1) readr::write_csv(exp.plan.to.write, clean_path(paste0(path, "/", exp.name, "_exp_summary.csv")))
 
   ## build folder tree & input files for each simulation in experiment
   create_tibble <- function(x) {
@@ -82,6 +88,7 @@ build_hisafe <- function(hip) {
     }
     return(dplyr::as_tibble(y))
   }
+
   hip.list <- as.list(EXP.PLAN) %>%
     purrr::pmap(list) %>%
     purrr::map(create_tibble)
@@ -96,6 +103,11 @@ build_hisafe <- function(hip) {
                path = path,
                profiles = profiles,
                template = hip$template)
+
+  purrr::walk2(as.list(unique(EXP.PLAN$SimulationName)),
+               as.list(clean_path(paste0(hip$path, "/", EXP.PLAN$SimulationName))),
+               plot_hisafe_scene,
+               hip = hip)
 
   invisible(hip)
 }
@@ -112,9 +124,9 @@ build_hisafe <- function(hip) {
 build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, template) {
 
   if(template == "default") {
-    HISAFE.TEMPLATE <- gsub("//", "/", paste0(system.file("extdata", "hisafe_template", package = "hisafer"), "/"))
+    HISAFE.TEMPLATE <- clean_path(paste0(system.file("extdata", "hisafe_template", package = "hisafer"), "/"))
   } else {
-    HISAFE.TEMPLATE <- gsub("//", "/", paste0(template, "/"))
+    HISAFE.TEMPLATE <- clean_path(paste0(template, "/"))
   }
 
   TEMPLATE_PARAMS <- get_template_params(template)
@@ -123,60 +135,64 @@ build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, templat
 
   ## Copy over folder structure & template files from Hi-sAFe template path
   ## Any newly built files below will overwrite these files
-  simu.path <- gsub("//", "/", paste0(path, "/", exp.plan$SimulationName))
-  if(dir.exists(simu.path)) stop(paste0("A simulation with the name <", exp.plan$SimulationName, "> already exisits in this location."), call. = FALSE)
+  simu.path <- clean_path(paste0(path, "/", exp.plan$SimulationName))
   system(paste("cp -r", HISAFE.TEMPLATE, simu.path))
 
   ## Write out experiment summary
-  readr::write_csv(exp.plan.to.write, gsub("//", "/", paste0(simu.path, "/", exp.plan$SimulationName, "_simu_summary.csv")))
+  readr::write_csv(exp.plan.to.write, clean_path(paste0(simu.path, "/", exp.plan$SimulationName, "_simulation_summary.csv")))
 
   ## Move weather file if one was provided
   wth.name <- "weather.wth"
-  if(!is.null(exp.plan$weatherFile)) {
+  if("weatherFile" %in% names(exp.plan)) {
     wth.name <- tail(strsplit(exp.plan$weatherFile, split = "/", fixed = TRUE)[[1]], 1)
     dum <- file.remove(paste0(simu.path, "/weather/weather.wth"))
     dum <- file.copy(exp.plan$weatherFile, paste0(simu.path, "/weather/", wth.name))
   }
 
   ## Remove unused .plt files from cropSpecies
-  if(!is.null(exp.plan$mainCropSpecies)){
+  if("mainCropSpecies" %in% names(exp.plan)){
     main.crop.used <- exp.plan$mainCropSpecies
   } else {
     main.crop.used <- PARAM_DEFAULTS$mainCropSpecies
   }
-  if(!is.null(exp.plan$interCropSpecies)){
+  if("interCropSpecies" %in% names(exp.plan)){
     inter.crop.used <- exp.plan$interCropSpecies
   } else {
     inter.crop.used <- PARAM_DEFAULTS$interCropSpecies
   }
-  existing.plt    <- list.files(paste0(simu.path, "/cropSpecies"), full.names = TRUE)
-  required.plt    <- paste0(simu.path, "/cropSpecies/", c(main.crop.used, inter.crop.used))
-  remove.plt      <- existing.plt[!(existing.plt %in% required.plt)]
+  existing.plt <- list.files(paste0(simu.path, "/cropSpecies"), full.names = TRUE)
+  required.plt <- paste0(simu.path, "/cropSpecies/", c(main.crop.used, inter.crop.used))
+  remove.plt   <- existing.plt[!(existing.plt %in% required.plt)]
   dum <- purrr::map(remove.plt, file.remove)
 
   ## Remove unused .tec files from itk
-  if(!is.null(exp.plan$mainCropItk)){
+  if("mainCropItk" %in% names(exp.plan)){
     main.itk.used <- exp.plan$mainCropItk
   } else {
     main.itk.used <- PARAM_DEFAULTS$mainCropItk
   }
-  if(!is.null(exp.plan$interCropItk)){
+  if("interCropItk" %in% names(exp.plan)){
     inter.itk.used <- exp.plan$interCropItk
   } else {
     inter.itk.used <- PARAM_DEFAULTS$interCropItk
   }
-  existing.itk   <- list.files(paste0(simu.path, "/itk"), full.names = TRUE)
-  required.itk   <- paste0(simu.path, "/itk/", c(main.itk.used, inter.itk.used))
-  remove.itk     <- existing.itk[!(existing.itk %in% required.itk)]
+  existing.itk <- list.files(paste0(simu.path, "/itk"), full.names = TRUE)
+  required.itk <- paste0(simu.path, "/itk/", c(main.itk.used, inter.itk.used))
+  remove.itk   <- existing.itk[!(existing.itk %in% required.itk)]
   dum <- purrr::map(remove.itk, file.remove)
 
   ## Remove unused .tree files from treeSpecies
-  if(!is.null(exp.plan$tree.initialization)){
+  if("tree.initialization" %in% names(exp.plan)){
     trees.used <- exp.plan$tree.initialization[[1]]$species
   } else {
     trees.used <- PARAM_DEFAULTS$tree.initialization$species
   }
-  num.trees <- length(trees.used)
+  if("nbTrees" %in% names(exp.plan)){
+    num.trees <- exp.plan$nbTrees
+  } else {
+    num.trees <- length(trees.used)
+  }
+
   existing.tree <- list.files(paste0(simu.path, "/treeSpecies"), full.names = TRUE)
   required.tree <- paste0(simu.path, "/treeSpecies/", trees.used, ".tree")
   remove.tree   <- existing.tree[!(existing.tree %in% required.tree)]

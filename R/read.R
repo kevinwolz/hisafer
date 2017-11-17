@@ -47,7 +47,7 @@ read_hisafe_exp <- function(hip = NULL, path = NULL, profiles = "all", show.prog
     path     <- hip$path
   } else {
     exp.name <- tail(strsplit(path, "/")[[1]], n = 1)
-    exp.summary.file <- gsub("//", "/", paste0(path, "/", exp.name, "_exp_summary.csv"))
+    exp.summary.file <- clean_path(paste0(path, "/", exp.name, "_exp_summary.csv"))
     if(file.exists(exp.summary.file)) {
       exp.plan <- readr::read_csv(exp.summary.file, col_types = readr::cols())
     } else {
@@ -159,10 +159,10 @@ read_hisafe <- function(hip = NULL, simu.name = NULL, path = NULL, profiles = "a
     simu.name <- hip$exp.plan$SimulationName
   } else {
     #cat("\nreading:  simulation inputs (hip)")
-    simu.path <- gsub("//", "/", paste0(path, "/" , simu.name))
-    simu.summary.file <- paste0(simu.path, "/", simu.name, "_simu_summary.csv")
+    simu.path <- clean_path(paste0(path, "/" , simu.name))
+    simu.summary.file <- paste0(simu.path, "/", simu.name, "_simulation_summary.csv")
     if(file.exists(simu.summary.file)){
-      hip <- readr::read_csv(paste0(simu.path, "/", simu.name, "_simu_summary.csv"), col_types = readr::cols()) #%>%
+      hip <- readr::read_csv(paste0(simu.path, "/", simu.name, "_simulation_summary.csv"), col_types = readr::cols()) #%>%
       #mutate(SimulationName = factor(SimulationName))
     } else {
       warning("No simulation inputs summary (hip) to read from simulation directory. This simulation was not created with hisafer.", call. = FALSE)
@@ -253,7 +253,7 @@ read_hisafe <- function(hip = NULL, simu.name = NULL, path = NULL, profiles = "a
 #' @export
 read_hisafe_example <- function(profiles = c("annualplot", "annualtree", "annualcrop", "plot", "trees", "climate", "monthCells"),
                                 show.progress = TRUE) {
-  hop <- read_hisafe_exp(path = gsub("//", "/", paste0(system.file("extdata", "example_output", package = "hisafer"), "/")),
+  hop <- read_hisafe_exp(path = clean_path(paste0(system.file("extdata", "example_output", package = "hisafer"), "/")),
                          profiles = profiles,
                          show.progress = show.progress)
   return(hop)
@@ -331,7 +331,7 @@ read_profile <- function(profile, path, show.progress = TRUE) {
 #' @param simu.name A character string of the simualation name.
 #' @importFrom dplyr %>%
 read_tree_info <- function(path, simu.name) {
-  pld <- read_param_file(gsub("//", "/", paste0(path, "/", simu.name, "/plotDescription/", simu.name, ".pld"), fixed = TRUE))
+  pld <- read_param_file(clean_path(paste0(path, "/", simu.name, "/plotDescription/", simu.name, ".pld")))
   tree.info <- pld$TREE_INITIALIZATION$tree.initialization$value %>%
     dplyr::mutate(x = treeX, y = treeY) %>%
     dplyr::select(species, x, y)

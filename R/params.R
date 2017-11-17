@@ -19,7 +19,7 @@ read_param_file <- function(path) {
   read_element_table <- function(sim, i, titles, table.names) {
     if(any(which(titles) > i)) {
       next.header <- which(titles)[which(titles) > i][[1]]
-      table.elements <- strsplit(gsub("^\\s+|\\s+$", "", sim[i:(next.header - 1)]), split = "\t")
+      table.elements <- strsplit(remove_whitespace(sim[i:(next.header - 1)]), split = "\t")
     } else {
       table.elements <- strsplit(sim[i], split = "\t")
     }
@@ -45,7 +45,7 @@ read_param_file <- function(path) {
     if(titles[i]){
       list.title <- gsub(pattern = " ",
                          replacement = "_",
-                         gsub("^\\s+|\\s+$", "", gsub(pattern = "#", replacement = "", sim[i]))) #on enleve les tabs, leading et trailing blanks
+                         remove_whitespace(gsub(pattern = "#", replacement = "", sim[i]))) #on enleve les tabs, leading et trailing blanks
       toto <- list(c())
       names(toto) <- list.title
       new.sim <- c(new.sim, toto)
@@ -81,16 +81,16 @@ read_param_file <- function(path) {
       line.text <- ifelse(comment[i], substr(sim[i], start = 2, stop = 10000), sim[i]) # remove first # only (definitions possible after another #)
 
       element.name  <- unlist(lapply(strsplit(line.text, split = "=", fixed = TRUE), "[[", 1))
-      element.name  <- gsub("^\\s+|\\s+$", "", element.name) # remove tabs, leading, and trailing blanks
+      element.name  <- remove_whitespace(element.name) # remove tabs, leading, and trailing blanks
 
       element.vals    <- purrr::map_chr(strsplit(line.text, split = "=", fixed = TRUE), 2)
-      element.vals    <- strsplit(element.vals, split = "#", fixed = TRUE)[[1]]
+      element.vals    <- remove_whitespace(strsplit(element.vals, split = "#", fixed = TRUE)[[1]])
 
-      element.value   <- gsub("^\\s+|\\s+$", "", element.vals[1])
+      element.value   <- element.vals[1]
       element.value   <- strsplit(element.value, split = ",")[[1]]
 
       if(length(element.vals) > 1) {
-        value.range <- gsub("^\\s+|\\s+$", "", element.vals[2])
+        value.range <- element.vals[2]
 
         if(grepl("(", value.range, fixed = TRUE)) {
           value.type <- "continuous"
@@ -103,14 +103,17 @@ read_param_file <- function(path) {
         if(value.range == "NA") {
           value.range <- NA
         } else {
-          value.range <- as.numeric(strsplit(gsub("\\[|\\]|\\(|\\)", "", value.range), split = ",")[[1]])
+          value.range <- strsplit(gsub("\\[|\\]|\\(|\\)", "", value.range), split = ",")[[1]]
+          value.range[value.range == "NA"] <- NA
+          value.range <- as.numeric(value.range)
         }
 
-        value.accepted <- gsub("^\\s+|\\s+$", "", element.vals[3])
+        value.accepted <- element.vals[3]
         if(value.accepted == "NA") {
             value.accepted <- NA
           } else {
             value.accepted <- strsplit(gsub("\\[|\\]|\\(|\\)", "", value.accepted), split = ",")[[1]]
+            value.accepted[value.accepted == "NA"] <- NA
           }
       } else {
         value.range    <- c(NA, NA)
@@ -225,7 +228,7 @@ edit_param_element <- function(param.list, variable, value) {
 #' @return A list containing all parameter values and constraints.
 #' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
 get_template_params <- function(template) {
-  if(template == "default") template <- gsub("//", "/", paste0(system.file("extdata", "hisafe_template", package = "hisafer"), "/"))
+  if(template == "default") template <- clean_path(paste0(system.file("extdata", "hisafe_template", package = "hisafer"), "/"))
 
   avail.template.trees <- unlist(purrr::map(strsplit(list.files(paste0(template, "treeSpecies")), split = ".", fixed = TRUE), 1))
   if(length(avail.template.trees) == 1) {
@@ -236,9 +239,9 @@ get_template_params <- function(template) {
     template.tree <- avail.template.trees[1]
   }
 
-  sim.file  <- gsub("//", "/", list.files(template, ".sim", full.names = TRUE))
-  pld.file  <- list.files(gsub("//", "/", paste0(template, "/plotDescription")), ".pld", full.names = TRUE)
-  tree.file <- list.files(gsub("//", "/", paste0(template, "/treeSpecies")), paste0(template.tree, ".tree"), full.names = TRUE)
+  sim.file  <- clean_path(list.files(template, ".sim", full.names = TRUE))
+  pld.file  <- list.files(clean_path(paste0(template, "/plotDescription")), ".pld", full.names = TRUE)
+  tree.file <- list.files(clean_path(paste0(template, "/treeSpecies")), paste0(template.tree, ".tree"), full.names = TRUE)
 
   sim.params  <- read_param_file(sim.file)
   pld.params  <- read_param_file(pld.file)
@@ -274,13 +277,28 @@ get_param_vals <- function(x, type) {
 #' @description Gets the parameter actually used (i.e. the default or the defined)
 #' @return The value of the parameter
 #' @param variable A character string of the name of the variable to check.
-#' @param hip A "hip object
+#' @param hip A "hip" object
 #' @param template.defaults A list containing the default values for all parameters.
-get_used_param <- function(variable, hip, template.defaults) {
-  if(!is.null(hip$exp.plan[[variable]])){
-    out <- hip$exp.plan[[variable]]
+get_used_param <- function(variable, exp.plan, template.defaults, template.commented) {
+  if(variable %in% names(exp.plan)){
+    val <- exp.plan[[variable]]
+    exp <- TRUE
+    if("list" %in% class(val)) {
+      val <- val[[1]]
+    }
   } else {
-    out <- template.defaults[[variable]]
+    commented <- template.commented[[variable]]
+    if(commented) {
+      val <- NA
+      exp <- FALSE
+    } else {
+      val <- template.defaults[[variable]]
+      exp <- FALSE
+      if(substr(as.character(val)[1], 1, 1) %in% as.character(0:9)){
+        val <- as.numeric(val)
+      }
+    }
   }
+  out <- list(value = val, exp.plan = exp)
   return(out)
 }

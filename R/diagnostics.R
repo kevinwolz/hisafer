@@ -48,11 +48,11 @@ diag_hisafe_ts <- function(hop,
 
   ## Create output directory
   if(is.null(output.path) & "hop-group" %in% class(hop)) {
-    output.path <- gsub("//", "/", paste0(hop$exp.path, "/diagnostics"))
+    output.path <- clean_path(paste0(hop$exp.path, "/diagnostics"))
   } else if(is.null(output.path) & !("hop-group" %in% class(hop))){
-    output.path <- gsub("//", "/", paste0(hop$path, "/diagnostics"))
+    output.path <- clean_path(paste0(hop$path, "/diagnostics"))
   }
-  ts.path <- gsub("//", "/", paste0(output.path, "/", profile, "/"))
+  ts.path <- clean_path(paste0(output.path, "/", profile, "/"))
   dir.create(ts.path, recursive = TRUE, showWarnings = FALSE)
 
 
@@ -115,11 +115,11 @@ diag_hisafe_monthcells <- function(hop, output.path = NULL) {
 
   ## Create output directories
   if(is.null(output.path) & "hop-group" %in% class(hop)) {
-    output.path <- gsub("//", "/", paste0(hop$exp.path, "/diagnostics"))
+    output.path <- clean_path(paste0(hop$exp.path, "/diagnostics"))
   } else if(is.null(output.path) & !("hop-group" %in% class(hop))){
-    output.path <- gsub("//", "/", paste0(hop$path, "/diagnostics"))
+    output.path <- clean_path(paste0(hop$path, "/diagnostics"))
   }
-  monthcells.path <- gsub("//", "/", paste0(output.path, "/monthCells/"))
+  monthcells.path <- clean_path(paste0(output.path, "/monthCells/"))
   plot.dirs <- paste0(monthcells.path, c("year_simname/", "month_simname/", "month_year/"))
   purrr::walk(plot.dirs, dir.create, recursive = TRUE, showWarnings = FALSE)
 

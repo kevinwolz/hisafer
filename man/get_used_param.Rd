@@ -4,14 +4,14 @@
 \alias{get_used_param}
 \title{Gets the parameter actually used}
 \usage{
-get_used_param(variable, hip, template.defaults)
+get_used_param(variable, exp.plan, template.defaults, template.commented)
 }
 \arguments{
 \item{variable}{A character string of the name of the variable to check.}
 
-\item{hip}{A "hip object}
-
 \item{template.defaults}{A list containing the default values for all parameters.}
+
+\item{hip}{A "hip" object}
 }
 \value{
 The value of the parameter

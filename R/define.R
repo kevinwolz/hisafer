@@ -77,13 +77,13 @@ define_hisafe <- function(path,
     param.list.filled <- purrr::map2(param.list, reps.to.make, rep.int)
     exp.plan <- dplyr::as_tibble(param.list.filled)
   } else {
-    exp.plan <- dplyr::tibble(SimulationName = "Default_Sim")
+    exp.plan <- dplyr::tibble(SimulationName = "Restinclieres_A2")
   }
 
-  if(is.null(exp.plan$SimulationName)) exp.plan$SimulationName <- paste0("Sim_", 1:nrow(exp.plan))
+  if(!("SimulationName" %in% names(exp.plan))) exp.plan$SimulationName <- paste0("Sim_", 1:nrow(exp.plan))
   exp.plan <- dplyr::select(exp.plan, SimulationName, dplyr::everything())
 
-  if(nrow(exp.plan) > 1) path <- gsub("//", "/", paste0(path, "/", exp.name), fixed = TRUE)
+  if(nrow(exp.plan) > 1) path <- clean_path(paste0(path, "/", exp.name))
   hip <- list(exp.plan = exp.plan,
               template = template,
               profiles = profiles,
@@ -119,7 +119,7 @@ define_hisafe_file <- function(file, path, profiles = "all", template = "default
 
   if(profiles[1] == "all") profiles <- SUPPORTED.PROFILES$profiles
 
-  if(is.null(exp.plan$SimulationName)) exp.plan$SimulationName <- paste0("Sim_", 1:nrow(exp.plan))
+  if(!("SimulationName" %in% names(exp.plan))) exp.plan$SimulationName <- paste0("Sim_", 1:nrow(exp.plan))
   exp.plan <- dplyr::select(exp.plan, SimulationName, dplyr::everything())
 
   hip <- list(exp.plan = exp.plan,
@@ -142,7 +142,7 @@ check_input_values <- function(hip) {
 
   EXP.PLAN <- hip$exp.plan
   if(hip$template == "default") {
-    template.path <- gsub("//", "/", paste0(system.file("extdata", "hisafe_template", package = "hisafer"), "/"))
+    template.path <- clean_path(paste0(system.file("extdata", "hisafe_template", package = "hisafer"), "/"))
   } else {
     template.path <- hip$template
   }
@@ -151,35 +151,46 @@ check_input_values <- function(hip) {
   TEMPLATE_PARAMS <- get_template_params(hip$template)
   PARAM_NAMES     <- get_param_names(TEMPLATE_PARAMS)
   PARAM_DEFAULTS  <- get_param_vals(TEMPLATE_PARAMS, "value")
-  AVAIL_CROPS     <- list.files(gsub("//", "/", paste0(template.path, "/cropSpecies")))
-  AVAIL_TECS      <- list.files(gsub("//", "/", paste0(template.path, "/itk")))
-  AVAIL_TREES     <- gsub("\\.tree", "", list.files(gsub("//", "/", paste0(template.path, "/treeSpecies"))))
+  PARAM_COMMENTED <- get_param_vals(TEMPLATE_PARAMS, "commented")
+  AVAIL_CROPS     <- list.files(clean_path(paste0(template.path, "/cropSpecies")))
+  AVAIL_TECS      <- list.files(clean_path(paste0(template.path, "/itk")))
+  AVAIL_TREES     <- gsub("\\.tree", "", list.files(clean_path(paste0(template.path, "/treeSpecies"))))
 
-  ## Check for unsupported inputs
+  ## Get used parameters
+  USED_PARAMS <- purrr::map(as.list(unlist(PARAM_NAMES, use.names = FALSE)),
+                            get_used_param,
+                            exp.plan = EXP.PLAN,
+                            template.defaults = PARAM_DEFAULTS,
+                            template.commented = PARAM_COMMENTED)
+  names(USED_PARAMS) <- unlist(PARAM_NAMES, use.names = FALSE)
+
+  ## Initialize Error Message
+  errors <-   "Hi-sAFe definition errors:"
+
+  ## Unsupported inputs
   names.to.check <- names(EXP.PLAN)[names(EXP.PLAN) != "SimulationName"]
   if(any(!(names.to.check %in% unlist(PARAM_NAMES, use.names = FALSE)))) {
     unsupported.names   <- names.to.check[!(names.to.check %in% PARAM_NAMES)]
-    unsupported.message <- c("The following variables are not supported:", paste0(unsupported.names, collapse = ", "))
-    stop(unsupported.message, call. = FALSE)
+    unsupported.var.error <- c("The following variables are not supported:", paste0(unsupported.names, collapse = ", "))
+  } else {
+    unsupported.var.error <- ""
   }
 
-  ## Check for validity of input values
-  messages <- "Hi-sAFe definition warnings:"
-  errors <-   "Hi-sAFe definition errors:"
-
-  hip.no.name <- dplyr::select(EXP.PLAN, -SimulationName)
-  unique.sim.error     <- ifelse(identical(hip.no.name, dplyr::distinct(hip.no.name)), "",
-                                 "-- Each simulaton must be distinct.")
-  unique.simname.error <- ifelse(unique(table(EXP.PLAN$SimulationName)) == 1, "",
-                                 "-- SimulationName - each siulation must have a unique name")
+  ## SimulationName errors
+  unique.sim.error     <- ifelse(identical(EXP.PLAN, dplyr::distinct(EXP.PLAN)),
+                                 "", "-- Each simulaton must be distinct.")
+  unique.simname.error <- ifelse(unique(table(EXP.PLAN$SimulationName)) == 1,
+                                 "", "-- SimulationName - each siulation must have a unique name")
+  simname.space.error  <- ifelse(!any(grepl(" ", EXP.PLAN$SimulationName)),
+                                 "", "-- SimulationName - names cannot contains spaces")
 
   ## Tree Errors
-  if(!is.null(EXP.PLAN$tree.initialization)) {
+  if(USED_PARAMS$tree.initialization$exp.plan) {
     unique_tree_species <- function(x) unique(x$species)
     tree.species.used <- unique(unlist(purrr::map(EXP.PLAN$tree.initialization, unique_tree_species)))
     if(any(!(tree.species.used %in% AVAIL_TREES))) {
       tree.species.missing <- tree.species.used[!(tree.species.used %in% AVAIL_TREES)]
-      unsupported.trees.error <- paste("--", tree.species.missing, "is not a not available in the template directory.")
+      unsupported.trees.error <- paste("--", tree.species.missing, "is not a tree available in the template directory.")
     } else {
       unsupported.trees.error <- ""
     }
@@ -193,158 +204,172 @@ check_input_values <- function(hip) {
   }
 
   ## Crop Errors
-  main.crop  <- get_used_param("mainCropSpecies",  hip, PARAM_DEFAULTS)
-  inter.crop <- get_used_param("interCropSpecies", hip, PARAM_DEFAULTS)
-  crop.species.used <- unique(c(main.crop, inter.crop))
+  crop.species.used <- unique(c(USED_PARAMS$mainCropSpecies$value, USED_PARAMS$interCropSpecies$value))
   if(any(!(crop.species.used %in% AVAIL_CROPS))) {
     crop.species.missing <- crop.species.used[!(crop.species.used %in% AVAIL_CROPS)]
-    unsupported.crops.error <- paste("--", crop.species.missing, "is not a not available in the template directory.")
+    unsupported.crops.error <- paste("-- The following crop files are not available in the template idrectory: ", crop.species.missing)
   } else {
     unsupported.crops.error <- ""
   }
 
   ## itk Errors
-  main.itk  <- get_used_param("mainCropItk",  hip, PARAM_DEFAULTS)
-  inter.itk <- get_used_param("interCropItk", hip, PARAM_DEFAULTS)
-  crop.itks.used <- unique(c(main.itk, inter.itk))
+  crop.itks.used <- unique(c(USED_PARAMS$mainCropItk$value, USED_PARAMS$interCropItk$value))
   if(any(!(crop.itks.used %in% AVAIL_TECS))) {
     crop.itks.missing <- crop.itks.used[!(crop.itks.used %in% AVAIL_TECS)]
-    unsupported.itks.error <- paste("--", crop.itks.missing, "is not a not available in the template directory.")
+    unsupported.itks.error <- paste("-- The following crop files are not available in the template idrectory: ", crop.itks.missing)
   } else {
     unsupported.itks.error <- ""
   }
 
   ## Spacing Errors
-  between    <- as.numeric(get_used_param("spacingBetweenRows", hip, PARAM_DEFAULTS))
-  within     <- as.numeric(get_used_param("spacingWithinRows",  hip, PARAM_DEFAULTS))
-  cell.width <- as.numeric(get_used_param("cellWidth",          hip, PARAM_DEFAULTS))
-  btwn.tree.error   <- ifelse(all(((between / cell.width) %% 1) == 0), "", "-- (spacingBetweenRows / cellWidth) should be a whole number")
-  within.tree.error <- ifelse(all(((within  / cell.width) %% 1) == 0), "", "-- (spacingWithinRows / cellWidth) should be a whole number")
-  # btwn.tree.odd.error      <- ifelse(all(((between / cell.width) %% 2) == 1), "",
+  btwn.tree.error   <- ifelse(all(((USED_PARAMS$spacingBetweenRows$value / USED_PARAMS$cellWidth$value) %% 1) == 0),
+                              "", "-- (spacingBetweenRows / cellWidth) should be a whole number")
+  within.tree.error <- ifelse(all(((USED_PARAMS$spacingWithinRows$value  / USED_PARAMS$cellWidth$value) %% 1) == 0),
+                              "", "-- (spacingWithinRows / cellWidth) should be a whole number")
+  # btwn.tree.odd.error      <- ifelse(all(((USED_PARAMS$spacingBetweenRows$value / USED_PARAMS$cellWidth$value) %% 2) == 1), "",
   #                                "-- Tree should be centered in a cell. (spacingBetweenRows / cellWidth) should be an odd integer")
-  # within.tree.odd.error    <- ifelse(all(((within  / cell.width) %% 2) == 1), "",
+  # within.tree.odd.error    <- ifelse(all(((USED_PARAMS$spacingWithinRows$value  / USED_PARAMS$cellWidth$value) %% 2) == 1), "",
   #                                "-- Tree should be centered in a cell. (spacingWithinRows / cellWidth) should be an odd integer")
 
   ## Distance Errors
-  treeCropDistance        <- as.numeric(get_used_param("treeCropDistance",         hip, PARAM_DEFAULTS))
-  weededAreaRadius        <- as.numeric(get_used_param("weededAreaRadius",         hip, PARAM_DEFAULTS))
-  treeRootPruningDistance <- as.numeric(get_used_param("treeRootPruningDistance",  hip, PARAM_DEFAULTS))
-  treeCropDistance.error        <- ifelse(all(treeCropDistance <= between),          "", "-- treeCropDistance must be less than spacingBetweenRows")
-  weededAreaRadius.error        <- ifelse(all(weededAreaRadius <= treeCropDistance), "", "-- weededAreaRadius must be less than treeCropDistance")
-  treeRootPruningDistance.error <- ifelse(all(treeRootPruningDistance <= between),   "", "-- treeRootPruningDistance must be less than spacingBetweenRows")
+  treeCropDistance.error        <- ifelse(all(USED_PARAMS$treeCropDistance$value <= USED_PARAMS$spacingBetweenRows$value),
+                                          "", "-- treeCropDistance must be less than spacingBetweenRows")
+  treeRootPruningDistance.error <- ifelse(all(USED_PARAMS$treeRootPruningDistance$value <= USED_PARAMS$spacingBetweenRows$value),
+                                          "", "-- treeRootPruningDistance must be less than spacingBetweenRows")
 
   ## Time Errors
-  nbSimulations        <- as.numeric(get_used_param("nbSimulations",        hip, PARAM_DEFAULTS))
-  treePruningYears     <- get_used_param("treePruningYears",     hip, PARAM_DEFAULTS)
-  treeThinningYears    <- get_used_param("treeThinningYears",    hip, PARAM_DEFAULTS)
-  treeRootPruningYears <- get_used_param("treeRootPruningYears", hip, PARAM_DEFAULTS)
-  less_than_nbSimulations <- function(x) all(as.numeric(x) <= nbSimulations)
-  treePruningYears.error     <- ifelse(all(purrr::map_lgl(treePruningYears, less_than_nbSimulations)),
+  less_than_nbSimulations <- function(x,y) all(x <= y)
+  treePruningYears.error     <- ifelse(all(purrr::map2_lgl(USED_PARAMS$treePruningYears$value,
+                                                           as.list(USED_PARAMS$nbSimulations$value),
+                                                           less_than_nbSimulations)),
                                        "", "-- treePruningYears must be less than nbSimulations")
-  treeThinningYears.error    <- ifelse(all(purrr::map_lgl(treeThinningYears, less_than_nbSimulations)),
+  treeThinningYears.error    <- ifelse(all(purrr::map2_lgl(USED_PARAMS$treeThinningYears$value,
+                                                           as.list(USED_PARAMS$nbSimulations$value),
+                                                           less_than_nbSimulations)),
                                        "", "-- treeThinningYears must be less than nbSimulations")
-  treeRootPruningYears.error <- ifelse(all(purrr::map_lgl(treeRootPruningYears, less_than_nbSimulations)),
+  treeRootPruningYears.error <- ifelse(all(purrr::map2_lgl(USED_PARAMS$treeRootPruningYears$value,
+                                                           as.list(USED_PARAMS$nbSimulations$value),
+                                                           less_than_nbSimulations)),
                                        "", "-- treeRootPruningYears must be less than nbSimulations")
 
   ## nrow(tree_init) == nrow(root_init) Error
-  tree.init <- get_used_param("tree.initialization", hip, PARAM_DEFAULTS)
-  root.init <- get_used_param("root.initialization", hip, PARAM_DEFAULTS)
+  tree.init <- USED_PARAMS$tree.initialization$value
+  root.init <- USED_PARAMS$root.initialization$value
   if(class(tree.init)[1] != "list") tree.init <- list(tree.init)
   if(class(root.init)[1] != "list") root.init <- list(root.init)
   tree.rows <- purrr::map_dbl(tree.init, nrow)
   root.rows <- purrr::map_dbl(root.init, nrow)
-  tree.root.error <- ifelse(all(tree.rows == root.rows), "", "-- number of rows in the tree initialization and root initialization tables must be equal")
+  tree.root.error <- ifelse(all(tree.rows == root.rows),
+                            "", "-- number of rows in the tree initialization and root initialization tables must be equal")
 
   ## Don't Edit Export Profile Errors
-  EP.error <- ifelse(!is.null(EXP.PLAN$profileNames) | !is.null(EXP.PLAN$exportFrequencies),
+  EP.error <- ifelse((USED_PARAMS$profileNames$exp.plan) | (USED_PARAMS$exportFrequencies$exp.plan),
                      "-- profileNames and exportFrequencies cannot be defined using define_hisafe(). Use the 'profiles' argument of build_hisafe().", "")
 
   ## Don't Edit nbTrees Error
-  nbTrees.error <- ifelse(!is.null(EXP.PLAN$nbTrees),
-                     "-- nbTrees cannot be defined directly using define_hisafe(). Instead the size of the tree initialziation table will be used.", "")
+  nbTrees.error <- ifelse(USED_PARAMS$nbTrees$exp.plan,
+                          "-- nbTrees cannot be defined directly using define_hisafe(). Instead the size of the tree initialziation table will be used.", "")
 
   ## Modified Together Errors
-  tree.pruning.check  <- identical(is.null(EXP.PLAN$treePruningYears),
-                                   is.null(EXP.PLAN$treePruningProp),
-                                   is.null(EXP.PLAN$treePruningMaxHeight),
-                                   is.null(EXP.PLAN$treePruningDays))
-  tree.thinning.check <- identical(is.null(EXP.PLAN$treeThinningIds),
-                                   is.null(EXP.PLAN$treeThinningYears),
-                                   is.null(EXP.PLAN$treeThinningDays))
-  root.pruning.check  <- identical(is.null(EXP.PLAN$treeRootPruningYears),
-                                   is.null(EXP.PLAN$treeRootPruningDays),
-                                   is.null(EXP.PLAN$treeRootPruningDistance),
-                                   is.null(EXP.PLAN$treeRootPruningDepth))
-  tree.pruning.error  <- ifelse(tree.pruning.check,  "", paste0("-- tree pruning parameters must all be modified together: ",
-                                                                "treePruningYears, treePruningProp, treePruningMaxHeight, treePruningDays"))
-  tree.thinning.error <- ifelse(tree.thinning.check, "", paste0("-- tree thinning parameters must all be modified together: ",
-                                                                "treeThinningIds, treeThinningYears, treeThinningDays"))
-  root.pruning.error  <- ifelse(root.pruning.check,  "", paste0("-- root pruning parameters must all be modified together: ",
-                                                                "treeRootPruningYears, treeRootPruningDays, treeRootPruningDistance, treeRootPruningDepth"))
+  tree.pruning.check  <- c(USED_PARAMS$treePruningYears$exp.plan,
+                           USED_PARAMS$treePruningProp$exp.plan,
+                           USED_PARAMS$treePruningMaxHeight$exp.plan,
+                           USED_PARAMS$treePruningDays$exp.plan)
+
+  tree.thinning.check <- c(USED_PARAMS$treeThinningIds$exp.plan,
+                           USED_PARAMS$treeThinningYears$exp.plan,
+                           USED_PARAMS$treeThinningDays$exp.plan)
+
+  root.pruning.check  <-  c(USED_PARAMS$treeRootPruningYears$exp.plan,
+                            USED_PARAMS$treeRootPruningDays$exp.plan,
+                            USED_PARAMS$treeRootPruningDistance$exp.plan,
+                            USED_PARAMS$treeRootPruningDepth$exp.plan)
+
+  tree.pruning.error  <- ifelse(all(tree.pruning.check) | all(!tree.pruning.check),  "",
+                                paste0("-- tree pruning parameters must all be modified together: ",
+                                       "treePruningYears, treePruningProp, treePruningMaxHeight, treePruningDays"))
+  tree.thinning.error <- ifelse(all(tree.thinning.check) | all(!tree.thinning.check), "",
+                                paste0("-- tree thinning parameters must all be modified together: ",
+                                       "treeThinningIds, treeThinningYears, treeThinningDays"))
+  root.pruning.error  <- ifelse(all(root.pruning.check) | all(!root.pruning.check),  "",
+                                paste0("-- root pruning parameters must all be modified together: ",
+                                       "treeRootPruningYears, treeRootPruningDays, treeRootPruningDistance, treeRootPruningDepth"))
 
   ## Timeseries Length Errors
-  if(!is.null(EXP.PLAN$treePruningYears) & !is.null(EXP.PLAN$treePruningProp) & !is.null(EXP.PLAN$treePruningMaxHeight) & !is.null(EXP.PLAN$treePruningDays)) {
-    treePruningYears     <- purrr::map_dbl(get_used_param("treePruningYears",     hip, PARAM_DEFAULTS), length)
-    treePruningProp      <- purrr::map_dbl(get_used_param("treePruningProp",      hip, PARAM_DEFAULTS), length)
-    treePruningMaxHeight <- purrr::map_dbl(get_used_param("treePruningMaxHeight", hip, PARAM_DEFAULTS), length)
-    treePruningDays      <- purrr::map_dbl(get_used_param("treePruningDays",      hip, PARAM_DEFAULTS), length)
+  if(all(tree.pruning.check)) {
+    treePruningYears.length     <- purrr::map_dbl(USED_PARAMS$treePruningYears$value,     length)
+    treePruningProp.length      <- purrr::map_dbl(USED_PARAMS$treePruningProp$value,      length)
+    treePruningMaxHeight.length <- purrr::map_dbl(USED_PARAMS$treePruningMaxHeight$value, length)
+    treePruningDays.length      <- purrr::map_dbl(USED_PARAMS$treePruningDays$value,      length)
 
-    treePruning.length.error <- ifelse(all(purrr::map_lgl(list(treePruningProp, treePruningMaxHeight, treePruningDays), identical, y = treePruningYears)),
+    treePruning.length.error <- ifelse(all(purrr::map_lgl(list(treePruningProp.length,
+                                                               treePruningMaxHeight.length,
+                                                               treePruningDays.length), identical, y = treePruningYears.length)),
                                        "", "-- treePruningYears, treePruningProp, treePruningMaxHeight, and treePruningDays must have the same length")
   } else {
     treePruning.length.error <- ""
   }
 
-  if(!is.null(EXP.PLAN$treeThinningIds) & !is.null(EXP.PLAN$treeThinningYears) & !is.null(EXP.PLAN$treeThinningDays)) {
-    treeThinningIds   <- purrr::map_dbl(get_used_param("treeThinningIds",   hip, PARAM_DEFAULTS), length)
-    treeThinningYears <- purrr::map_dbl(get_used_param("treeThinningYears", hip, PARAM_DEFAULTS), length)
-    treeThinningDays  <- purrr::map_dbl(get_used_param("treeThinningDays",  hip, PARAM_DEFAULTS), length)
-    treeThinning.length.error <- ifelse(all(purrr::map_lgl(list(treeThinningYears, treeThinningDays), identical, y = treeThinningIds)),
-                                       "", "-- treeThinningIds, treeThinningYears, and treeThinningDays must have the same length")
+  if(all(root.pruning.check)) {
+    treeThinningIds.length   <- purrr::map_dbl(USED_PARAMS$treeThinningIds$value,   length)
+    treeThinningYears.length <- purrr::map_dbl(USED_PARAMS$treeThinningYears$value, length)
+    treeThinningDays.length  <- purrr::map_dbl(USED_PARAMS$treeThinningDays$value,  length)
+    treeThinning.length.error <- ifelse(all(purrr::map_lgl(list(treeThinningYears.length, treeThinningDays.length), identical, y = treeThinningIds.length)),
+                                        "", "-- treeThinningIds, treeThinningYears, and treeThinningDays must have the same length")
   } else {
     treeThinning.length.error <- ""
   }
 
-  if(!is.null(EXP.PLAN$treeRootPruningYears) & !is.null(EXP.PLAN$treeRootPruningDays) & !is.null(EXP.PLAN$treeRootPruningDistance) & !is.null(EXP.PLAN$treeRootPruningDepth)) {
-    treeRootPruningYears    <- purrr::map_dbl(get_used_param("treeRootPruningYears",    hip, PARAM_DEFAULTS), length)
-    treeRootPruningDays     <- purrr::map_dbl(get_used_param("treeRootPruningDays",     hip, PARAM_DEFAULTS), length)
-    treeRootPruningDistance <- purrr::map_dbl(get_used_param("treeRootPruningDistance", hip, PARAM_DEFAULTS), length)
-    treeRootPruningDepth    <- purrr::map_dbl(get_used_param("treeRootPruningDepth",    hip, PARAM_DEFAULTS), length)
-    rootPruning.length.error <- ifelse(all(purrr::map_lgl(list(treeRootPruningDays, treeRootPruningDistance, treeRootPruningDepth), identical, y = treeRootPruningYears)), "",
+  if(all(root.pruning.check)) {
+    treeRootPruningYears.length    <- purrr::map_dbl(USED_PARAMS$treeRootPruningYears$value,    length)
+    treeRootPruningDays.length     <- purrr::map_dbl(USED_PARAMS$treeRootPruningDays$value,     length)
+    treeRootPruningDistance.length <- purrr::map_dbl(USED_PARAMS$treeRootPruningDistance$value, length)
+    treeRootPruningDepth.length    <- purrr::map_dbl(USED_PARAMS$treeRootPruningDepth$value,    length)
+    rootPruning.length.error <- ifelse(all(purrr::map_lgl(list(treeRootPruningDays.length,
+                                                               treeRootPruningDistance.length,
+                                                               treeRootPruningDepth.length), identical, y = treeRootPruningYears.length)), "",
                                        "-- treeRootPruningYears, treeRootPruningDays, treeRootPruningDistance, and treeRootPruningDepth must have the same length")
   } else {
     rootPruning.length.error <- ""
   }
 
   ## Geometry Option Errors
-  geometryOption   <- get_used_param("geometryOption", hip, PARAM_DEFAULTS)
-  between.check    <- !is.null(EXP.PLAN$spacingBetweenRows)
-  within.check     <- !is.null(EXP.PLAN$spacingWithinRows)
-  plotHeight.check <- !is.null(EXP.PLAN$plotHeight)
-  plotWidth.check  <- !is.null(EXP.PLAN$plotWidth)
-  if(1 %in% geometryOption & (plotHeight.check | plotWidth.check)) warning("-- When geometryOption = 1, plotHeight and plotWidth are not used."
-                                                                           , call. = FALSE,
-                                                                           immediate. = TRUE)
-  if(3 %in% geometryOption & (between.check | within.check)) warning("-- When geometryOption = 3, spacingBetweenRows and spacingWithinRows are not used."
-                                                                     , call. = FALSE,
-                                                                     immediate. = TRUE)
+  if(1 %in% USED_PARAMS$geometryOption$value & (USED_PARAMS$plotHeight$exp.plan | USED_PARAMS$plotWidth$exp.plan)) {
+    warning("-- when geometryOption = 1, plotHeight and plotWidth are not used." , call. = FALSE, immediate. = TRUE)
+  }
+  if(3 %in% USED_PARAMS$geometryOption$value & (USED_PARAMS$spacingBetweenRows$exp.plan | USED_PARAMS$spacingWithinRows$exp.plan)) {
+    warning("--when geometryOption = 3, spacingBetweenRows and spacingWithinRows are not used." , call. = FALSE, immediate. = TRUE)
+  }
+  nbtree.error <- ifelse(any(USED_PARAMS$geometryOption$value == 1 & !(tree.rows %in% c(1,4,9))),
+                         "-- when geompetryOption = 1, the number of trees can only be 1, 4, or 9", "")
+
+  get_n_species <- function(x) length(unique(x$species))
+  n.tree.species <- purrr::map_dbl(tree.init, get_n_species)
+  species.error <- ifelse(any(USED_PARAMS$geometryOption$value == 1 & n.tree.species > 1),
+                         "-- when geompetryOption = 1, there can only be one tree species", "")
+
+  weed.error <- ifelse(any(USED_PARAMS$treeCropDistance$value > 0 & USED_PARAMS$weededAreaRadius$value > 0),
+                       "-- treeCropDistance and weededAreaRadius cannont both be greater than 0", "")
 
   ## Accepted & Range Errors
   accepted.errors <- purrr::map_chr(names.to.check, check_accepted, exp.plan = EXP.PLAN, template = TEMPLATE_PARAMS)
   range.errors    <- purrr::map_chr(names.to.check, check_range,    exp.plan = EXP.PLAN, template = TEMPLATE_PARAMS)
   type.errors     <- purrr::map_chr(names.to.check, check_type,     exp.plan = EXP.PLAN, template = TEMPLATE_PARAMS)
 
-  all.errors <- c(errors, unique.sim.error, unique.simname.error,
+  all.errors <- c(errors, unsupported.var.error,
+                  unique.sim.error, unique.simname.error, simname.space.error,
                   unsupported.trees.error, too.many.trees.error,
                   unsupported.crops.error, unsupported.itks.error,
                   btwn.tree.error, within.tree.error,
-                  treeCropDistance.error, weededAreaRadius.error, treeRootPruningDistance.error,
+                  treeCropDistance.error, treeRootPruningDistance.error,
                   treePruningYears.error, treeThinningYears.error, treeRootPruningYears.error,
                   tree.root.error, EP.error, nbTrees.error,
                   tree.pruning.error, tree.thinning.error, root.pruning.error,
                   treePruning.length.error, treeThinning.length.error, rootPruning.length.error,
+                  nbtree.error, species.error, weed.error,
                   accepted.errors, range.errors, type.errors)
-  all.errors <- paste0(all.errors[!all.errors == ""], collapse = "\n")
+
+  all.errors <- paste0(all.errors[!(all.errors == "") & !is.na(all.errors)], collapse = "\n")
 
   if(all.errors != errors) stop(all.errors, call. = FALSE)
 
@@ -360,7 +385,7 @@ check_input_values <- function(hip) {
 #' @param template A list of template parameters and constraints
 check_accepted <- function(variable, exp.plan, template) {
   accepted.vals <- get_param_vals(template, "accepted")[[variable]]
-  accepted.pass <- (is.na(accepted.vals) | all(as.character(exp.plan[[variable]]) %in% accepted.vals))
+  accepted.pass <- (all(is.na(accepted.vals)) | all(as.character(exp.plan[[variable]]) %in% accepted.vals))
   if(accepted.pass) {
     return("")
   } else {
@@ -437,13 +462,13 @@ root_init_params <- function(reps        = 1,
                              paramShape2 = 0,
                              paramShape3 = 0,
                              amount      = 0.5) {
-  temp <- dplyr::tibble(name = "RootInit",
-                        shape = shape,
-                        repartition = repartition,
-                        paramShape1 = paramShape1,
-                        paramShape2 = paramShape2,
-                        paramShape3 = paramShape3,
-                        amount = amount)
+  temp <- dplyr::as_tibble(data.frame(name        = "RootInit",
+                                      shape       = shape,
+                                      repartition = repartition,
+                                      paramShape1 = paramShape1,
+                                      paramShape2 = paramShape2,
+                                      paramShape3 = paramShape3,
+                                      amount      = amount))
   out <- list(temp)
   if(reps > 1) {
     for(i in 2:reps) {
@@ -481,16 +506,16 @@ tree_init_params <- function(species               = "walnut-hybrid",
                              crownRadius           = 0.25,
                              treeX                 = 0,
                              treeY                 = 0) {
-  out <- dplyr::tibble(name                  = "TreeInit",
-                       species               = species,
-                       age                   = age,
-                       height                = height,
-                       crownBaseHeight       = crownBaseHeight,
-                       truncatureRatio       = truncatureRatio,
-                       leafToFineRootsRatio  = leafToFineRootsRatio,
-                       crownRadius           = crownRadius,
-                       treeX                 = treeX,
-                       treeY                 = treeY)
+  out <- dplyr::as_tibble(data.frame(name                  = "TreeInit",
+                                     species               = species,
+                                     age                   = age,
+                                     height                = height,
+                                     crownBaseHeight       = crownBaseHeight,
+                                     truncatureRatio       = truncatureRatio,
+                                     leafToFineRootsRatio  = leafToFineRootsRatio,
+                                     crownRadius           = crownRadius,
+                                     treeX                 = treeX,
+                                     treeY                 = treeY))
   return(list(out))
 }
 
@@ -509,10 +534,10 @@ tree_init_params <- function(species               = "walnut-hybrid",
 layer_init_params <- function(waterContent     = c(0.2, 0.3, 0.3, 0.3, 0.3),
                               no3Concentration = c(30, 14, 5, 2, 0),
                               nh4concentration = 0) {
-  out <- dplyr::tibble(name             = "LayerInit",
-                       waterContent     = waterContent,
-                       no3Concentration = no3Concentration,
-                       nh4concentration = nh4concentration)
+  out <- dplyr::as_tibble(data.frame(name             = "LayerInit",
+                                     waterContent     = waterContent,
+                                     no3Concentration = no3Concentration,
+                                     nh4concentration = nh4concentration))
   return(list(out))
 }
 
@@ -543,15 +568,15 @@ layer_params <- function(thick          = c(0.4, 0.4, 0.6, 1, 7),
                          stone          = 0,
                          stoneType      = 6,
                          infiltrability = 50) {
-  out <- dplyr::tibble(name           = "Layer",
-                       thick          = thick,
-                       sand           = sand,
-                       clay           = clay,
-                       limeStone      = limeStone,
-                       organicMatter  = organicMatter,
-                       partSizeSand   = partSizeSand,
-                       stone          = stone,
-                       stoneType      = stoneType,
-                       infiltrability = infiltrability)
+  out <- dplyr::as_tibble(data.frame(name           = "Layer",
+                                     thick          = thick,
+                                     sand           = sand,
+                                     clay           = clay,
+                                     limeStone      = limeStone,
+                                     organicMatter  = organicMatter,
+                                     partSizeSand   = partSizeSand,
+                                     stone          = stone,
+                                     stoneType      = stoneType,
+                                     infiltrability = infiltrability))
   return(list(out))
 }
