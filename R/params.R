@@ -283,9 +283,11 @@ get_used_param <- function(variable, exp.plan, template.defaults, template.comme
   if(variable %in% names(exp.plan)){
     val <- exp.plan[[variable]]
     exp <- TRUE
-    if("list" %in% class(val)) {
-      val <- val[[1]]
-    }
+    # if("list" %in% class(val)) {
+    #   if("tbl" %in% class(val[[1]])){
+    #     val <- val[[1]]
+    #   }
+    # }
   } else {
     commented <- template.commented[[variable]]
     if(commented) {

@@ -273,8 +273,8 @@ check_input_values <- function(hip) {
   ## nrow(tree_init) == nrow(root_init) Error
   tree.init <- USED_PARAMS$tree.initialization$value
   root.init <- USED_PARAMS$root.initialization$value
-  if(class(tree.init)[1] != "list") tree.init <- list(tree.init)
-  if(class(root.init)[1] != "list") root.init <- list(root.init)
+  if(!("list" %in% class(tree.init))) tree.init <- list(tree.init)
+  if(!("list" %in% class(root.init))) root.init <- list(root.init)
   tree.rows <- purrr::map_dbl(tree.init, nrow)
   root.rows <- purrr::map_dbl(root.init, nrow)
   tree.root.error <- ifelse(all(tree.rows == root.rows),
@@ -356,7 +356,7 @@ check_input_values <- function(hip) {
     warning("-- when geometryOption = 1, plotHeight and plotWidth are not used." , call. = FALSE, immediate. = TRUE)
   }
   if(3 %in% USED_PARAMS$geometryOption$value & (USED_PARAMS$spacingBetweenRows$exp.plan | USED_PARAMS$spacingWithinRows$exp.plan)) {
-    warning("--when geometryOption = 3, spacingBetweenRows and spacingWithinRows are not used." , call. = FALSE, immediate. = TRUE)
+    warning("-- when geometryOption = 3, spacingBetweenRows and spacingWithinRows are not used." , call. = FALSE, immediate. = TRUE)
   }
   nbtree.error <- ifelse(any(USED_PARAMS$geometryOption$value == 1 & !(tree.rows %in% c(1,4,9))),
                          "-- when geompetryOption = 1, the number of trees can only be 1, 4, or 9", "")
