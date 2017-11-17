@@ -240,5 +240,5 @@ build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, templat
     }
     write_param_file(tree.new, i)
   }
-  invisible(hip)
+  invisible(TRUE)
 }

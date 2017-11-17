@@ -45,12 +45,19 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
   ## Calculate total soil depth
   soil.depth <- sum(USED_PARAMS$layers$value$thickness)
 
-  ## Extract tree data
-  tree.plot.data <- tree.data <- USED_PARAMS$tree.initialization$value %>%
-    dplyr::mutate(x = treeX, y = treeY) %>%
-    dplyr::select(species, x, y)
-  num.trees <- nrow(tree.data) #nbTrees is not an allowed entry to a hip object, but is rather modifying by build_hisafe based on nrow(tree.init.table)
-
+  if(USED_PARAMS$nbTrees$value != 0) {
+    ## Extract tree data
+    tree.plot.data <- tree.data <- USED_PARAMS$tree.initialization$value %>%
+      dplyr::mutate(x = treeX, y = treeY) %>%
+      dplyr::select(species, x, y)
+    num.trees <- nrow(tree.data) #nbTrees is not an allowed entry to a hip object, but is rather modifying by build_hisafe based on nrow(tree.init.table)
+  } else {
+    tree.plot.data <- tree.data <- tree_init_params("No trees", NA, NA, NA, NA, NA, NA, NA, NA)[[1]] %>%
+      dplyr::mutate_if(is.logical, as.numeric) %>%
+      dplyr::mutate(x = treeX, y = treeY) %>%
+      dplyr::select(species, x, y)
+    num.trees <- 0
+  }
   ## Calculate scene dimensions
   if(USED_PARAMS$geometryOption$value == 1) {
     width  <- USED_PARAMS$spacingBetweenRows$value / USED_PARAMS$cellWidth$value * sqrt(num.trees)
@@ -69,65 +76,66 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
     dplyr::arrange(desc(y), x) %>%
     dplyr::mutate(id = 1:nrow(.), x = x - USED_PARAMS$cellWidth$value/2, y = y - USED_PARAMS$cellWidth$value/2) # x and y are now cell centers
 
-  ## Modify tree locations for geometryOption = 1
-  if(USED_PARAMS$geometryOption$value == 1) {
-    if(num.trees == 1) {
-      tree.plot.data$x <- mean(plot.data$x)
-      tree.plot.data$y <- mean(plot.data$y)
-    } else if(num.trees == 4) {
-      tree.plot.data$x <- mean(plot.data$x) * c(1,3,1,3)/2
-      tree.plot.data$y <- mean(plot.data$y) * c(1,1,3,3)/2
-    } else if(num.trees == 9) {
-      tree.plot.data$x <- mean(plot.data$x) * c(1,3,5,1,3,5,1,3,5)/3
-      tree.plot.data$y <- mean(plot.data$y) * c(1,1,1,3,3,3,5,5,5)/3
+  if(num.trees > 0) {
+    ## Modify tree locations for geometryOption = 1
+    if(USED_PARAMS$geometryOption$value == 1) {
+      if(num.trees == 1) {
+        tree.plot.data$x <- mean(plot.data$x)
+        tree.plot.data$y <- mean(plot.data$y)
+      } else if(num.trees == 4) {
+        tree.plot.data$x <- mean(plot.data$x) * c(1,3,1,3)/2
+        tree.plot.data$y <- mean(plot.data$y) * c(1,1,3,3)/2
+      } else if(num.trees == 9) {
+        tree.plot.data$x <- mean(plot.data$x) * c(1,3,5,1,3,5,1,3,5)/3
+        tree.plot.data$y <- mean(plot.data$y) * c(1,1,1,3,3,3,5,5,5)/3
+      }
+    }
+
+    ## Determine interCrop cells
+    create_range <- function(x, tcd) c(x - tcd, x + tcd)
+    roundup   <- function(from,to) ceiling(from/to)*to
+    rounddown <- function(from,to) floor(from/to)*to
+    round_if_needed <- function(x, cw){
+      if(all(x %% cw == 0)){
+        out <- x
+      } else {
+        out <- c(rounddown(x[1], cw), roundup(x[2], cw))
+      }
+      return(out)
+    }
+    which_inside <- function(boundaries, x.vals) {
+      unique(x.vals[x.vals > boundaries[1] & x.vals < boundaries[2]])
+    }
+
+    if(USED_PARAMS$treeCropDistance$value > 0) {
+      xs <- as.list(tree.plot.data$x)
+      boundaries <- purrr::map(xs, create_range, USED_PARAMS$treeCropDistance$value)
+      boundaries <- purrr::map(boundaries, round_if_needed, USED_PARAMS$cellWidth$value)
+      x.inside   <- unlist(purrr::map(boundaries, which_inside, plot.data$x))
+      plot.data$crop[which(plot.data$x %in% x.inside)] <- interCropSpecies
+    } else if(USED_PARAMS$weededAreaRadius$value > 0) {
+      xs <- as.list(tree.plot.data$x)
+      x.boundaries <- purrr::map(xs, create_range, USED_PARAMS$weededAreaRadius$value)
+      x.boundaries <- purrr::map(x.boundaries, round_if_needed, USED_PARAMS$cellWidth$value)
+      x.inside     <- purrr::map(x.boundaries, which_inside, plot.data$x)
+
+      ys <- as.list(tree.plot.data$y)
+      y.boundaries <- purrr::map(ys, create_range, USED_PARAMS$weededAreaRadius$value)
+      y.boundaries <- purrr::map(y.boundaries, round_if_needed, USED_PARAMS$cellWidth$value)
+      y.inside     <- purrr::map(y.boundaries, which_inside, plot.data$y)
+
+      cells.inside <- purrr::map2(x.inside, y.inside, expand.grid) %>%
+        dplyr::bind_rows() %>%
+        dplyr::transmute(x = Var1, y = Var2) %>%
+        dplyr::mutate(flagged = 1)
+
+      plot.data <- plot.data %>%
+        dplyr::left_join(cells.inside, by = c("x", "y"))
+
+      plot.data$crop[which(plot.data$flagged == 1)] <- interCropSpecies
+      plot.data$flagged <- NULL
     }
   }
-
-  ## Determine interCrop cells
-  create_range <- function(x, tcd) c(x - tcd, x + tcd)
-  roundup   <- function(from,to) ceiling(from/to)*to
-  rounddown <- function(from,to) floor(from/to)*to
-  round_if_needed <- function(x, cw){
-    if(all(x %% cw == 0)){
-      out <- x
-    } else {
-      out <- c(rounddown(x[1], cw), roundup(x[2], cw))
-    }
-    return(out)
-  }
-  which_inside <- function(boundaries, x.vals) {
-    unique(x.vals[x.vals > boundaries[1] & x.vals < boundaries[2]])
-  }
-
-  if(USED_PARAMS$treeCropDistance$value > 0) {
-    xs <- as.list(tree.plot.data$x)
-    boundaries <- purrr::map(xs, create_range, USED_PARAMS$treeCropDistance$value)
-    boundaries <- purrr::map(boundaries, round_if_needed, USED_PARAMS$cellWidth$value)
-    x.inside   <- unlist(purrr::map(boundaries, which_inside, plot.data$x))
-    plot.data$crop[which(plot.data$x %in% x.inside)] <- interCropSpecies
-  } else if(USED_PARAMS$weededAreaRadius$value > 0) {
-    xs <- as.list(tree.plot.data$x)
-    x.boundaries <- purrr::map(xs, create_range, USED_PARAMS$weededAreaRadius$value)
-    x.boundaries <- purrr::map(x.boundaries, round_if_needed, USED_PARAMS$cellWidth$value)
-    x.inside     <- purrr::map(x.boundaries, which_inside, plot.data$x)
-
-    ys <- as.list(tree.plot.data$y)
-    y.boundaries <- purrr::map(ys, create_range, USED_PARAMS$weededAreaRadius$value)
-    y.boundaries <- purrr::map(y.boundaries, round_if_needed, USED_PARAMS$cellWidth$value)
-    y.inside     <- purrr::map(y.boundaries, which_inside, plot.data$y)
-
-    cells.inside <- purrr::map2(x.inside, y.inside, expand.grid) %>%
-      dplyr::bind_rows() %>%
-      dplyr::transmute(x = Var1, y = Var2) %>%
-      dplyr::mutate(flagged = 1)
-
-    plot.data <- plot.data %>%
-      dplyr::left_join(cells.inside, by = c("x", "y"))
-
-    plot.data$crop[which(plot.data$flagged == 1)] <- interCropSpecies
-    plot.data$flagged <- NULL
-  }
-
 
   # weeded.cells <- NA
   # if(weededAreaRadius > 0) {
@@ -153,8 +161,8 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
     scale_y_continuous(expand = c(0,0)) +
     geom_tile(color = "black", aes(fill = crop)) +
     geom_text(aes(label = id)) +
-    geom_point(data = tree.plot.data, size = 10, aes(color = species)) +
-    geom_point(data = tree.plot.data, shape = 21, size = 10) +
+    geom_point(data = tree.plot.data, size = 10, aes(color = species), na.rm = TRUE) +
+    geom_point(data = tree.plot.data, shape = 21, size = 10, na.rm = TRUE) +
     scale_color_manual(values = c("black", "grey70", "grey30", "grey50")) +
     scale_fill_manual(values = c("white", "grey80")) +
     coord_equal() +
