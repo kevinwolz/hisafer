@@ -123,7 +123,7 @@ build_hisafe <- function(hip) {
 #' @param template A character string of the path to the Hi-sAFe directory structure/files to use as a template (or one of the strings signaling a default template)
 build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, template) {
 
-  template.path   <- default_template_path(template)
+  template.path   <- get_template_path(template)
   TEMPLATE_PARAMS <- get_template_params(template.path)
   PARAM_NAMES     <- get_param_names(TEMPLATE_PARAMS)
   PARAM_DEFAULTS  <- get_param_vals(TEMPLATE_PARAMS, "value")
