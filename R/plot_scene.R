@@ -28,7 +28,7 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
   }
 
   ## Get used parameters
-  TEMPLATE_PARAMS <- get_template_params(hip$template)
+  TEMPLATE_PARAMS <- get_template_params(get_template_path(hip$template))
   PARAM_NAMES     <- get_param_names(TEMPLATE_PARAMS)
   PARAM_DEFAULTS  <- get_param_vals(TEMPLATE_PARAMS, "value")
   PARAM_COMMENTED <- get_param_vals(TEMPLATE_PARAMS, "commented")
