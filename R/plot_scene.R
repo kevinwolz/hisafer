@@ -170,11 +170,11 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
     theme(legend.position = "right")
 
   if(!is.null(output.path)){
-    ggplot2::ggsave(filename = clean_path(paste0(output.path, "/", hip$exp.plan$SimulationName, "_Scene.pdf")),
-                    plot = plot.obj,
-                    scale = 1,
-                    height = 8.5,
-                    width = 11)
+    ggsave(filename = clean_path(paste0(output.path, "/", EXP.PLAN$SimulationName, "_Scene.pdf")),
+           plot = plot.obj,
+           scale = 1,
+           height = 8.5,
+           width = 11)
   }
   return(plot.obj)
 }
