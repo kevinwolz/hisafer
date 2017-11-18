@@ -208,13 +208,13 @@ build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, templat
   pld.path <- paste0(simu.path, "/plotDescription/template.pld")
   pld <- read_param_file(pld.path)
   pld.new <- edit_param_file(pld, dplyr::select(exp.plan, pld.params.to.edit)) %>%
-    edit_param_element("nbTrees", exp.plan$SimulationName) %>%
+    edit_param_element("nbTrees", num.trees) %>%
     edit_param_element("country", exp.plan$SimulationName) %>%
     edit_param_element("townShip", exp.plan$SimulationName) %>%
     edit_param_element("site", exp.plan$SimulationName) %>%
     edit_param_element("name", exp.plan$SimulationName) %>%
-    edit_param_element("longitude", "NA") %>%
-    edit_param_element("elevation", "NA")
+    edit_param_element("longitude", 0) %>%
+    edit_param_element("elevation", 0)
   write_param_file(pld.new, pld.path)
   dum <- file.rename(pld.path, paste0(simu.path, "/plotDescription/", exp.plan$SimulationName, ".pld"))
 
@@ -225,7 +225,7 @@ build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, templat
     edit_param_element("pldFileName", paste0(exp.plan$SimulationName, ".pld")) %>%
     edit_param_element("weatherFile", wth.name) %>%
     edit_param_element("profileNames", paste0(profiles, collapse = ",")) %>%
-    edit_param_element("exportFrequencies", paste0(SUPPORTED.PROFILES$freqs[SUPPORTED.PROFILES$profiles %in% profiles], collapse = ","))
+    edit_param_element("exportFrequencies", paste0(SUPPORTED.PROFILES$freqs[match(profiles, SUPPORTED.PROFILES$profiles)], collapse = ","))
   write_param_file(sim.new, sim.path)
   dum <- file.rename(sim.path, paste0(simu.path, "/", exp.plan$SimulationName, ".sim"))
 
