@@ -60,16 +60,16 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
   }
   ## Calculate scene dimensions
   if(USED_PARAMS$geometryOption$value == 1) {
-    width  <- USED_PARAMS$spacingBetweenRows$value / USED_PARAMS$cellWidth$value * sqrt(num.trees)
-    height <- USED_PARAMS$spacingWithinRows$value / USED_PARAMS$cellWidth$value * sqrt(num.trees)
+    WIDTH  <- USED_PARAMS$spacingBetweenRows$value / USED_PARAMS$cellWidth$value * sqrt(num.trees)
+    HEIGHT <- USED_PARAMS$spacingWithinRows$value / USED_PARAMS$cellWidth$value * sqrt(num.trees)
   } else {
-    width  <- USED_PARAMS$plotWidth$value / USED_PARAMS$cellWidth$value
-    height <- USED_PARAMS$plotHeight$value / USED_PARAMS$cellWidth$value
+    WIDTH  <- USED_PARAMS$plotWidth$value / USED_PARAMS$cellWidth$value
+    HEIGHT <- USED_PARAMS$plotHeight$value / USED_PARAMS$cellWidth$value
   }
 
   ## Create plot data
-  plot.data <- expand.grid(x = 1:width,
-                           y = 1:height,
+  plot.data <- expand.grid(x = 1:WIDTH,
+                           y = 1:HEIGHT,
                            crop = mainCropSpecies,
                            stringsAsFactors = FALSE) %>%
     dplyr::as_tibble() %>%
@@ -137,25 +137,15 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
     }
   }
 
-  # weeded.cells <- NA
-  # if(weededAreaRadius > 0) {
-  #   for(i in 1:nrow(tree.data)){
-  #     weeded.xs <- c(tree.data$x[i] + weededAreaRadius, tree.data$x[i] - weededAreaRadius)
-  #     weeded.ys <- c(tree.data$y[i] + weededAreaRadius, tree.data$y[i] - weededAreaRadius)
-  #     weeded.cells <- c(weeded.cells, expand.grid(weeded.xs, weeded.ys))
-  #   }
-  #   plot.data$crop[which(plot.data$x %in% intercrop.xs)] <- "baresoil"
-  # }
-
   plot.obj <- ggplot(plot.data, aes(x = x, y = y)) +
-    labs(x = paste0(width, "m"),
-         y = paste0(height, "m"),
+    labs(x = paste0(WIDTH, "m"),
+         y = paste0(HEIGHT, "m"),
          color = "",
          fill = "",
-         title = paste("Scene:", hip$exp.plan$SimulationName),
+         title = paste("Scene:", EXP.PLAN$SimulationName),
          caption = paste0("Latitude: ", USED_PARAMS$latitude$value,
-                          "deg - Orientation: ", USED_PARAMS$treeLineOrientation$value,
-                          "deg - Cell width: ", USED_PARAMS$cellWidth$value,
+                          " - Orientation: ", USED_PARAMS$treeLineOrientation$value,
+                          "\nCell width: ", USED_PARAMS$cellWidth$value,
                           "m - Soil depth: ", soil.depth, "m")) +
     scale_x_continuous(expand = c(0,0)) +
     scale_y_continuous(expand = c(0,0)) +
@@ -170,11 +160,11 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
     theme(legend.position = "right")
 
   if(!is.null(output.path)){
-    ggplot2::ggsave(filename = clean_path(paste0(output.path, "/", hip$exp.plan$SimulationName, "_Scene.pdf")),
-                    plot = plot.obj,
-                    scale = 1,
-                    height = 8.5,
-                    width = 11)
+    ggsave(filename = clean_path(paste0(output.path, "/", EXP.PLAN$SimulationName, "_Scene.pdf")),
+           plot     = plot.obj,
+           scale    = 1,
+           height   = ifelse(WIDTH > HEIGHT, 8.5, 11),
+           width    = ifelse(WIDTH > HEIGHT, 11,  8.5))
   }
   return(plot.obj)
 }
