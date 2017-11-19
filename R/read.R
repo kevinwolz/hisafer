@@ -22,7 +22,8 @@
 #' If \code{hip} is not provided, then \code{path} is required and the input data for the experiment is read from the experiment
 #' summary .csv file created when building the experiment.
 #' @param path A character string of the path to the directory containing the Hi-sAFe simulation folders.
-#' If \code{hip} is not provided, then \code{path} is required. If both \code{hip} and \code{path} are provided, \code{path} is used.
+#' If \code{hip} is not provided, then \code{path} is required. If \code{hip} is provided, \code{path} is ignored.
+#' @param simu.names Names of the simulations to read. If "all", the default, then all simulations in the experiment folder are read.
 #' @param profiles A character vector of the names of Hi-sAFe output profiles to read.
 #' #' If "all" the default, reads all supported Hi-sAFe output profiles. For currently supported profiles see: \code{\link{hisafe_profiles}}
 #' @param show.progress Logical indicating whether progress messsages should be printed to the console.
@@ -36,10 +37,14 @@
 #' # If only the annual tree data is required:
 #' mytreeexp <- read_hisafe(myexphip, profiles = "annualtree")
 #' }
-read_hisafe_exp <- function(hip = NULL, path = NULL, profiles = "all", show.progress = TRUE) {
+read_hisafe_exp <- function(hip = NULL,
+                            path = NULL,
+                            simu.names = "all",
+                            profiles = "all",
+                            show.progress = TRUE) {
 
   if(!is.null(hip) & !("hip" %in% class(hip))) stop("data not of class hip", call. = FALSE)
-  if(is.null(hip) & is.null(path))             stop("must provide hip or path", call. = FALSE)
+  if(is.null(hip) == is.null(path))            stop("must provide hip or path, not both", call. = FALSE)
 
   ## Read simulation inputs & extract cols that vary for binding to output data
   if(!is.null(hip)) {
@@ -57,6 +62,8 @@ read_hisafe_exp <- function(hip = NULL, path = NULL, profiles = "all", show.prog
   }
 
   exp.plan <- exp.plan[, purrr::map_lgl(exp.plan, function(x) (length(unique(x)) != 1))]
+
+  if(simu.names[1] != "all") exp.plan <- dplyr::filter(exp.plan, SimulationName %in% simu.names)
 
   ## Read all data from all simulations & combine
   data <- purrr::map(exp.plan$SimulationName, read_hisafe, hip = NULL, path = path, profiles = profiles, show.progress = show.progress) %>%
@@ -97,9 +104,9 @@ read_hisafe_exp <- function(hip = NULL, path = NULL, profiles = "all", show.prog
     tidyr::unite(label, SimulationName, n, sep = ": ", remove = FALSE)
   if(length(unique(year.summary$n)) != 1) {
     year.length.warning <- paste(c("Simulation durations not equal!",
-                                   "   Be careful when comparing simulations.",
-                                   "   Simulation durations:",
-                                   paste("      --", year.summary$label, "years")),
+                                   "  Be careful when comparing simulations.",
+                                   "  Simulation durations:",
+                                   paste("   --", year.summary$label, "years")),
                                  collapse = "\n")
     warning(year.length.warning, call. = FALSE)
   }
@@ -131,10 +138,10 @@ read_hisafe_exp <- function(hip = NULL, path = NULL, profiles = "all", show.prog
 #' Cannot provided both \code{hip} and \code{simu.name}.
 #' If \code{hip} is not provided, then \code{path} is required and the input data for the experiment is read from the experiment
 #' summary .csv file created when building the experiment.
-#' @param simu.name The \code{SimulationName} of the Hi-sAFe simulation to read. This must be the same as the name of the Hi-sAFe simulation folder.
-#' Cannot provided both \code{hip} and \code{simu.name}.
 #' @param path A character string of the path to the directory containing the Hi-sAFe simulation folder.
 #' If \code{hip} is not provided, then \code{path} is required. If both \code{hip} and \code{path} are provided, \code{path} is used.
+#' @param simu.name The \code{SimulationName} of the Hi-sAFe simulation to read. This must be the same as the name of the Hi-sAFe simulation folder.
+#' Cannot provided both \code{hip} and \code{simu.name}.
 #' @param profiles A character vector of the names of Hi-sAFe output profiles to read.
 #' If "all" the default, reads all supported Hi-sAFe output profiles. For currently supported profiles see: \code{\link{hisafe_profiles}}
 #' @param show.progress Logical indicating whether progress messsages should be printed to the console.
@@ -148,10 +155,14 @@ read_hisafe_exp <- function(hip = NULL, path = NULL, profiles = "all", show.prog
 #' # If only the annual tree data is required:
 #' mytreedata <- read_hisafe(mysimhip, profiles = "annualtree")
 #' }
-read_hisafe <- function(hip = NULL, simu.name = NULL, path = NULL, profiles = "all", show.progress = TRUE) {
+read_hisafe <- function(hip = NULL,
+                        path = NULL,
+                        simu.name = NULL,
+                        profiles = "all",
+                        show.progress = TRUE) {
 
-  if(!is.null(hip) & !("hip" %in% class(hip)))                stop("data not of class hip", call. = FALSE)
-  if(is.null(hip) == (is.null(simu.name)  |  is.null(path)))  stop("must provide hip OR (simu.name & path)", call. = FALSE)
+  if(!is.null(hip) & !("hip" %in% class(hip)))              stop("data not of class hip", call. = FALSE)
+  if(is.null(hip) == (is.null(simu.name) | is.null(path)))  stop("must provide hip OR (simu.name & path)", call. = FALSE)
 
   ## Read simulation inputs
   if(!is.null(hip)) {

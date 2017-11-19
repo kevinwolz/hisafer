@@ -3,7 +3,7 @@
 #' @return Invisibly returns a list of console logs from simulation runs.
 #' @param hip An object of class "hip" with multiple simulations (rows). Required if \code{path} is not provided.
 #' @param path A character string of the path to the experiment folder containing the simulation folders. Required if \code{hip} is not provided.
-#' @param simu.names Names of the simulations to run. Default is to run all simulations in the experiment folder via "all".
+#' @param simu.names Names of the simulations to run. If "all", the default, then all simulations are run.
 #' @param parallel Logical, should parallel computing be used.
 #' @param num.cores Numbers of cores to use in parallel computing. If not provided, will default to one less than the total number of available cores.
 #' @param capsis.path A character string of the path to the Capsis folder

@@ -4,7 +4,7 @@
 \alias{read_hisafe}
 \title{Read output from a single Hi-sAFe simulation}
 \usage{
-read_hisafe(hip = NULL, simu.name = NULL, path = NULL, profiles = "all",
+read_hisafe(hip = NULL, path = NULL, simu.name = NULL, profiles = "all",
   show.progress = TRUE)
 }
 \arguments{
@@ -13,11 +13,11 @@ Cannot provided both \code{hip} and \code{simu.name}.
 If \code{hip} is not provided, then \code{path} is required and the input data for the experiment is read from the experiment
 summary .csv file created when building the experiment.}
 
-\item{simu.name}{The \code{SimulationName} of the Hi-sAFe simulation to read. This must be the same as the name of the Hi-sAFe simulation folder.
-Cannot provided both \code{hip} and \code{simu.name}.}
-
 \item{path}{A character string of the path to the directory containing the Hi-sAFe simulation folder.
 If \code{hip} is not provided, then \code{path} is required. If both \code{hip} and \code{path} are provided, \code{path} is used.}
+
+\item{simu.name}{The \code{SimulationName} of the Hi-sAFe simulation to read. This must be the same as the name of the Hi-sAFe simulation folder.
+Cannot provided both \code{hip} and \code{simu.name}.}
 
 \item{profiles}{A character vector of the names of Hi-sAFe output profiles to read.
 If "all" the default, reads all supported Hi-sAFe output profiles. For currently supported profiles see: \code{\link{hisafe_profiles}}}

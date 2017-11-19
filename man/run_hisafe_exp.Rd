@@ -13,7 +13,7 @@ run_hisafe_exp(hip = NULL, path = NULL, simu.names = "all",
 
 \item{path}{A character string of the path to the experiment folder containing the simulation folders. Required if \code{hip} is not provided.}
 
-\item{simu.names}{Names of the simulations to run. Default is to run all simulations in the experiment folder via "all".}
+\item{simu.names}{Names of the simulations to run. If "all", the default, then all simulations are run.}
 
 \item{parallel}{Logical, should parallel computing be used.}
 

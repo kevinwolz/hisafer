@@ -4,8 +4,8 @@
 \alias{read_hisafe_exp}
 \title{Read output from a Hi-sAFe experiment}
 \usage{
-read_hisafe_exp(hip = NULL, path = NULL, profiles = "all",
-  show.progress = TRUE)
+read_hisafe_exp(hip = NULL, path = NULL, simu.names = "all",
+  profiles = "all", show.progress = TRUE)
 }
 \arguments{
 \item{hip}{An object of class "hip". To create a hip object see \code{\link{define_hisafe}}.
@@ -13,7 +13,9 @@ If \code{hip} is not provided, then \code{path} is required and the input data f
 summary .csv file created when building the experiment.}
 
 \item{path}{A character string of the path to the directory containing the Hi-sAFe simulation folders.
-If \code{hip} is not provided, then \code{path} is required. If both \code{hip} and \code{path} are provided, \code{path} is used.}
+If \code{hip} is not provided, then \code{path} is required. If \code{hip} is provided, \code{path} is ignored.}
+
+\item{simu.names}{Names of the simulations to read. If "all", the default, then all simulations in the experiment folder are read.}
 
 \item{profiles}{A character vector of the names of Hi-sAFe output profiles to read.
 #' If "all" the default, reads all supported Hi-sAFe output profiles. For currently supported profiles see: \code{\link{hisafe_profiles}}}
