@@ -11,7 +11,8 @@ run_hisafe_exp(hip = NULL, path = NULL, simu.names = "all",
 \arguments{
 \item{hip}{An object of class "hip" with multiple simulations (rows). Required if \code{path} is not provided.}
 
-\item{path}{A character string of the path to the experiment folder containing the simulation folders. Required if \code{hip} is not provided.}
+\item{path}{A character string of the path (relative or absolute) to the experiment folder containing the simulation folders.
+Required if \code{hip} is not provided.}
 
 \item{simu.names}{Names of the simulations to run. If "all", the default, then all simulations are run.}
 

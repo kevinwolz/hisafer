@@ -2,7 +2,8 @@
 #' @description Runs a Hi-sAFe experiment (a group of simulations) - calls Hi-sAFe from command line.
 #' @return Invisibly returns a list of console logs from simulation runs.
 #' @param hip An object of class "hip" with multiple simulations (rows). Required if \code{path} is not provided.
-#' @param path A character string of the path to the experiment folder containing the simulation folders. Required if \code{hip} is not provided.
+#' @param path A character string of the path (relative or absolute) to the experiment folder containing the simulation folders.
+#' Required if \code{hip} is not provided.
 #' @param simu.names Names of the simulations to run. If "all", the default, then all simulations are run.
 #' @param parallel Logical, should parallel computing be used.
 #' @param num.cores Numbers of cores to use in parallel computing. If not provided, will default to one less than the total number of available cores.
@@ -35,7 +36,11 @@ run_hisafe_exp <- function(hip         = NULL,
   if(is.null(hip) & is.null(path))    stop("must provide hip OR path", call. = FALSE)
   if(!is.null(hip) & !is.null(path))  stop("must provide hip OR path, not both", call. = FALSE)
 
-  if(is.null(path)) path <- hip$path
+  if(is.null(path)) {
+    path <- hip$path
+  } else {
+    path <- R.utils::getAbsolutePath(path)
+  }
 
   ## Determine simulations to run & check for missing directories
   if(simu.names[1] == "all") {
@@ -64,7 +69,7 @@ run_hisafe_exp <- function(hip         = NULL,
     }
 
     if(is.null(num.cores)) num.cores <- min((parallel::detectCores() - 1), nrow(hip$exp.plan))
-    if(num.cores < 2) stop("There are less than 2 detectable cores on this computer. Parallel computing not possible.")
+    if(num.cores == 1) stop("There is only 1 detectable core on this computer. Parallel computing is not possible.")
     cat("\nInitializing simulations on", num.cores, "cores")
     cl <- parallel::makeCluster(num.cores)
     doParallel::registerDoParallel(cl)

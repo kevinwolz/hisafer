@@ -51,7 +51,7 @@ An object of class "hip". This is a list of 4 elements:
  \item{"exp.plan"}{ - A data frame (tibble) of manipulated Hi-sAFe input parameters, with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.}
  \item{"template"}{ - A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files used.}
  \item{"profiles"}{ - A character vector of the names of the Hi-sAFe export profiles that will be exported by Hi-sAFe.}
- \item{"path"}{ - A character string of the path to the directory where the simulation/experiment is to be built.
+ \item{"path"}{ - A character string of the absolute path to the directory where the simulation/experiment is to be built.
 }
 If a relative path is via \code{path}, it is converted to an absolute path to maximize "hip" object versaitility.}
 }

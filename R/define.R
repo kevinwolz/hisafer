@@ -7,7 +7,7 @@
 #'  \item{"exp.plan"}{ - A data frame (tibble) of manipulated Hi-sAFe input parameters, with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.}
 #'  \item{"template"}{ - A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files used.}
 #'  \item{"profiles"}{ - A character vector of the names of the Hi-sAFe export profiles that will be exported by Hi-sAFe.}
-#'  \item{"path"}{ - A character string of the path to the directory where the simulation/experiment is to be built.
+#'  \item{"path"}{ - A character string of the absolute path to the directory where the simulation/experiment is to be built.
 #' }
 #' If a relative path is via \code{path}, it is converted to an absolute path to maximize "hip" object versaitility.}
 #' @param path A character string of the path (relative or absolute) to the directory where the simulation/experiment is to be built.
@@ -97,6 +97,8 @@ define_hisafe <- function(path,
 
   if(!("SimulationName" %in% names(exp.plan))) exp.plan$SimulationName <- paste0("Sim_", 1:nrow(exp.plan))
   exp.plan <- dplyr::select(exp.plan, SimulationName, dplyr::everything())
+
+  if("weatherFile" %in% names(exp.plan)) exp.plan$weatherFile <- as.character(R.utils::getAbsolutePath(exp.plan$weatherFile))
 
   if(nrow(exp.plan) > 1) path <- clean_path(paste0(path, "/", exp.name))
   hip <- list(exp.plan = exp.plan,
