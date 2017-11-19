@@ -193,7 +193,7 @@ build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, templat
   remove.tree   <- existing.tree[!(existing.tree %in% required.tree)]
   dum <- purrr::map(remove.tree, file.remove)
 
-  existing.EP <- list.files(paste0(simu.path, "/exportParameters"), pattern = "\\.pro", full.names = TRUE)
+  existing.EP <- list.files(paste0(simu.path, "/exportParameters"), full.names = TRUE)
   required.EP <- paste0(simu.path, "/exportParameters/", profiles, ".pro")
   remove.EP   <- existing.EP[!(existing.EP %in% required.EP)]
   dum <- purrr::map(remove.EP, file.remove)
