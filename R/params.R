@@ -52,28 +52,48 @@ read_param_file <- function(path) {
     } else if(tolower(list.title) == "layers"){
       NAMES <- c("name", "thickness", "sand", "clay", "limeStone", "organicMatter", "partSizeSand", "stone", "stoneType", "infiltrability")
       element.table <- read_element_table(sim, i, titles, NAMES)
-      toto <- list(list(value = element.table, commented = FALSE, range = NA, accepted = NA))
+      element.table.reduced <- element.table[!grepl("#", element.table$name),]
+      if(nrow(element.table.reduced) > 0) {
+        toto <- list(list(value = element.table, commented = FALSE, range = NA, accepted = NA))
+      } else {
+        toto <- list(list(value = element.table, commented = TRUE, range = NA, accepted = NA))
+      }
       names(toto) <- "layers"
       new.sim[[list.title]] <- c(new.sim[[list.title]], toto)
       next_threshold <- i + nrow(element.table)
     } else if(tolower(list.title) == "layer_initialization"){
       NAMES <- c("name", "waterContent", "no3Concentration", "nh4concentration")
       element.table <- read_element_table(sim, i, titles, NAMES)
-      toto <- list(list(value = element.table, commented = FALSE, range = NA, accepted = NA))
+      element.table.reduced <- element.table[!grepl("#", element.table$name),]
+      if(nrow(element.table.reduced) > 0) {
+        toto <- list(list(value = element.table, commented = FALSE, range = NA, accepted = NA))
+      } else {
+        toto <- list(list(value = element.table, commented = TRUE, range = NA, accepted = NA))
+      }
       names(toto) <- "layer.initialization"
       new.sim[[list.title]] <- c(new.sim[[list.title]], toto)
       next_threshold <- i + nrow(element.table)
     } else if(tolower(list.title) == "tree_initialization"){
       NAMES <- c("name", "species", "age", "height", "crownBaseHeight", "truncatureRatio", "leafToFineRootsRatio", "crownRadius", "treeX", "treeY")
       element.table <- read_element_table(sim, i, titles, NAMES)
-      toto <- list(list(value = element.table, commented = FALSE, range = NA, accepted = NA))
+      element.table.reduced <- element.table[!grepl("#", element.table$name),]
+      if(nrow(element.table.reduced) > 0) {
+        toto <- list(list(value = element.table, commented = FALSE, range = NA, accepted = NA))
+      } else {
+        toto <- list(list(value = element.table, commented = TRUE, range = NA, accepted = NA))
+      }
       names(toto) <- "tree.initialization"
       new.sim[[list.title]] <- c(new.sim[[list.title]], toto)
       next_threshold <- i + nrow(element.table)
     } else if(tolower(list.title) == "root_initialization") {
       NAMES <- c("name", "shape", "repartition", "paramShape1", "paramShape2", "paramShape3", "amount")
       element.table <- read_element_table(sim, i, titles, NAMES)
-      toto <- list(list(value = element.table, commented = FALSE, range = NA, accepted = NA))
+      element.table.reduced <- element.table[!grepl("#", element.table$name),]
+      if(nrow(element.table.reduced) > 0) {
+        toto <- list(list(value = element.table, commented = FALSE, range = NA, accepted = NA))
+      } else {
+        toto <- list(list(value = element.table, commented = TRUE, range = NA, accepted = NA))
+      }
       names(toto) <- "root.initialization"
       new.sim[[list.title]] <- c(new.sim[[list.title]], toto)
       next_threshold <- i + nrow(element.table)

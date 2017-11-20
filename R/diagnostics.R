@@ -50,7 +50,7 @@ diag_hisafe_ts <- function(hop,
   if(is.null(output.path) & "hop-group" %in% class(hop)) {
     output.path <- clean_path(paste0(hop$exp.path, "/diagnostics"))
   } else if(is.null(output.path) & !("hop-group" %in% class(hop))){
-    output.path <- clean_path(paste0(hop$path, "/diagnostics"))
+    output.path <- clean_path(paste0(hop$path$path, "/diagnostics"))
   }
   ts.path <- clean_path(paste0(output.path, "/", profile, "/"))
   dir.create(ts.path, recursive = TRUE, showWarnings = FALSE)

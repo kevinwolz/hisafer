@@ -127,6 +127,7 @@ build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, templat
   TEMPLATE_PARAMS <- get_template_params(template.path)
   PARAM_NAMES     <- get_param_names(TEMPLATE_PARAMS)
   PARAM_DEFAULTS  <- get_param_vals(TEMPLATE_PARAMS, "value")
+  PARAM_COMMENTED <- get_param_vals(TEMPLATE_PARAMS, "commented")
 
   ## Copy over folder structure & template files from Hi-sAFe template path
   ## Any newly built files below will overwrite these files
@@ -179,11 +180,16 @@ build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, templat
   ## Remove unused .tree files from treeSpecies
   if("tree.initialization" %in% names(exp.plan)){
     trees.used <- exp.plan$tree.initialization[[1]]$species
-  } else {
+  } else if(PARAM_COMMENTED$tree.initialization == FALSE) {
     trees.used <- PARAM_DEFAULTS$tree.initialization$species
+  } else {
+    trees.used <- NA
   }
+
   if("nbTrees" %in% names(exp.plan)){
     num.trees <- exp.plan$nbTrees
+  } else if(is.na(trees.used)) {
+    num.trees <- 0
   } else {
     num.trees <- length(trees.used)
   }

@@ -249,7 +249,7 @@ read_hisafe <- function(hip = NULL,
                  voxels     = voxels.dv$data,
                  variables  = variables,
                  tree.info  = read_tree_info(path, simu.name),
-                 exp.plan   = hip,
+                 exp.plan   = hip$exp.plan,
                  path       = dplyr::tibble(SimulationName = simu.name, path = simu.path))
 
   class(output) <- c("hop", class(output))
@@ -323,7 +323,7 @@ read_table_hisafe <- function(file, ...) {
 #' @param show.progress Logical indicating whether progress messsages should be printed to the console.
 read_profile <- function(profile, path, show.progress = TRUE) {
   file <- paste0(path, profile, ".txt")
-  if(show.progress) cat(paste0("\nreading:  ", profile, collapse = ", "))
+  if(show.progress) cat(paste0("\n   -- reading:  ", profile, collapse = ", "))
   if(file.info(file)$size < 3e8) {
     profile.list      <- read_hisafe_output_file(file)
     profile.data      <- profile.list$data %>%
@@ -344,11 +344,15 @@ read_profile <- function(profile, path, show.progress = TRUE) {
 #' @importFrom dplyr %>%
 read_tree_info <- function(path, simu.name) {
   pld <- read_param_file(clean_path(paste0(path, "/", simu.name, "/plotDescription/", simu.name, ".pld")))
-  tree.info <- pld$TREE_INITIALIZATION$tree.initialization$value %>%
-    dplyr::mutate(x = treeX, y = treeY) %>%
-    dplyr::select(species, x, y)
-  tree.info <- tree.info %>%
-    dplyr::mutate(id = 1:nrow(tree.info)) %>%
-    dplyr::mutate(SimulationName = rep(simu.name, nrow(tree.info))) %>%
-    dplyr::select(SimulationName, id, dplyr::everything())
+  if(pld$TREE_INITIALIZATION$tree.initialization$commented == FALSE) {
+    tree.info <- pld$TREE_INITIALIZATION$tree.initialization$value %>%
+      dplyr::mutate(x = treeX, y = treeY) %>%
+      dplyr::select(species, x, y)
+    tree.info <- tree.info %>%
+      dplyr::mutate(id = 1:nrow(tree.info)) %>%
+      dplyr::mutate(SimulationName = rep(simu.name, nrow(tree.info))) %>%
+      dplyr::select(SimulationName, id, dplyr::everything())
+  } else {
+    tree.info <- dplyr::tibble()
+  }
 }
