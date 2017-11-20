@@ -252,7 +252,7 @@ plot_hisafe_monthcells <- function(hop,
                aes(x = (x+x.center), y = (y+y.center)),
                inherit.aes = FALSE,
                na.rm = TRUE) +
-    geom_ellipsis(data = diam.data,
+    ggforce::geom_ellipsis(data = diam.data,
                   color = "green",
                   aes(x0 = (x+x.center), y0 = (y+y.center),
                       a = crownRadiusInterRow,

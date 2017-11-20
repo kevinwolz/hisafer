@@ -168,6 +168,7 @@ read_hisafe <- function(hip = NULL,
   if(!is.null(hip)) {
     path      <- hip$path
     simu.name <- hip$exp.plan$SimulationName
+    simu.path <- clean_path(paste0(path, "/" , simu.name))
   } else {
     #cat("\nreading:  simulation inputs (hip)")
     simu.path <- clean_path(paste0(path, "/" , simu.name))
