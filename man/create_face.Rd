@@ -4,7 +4,7 @@
 \alias{create_face}
 \title{Combine hop objects into a face object}
 \usage{
-create_face(agroforestry, forestry, monocrop)
+create_face(agroforestry, forestry, monocrop, face.path)
 }
 \arguments{
 \item{agroforestry}{An object of class "hop" containing one or more agroforestry simulations.}
@@ -12,6 +12,8 @@ create_face(agroforestry, forestry, monocrop)
 \item{forestry}{An object of class "hop" containing a single simulation to serve as a forestry control.}
 
 \item{monocrop}{An object of class "hop" containing a single simulation to serve as a monocrop control. This simulation must not contain any trees.}
+
+\item{face.path}{A character string of the path to a directory where any face analyses should be written to.}
 }
 \value{
 An object of class "face", which is a list of three objects of class "hop":
