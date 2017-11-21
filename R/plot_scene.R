@@ -47,7 +47,9 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
 
   if(USED_PARAMS$nbTrees$value != 0) {
     ## Extract tree data
-    tree.plot.data <- tree.data <- USED_PARAMS$tree.initialization$value %>%
+    tree.init <- USED_PARAMS$tree.initialization$value
+    if("list" %>% class(tree.init)) tree.init <- tree.init[[1]]
+    tree.plot.data <- tree.data <- tree.init %>%
       dplyr::mutate(x = treeX, y = treeY) %>%
       dplyr::select(species, x, y)
     num.trees <- nrow(tree.data) #nbTrees is not an allowed entry to a hip object, but is rather modifying by build_hisafe based on nrow(tree.init.table)

@@ -275,7 +275,7 @@ check_input_values <- function(hip) {
   ## nrow(tree_init) == nrow(root_init) Error
   tree.init <- USED_PARAMS$tree.initialization$value
   if(all(is.na(tree.init))) {
-    tree.rows <- 0
+    tree.rows <- rep(0, length(tree.init))
   } else {
     if(!("list" %in% class(tree.init))) tree.init <- list(tree.init)
     tree.rows <- purrr::map_dbl(tree.init, nrow)
@@ -374,8 +374,8 @@ check_input_values <- function(hip) {
                          "-- when geompetryOption = 1, the number of trees can only be 1, 4, or 9", "")
 
   get_n_species <- function(x) length(unique(x$species))
-  if(is.na(tree.init)) {
-    n.tree.species <- 0
+  if(all(is.na(tree.init))) {
+    n.tree.species <- rep(0, length(tree.init))
     } else {
       n.tree.species <- purrr::map_dbl(tree.init, get_n_species)
     }
