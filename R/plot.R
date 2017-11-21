@@ -220,14 +220,16 @@ plot_hisafe_monthcells <- function(hop,
     gsub(pattern = "\\.", replacement = " ")
 
   ## Filter for provided sim.names, years & months
+  #cellWidth <- max(diff(hop$monthCells$x))
   plot.data <- hop$monthCells %>%
     dplyr::mutate(Year = Year - min(Year) + 1) %>% # Create 0+ year values
     dplyr::filter(SimulationName %in% sim.names) %>%
     dplyr::filter(Year %in% years) %>%
     dplyr::filter(Month %in% months)
 
-  x.center <- mean(plot.data$x)
-  y.center <- mean(plot.data$y)
+  xy.centers <- plot.data %>%
+    dplyr::group_by(SimulationName) %>%
+    dplyr::summarize(x.center = median(x), y.center = median(y)) #+ cellWidth/2
 
   ## Filter for sim.names & combine with canopy diameter
   if(nrow(hop$tree.info) > 0 & nrow(hop$trees) > 0) {
@@ -241,7 +243,10 @@ plot_hisafe_monthcells <- function(hop,
       dplyr::filter(Month %in% months) %>%
       dplyr::filter(Day == 1) %>%
       dplyr::select(SimulationName, Year, Month, id, crownRadiusInterRow, crownRadiusTreeLine) %>%
-      dplyr::left_join(tree.data, by = c("SimulationName", "id"))
+      dplyr::left_join(tree.data, by = c("SimulationName", "id")) %>%
+      dplyr::left_join(xy.centers, by = "SimulationName") %>%
+      dplyr::mutate(x = x + x.center, y = y + y.center) %>%
+      dplyr::select(-x.center, -y.center)
   } else {
     years <- years[years %in% (unique(hop$monthCells$Year) -  min(hop$monthCells$Year))]
     years <- years[years != 0]
@@ -267,12 +272,12 @@ plot_hisafe_monthcells <- function(hop,
     geom_tile(aes_string(fill = variable), na.rm = TRUE, color = "black") +
     geom_point(data = diam.data,
                color = "green",
-               aes(x = (x+x.center), y = (y+y.center)),
-               inherit.aes = FALSE,
+               size = 2,
                na.rm = TRUE) +
     ggforce::geom_ellipsis(data = diam.data,
                            color = "green",
-                           aes(x0 = (x+x.center), y0 = (y+y.center),
+                           size = 2,
+                           aes(x0 = x, y0 = y,
                                a = crownRadiusInterRow,
                                b = crownRadiusTreeLine,
                                angle = 0),
