@@ -139,8 +139,8 @@ diag_hisafe_monthcells <- function(hop, output.path = NULL) {
   ## Create plots
   plot.list1 <- purrr::map(var.names, plot_hisafe_monthcells,
                            hop       = hop,
-                           rowfacet  = "SimulationName",
-                           colfacet  = "Year",
+                           colfacet  = "SimulationName",
+                           rowfacet  = "Year",
                            sim.names = "all",
                            years     = seq(0, (max(hop$monthCells$Year) - min(hop$monthCells$Year)), 5),
                            months    = 6)
@@ -149,8 +149,8 @@ diag_hisafe_monthcells <- function(hop, output.path = NULL) {
 
   plot.list2 <- purrr::map(var.names, plot_hisafe_monthcells,
                            hop       = hop,
-                           rowfacet  = "SimulationName",
-                           colfacet  = "Month",
+                           colfacet  = "SimulationName",
+                           rowfacet  = "Month",
                            sim.names = "all",
                            years     = (round(median(hop$monthCells$Year),0) - min(hop$monthCells$Year)),
                            months    = 1:12)
@@ -161,8 +161,8 @@ diag_hisafe_monthcells <- function(hop, output.path = NULL) {
   for(sim.name in unique(hop$monthCells$SimulationName)){
     plot.list3 <- purrr::map(var.names, plot_hisafe_monthcells,
                              hop       = hop,
-                             rowfacet  = "Year",
-                             colfacet  = "Month",
+                             colfacet  = "Year",
+                             rowfacet  = "Month",
                              sim.names = sim.name,
                              years     = seq(0, (max(hop$monthCells$Year) - min(hop$monthCells$Year)), 5),
                              months    = 1:12)

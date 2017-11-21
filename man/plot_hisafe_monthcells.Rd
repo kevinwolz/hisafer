@@ -4,8 +4,8 @@
 \alias{plot_hisafe_monthcells}
 \title{Tile plot of Hi-sAFe monthCells output variable}
 \usage{
-plot_hisafe_monthcells(hop, variable, rowfacet = "SimulationName",
-  colfacet = "Year", sim.names = "all", years = seq(0, 40, 5),
+plot_hisafe_monthcells(hop, variable, colfacet = "SimulationName",
+  rowfacet = "Year", sim.names = "all", years = seq(0, 40, 5),
   months = 6)
 }
 \arguments{
@@ -13,9 +13,9 @@ plot_hisafe_monthcells(hop, variable, rowfacet = "SimulationName",
 
 \item{variable}{A character string of the name of the variable to color the tiles.}
 
-\item{rowfacet}{One of "Year", "Month", or "SimulationName", indicating which variable to use for row faceting.}
-
 \item{colfacet}{One of "Year", "Month", or "SimulationName", indicating which variable to use for column faceting.}
+
+\item{rowfacet}{One of "Year", "Month", or "SimulationName", indicating which variable to use for row faceting.}
 
 \item{sim.names}{A character string containing the SimulationNames to include. Use "all" to include all available values.}
 

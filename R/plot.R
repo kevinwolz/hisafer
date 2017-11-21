@@ -190,8 +190,8 @@ plot_hisafe_ts <- function(hop,
 #' }
 plot_hisafe_monthcells <- function(hop,
                                    variable,
-                                   rowfacet  = "SimulationName",
-                                   colfacet  = "Year",
+                                   colfacet  = "SimulationName",
+                                   rowfacet  = "Year",
                                    sim.names = "all",
                                    years     = seq(0, 40, 5),
                                    months    = 6) {
@@ -210,7 +210,7 @@ plot_hisafe_monthcells <- function(hop,
   avail.vars <- list(sim.names, years, months)
   var.lengths <- purrr::map_int(avail.vars, length) > 1
   if(sum(var.lengths) > 2) stop("only two variables of (sim.names, years, months) can have length greater than one", call. = FALSE)
-  fixed <- which(!(vars %in% c(rowfacet, colfacet)))
+  fixed <- which(!(vars %in% c(colfacet, rowfacet)))
   fixed.var <- paste(vars[fixed], "=", avail.vars[[fixed]])
 
   ## Exract units of supplied variable from the "variables" slot
@@ -232,7 +232,8 @@ plot_hisafe_monthcells <- function(hop,
     dplyr::summarize(x.center = median(x), y.center = median(y)) #+ cellWidth/2
 
   ## Filter for sim.names & combine with canopy diameter
-  if(nrow(hop$tree.info) > 0 & nrow(hop$trees) > 0) {
+  n.trees <- nrow(dplyr::filter(hop$tree.info, SimulationName %in% sim.names))
+  if(n.trees > 0 & nrow(hop$trees) > 0) {
     tree.data <- hop$tree.info %>%
       dplyr::filter(SimulationName %in% sim.names)
 
@@ -263,13 +264,13 @@ plot_hisafe_monthcells <- function(hop,
 
   ## Create plot
   plot.obj <- ggplot(plot.data, aes(x = x, y = y)) +
-    labs(x = rowfacet,
-         y = colfacet,
+    labs(x = colfacet,
+         y = rowfacet,
          fill = var.unit,
          title = paste0(variable, " (", fixed.var, ")")) +
     scale_x_continuous(expand = c(0,0)) +
     scale_y_continuous(expand = c(0,0)) +
-    facet_grid(reformulate(rowfacet, colfacet), switch = "both") +
+    facet_grid(reformulate(colfacet, rowfacet), switch = "both") +
     geom_tile(aes_string(fill = variable), na.rm = TRUE, color = "black") +
     geom_point(data = diam.data,
                color = "green",
