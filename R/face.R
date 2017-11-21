@@ -120,6 +120,11 @@ create_face <- function(agroforestry, forestry, monocrop, face.path) {
 }
 
 
+#' Augment hop elements with system name
+#' @description Adds a "System" column to all hop elements
+#' @return Returns the modified hop object
+#' @param hop An object of class "hop" to augment
+#' @param system A character string of the system name to use
 augment_with_system <- function(hop, system) {
   profiles.to.check <- c("annualtree", "annualcrop", "annualplot",
                          "trees", "plot", "climate", "roots",

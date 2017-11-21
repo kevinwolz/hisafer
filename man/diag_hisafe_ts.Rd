@@ -5,7 +5,8 @@
 \title{Plot timeseries diagnostics of Hi-sAFe output}
 \usage{
 diag_hisafe_ts(hop, profile, output.path = NULL, time.lim = NULL,
-  tree.id = NULL, color.palette = NULL, lty.palette = NULL)
+  tree.id = NULL, color.palette = NULL, linetype.palette = NULL,
+  aes.cols = list(color = NULL, linetype = NULL))
 }
 \arguments{
 \item{hop}{An object of class "hop" or "hop-group" containing output data from one or more Hi-sAFe simulations.}
@@ -24,7 +25,13 @@ If no input, the full available time range is plotted. Use \code{NA} to refer to
 \item{tree.id}{A numeric vector indicating the ids of a subset of tree ids to plot. If no input, all trees will be plotted.}
 
 \item{color.palette}{A character stirng of hex values  or R standard color names defining the color palette to use in plots with multiple simulations.
-If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette.}
+If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette. The default supports up to 24 simulations.}
+
+\item{linetype.palette}{A character stirng of values defining the linetype palette to use in plots with multiple simulations.
+If \code{NULL}, the default, then solid lines are used for all simulations. The default supports up to 24 simulations.}
+
+\item{aes.cols}{A list with arguments "color" and "linetype" containing character stirngs of the column names to use for plot aesthetics.
+If \code{NULL}, the default, then SimulationName is used for both aesthetics.}
 }
 \value{
 Invisibly returns a list of \code{ggplot} objects. If the data is of class "hop-group" and contains

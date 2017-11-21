@@ -48,25 +48,25 @@ read_hisafe_exp <- function(hip = NULL,
 
   ## Read simulation inputs & extract cols that vary for binding to output data
   if(!is.null(hip)) {
-    exp.plan <- hip$hip
+    EXP.PLAN <- hip$exp.plan
     path     <- hip$path
   } else {
     exp.name <- tail(strsplit(path, "/")[[1]], n = 1)
     exp.summary.file <- clean_path(paste0(path, "/", exp.name, "_exp_summary.csv"))
     if(file.exists(exp.summary.file)) {
-      exp.plan <- readr::read_csv(exp.summary.file, col_types = readr::cols())
+      EXP.PLAN <- readr::read_csv(exp.summary.file, col_types = readr::cols())
     } else {
       warning("No experiment summary to read. This experiment was not created with hisafer.", call. = FALSE)
-      exp.plan <- dplyr::tibble()
+      EXP.PLAN <- dplyr::tibble()
     }
   }
 
-  exp.plan <- exp.plan[, purrr::map_lgl(exp.plan, function(x) (length(unique(x)) != 1))]
+  EXP.PLAN <- EXP.PLAN[, purrr::map_lgl(EXP.PLAN, function(x) (length(unique(x)) != 1))]
 
-  if(simu.names[1] != "all") exp.plan <- dplyr::filter(exp.plan, SimulationName %in% simu.names)
+  if(simu.names[1] != "all") EXP.PLAN <- dplyr::filter(EXP.PLAN, SimulationName %in% simu.names)
 
   ## Read all data from all simulations & combine
-  data <- purrr::map(exp.plan$SimulationName, read_hisafe, hip = NULL, path = path, profiles = profiles, show.progress = show.progress) %>%
+  data <- purrr::map(EXP.PLAN$SimulationName, read_hisafe, hip = NULL, path = path, profiles = profiles, show.progress = show.progress) %>%
     purrr::pmap(dplyr::bind_rows) # a more generic version of this line that handles cases where the number
   # of elements and order of names in each sublist can vary is:
   # purrr::map(map_df(data, ~ as.data.frame(purrr::map(.x, ~ unname(nest(.))))), bind_rows)
@@ -76,9 +76,9 @@ read_hisafe_exp <- function(hip = NULL,
   ## Tidy up data
   data_tidy <- function(x){
     if(nrow(x) > 0) {
-      x <- dplyr::left_join(exp.plan, x, by = "SimulationName") %>%   # add exp.plan cols to annual data
+      x <- dplyr::left_join(EXP.PLAN, x, by = "SimulationName") %>%   # add EXP.PLAN cols to annual data
         dplyr::filter(!is.na(Date)) #%>%                               # output profiles with no data will have NA's in all columns
-      #dplyr::mutate_at(names(exp.plan), factor) #%>%
+      #dplyr::mutate_at(names(EXP.PLAN), factor) #%>%
       #dplyr::group_by(SimulationName)                               # group annual data by simulaton
     }
     return(x)
@@ -166,19 +166,20 @@ read_hisafe <- function(hip = NULL,
 
   ## Read simulation inputs
   if(!is.null(hip)) {
+    EXP.PLAN  <- hip$exp.plan
     path      <- hip$path
-    simu.name <- hip$exp.plan$SimulationName
+    simu.name <- EXP.PLAN$SimulationName
     simu.path <- clean_path(paste0(path, "/" , simu.name))
   } else {
     #cat("\nreading:  simulation inputs (hip)")
     simu.path <- clean_path(paste0(path, "/" , simu.name))
     simu.summary.file <- paste0(simu.path, "/", simu.name, "_simulation_summary.csv")
     if(file.exists(simu.summary.file)){
-      hip <- readr::read_csv(paste0(simu.path, "/", simu.name, "_simulation_summary.csv"), col_types = readr::cols()) #%>%
+      EXP.PLAN <- readr::read_csv(paste0(simu.path, "/", simu.name, "_simulation_summary.csv"), col_types = readr::cols()) #%>%
       #mutate(SimulationName = factor(SimulationName))
     } else {
-      warning("No simulation inputs summary (hip) to read from simulation directory. This simulation was not created with hisafer.", call. = FALSE)
-      hip <- dplyr::tibble()
+      warning("No simulation inputs summary (experimental plan) to read from simulation directory. This simulation was not created with hisafer.", call. = FALSE)
+      EXP.PLAN <- dplyr::tibble()
     }
   }
 
@@ -249,7 +250,7 @@ read_hisafe <- function(hip = NULL,
                  voxels     = voxels.dv$data,
                  variables  = variables,
                  tree.info  = read_tree_info(path, simu.name),
-                 exp.plan   = hip$exp.plan,
+                 exp.plan   = EXP.PLAN,
                  path       = dplyr::tibble(SimulationName = simu.name, path = simu.path))
 
   class(output) <- c("hop", class(output))

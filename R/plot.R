@@ -12,7 +12,11 @@
 #' If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.
 #' @param tree.id A numeric vector indicating the ids of a subset of tree ids to plot. If no input, all trees will be plotted.
 #' @param color.palette A character stirng of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
-#' If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette.
+#' If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette. The default supports up to 24 simulations.
+#' @param linetype.palette A character stirng of values defining the linetype palette to use in plots with multiple simulations.
+#' If \code{NULL}, the default, then solid lines are used for all simulations. The default supports up to 24 simulations.
+#' @param aes.cols A list with arguments "color" and "linetype" containing character stirngs of the column names to use for plot aesthetics.
+#' If \code{NULL}, the default, then SimulationName is used for both aesthetics.
 #' @export
 #' @importFrom dplyr %>%
 #' @import ggplot2
@@ -35,10 +39,11 @@
 plot_hisafe_ts <- function(hop,
                            variable,
                            profile,
-                           time.lim      = NULL,
-                           tree.id       = NULL,
-                           color.palette = NULL,
-                           lty.palette   = NULL) {
+                           time.lim         = NULL,
+                           tree.id          = NULL,
+                           color.palette    = NULL,
+                           linetype.palette = NULL,
+                           aes.cols         = list(color = NULL, linetype = NULL)) {
 
   annual.profiles <- c("annualtree", "annualplot")
   daily.profiles  <- c("trees", "plot", "climate")
@@ -47,16 +52,6 @@ plot_hisafe_ts <- function(hop,
   if(!any(c("hop", "hop-group") %in% class(hop)))        stop("hop argument not of class hop", call. = FALSE)
   if(!(profile %in% c(annual.profiles, daily.profiles))) stop("supplied profile is not supported", call. = FALSE)
   if(nrow(hop[[profile]]) == 0)                          stop(paste("no data from", profile, "profile found"), call. = FALSE)
-
-  ## Color blind-friendly palette
-  if(is.null(color.palette)) {
-    cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
-    color.palette <- cbPalette
-  }
-
-  if(is.null(lty.palette)) {
-    lty.palette <- "solid"
-  }
 
   ## Exract units of supplied variable from the "variables" slot
   var.unit <- hop$variables %>%
@@ -101,32 +96,55 @@ plot_hisafe_ts <- function(hop,
   }
 
   ## If number of trees in scene is > 1, then facet by tree id
-  facet_annual <- geom_blank()
+  facet_tree <- geom_blank()
   if(profile %in% c("annualtree", "trees")) {
     if(length(unique(plot.data$id)) > 1) {
       plot.data <- plot.data %>% dplyr::mutate(id = paste("Tree", id))
-      facet_annual <- facet_wrap(~id, nrow = 1)
+      facet_tree <- facet_wrap(~id, nrow = 1)
     }
   }
 
-  ## Pad SimulationName for legend clarity (until bug in legend.text response to margin is fixed)
-  if("hop-group" %in% class(hop)) {
-    levels(plot.data$SimulationName) <- paste0(levels(plot.data$SimulationName), "  ")
+  ## Create plot
+  if(is.null(color.palette)) {
+    cbPalette <- rep(c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7"), 3) # Color blind-friendly palette
+    color.palette <- cbPalette
+  }
+  if(is.null(linetype.palette)) {
+    linetype.palette <- rep(c("solid", "dashed", "dotted"), each = 8)
   }
 
-  ## Create plot
-  plot.obj <- ggplot(plot.data, aes_string(x = x.var, y = variable, color = "SimulationName", linetype = "SimulationName")) +
-    labs(x = x.label,
-         y = paste0(variable, " (", var.unit, ")"),
-         title = variable,
-         color = "", linetype = "") +
-    facet_annual +
+  if(is.null(aes.cols$color) & is.null(aes.cols$linetype)) {
+    plot.starter <- ggplot(plot.data, aes_string(x        = x.var,
+                                                 y        = variable,
+                                                 color    = "SimulationName",
+                                                 linetype = "SimulationName")) +
+      labs(x        = x.label,
+           y        = paste0(variable, " (", var.unit, ")"),
+           title    = variable,
+           color    = "",
+           linetype = "") +
+      scale_linetype_manual(values = linetype.palette)
+  } else {
+    if("color"    %in% names(aes.cols)) plot.data[[aes.cols$color]]    <- factor(plot.data[[aes.cols$color]])
+    if("linetype" %in% names(aes.cols)) plot.data[[aes.cols$linetype]] <- factor(plot.data[[aes.cols$linetype]])
+    plot.starter <- ggplot(plot.data, aes_string(x        = x.var,
+                                                 y        = variable,
+                                                 color    = aes.cols$color,
+                                                 linetype = aes.cols$linetype,
+                                                 group    = "SimulationName")) +
+      labs(x        = x.label,
+           y        = paste0(variable, " (", var.unit, ")"),
+           title    = variable,
+           color    = aes.cols$color,
+           linetype = aes.cols$linetype)
+  }
+
+  plot.obj <- plot.starter +
+    facet_tree +
     scale_x_ts +
     scale_y_continuous(sec.axis = sec_axis(~ ., labels = NULL)) +
     geom_line(size = 1, na.rm = TRUE) +
-    scale_color_manual(values = rep(color.palette, 10),
-                       guide = guide_legend(ncol = 3, byrow = TRUE)) +
-    scale_linetype_manual(values = rep(lty.palette, 100)) +
+    scale_color_manual(values = color.palette) +
     theme_hisafe_ts()
 
   return(plot.obj)
@@ -228,7 +246,7 @@ plot_hisafe_monthcells <- function(hop,
     years <- years[years %in% (unique(hop$monthCells$Year) -  min(hop$monthCells$Year))]
     years <- years[years != 0]
     diam.data <- dplyr::as_tibble(expand.grid(SimulationName = sim.names, Year = years, Month = months, id = NA,
-                        crownRadiusInterRow = NA, crownRadiusTreeLine = NA, species = NA, x = NA, y = NA))
+                                              crownRadiusInterRow = NA, crownRadiusTreeLine = NA, species = NA, x = NA, y = NA))
   }
 
   ## Check for existence of variable within hop profile
@@ -253,13 +271,13 @@ plot_hisafe_monthcells <- function(hop,
                inherit.aes = FALSE,
                na.rm = TRUE) +
     ggforce::geom_ellipsis(data = diam.data,
-                  color = "green",
-                  aes(x0 = (x+x.center), y0 = (y+y.center),
-                      a = crownRadiusInterRow,
-                      b = crownRadiusTreeLine,
-                      angle = 0),
-                  inherit.aes = FALSE,
-                  na.rm = TRUE) +
+                           color = "green",
+                           aes(x0 = (x+x.center), y0 = (y+y.center),
+                               a = crownRadiusInterRow,
+                               b = crownRadiusTreeLine,
+                               angle = 0),
+                           inherit.aes = FALSE,
+                           na.rm = TRUE) +
     viridis::scale_fill_viridis(option = "magma") +
     guides(fill = guide_colourbar(barwidth = 15,
                                   barheight = 1.5,
