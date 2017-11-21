@@ -251,7 +251,8 @@ plot_hisafe_monthcells <- function(hop,
     years <- years[years %in% (unique(hop$monthCells$Year) -  min(hop$monthCells$Year))]
     years <- years[years != 0]
     diam.data <- dplyr::as_tibble(expand.grid(SimulationName = sim.names, Year = years, Month = months, id = NA,
-                                              crownRadiusInterRow = NA, crownRadiusTreeLine = NA, species = NA, x = NA, y = NA))
+                                              crownRadiusInterRow = NA, crownRadiusTreeLine = NA, species = NA, x = NA, y = NA)) %>%
+      dplyr::mutate_if(is.logical, as.numeric)
   }
 
   ## Check for existence of variable within hop profile
