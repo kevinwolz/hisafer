@@ -55,7 +55,7 @@ build_hisafe <- function(hip) {
       exp.plan.to.write[[i]] <- find.unique.tibbles(EXP.PLAN, i)
       add_sim_names <- function(x, sim.name) {
         x$SimulationName <- sim.name
-        x <- select(x, SimulationName, everything())
+        x <- dplyr::select(x, SimulationName, dplyr::everything())
         return(x)
       }
       tibble.out <- purrr::map2_df(as.list(EXP.PLAN[i])[[1]], EXP.PLAN$SimulationName, add_sim_names)

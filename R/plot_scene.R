@@ -48,7 +48,7 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
   if(USED_PARAMS$nbTrees$value != 0) {
     ## Extract tree data
     tree.init <- USED_PARAMS$tree.initialization$value
-    if("list" %>% class(tree.init)) tree.init <- tree.init[[1]]
+    if("list" %in% class(tree.init)) tree.init <- tree.init[[1]]
     tree.plot.data <- tree.data <- tree.init %>%
       dplyr::mutate(x = treeX, y = treeY) %>%
       dplyr::select(species, x, y)
