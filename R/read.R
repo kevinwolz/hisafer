@@ -27,6 +27,7 @@
 #' @param profiles A character vector of the names of Hi-sAFe output profiles to read.
 #' #' If "all" the default, reads all supported Hi-sAFe output profiles. For currently supported profiles see: \code{\link{hisafe_profiles}}
 #' @param show.progress Logical indicating whether progress messsages should be printed to the console.
+#' @param max.size The maximum file size (in bytes) that should be read. Files larger than this value will be ignored, with a warning.
 #' @export
 #' @importFrom dplyr %>%
 #' @examples
@@ -41,7 +42,8 @@ read_hisafe_exp <- function(hip = NULL,
                             path = NULL,
                             simu.names = "all",
                             profiles = "all",
-                            show.progress = TRUE) {
+                            show.progress = TRUE,
+                            max.size = 3e8) {
 
   if(!is.null(hip) & !("hip" %in% class(hip))) stop("data not of class hip", call. = FALSE)
   if(is.null(hip) == is.null(path))            stop("must provide hip or path, not both", call. = FALSE)
@@ -66,8 +68,15 @@ read_hisafe_exp <- function(hip = NULL,
   if(simu.names[1] != "all") EXP.PLAN <- dplyr::filter(EXP.PLAN, SimulationName %in% simu.names)
 
   ## Read all data from all simulations & combine
-  data <- purrr::map(EXP.PLAN$SimulationName, read_hisafe, hip = NULL, path = path, profiles = profiles, show.progress = show.progress) %>%
-    purrr::pmap(dplyr::bind_rows) # a more generic version of this line that handles cases where the number
+  data <- purrr::map(EXP.PLAN$SimulationName,
+                     read_hisafe,
+                     hip = NULL,
+                     path = path,
+                     profiles = profiles,
+                     show.progress = show.progress,
+                     max.size = max.size) %>%
+    purrr::pmap(dplyr::bind_rows)
+  # a more generic version of this line that handles cases where the number
   # of elements and order of names in each sublist can vary is:
   # purrr::map(map_df(data, ~ as.data.frame(purrr::map(.x, ~ unname(nest(.))))), bind_rows)
   # However, this isn't necessary becasue read_hisafe_output always produces
@@ -145,6 +154,7 @@ read_hisafe_exp <- function(hip = NULL,
 #' @param profiles A character vector of the names of Hi-sAFe output profiles to read.
 #' If "all" the default, reads all supported Hi-sAFe output profiles. For currently supported profiles see: \code{\link{hisafe_profiles}}
 #' @param show.progress Logical indicating whether progress messsages should be printed to the console.
+#' @param max.size The maximum file size (in bytes) that should be read. Files larger than this value will be ignored, with a warning.
 #' @export
 #' @importFrom dplyr %>%
 #' @examples
@@ -159,7 +169,8 @@ read_hisafe <- function(hip = NULL,
                         path = NULL,
                         simu.name = NULL,
                         profiles = "all",
-                        show.progress = TRUE) {
+                        show.progress = TRUE,
+                        max.size = 3e8) {
 
   if(!is.null(hip) & !("hip" %in% class(hip)))              stop("data not of class hip", call. = FALSE)
   if(is.null(hip) == (is.null(simu.name) | is.null(path)))  stop("must provide hip OR (simu.name & path)", call. = FALSE)
@@ -204,7 +215,7 @@ read_hisafe <- function(hip = NULL,
   if(show.progress) cat("\n\nReading: ", simu.name, "\nProfiles:", paste0(profiles, collapse = ", "))
 
   if(length(profiles) >= 1) {
-    out <- purrr::map(profiles, read_profile, path = file.prefix, show.progress = show.progress)
+    out <- purrr::map(profiles, read_profile, path = file.prefix, show.progress = show.progress, max.size = max.size)
     names(out) <- profiles
   } else {
     out <- list()
@@ -322,10 +333,10 @@ read_table_hisafe <- function(file, ...) {
 #' @param profile A character string of the profile name.
 #' @param path A character string of the path to the folder containing the profiles.
 #' @param show.progress Logical indicating whether progress messsages should be printed to the console.
-read_profile <- function(profile, path, show.progress = TRUE) {
+read_profile <- function(profile, path, show.progress = TRUE, max.size = 3e8) {
   file <- paste0(path, profile, ".txt")
   if(show.progress) cat(paste0("\n   -- reading:  ", profile, collapse = ", "))
-  if(file.info(file)$size < 3e8) {
+  if(file.info(file)$size < max.size) {
     profile.list      <- read_hisafe_output_file(file)
     profile.data      <- profile.list$data %>%
       dplyr::mutate_if(is.logical, as.numeric)   # columns read as logical must be coered to numeric to prevent plotting errors
