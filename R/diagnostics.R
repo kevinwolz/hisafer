@@ -167,7 +167,7 @@ diag_hisafe_monthcells <- function(hop, output.path = NULL) {
                              years     = seq(0, (max(hop$monthCells$Year) - min(hop$monthCells$Year)), 5),
                              months    = 1:12)
 
-    bad.plot.check <- unlist(map(plot.list3, is.logical))
+    bad.plot.check <- unlist(purrr::map(plot.list3, is.logical))
     plot.list3 <- plot.list3[!bad.plot.check]
 
     file.names <- paste0("monthCells_month_year_", sim.name, "_", var.names, ".png")
