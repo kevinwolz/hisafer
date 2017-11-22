@@ -126,10 +126,7 @@ create_face <- function(agroforestry, forestry, monocrop, face.path) {
 #' @param hop An object of class "hop" to augment
 #' @param system A character string of the system name to use
 augment_with_system <- function(hop, system) {
-  profiles.to.check <- c("annualtree", "annualcrop", "annualplot",
-                         "trees", "plot", "climate", "roots",
-                         "monthCells", "cells", "voxels",
-                         "tree.info", "exp.plan", "path")
+  profiles.to.check <- names(hop)[!(names(hop) %in% "variables")]
   profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
   for(i in profiles) {
     hop[[i]]$System <- system

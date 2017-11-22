@@ -74,10 +74,7 @@ hisafe_profiles <- function(variable = "names") {
 simu_rename <- function(hop, old.names, new.names) {
   if(!any(c("hop", "hop-group") %in% class(hop))) stop("data not of class hop or hop-group", call. = FALSE)
 
-  profiles.to.check <- c("annualtree", "annualcrop", "annualplot",
-                         "trees", "plot", "climate", "roots",
-                         "monthCells", "cells", "voxels",
-                         "plot.info", "tree.info", "exp.plan", "path")
+  profiles.to.check <- names(hop)[!(names(hop) %in% "variables")]
   profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
 
   existing.names <- unique(hop[[profiles[1]]]$SimulationName)
