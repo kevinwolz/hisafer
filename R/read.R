@@ -1,6 +1,6 @@
 #' Read output from a Hi-sAFe experiment
 #' @description Reads the designated output profiles from a Hi-sAFe experiiment (i.e. a group of Hi-sAFe simulations).
-#' @return An object of class "hop-group". This is a list of 15 data frames (tibbles):
+#' @return An object of class "hop-group". This is a list of 16 data frames (tibbles):
 #' \itemize{
 #'  \item{annualtree}
 #'  \item{annualcrop}
@@ -13,6 +13,7 @@
 #'  \item{cells}
 #'  \item{voxels}
 #'  \item{variables}{ - variable descriptions and units from all profiles}
+#'  \item{plot.info}{ - plot geometry data}
 #'  \item{tree.info}{ - tree species and location data}
 #'  \item{exp.plan}{ - the exp.plan of the hip object that generated the simulation}
 #'  \item{path}{ - the path to the simulation folder}
@@ -86,9 +87,7 @@ read_hisafe_exp <- function(hip = NULL,
   data_tidy <- function(x){
     if(nrow(x) > 0) {
       x <- dplyr::left_join(EXP.PLAN, x, by = "SimulationName") %>%   # add EXP.PLAN cols to annual data
-        dplyr::filter(!is.na(Date)) #%>%                               # output profiles with no data will have NA's in all columns
-      #dplyr::mutate_at(names(EXP.PLAN), factor) #%>%
-      #dplyr::group_by(SimulationName)                               # group annual data by simulaton
+        dplyr::filter(!is.na(Date))                                   # output profiles with no data will have NA's in all columns
     }
     return(x)
   }
@@ -126,7 +125,7 @@ read_hisafe_exp <- function(hip = NULL,
 
 #' Read output from a single Hi-sAFe simulation
 #' @description Reads the designated output profiles from a single Hi-sAFe simulation.
-#' @return An object of class "hop". This is a list of 14 data frames (tibbles):
+#' @return An object of class "hop". This is a list of 15 data frames (tibbles):
 #' \itemize{
 #'  \item{annualtree}
 #'  \item{annualcrop}
@@ -139,6 +138,7 @@ read_hisafe_exp <- function(hip = NULL,
 #'  \item{cells}
 #'  \item{voxels}
 #'  \item{variables}{ - variable descriptions and units from all profiles}
+#'  \item{plot.info}{ - plot geometry data}
 #'  \item{tree.info}{ - tree species and location data}
 #'  \item{exp.plan}{ - the exp.plan of the hip object that generated the simulation}
 #'  \item{path}{ - the path to the simulation folder}
@@ -182,12 +182,10 @@ read_hisafe <- function(hip = NULL,
     simu.name <- EXP.PLAN$SimulationName
     simu.path <- clean_path(paste0(path, "/" , simu.name))
   } else {
-    #cat("\nreading:  simulation inputs (hip)")
     simu.path <- clean_path(paste0(path, "/" , simu.name))
     simu.summary.file <- paste0(simu.path, "/", simu.name, "_simulation_summary.csv")
     if(file.exists(simu.summary.file)){
-      EXP.PLAN <- readr::read_csv(paste0(simu.path, "/", simu.name, "_simulation_summary.csv"), col_types = readr::cols()) #%>%
-      #mutate(SimulationName = factor(SimulationName))
+      EXP.PLAN <- readr::read_csv(paste0(simu.path, "/", simu.name, "_simulation_summary.csv"), col_types = readr::cols())
     } else {
       warning("No simulation inputs summary (experimental plan) to read from simulation directory. This simulation was not created with hisafer.", call. = FALSE)
       EXP.PLAN <- dplyr::tibble()
@@ -212,7 +210,7 @@ read_hisafe <- function(hip = NULL,
   }
 
   ## Read profiles
-  if(show.progress) cat("\n\nReading: ", simu.name, "\nProfiles:", paste0(profiles, collapse = ", "))
+  if(show.progress) cat("\n\nReading:", simu.name, "\nProfiles:", paste0(profiles, collapse = ", "))
 
   if(length(profiles) >= 1) {
     out <- purrr::map(profiles, read_profile, path = file.prefix, show.progress = show.progress, max.size = max.size)
@@ -248,7 +246,26 @@ read_hisafe <- function(hip = NULL,
     dplyr::distinct()
   if(ncol(variables) > 0) names(variables) <- c("Subject", "SubjectId", "VariableName", "Units", "Description", "VariableClass")
 
-  ## Creat output list & assign class
+  ## Read plot characteristics from .PLD file
+  pld.path <- clean_path(paste0(simu.path, "/plotDescription/", simu.name, ".pld"))
+  pld <- read_param_file(pld.path)
+  geometryOption      <- as.numeric(pld$PLOT$geometryOption$value)
+  spacingBetweenRows  <- as.numeric(pld$PLOT$spacingBetweenRows$value)
+  spacingWithinRows   <- as.numeric(pld$PLOT$spacingWithinRows$value)
+  plotWidth           <- as.numeric(pld$PLOT$plotWidth$value)
+  plotHeight          <- as.numeric(pld$PLOT$plotHeight$value)
+  treeLineOrientation <- as.numeric(pld$PLOT$treeLineOrientation$value)
+  cellWidth           <- as.numeric(pld$PLOT$cellWidth$value)
+  soil.depth          <- sum(pld$LAYERS$layers$value$thickness)
+
+  plot.area <- ifelse(geometryOption == 1, spacingBetweenRows * spacingWithinRows, plotWidth * plotHeight)
+  plot.info <- dplyr::tibble(SimulationName      = simu.name,
+                             plot.area           = plot.area,
+                             treeLineOrientation = treeLineOrientation,
+                             cellWidth           = cellWidth,
+                             soilDepth           = soil.depth)
+
+  ## Creatd output list & assign class
   output <- list(annualtree = annualtree.dv$data,
                  annualcrop = annualcrop.dv$data,
                  annualplot = annualplot.dv$data,
@@ -260,6 +277,7 @@ read_hisafe <- function(hip = NULL,
                  cells      = cells.dv$data,
                  voxels     = voxels.dv$data,
                  variables  = variables,
+                 plot.info  = plot.info,
                  tree.info  = read_tree_info(path, simu.name),
                  exp.plan   = EXP.PLAN,
                  path       = dplyr::tibble(SimulationName = simu.name, path = simu.path))

@@ -77,7 +77,7 @@ simu_rename <- function(hop, old.names, new.names) {
   profiles.to.check <- c("annualtree", "annualcrop", "annualplot",
                          "trees", "plot", "climate", "roots",
                          "monthCells", "cells", "voxels",
-                         "tree.info", "exp.plan", "path")
+                         "plot.info", "tree.info", "exp.plan", "path")
   profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
 
   existing.names <- unique(hop[[profiles[1]]]$SimulationName)
