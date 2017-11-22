@@ -248,14 +248,15 @@ plot_hisafe_monthcells <- function(hop,
       dplyr::left_join(tree.data, by = c("SimulationName", "id")) %>%
       dplyr::left_join(xy.centers, by = "SimulationName")
 
-    if(all(diam.data$x == 0 & diam.data$y == 0)){
-      diam.data <- diam.data %>%
-        dplyr::mutate(x = x + x.center, y = y + y.center) %>%
-        dplyr::select(-x.center, -y.center)
-    } else {
-      cellWidth <- max(diff(plot.data$x))
-      diam.data <- diam.data %>%
-        dplyr::mutate(x = x - cellWidth/2, y = y - cellWidth/2)
+    for(i in 1:nrow(diam.data)) {
+      if(diam.data$x[i] == 0 & diam.data$y[i] == 0){
+        diam.data$x[i] <- diam.data$x[i] + diam.data$x.center[i]
+        diam.data$y[i] <- diam.data$y[i] + diam.data$y.center[i]
+      } else {
+        cellWidth <- max(diff(plot.data[plot.data$SimulationName == diam.data$SimulationName[i],]$x))
+        diam.data$x[i] <- diam.data$x[i] - cellWidth/2
+        diam.data$y[i] <- diam.data$y[i] - cellWidth/2
+      }
     }
   } else {
     years <- years[years %in% (unique(hop$monthCells$Year) -  min(hop$monthCells$Year))]

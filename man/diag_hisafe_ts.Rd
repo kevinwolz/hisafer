@@ -16,7 +16,7 @@ If 'trees', 'plot', or 'climate', daily timeseries are created.}
 
 \item{output.path}{A character stting indicating the path to the directory where plots should be saved.
 Plots aresaved in a subdirectory within this directory named by \code{profile}.
-If no value is provided, the experiment/simulation path is read from the hop object, and a folder is created there called "diagnostics".}
+If no value is provided, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis/diagnostics".}
 
 \item{time.lim}{If profile is an annual profile, a numeric vector of length two providing the \code{c(minimum, maximum)} of years (since planting) to plot.
 If profile is daily profile, a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
