@@ -360,7 +360,7 @@ read_profile <- function(profile, path, show.progress = TRUE, max.size = 3e8) {
       dplyr::mutate_if(is.logical, as.numeric)   # columns read as logical must be coered to numeric to prevent plotting errors
     profile.variables <- profile.list$variables %>% dplyr::mutate(VariableClass = profile)
   } else {
-    warning(paste(profile, "profile too large (> 300 MB) to read"), call. = FALSE)
+    warning(paste(profile, "profile too large (> max.size) to read"), call. = FALSE)
     profile.data <- profile.variables <- dplyr::tibble()
   }
   return(list(data = profile.data, variables = profile.variables))

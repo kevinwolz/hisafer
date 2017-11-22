@@ -15,6 +15,8 @@ get_template_path <- function(input) {
     path <- clean_path(paste0(system.file("extdata", "forestry_template",     package = "hisafer"), "/"))
   } else if(input == "monocrop_default") {
     path <- clean_path(paste0(system.file("extdata", "monocrop_template",     package = "hisafer"), "/"))
+  } else if(input == "restinclieres_default") {
+    path <- clean_path(paste0(system.file("extdata", "restinclieres_template",     package = "hisafer"), "/"))
   } else {
     path <- clean_path(paste0(input, "/"))
   }
