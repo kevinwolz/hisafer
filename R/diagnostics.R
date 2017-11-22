@@ -9,7 +9,7 @@
 #' If 'trees', 'plot', or 'climate', daily timeseries are created.
 #' @param output.path A character stting indicating the path to the directory where plots should be saved.
 #' Plots aresaved in a subdirectory within this directory named by \code{profile}.
-#' If no value is provided, the experiment/simulation path is read from the hop object, and a folder is created there called "diagnostics".
+#' If no value is provided, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis/diagnostics".
 #' @param time.lim If profile is an annual profile, a numeric vector of length two providing the \code{c(minimum, maximum)} of years (since planting) to plot.
 #' If profile is daily profile, a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
 #' If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.
@@ -53,9 +53,9 @@ diag_hisafe_ts <- function(hop,
 
   ## Create output directory
   if(is.null(output.path) & "hop-group" %in% class(hop)) {
-    output.path <- clean_path(paste0(hop$exp.path, "/diagnostics"))
+    output.path <- clean_path(paste0(hop$exp.path, "/analysis/diagnostics"))
   } else if(is.null(output.path) & !("hop-group" %in% class(hop))){
-    output.path <- clean_path(paste0(hop$path$path, "/diagnostics"))
+    output.path <- clean_path(paste0(hop$path$path, "/analysis/diagnostics"))
   }
   ts.path <- clean_path(paste0(output.path, "/", profile, "/"))
   dir.create(ts.path, recursive = TRUE, showWarnings = FALSE)
@@ -103,7 +103,7 @@ diag_hisafe_ts <- function(hop,
 #' @param hop An object of class "hop" or "hop-group" containing output data from one or more Hi-sAFe simulations.
 #' @param output.path A character stting indicating the path to the directory where plots should be saved. Plots are
 #' saved in a subdirectory within this directory named /monthCells/facetScheme.
-#' If no value is provided, the experiment/simulation path is read from the hop object, and a folder is created there called "diagnostics".
+#' If no value is provided, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis/diagnostics".
 #' @export
 #' @importFrom dplyr %>%
 #' @family hisafe diagnostic fucntions
@@ -123,9 +123,9 @@ diag_hisafe_monthcells <- function(hop, output.path = NULL) {
 
   ## Create output directories
   if(is.null(output.path) & "hop-group" %in% class(hop)) {
-    output.path <- clean_path(paste0(hop$exp.path, "/diagnostics"))
+    output.path <- clean_path(paste0(hop$exp.path, "/analysis/diagnostics"))
   } else if(is.null(output.path) & !("hop-group" %in% class(hop))){
-    output.path <- clean_path(paste0(hop$path, "/diagnostics"))
+    output.path <- clean_path(paste0(hop$path, "/analysis/diagnostics"))
   }
   monthcells.path <- clean_path(paste0(output.path, "/monthCells/"))
   plot.dirs <- paste0(monthcells.path, c("year_simname/", "month_simname/", "month_year/"))
