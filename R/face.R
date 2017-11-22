@@ -76,9 +76,9 @@ create_face <- function(agroforestry, forestry, monocrop, face.path) {
   if(tree.errors != "") stop(tree.errors, call. = FALSE)
 
   # Edit SimluationNames & add system column
-  agroforestry <- simu_rename(agroforestry,
-                              old.names = unique(agroforestry[[AF.profiles[1]]]$SimulationName),
-                              new.names = paste0("AF-", unique(agroforestry[[AF.profiles[1]]]$SimulationName)))
+  # agroforestry <- simu_rename(agroforestry,
+  #                             old.names = unique(agroforestry[[AF.profiles[1]]]$SimulationName),
+  #                             new.names = paste0("AF-", unique(agroforestry[[AF.profiles[1]]]$SimulationName)))
   forestry <- simu_rename(forestry,
                               old.names = unique(forestry[[FC.profiles[1]]]$SimulationName),
                               new.names = "Forestry")

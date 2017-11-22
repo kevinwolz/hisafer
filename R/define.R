@@ -26,6 +26,7 @@
 #' If "default", then the default template inluded with hisafer (i.e. the files used for Hi-sAFe calibtation) will be used.
 #' @param factorial If \code{FALSE}, the default, then supplied input values are recycled (i.e. such as for default behavior of \code{\link{data.frame}}).
 #' If \code{TRUE}, then a factorial experiment is created, in which an experiment is defined for each possible combination of supplied values.
+#' @param force Logical indicating wether the supplied values should be forced past the constraint checks. Use \code{TRUE} for development only.
 #' @param ... Any Hi-sAFe input parameter in the .sim, .pld, and .tree files can be passed.
 #' To display supported parameters, use \code{\link{hisafe_params}}. See below for further details.
 #' There are three methods for passing parameters to \code{define_hisafe}, one for each of the three types of parameters within the parameter files:
@@ -63,7 +64,8 @@ define_hisafe <- function(path,
                           exp.name = "experiment",
                           profiles = "all",
                           template = "agroforestry_default",
-                          factorial = FALSE, ...) {
+                          factorial = FALSE,
+                          force = FALSE, ...) {
 
   # FOR TESTING
   # tmpfun <- function(...){ list(...) }
@@ -105,7 +107,13 @@ define_hisafe <- function(path,
               template = template,
               profiles = profiles,
               path     = R.utils::getAbsolutePath(path))
-  check_input_values(hip)
+
+  if(!force) {
+    check_input_values(hip)
+  } else {
+    warning("Bypassing validation of input parameter definitions can lead to unpredictable functionality of Hi-sAFe." ,
+            call. = FALSE, immediate. = TRUE)
+  }
 
   class(hip) <- c("hip", class(hip))
   return(hip)
@@ -123,6 +131,7 @@ define_hisafe <- function(path,
 #' @param path A character string of the path (relative or absolute) to the directory where the simulation/experiment is to be built.
 #' @param profiles A character vector of Hi-sAFe export profiles to be exported by Hi-sAFe. If "all" (the default), then all supported profiles will be exported.
 #' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
+#' @param force Logical indicating wether the supplied values should be forced past the constraint checks. Use \code{TRUE} for development only.
 #' See \code{\link{define_hisafe}} for more details.
 #' @export
 #' @importFrom dplyr %>%
@@ -132,7 +141,7 @@ define_hisafe <- function(path,
 #' # To define a Hi-sAFe experiment from a file:
 #' myexp <- define_hisafe_file("./example_exp.csv")
 #' }
-define_hisafe_file <- function(file, path, profiles = "all", template = "agroforestry_default") {
+define_hisafe_file <- function(file, path, profiles = "all", template = "agroforestry_default", force = FALSE) {
   exp.plan <- dplyr::as_tibble(read.csv(file, header = TRUE, stringsAsFactors = FALSE))
 
   ## Get profile names and check that they are present in template directory
@@ -151,7 +160,13 @@ define_hisafe_file <- function(file, path, profiles = "all", template = "agrofor
               template = template,
               profiles = profiles,
               path     = R.utils::getAbsolutePath(path))
-  check_input_values(hip)
+
+  if(!force) {
+    check_input_values(hip)
+  } else {
+    warning("Bypassing validation of input parameter definitions can lead to unpredictable functionality of Hi-sAFe." ,
+            call. = FALSE, immediate. = TRUE)
+  }
 
   class(hip) <- c("hip", class(hip))
   return(hip)

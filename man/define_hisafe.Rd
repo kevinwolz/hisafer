@@ -5,7 +5,8 @@
 \title{Define a Hi-sAFe experiment}
 \usage{
 define_hisafe(path, exp.name = "experiment", profiles = "all",
-  template = "agroforestry_default", factorial = FALSE, ...)
+  template = "agroforestry_default", factorial = FALSE, force = FALSE,
+  ...)
 }
 \arguments{
 \item{path}{A character string of the path (relative or absolute) to the directory where the simulation/experiment is to be built.}
@@ -28,6 +29,8 @@ If "default", then the default template inluded with hisafer (i.e. the files use
 
 \item{factorial}{If \code{FALSE}, the default, then supplied input values are recycled (i.e. such as for default behavior of \code{\link{data.frame}}).
 If \code{TRUE}, then a factorial experiment is created, in which an experiment is defined for each possible combination of supplied values.}
+
+\item{force}{Logical indicating wether the supplied values should be forced past the constraint checks. Use \code{TRUE} for development only.}
 
 \item{...}{Any Hi-sAFe input parameter in the .sim, .pld, and .tree files can be passed.
 To display supported parameters, use \code{\link{hisafe_params}}. See below for further details.
