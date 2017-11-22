@@ -220,16 +220,17 @@ plot_hisafe_monthcells <- function(hop,
     gsub(pattern = "\\.", replacement = " ")
 
   ## Filter for provided sim.names, years & months
-  #cellWidth <- max(diff(hop$monthCells$x))
   plot.data <- hop$monthCells %>%
     dplyr::mutate(Year = Year - min(Year) + 1) %>% # Create 0+ year values
     dplyr::filter(SimulationName %in% sim.names) %>%
     dplyr::filter(Year %in% years) %>%
     dplyr::filter(Month %in% months)
 
+  if(nrow(plot.data) == 0) return(FALSE)
+
   xy.centers <- plot.data %>%
     dplyr::group_by(SimulationName) %>%
-    dplyr::summarize(x.center = median(x), y.center = median(y)) #+ cellWidth/2
+    dplyr::summarize(x.center = median(x), y.center = median(y))
 
   ## Filter for sim.names & combine with canopy diameter
   n.trees <- nrow(dplyr::filter(hop$tree.info, SimulationName %in% sim.names))
@@ -245,9 +246,17 @@ plot_hisafe_monthcells <- function(hop,
       dplyr::filter(Day == 1) %>%
       dplyr::select(SimulationName, Year, Month, id, crownRadiusInterRow, crownRadiusTreeLine) %>%
       dplyr::left_join(tree.data, by = c("SimulationName", "id")) %>%
-      dplyr::left_join(xy.centers, by = "SimulationName") %>%
-      dplyr::mutate(x = x + x.center, y = y + y.center) %>%
-      dplyr::select(-x.center, -y.center)
+      dplyr::left_join(xy.centers, by = "SimulationName")
+
+    if(all(diam.data$x == 0 & diam.data$y == 0)){
+      diam.data <- diam.data %>%
+        dplyr::mutate(x = x + x.center, y = y + y.center) %>%
+        dplyr::select(-x.center, -y.center)
+    } else {
+      cellWidth <- max(diff(plot.data$x))
+      diam.data <- diam.data %>%
+        dplyr::mutate(x = x - cellWidth/2, y = y - cellWidth/2)
+    }
   } else {
     years <- years[years %in% (unique(hop$monthCells$Year) -  min(hop$monthCells$Year))]
     years <- years[years != 0]

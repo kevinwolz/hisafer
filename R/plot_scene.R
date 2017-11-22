@@ -41,6 +41,7 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
 
   mainCropSpecies     <- gsub("\\.plt", "", USED_PARAMS$mainCropSpecies$value)
   interCropSpecies    <- gsub("\\.plt", "", USED_PARAMS$interCropSpecies$value)
+  toric <- c(USED_PARAMS$toreXp$value, USED_PARAMS$toreXn$value, USED_PARAMS$toreYp$value, USED_PARAMS$toreYn$value)
 
   ## Calculate total soil depth
   soil.depth <- sum(USED_PARAMS$layers$value$thickness)
@@ -148,7 +149,10 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
          caption = paste0("Latitude: ", USED_PARAMS$latitude$value,
                           " - Orientation: ", USED_PARAMS$treeLineOrientation$value,
                           "\nCell width: ", USED_PARAMS$cellWidth$value,
-                          "m - Soil depth: ", soil.depth, "m")) +
+                          "m - Soil depth: ", soil.depth, "m",
+                          "\nSlope aspect: ", USED_PARAMS$slopeAspect$value,
+                          " - Slope intensity: ", USED_PARAMS$slopeIntensity$value,
+                          "\nToric symmetry: ", paste(c("Xp", "Xn", "Yp", "Yn")[as.logical(toric)], collapse = ","))) +
     scale_x_continuous(expand = c(0,0)) +
     scale_y_continuous(expand = c(0,0)) +
     geom_tile(color = "black", aes(fill = crop)) +

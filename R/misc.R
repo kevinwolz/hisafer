@@ -14,8 +14,7 @@
 #' }
 hisafe_params <- function(variable = "names", template = "agroforestry_default") {
 
-  template.path   <- default_template_path(template)
-  TEMPLATE_PARAMS <- get_template_params(template.path)
+  TEMPLATE_PARAMS <- get_template_params(get_template_path(template))
   PARAM_NAMES     <- unlist(get_param_names(TEMPLATE_PARAMS), use.names = FALSE)
   PARAM_DEFAULTS  <- get_param_vals(TEMPLATE_PARAMS, "value")
   PARAM_RANGES    <- get_param_vals(TEMPLATE_PARAMS, "range")
