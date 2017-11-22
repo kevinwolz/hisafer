@@ -80,6 +80,11 @@ simu_rename <- function(hop, old.names, new.names) {
                          "tree.info", "exp.plan", "path")
   profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
 
+  existing.names <- unique(hop[[profiles[1]]]$SimulationName)
+  missing.names  <- existing.names[!(unique(existing.names) %in% old.names)]
+  old.names <- c(old.names, missing.names)
+  new.names <- c(new.names, missing.names)
+
   for(i in profiles) {
     hop[[i]]$SimulationName <- new.names[match(hop[[i]]$SimulationName, old.names)]
   }

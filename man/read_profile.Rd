@@ -4,7 +4,7 @@
 \alias{read_profile}
 \title{Read a Hi-sAFe output profile}
 \usage{
-read_profile(profile, path, show.progress = TRUE)
+read_profile(profile, path, show.progress = TRUE, max.size = 3e+08)
 }
 \arguments{
 \item{profile}{A character string of the profile name.}

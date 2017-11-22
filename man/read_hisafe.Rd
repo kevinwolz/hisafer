@@ -5,7 +5,7 @@
 \title{Read output from a single Hi-sAFe simulation}
 \usage{
 read_hisafe(hip = NULL, path = NULL, simu.name = NULL, profiles = "all",
-  show.progress = TRUE)
+  show.progress = TRUE, max.size = 3e+08)
 }
 \arguments{
 \item{hip}{An object of class "hip". To create a hip object see \code{\link{define_hisafe}}.
@@ -23,6 +23,8 @@ Cannot provided both \code{hip} and \code{simu.name}.}
 If "all" the default, reads all supported Hi-sAFe output profiles. For currently supported profiles see: \code{\link{hisafe_profiles}}}
 
 \item{show.progress}{Logical indicating whether progress messsages should be printed to the console.}
+
+\item{max.size}{The maximum file size (in bytes) that should be read. Files larger than this value will be ignored, with a warning.}
 }
 \value{
 An object of class "hop". This is a list of 14 data frames (tibbles):
