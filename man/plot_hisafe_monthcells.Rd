@@ -6,10 +6,10 @@
 \usage{
 plot_hisafe_monthcells(hop, variable, colfacet = "SimulationName",
   rowfacet = "Year", sim.names = "all", years = seq(0, 40, 5),
-  months = 6)
+  months = 6, plot = TRUE)
 }
 \arguments{
-\item{hop}{An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.}
+\item{hop}{An object of class hop.}
 
 \item{variable}{A character string of the name of the variable to color the tiles.}
 
@@ -22,6 +22,8 @@ plot_hisafe_monthcells(hop, variable, colfacet = "SimulationName",
 \item{years}{A numeric vector containing the years to include. Use "all" to include all available values.}
 
 \item{months}{A numeric vector containing the months to include. Use "all" to include all available values.}
+
+\item{plot}{If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the that would create the plot is returned.}
 }
 \value{
 Returns a ggplot object.

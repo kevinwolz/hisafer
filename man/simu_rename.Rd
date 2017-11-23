@@ -26,5 +26,6 @@ simu_rename(myhop, old.names = c("Sim_1", "Sim_2"), new.names = c("Lat30", "Lat6
 }
 \seealso{
 Other hisafe helper functions: \code{\link{hisafe_params}},
-  \code{\link{hisafe_profiles}}, \code{\link{hop_merge}}
+  \code{\link{hisafe_profiles}}, \code{\link{hop_filter}},
+  \code{\link{hop_merge}}
 }

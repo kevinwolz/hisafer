@@ -4,14 +4,16 @@
 \alias{plot_hisafe_cells}
 \title{Tile plot of Hi-sAFe cells output variable}
 \usage{
-plot_hisafe_cells(hop, variable, dates)
+plot_hisafe_cells(hop, variable, dates, plot = TRUE)
 }
 \arguments{
-\item{hop}{An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.}
+\item{hop}{An object of class hop.}
 
 \item{variable}{A character string of the name of the variable to color the tiles.}
 
 \item{dates}{A character vector containing the dates (yyyy-mm-dd) to include.}
+
+\item{plot}{If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the that would create the plot is returned.}
 }
 \value{
 Returns a ggplot object.

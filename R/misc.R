@@ -72,7 +72,7 @@ hisafe_profiles <- function(variable = "names") {
 #' simu_rename(myhop, old.names = c("Sim_1", "Sim_2"), new.names = c("Lat30", "Lat60"))
 #' }
 simu_rename <- function(hop, old.names, new.names) {
-  if(!any(c("hop", "hop-group") %in% class(hop))) stop("data not of class hop or hop-group", call. = FALSE)
+  if(!("hop" %in% class(hop))) stop("data not of class hop", call. = FALSE)
 
   profiles.to.check <- names(hop)[!(names(hop) %in% c("variables", "exp.path"))]
   profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
@@ -86,6 +86,26 @@ simu_rename <- function(hop, old.names, new.names) {
     hop[[i]]$SimulationName <- new.names[match(hop[[i]]$SimulationName, old.names)]
   }
 
+  return(hop)
+}
+
+#' Filter a hop object by SimulationName
+#' @description Filters a hop object by SimulationName
+#' @return A hop object.
+#' @param hop A object of class "hop".
+#' @param simu.names A character vector of the SimulationNames to keep. If "all", no filtering occurs.
+#' @export
+#' @family hisafe helper functions
+#' @examples
+#' \dontrun{
+#' newhop <- hop_filter(myhop, c("Sim_1", "Sim_2"))
+#' }
+hop_filter <- function(hop, simu.names) {
+  if(simu.names[1] == "all") return(hop)
+  if(!("hop" %in% class(hop))) stop("data not of class hop", call. = FALSE)
+  profiles.to.check <- names(hop)[!(names(hop) %in% c("variables", "exp.path"))]
+  profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
+  for(i in profiles) { hop[[i]] <- dplyr::filter(hop[[i]], SimulationName %in% simu.names) }
   return(hop)
 }
 
@@ -104,7 +124,7 @@ hop_merge <- function(...) {
 
   hops <- list(...)
 
-  check_class <- function(x) { any(c("hop", "hop-group") %in% class(x)) }
+  check_class <- function(x) { ("hop" %in% class(x)) }
   if(!all(purrr::map_lgl(hops, check_class))) stop("one or more supplied objects not of class hop", call. = FALSE)
 
   make_names_unique <- function(x, num){ paste0(num, "-", x) }

@@ -23,7 +23,6 @@ theme_hisafe_ts <- function(base_size = 18) {
       plot.title        = element_text(hjust = 0.5,
                                        margin = margin(b = (base_size * 1), unit = "points")),
       legend.position   = "right",
-      #legend.title      = element_blank(),
       legend.key        = element_blank(),
       legend.key.width  = unit(1.5, "cm"),
       #legend.text      = element_text(margin = margin(r = 24, unit = "pt")), # does not work; known ggplot bug

@@ -6,10 +6,10 @@
 \usage{
 plot_hisafe_ts(hop, variable, profile, time.lim = NULL, tree.id = NULL,
   color.palette = NULL, linetype.palette = NULL, aes.cols = list(color =
-  NULL, linetype = NULL))
+  NULL, linetype = NULL), plot = TRUE)
 }
 \arguments{
-\item{hop}{An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.}
+\item{hop}{An object of class hop.}
 
 \item{variable}{A character string of the name of the variable to plot.}
 
@@ -30,11 +30,12 @@ If \code{NULL}, the default, then solid lines are used for all simulations. The 
 
 \item{aes.cols}{A list with arguments "color" and "linetype" containing character stirngs of the column names to use for plot aesthetics.
 If \code{NULL}, the default, then SimulationName is used for both aesthetics.}
+
+\item{plot}{If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the that would create the plot is returned.}
 }
 \value{
-Returns a ggplot object. If the data is of class \code{hop-group} and contains data from more than one
-Hi-sAFe simulation, the plot will contain multiple lines, colored and labeled by SimulationName. If the data
-contains two more tree ids, the plot will be faceted by tree id.
+Returns a ggplot object. If \code{hop} contains more than one simulation, the plot will contain multiple lines, colored and labeled by SimulationName.
+If the data contains two more tree ids, the plot will be faceted by tree id.
 }
 \description{
 Plots a daily or annual timeseries of a single Hi-sAFe output variable.

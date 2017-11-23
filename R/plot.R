@@ -1,9 +1,8 @@
 #' Plot timeseries of Hi-sAFe output variable
 #' @description Plots a daily or annual timeseries of a single Hi-sAFe output variable.
-#' @return Returns a ggplot object. If the data is of class \code{hop-group} and contains data from more than one
-#' Hi-sAFe simulation, the plot will contain multiple lines, colored and labeled by SimulationName. If the data
-#' contains two more tree ids, the plot will be faceted by tree id.
-#' @param hop An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
+#' @return Returns a ggplot object. If \code{hop} contains more than one simulation, the plot will contain multiple lines, colored and labeled by SimulationName.
+#' If the data contains two more tree ids, the plot will be faceted by tree id.
+#' @param hop An object of class hop.
 #' @param variable A character string of the name of the variable to plot.
 #' @param profile The profile for which to plot a timeseries. If 'annualtree' or 'annualplot', annual timeseries are created.
 #' If 'trees', 'plot', or 'climate', daily timeseries are created.
@@ -17,6 +16,7 @@
 #' If \code{NULL}, the default, then solid lines are used for all simulations. The default supports up to 24 simulations.
 #' @param aes.cols A list with arguments "color" and "linetype" containing character stirngs of the column names to use for plot aesthetics.
 #' If \code{NULL}, the default, then SimulationName is used for both aesthetics.
+#' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the that would create the plot is returned.
 #' @export
 #' @importFrom dplyr %>%
 #' @import ggplot2
@@ -43,13 +43,13 @@ plot_hisafe_ts <- function(hop,
                            tree.id          = NULL,
                            color.palette    = NULL,
                            linetype.palette = NULL,
-                           aes.cols         = list(color = NULL, linetype = NULL)) {
+                           aes.cols         = list(color = NULL, linetype = NULL),
+                           plot             = TRUE) {
 
   annual.profiles <- c("annualtree", "annualplot")
   daily.profiles  <- c("trees", "plot", "climate")
 
-  ## Check for data class and if profile exists
-  if(!any(c("hop", "hop-group") %in% class(hop)))        stop("hop argument not of class hop", call. = FALSE)
+  if(!("hop" %in% class(hop)))                           stop("hop argument not of class hop", call. = FALSE)
   if(!(profile %in% c(annual.profiles, daily.profiles))) stop("supplied profile is not supported", call. = FALSE)
   if(nrow(hop[[profile]]) == 0)                          stop(paste("no data from", profile, "profile found"), call. = FALSE)
 
@@ -78,8 +78,8 @@ plot_hisafe_ts <- function(hop,
     scale_x_ts <- scale_x_date()
     if(!is.null(time.lim)) {
       time.lim <- lubridate::ymd(time.lim)
-      if(is.na(time.lim[1])) { time.lim[1] <- min(plot.data$Date) }
-      if(is.na(time.lim[2])) { time.lim[2] <- max(plot.data$Date) }
+      if(is.na(time.lim[1])) time.lim[1] <- min(plot.data$Date)
+      if(is.na(time.lim[2])) time.lim[2] <- max(plot.data$Date)
       plot.data <- dplyr::filter(plot.data, Date >= time.lim[1], Date <= time.lim[2])
     }
   }
@@ -147,7 +147,7 @@ plot_hisafe_ts <- function(hop,
     scale_color_manual(values = color.palette) +
     theme_hisafe_ts()
 
-  return(plot.obj)
+  if(plot) return(plot.obj) else return(plot.data)
 }
 
 #' Tile plot of Hi-sAFe monthCells output variable
@@ -156,13 +156,14 @@ plot_hisafe_ts <- function(hop,
 #' @details This function is very picky! You can only facet by two of the three manipulable variables: SimulationName, Year, Month.
 #' You must ensure that the one varibale not used for faceting is fixed at a single value.
 #' @return Returns a ggplot object.
-#' @param hop An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
+#' @param hop An object of class hop.
 #' @param variable A character string of the name of the variable to color the tiles.
 #' @param rowfacet One of "Year", "Month", or "SimulationName", indicating which variable to use for row faceting.
 #' @param colfacet One of "Year", "Month", or "SimulationName", indicating which variable to use for column faceting.
 #' @param sim.names A character string containing the SimulationNames to include. Use "all" to include all available values.
 #' @param years A numeric vector containing the years to include. Use "all" to include all available values.
 #' @param months A numeric vector containing the months to include. Use "all" to include all available values.
+#' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the that would create the plot is returned.
 #' @export
 #' @importFrom dplyr %>%
 #' @import ggplot2
@@ -194,11 +195,10 @@ plot_hisafe_monthcells <- function(hop,
                                    rowfacet  = "Year",
                                    sim.names = "all",
                                    years     = seq(0, 40, 5),
-                                   months    = 6) {
-
-  ## Check for data class and if profile exists
-  if(!any(c("hop", "hop-group") %in% class(hop))) stop("hop argument not of class hop", call. = FALSE)
-  if(nrow(hop$monthCells) == 0)                   stop("no data from monthCells profile found", call. = FALSE)
+                                   months    = 6,
+                                   plot      = TRUE) {
+  if(!("hop" %in% class(hop)))  stop("hop argument not of class hop", call. = FALSE)
+  if(nrow(hop$monthCells) == 0) stop("no data from monthCells profile found", call. = FALSE)
 
   ## Convert "all" arguements to actual values
   if(sim.names[1] == "all") sim.names <- unique(hop$monthCells$SimulationName)
@@ -303,7 +303,7 @@ plot_hisafe_monthcells <- function(hop,
     coord_equal() +
     theme_hisafe_tile()
 
-  return(plot.obj)
+  if(plot) return(plot.obj) else return(plot.data)
 }
 
 
@@ -311,9 +311,10 @@ plot_hisafe_monthcells <- function(hop,
 #' @description Plots a tile plot of a single Hi-sAFe cells output variable.
 #' SimulationName is used as the column facet. Date is used as the row facet.
 #' @return Returns a ggplot object.
-#' @param hop An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
+#' @param hop An object of class hop.
 #' @param variable A character string of the name of the variable to color the tiles.
 #' @param dates A character vector containing the dates (yyyy-mm-dd) to include.
+#' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the that would create the plot is returned.
 #' @export
 #' @importFrom dplyr %>%
 #' @import ggplot2
@@ -330,11 +331,9 @@ plot_hisafe_monthcells <- function(hop,
 #' tile.plot
 #' ggplot2::ggsave("tiled_relativeDirectParIncident.png", tile.plot)
 #' }
-plot_hisafe_cells <- function(hop, variable, dates) {
-
-  ## Check for data class and if profile exists
-  if(!any(c("hop", "hop-group") %in% class(hop))) stop("hop argument not of class hop", call. = FALSE)
-  if(nrow(hop$cells) == 0)                        stop("no data from cells profile found", call. = FALSE)
+plot_hisafe_cells <- function(hop, variable, dates, plot = TRUE) {
+  if(!("hop" %in% class(hop))) stop("hop argument not of class hop", call. = FALSE)
+  if(nrow(hop$cells) == 0)     stop("no data from cells profile found", call. = FALSE)
 
   ## Exract units of supplied variable from the "variables" slot
   var.unit <- hop$variables %>%
@@ -393,7 +392,7 @@ plot_hisafe_cells <- function(hop, variable, dates) {
     coord_equal() +
     theme_hisafe_tile()
 
-  return(plot.obj)
+  if(plot) return(plot.obj) else return(plot.data)
 }
 
 
@@ -401,9 +400,10 @@ plot_hisafe_cells <- function(hop, variable, dates) {
 #' @description Plots a tile plot of a single Hi-sAFe voxels output variable.
 #' If a single date is provided, SimulationName is used as the column facet. Otherwise, Date is used as the column facet.
 #' @return Returns ggplot object.
-#' @param hop An object of class \code{hop} or \code{hop-group} containing output data from one or more Hi-sAFe simulations.
+#' @param hop An object of class hop.
 #' @param variable A character string of the name of the variable to color the tiles.
-#' @param dates A character vector containing the dates (yyyy-mm-dd) to include.
+#' @param dates A character vector containing the dates (yyyy-mm-dd) to include.\
+#' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the that would create the plot is returned.
 #' @export
 #' @importFrom dplyr %>%
 #' @import ggplot2
@@ -420,12 +420,9 @@ plot_hisafe_cells <- function(hop, variable, dates) {
 #' tile.plot
 #' ggplot2::ggsave("tiled_waterAvailable.png", tile.plot)
 #' }
-plot_hisafe_voxels <- function(hop, variable, dates) {
-
-  ## Check for data class and if profile exists
-  if(!any(c("hop", "hop-group") %in% class(hop))) stop("hop argument not of class hop", call. = FALSE)
-  if(nrow(hop$voxels) == 0)                       stop("no data from voxels profile found", call. = FALSE)
-
+plot_hisafe_voxels <- function(hop, variable, dates, plot = TRUE) {
+  if(!("hop" %in% class(hop)))                        stop("hop argument not of class hop", call. = FALSE)
+  if(nrow(hop$voxels) == 0)                           stop("no data from voxels profile found", call. = FALSE)
   if("hop-group" %in% class(hop) & length(dates) > 1) stop("cannot supply more than one date for object of class hop-group", call. = FALSE)
 
   ## Exract units of supplied variable from the "variables" slot
@@ -483,5 +480,5 @@ plot_hisafe_voxels <- function(hop, variable, dates) {
     coord_equal() +
     theme_hisafe_tile()
 
-  return(plot.obj)
+  if(plot) return(plot.obj) else return(plot.data)
 }

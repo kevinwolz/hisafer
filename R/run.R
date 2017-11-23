@@ -70,12 +70,13 @@ run_hisafe_exp <- function(hip         = NULL,
 
     if(is.null(num.cores)) num.cores <- min((parallel::detectCores() - 1), nrow(hip$exp.plan))
     if(num.cores == 1) stop("There is only 1 detectable core on this computer. Parallel computing is not possible.")
-    cat("\nInitializing simulations on", num.cores, "cores")
+    cat("\nInitializing", length(simu.names), "simulations on", num.cores, "cores")
     cl <- parallel::makeCluster(num.cores)
     doParallel::registerDoParallel(cl)
     run.log <- foreach::foreach(i = simu.names, .inorder = FALSE) %dopar% run_hisafe(path = path, simu.name = i, capsis.path = capsis.path)
     doParallel::stopImplicitCluster()
   } else {
+    cat("\nInitializing", length(simu.names), "simulations on 1 core")
     run.log <- foreach::foreach(i = simu.names) %do% run_hisafe(path = path, simu.name = i)
   }
   cat("\nAll simulations complete")
