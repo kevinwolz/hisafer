@@ -7,7 +7,7 @@
 hop_filter(hop, simu.names)
 }
 \arguments{
-\item{hop}{A object of class "hop".}
+\item{hop}{A object of class hop or face.}
 
 \item{simu.names}{A character vector of the SimulationNames to keep. If "all", no filtering occurs.}
 }

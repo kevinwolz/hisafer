@@ -11,6 +11,8 @@ plot_hisafe_voxels(hop, variable, dates, plot = TRUE)
 
 \item{variable}{A character string of the name of the variable to color the tiles.}
 
+\item{dates}{A character vector containing the dates (yyyy-mm-dd) to include.}
+
 \item{plot}{If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the that would create the plot is returned.}
 }
 \value{

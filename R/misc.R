@@ -92,7 +92,7 @@ simu_rename <- function(hop, old.names, new.names) {
 #' Filter a hop object by SimulationName
 #' @description Filters a hop object by SimulationName
 #' @return A hop object.
-#' @param hop A object of class "hop".
+#' @param hop A object of class hop or face.
 #' @param simu.names A character vector of the SimulationNames to keep. If "all", no filtering occurs.
 #' @export
 #' @family hisafe helper functions

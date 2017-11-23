@@ -391,14 +391,32 @@ check_input_values <- function(hip) {
   get_n_species <- function(x) length(unique(x$species))
   if(all(is.na(tree.init))) {
     n.tree.species <- rep(0, length(tree.init))
-    } else {
-      n.tree.species <- purrr::map_dbl(tree.init, get_n_species)
-    }
+  } else {
+    n.tree.species <- purrr::map_dbl(tree.init, get_n_species)
+  }
   species.error <- ifelse(any(USED_PARAMS$geometryOption$value == 1 & n.tree.species > 1),
                           "-- when geompetryOption = 1, there can only be one tree species", "")
 
   weed.error <- ifelse(any(USED_PARAMS$treeCropDistance$value > 0 & USED_PARAMS$weededAreaRadius$value > 0),
                        "-- treeCropDistance and weededAreaRadius cannont both be greater than 0", "")
+
+  ## Root Init Errors
+  get_init_vals <- function(x, param) {
+    val <- NULL
+    if("list" %in% class(x)) {
+      for(i in 1:length(x)){
+        val <- c(val, x[[i]][[param]])
+      }
+    } else if("tbl" %in% class(x)) {
+      val <- x[[param]]
+    } else {
+      val <- NA
+    }
+    return(val)
+  }
+  root.init.diam.error <- ifelse(any(get_init_vals(USED_PARAMS$root.initialization$value,
+                                                   "paramShape1") < 0.75 * unlist(purrr::map2(USED_PARAMS$cellWidth$value, root.rows, rep))),
+                                 "-- paramShape1 of root initialization table cannot be smaller than 0.75 * cellWidth", "")
 
   ## Accepted & Range Errors
   accepted.errors <- purrr::map_chr(names.to.check, check_accepted, exp.plan = EXP.PLAN, template = TEMPLATE_PARAMS)
@@ -416,6 +434,7 @@ check_input_values <- function(hip) {
                   tree.pruning.error, tree.thinning.error, root.pruning.error,
                   treePruning.length.error, treeThinning.length.error, rootPruning.length.error,
                   nbtree.error, species.error, weed.error,
+                  root.init.diam.error,
                   accepted.errors, range.errors, type.errors)
 
   all.errors <- paste0(all.errors[!(all.errors == "") & !is.na(all.errors)], collapse = "\n")
@@ -507,7 +526,7 @@ check_type <- function(variable, exp.plan, template) {
 root_init_params <- function(reps        = 1,
                              shape       = 1,
                              repartition = 3,
-                             paramShape1 = 0.6,
+                             paramShape1 = 0.75,
                              paramShape2 = 0,
                              paramShape3 = 0,
                              amount      = 0.5) {

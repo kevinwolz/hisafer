@@ -5,7 +5,7 @@
 \title{Generate root initialization table for define_hisafe}
 \usage{
 root_init_params(reps = 1, shape = 1, repartition = 3,
-  paramShape1 = 0.6, paramShape2 = 0, paramShape3 = 0, amount = 0.5)
+  paramShape1 = 0.75, paramShape2 = 0, paramShape3 = 0, amount = 0.5)
 }
 \arguments{
 \item{reps}{Number of times to repeats the rows of the defined table.}

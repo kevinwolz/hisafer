@@ -402,7 +402,7 @@ plot_hisafe_cells <- function(hop, variable, dates, plot = TRUE) {
 #' @return Returns ggplot object.
 #' @param hop An object of class hop.
 #' @param variable A character string of the name of the variable to color the tiles.
-#' @param dates A character vector containing the dates (yyyy-mm-dd) to include.\
+#' @param dates A character vector containing the dates (yyyy-mm-dd) to include.
 #' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the that would create the plot is returned.
 #' @export
 #' @importFrom dplyr %>%
