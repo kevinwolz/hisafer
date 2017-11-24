@@ -39,9 +39,10 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
                             template.commented = PARAM_COMMENTED)
   names(USED_PARAMS) <- unlist(PARAM_NAMES, use.names = FALSE)
 
-  mainCropSpecies     <- gsub("\\.plt", "", USED_PARAMS$mainCropSpecies$value)
-  interCropSpecies    <- gsub("\\.plt", "", USED_PARAMS$interCropSpecies$value)
+  mainCropSpecies     <- gsub("\\.plt", "", USED_PARAMS$mainCropSpecies$value[1])
+  interCropSpecies    <- gsub("\\.plt", "", USED_PARAMS$interCropSpecies$value[1])
   toric <- c(USED_PARAMS$toreXp$value, USED_PARAMS$toreXn$value, USED_PARAMS$toreYp$value, USED_PARAMS$toreYn$value)
+  toric.lab <- ifelse(any(toric == 1), paste(c("Xp", "Xn", "Yp", "Yn")[as.logical(toric)], collapse = ","), "off")
 
   ## Calculate total soil depth
   soil.depth <- sum(USED_PARAMS$layers$value$thickness)
@@ -152,7 +153,7 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
                           "m - Soil depth: ", soil.depth, "m",
                           "\nSlope aspect: ", USED_PARAMS$slopeAspect$value,
                           " - Slope intensity: ", USED_PARAMS$slopeIntensity$value,
-                          "\nToric symmetry: ", paste(c("Xp", "Xn", "Yp", "Yn")[as.logical(toric)], collapse = ","))) +
+                          "\nToric symmetry: ", toric.lab)) +
     scale_x_continuous(expand = c(0,0)) +
     scale_y_continuous(expand = c(0,0)) +
     geom_tile(color = "black", aes(fill = crop)) +

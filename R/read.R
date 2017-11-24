@@ -341,7 +341,7 @@ read_table_hisafe <- function(file, ...) {
                               header = TRUE,
                               sep = "\t",
                               stringsAsFactors = FALSE,
-                              na.strings = c("NA", "error!"), # "error!" is output by HISAFE & causes table merge errors if left
+                              na.strings = c("NA", "error!", "NaN"), # "error!" is output by HISAFE & causes table merge errors if left; "NaN" output causes plot problems
                               encoding = "latin1", ...))
 }
 

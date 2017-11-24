@@ -192,7 +192,6 @@ write_param_file <- function(param.list, path) {
             dplyr::mutate_all(as.character)
           sim.out <- table_out(char.table, sim.out)
         }
-
       }
     }
   }

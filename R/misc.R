@@ -154,7 +154,7 @@ hop_merge <- function(...) {
 
   merged_hop$exp.plan <- dplyr::bind_cols(hip[, "SimulationName"], hip[,  unique.cols], hip[, other.cols])
 
-  merged_hop$exp.plan <- select(merged_hop$exp.plan, "SimulationName", unique.cols)
+  merged_hop$exp.plan <- dplyr::select(merged_hop$exp.plan, "SimulationName", unique.cols)
 
   merged_hop$variables <- dplyr::distinct(merged_hop$variables)
 
