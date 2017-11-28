@@ -68,6 +68,9 @@ read_hisafe_exp <- function(hip = NULL,
 
   if(simu.names[1] != "all") EXP.PLAN <- dplyr::filter(EXP.PLAN, SimulationName %in% simu.names)
 
+  # in case individual simulations were deleted from the experiment folder, but were still in the exp_summary.csv file
+  EXP.PLAN <- dplyr::filter(EXP.PLAN, SimulationName %in% list.dirs(path, recursive = FALSE, full.names = FALSE))
+
   ## Read all data from all simulations & combine
   data <- purrr::map(EXP.PLAN$SimulationName,
                      read_hisafe,

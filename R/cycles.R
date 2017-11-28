@@ -31,7 +31,7 @@ plot_annual_cycle <- function(hop,
                               plot          = TRUE) {
 
   if(!("hop" %in% class(hop))) stop("hop argument not of class hop", call. = FALSE)
-  if(simu.names == "all") simu.names <- unique(hop$exp.plan$SimulationName)
+  if(simu.names[1] == "all") simu.names <- unique(hop$exp.plan$SimulationName)
 
   ## Extract required data from hop
   fhop <- hop_filter(hop, simu.names)

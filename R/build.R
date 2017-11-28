@@ -188,7 +188,7 @@ build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, templat
 
   if("nbTrees" %in% names(exp.plan)){
     num.trees <- exp.plan$nbTrees
-  } else if(is.na(trees.used)) {
+  } else if(all(is.na(trees.used))) {
     num.trees <- 0
   } else {
     num.trees <- length(trees.used)
