@@ -29,7 +29,7 @@ hisafe_params <- function(variable = "names", template = "agroforestry_default")
 
   if(variable[1] == "all") {
     for(i in 1:length(PARAM_NAMES)){
-      cat("\n\n", PARAM_NAMES[i])
+      if(i == 1) { cat(PARAM_NAMES[i]) } else { cat("\n\n", PARAM_NAMES[i]) }
       if("tbl" %in% class(PARAM_DEFAULTS[[i]])){
         cat("\n-- Default:\n")
         print(PARAM_DEFAULTS[[i]])
@@ -46,7 +46,7 @@ hisafe_params <- function(variable = "names", template = "agroforestry_default")
     cat(paste0(PARAM_NAMES, collapse = "\n"))
   } else {
     for(i in 1:length(variable)){
-      cat("\n\n", variable[i])
+      if(i == 1) { cat(variable[i]) } else { cat("\n\n", variable[i]) }
       if("tbl" %in% class(PARAM_DEFAULTS[[variable[i]]])){
         cat("\n-- Default:\n")
         print(PARAM_DEFAULTS[[variable[i]]])

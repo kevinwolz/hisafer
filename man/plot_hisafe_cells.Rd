@@ -13,7 +13,7 @@ plot_hisafe_cells(hop, variable, dates, plot = TRUE)
 
 \item{dates}{A character vector containing the dates (yyyy-mm-dd) to include.}
 
-\item{plot}{If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the that would create the plot is returned.}
+\item{plot}{If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.}
 }
 \value{
 Returns a ggplot object.

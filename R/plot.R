@@ -16,7 +16,7 @@
 #' If \code{NULL}, the default, then solid lines are used for all simulations. The default supports up to 24 simulations.
 #' @param aes.cols A list with arguments "color" and "linetype" containing character stirngs of the column names to use for plot aesthetics.
 #' If \code{NULL}, the default, then SimulationName is used for both aesthetics.
-#' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the that would create the plot is returned.
+#' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.
 #' @export
 #' @importFrom dplyr %>%
 #' @import ggplot2
@@ -163,7 +163,7 @@ plot_hisafe_ts <- function(hop,
 #' @param sim.names A character string containing the SimulationNames to include. Use "all" to include all available values.
 #' @param years A numeric vector containing the years to include. Use "all" to include all available values.
 #' @param months A numeric vector containing the months to include. Use "all" to include all available values.
-#' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the that would create the plot is returned.
+#' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.
 #' @export
 #' @importFrom dplyr %>%
 #' @import ggplot2
@@ -314,7 +314,7 @@ plot_hisafe_monthcells <- function(hop,
 #' @param hop An object of class hop.
 #' @param variable A character string of the name of the variable to color the tiles.
 #' @param dates A character vector containing the dates (yyyy-mm-dd) to include.
-#' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the that would create the plot is returned.
+#' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.
 #' @export
 #' @importFrom dplyr %>%
 #' @import ggplot2
@@ -403,7 +403,7 @@ plot_hisafe_cells <- function(hop, variable, dates, plot = TRUE) {
 #' @param hop An object of class hop.
 #' @param variable A character string of the name of the variable to color the tiles.
 #' @param dates A character vector containing the dates (yyyy-mm-dd) to include.
-#' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the that would create the plot is returned.
+#' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.
 #' @export
 #' @importFrom dplyr %>%
 #' @import ggplot2

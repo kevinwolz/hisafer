@@ -10,6 +10,7 @@
 #' @param capsis.path A character string of the path to the Capsis folder
 #' @export
 #' @importFrom foreach %dopar%
+#' @importFrom foreach %do%
 #' @family hisafe run functions
 #' @examples
 #' \dontrun{

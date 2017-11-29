@@ -31,7 +31,7 @@ If \code{NULL}, the default, then solid lines are used for all simulations. The 
 \item{aes.cols}{A list with arguments "color" and "linetype" containing character stirngs of the column names to use for plot aesthetics.
 If \code{NULL}, the default, then SimulationName is used for both aesthetics.}
 
-\item{plot}{If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the that would create the plot is returned.}
+\item{plot}{If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.}
 }
 \value{
 Returns a ggplot object. If \code{hop} contains more than one simulation, the plot will contain multiple lines, colored and labeled by SimulationName.
