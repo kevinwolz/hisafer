@@ -153,7 +153,6 @@ plot_annual_cycle <- function(hop,
     if(!all(required.profiles %in% names(fhop))) stop(paste(cycle, "cycle calculations require data from",
                                                             paste(required.profiles, collapse = " and "),
                                                             "export profiles"), call. = FALSE)
-    #fhop$annualplot$annualTreesCarbonStump = fhop$annualplot$annualTreesCarbonStem *0.2
     plot.data <- fhop$annualplot %>%
       dplyr::select(SimulationName, Year,
                     maxTreesCarbonFoliage,

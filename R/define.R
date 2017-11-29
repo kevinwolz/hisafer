@@ -67,10 +67,6 @@ define_hisafe <- function(path,
                           factorial = FALSE,
                           force = FALSE, ...) {
 
-  # FOR TESTING
-  # tmpfun <- function(...){ list(...) }
-  # param.list <- tmpfun(latitude = 60, treeLineOrientation = -180)
-
   param.list <- list(...)
 
   ## Get profile names and check that they are present in template directory
@@ -179,7 +175,7 @@ define_hisafe_file <- function(file, path, profiles = "all", template = "agrofor
 #' @return Produces errors if issues are found. Otherwise, invisibly returns \code{TRUE}.
 #' @param hip An object of class "hip".
 check_input_values <- function(hip) {
-  EXP.PLAN      <- hip$exp.plan
+  EXP.PLAN <- hip$exp.plan
 
   ## Get template params & names
   template.path   <- get_template_path(hip$template)
@@ -188,7 +184,7 @@ check_input_values <- function(hip) {
   PARAM_DEFAULTS  <- get_param_vals(TEMPLATE_PARAMS, "value")
   PARAM_COMMENTED <- get_param_vals(TEMPLATE_PARAMS, "commented")
   AVAIL_CROPS     <- list.files(clean_path(paste0(template.path, "/cropSpecies")))
-  AVAIL_TECS      <- list.files(clean_path(paste0(template.path, "/itk")))
+  AVAIL_TECS      <- list.files(clean_path(paste0(template.path, "/cropInterventions")))
   AVAIL_TREES     <- gsub("\\.tree", "", list.files(clean_path(paste0(template.path, "/treeSpecies"))))
 
   ## Get used parameters
@@ -203,7 +199,7 @@ check_input_values <- function(hip) {
   errors <-   "Hi-sAFe definition errors:"
 
   ## Unsupported inputs
-  names.to.check <- names(EXP.PLAN)[names(EXP.PLAN) != "SimulationName"]
+  names.to.check <- names(EXP.PLAN)[!(names(EXP.PLAN) %in% c("SimulationName", "weatherFile"))]
   if(any(!(names.to.check %in% unlist(PARAM_NAMES, use.names = FALSE)))) {
     unsupported.names   <- names.to.check[!(names.to.check %in% PARAM_NAMES)]
     unsupported.var.error <- c("The following variables are not supported:", paste0(unsupported.names, collapse = ", "))
@@ -417,6 +413,17 @@ check_input_values <- function(hip) {
   root.init.diam.error <- ifelse(any(get_init_vals(USED_PARAMS$root.initialization$value,
                                                    "paramShape1") < 0.75 * unlist(purrr::map2(USED_PARAMS$cellWidth$value, root.rows, rep))),
                                  "-- paramShape1 of root initialization table cannot be smaller than 0.75 * cellWidth", "")
+  ## All weatherFile files exist
+  if("weatherFile" %in% names(EXP.PLAN)) {
+    if(all(file.exists(EXP.PLAN$weatherFile))) {
+      wth.error <- ""
+    } else {
+      missing.wth.files <- EXP.PLAN$weatherFile[!file.exists(EXP.PLAN$weatherFile)]
+      wth.error <- paste("-- the following .WTH files do not exist:", paste(missing.wth.files, collapse = ", "))
+    }
+  } else {
+    wth.error <- ""
+  }
 
   ## Accepted & Range Errors
   accepted.errors <- purrr::map_chr(names.to.check, check_accepted, exp.plan = EXP.PLAN, template = TEMPLATE_PARAMS)
@@ -434,7 +441,7 @@ check_input_values <- function(hip) {
                   tree.pruning.error, tree.thinning.error, root.pruning.error,
                   treePruning.length.error, treeThinning.length.error, rootPruning.length.error,
                   nbtree.error, species.error, weed.error,
-                  root.init.diam.error,
+                  root.init.diam.error, wth.error,
                   accepted.errors, range.errors, type.errors)
 
   all.errors <- paste0(all.errors[!(all.errors == "") & !is.na(all.errors)], collapse = "\n")

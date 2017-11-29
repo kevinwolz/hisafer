@@ -138,11 +138,9 @@ build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, templat
   readr::write_csv(exp.plan.to.write, clean_path(paste0(simu.path, "/", exp.plan$SimulationName, "_simulation_summary.csv")))
 
   ## Move weather file if one was provided
-  wth.name <- "weather.wth"
   if("weatherFile" %in% names(exp.plan)) {
-    wth.name <- tail(strsplit(exp.plan$weatherFile, split = "/", fixed = TRUE)[[1]], 1)
-    dum <- file.remove(paste0(simu.path, "/weather/weather.wth"))
-    dum <- file.copy(exp.plan$weatherFile, paste0(simu.path, "/weather/", wth.name))
+    dum <- file.remove(paste0(simu.path, "/weather.wth"))
+    dum <- file.copy(exp.plan$weatherFile, simu.path)
   }
 
   ## Remove unused .plt files from cropSpecies
@@ -172,8 +170,8 @@ build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, templat
   } else {
     inter.itk.used <- PARAM_DEFAULTS$interCropItk
   }
-  existing.itk <- list.files(paste0(simu.path, "/itk"), full.names = TRUE)
-  required.itk <- paste0(simu.path, "/itk/", c(main.itk.used, inter.itk.used))
+  existing.itk <- list.files(paste0(simu.path, "/cropInterventions"), full.names = TRUE)
+  required.itk <- paste0(simu.path, "/cropInterventions/", c(main.itk.used, inter.itk.used))
   remove.itk   <- existing.itk[!(existing.itk %in% required.itk)]
   dum <- purrr::map(remove.itk, file.remove)
 
@@ -211,7 +209,7 @@ build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, templat
   tree.params.to.edit <- params.to.edit[params.to.edit %in% PARAM_NAMES$tree]
 
   ## Edit pld file
-  pld.path <- paste0(simu.path, "/plotDescription/template.pld")
+  pld.path <- paste0(simu.path, "/template.pld")
   pld <- read_param_file(pld.path)
   pld.new <- edit_param_file(pld, dplyr::select(exp.plan, pld.params.to.edit)) %>%
     edit_param_element("nbTrees", num.trees) %>%
@@ -222,14 +220,12 @@ build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, templat
     edit_param_element("longitude", 0) %>%
     edit_param_element("elevation", 0)
   write_param_file(pld.new, pld.path)
-  dum <- file.rename(pld.path, paste0(simu.path, "/plotDescription/", exp.plan$SimulationName, ".pld"))
+  dum <- file.rename(pld.path, paste0(simu.path, "/", exp.plan$SimulationName, ".pld"))
 
   ## Edit sim file
   sim.path <- paste0(simu.path, "/template.sim")
   sim <- read_param_file(sim.path)
   sim.new <- edit_param_file(sim, dplyr::select(exp.plan, sim.params.to.edit)) %>%
-    edit_param_element("pldFileName", paste0(exp.plan$SimulationName, ".pld")) %>%
-    edit_param_element("weatherFile", wth.name) %>%
     edit_param_element("profileNames", paste0(profiles, collapse = ",")) %>%
     edit_param_element("exportFrequencies", paste0(SUPPORTED.PROFILES$freqs[match(profiles, SUPPORTED.PROFILES$profiles)], collapse = ","))
   write_param_file(sim.new, sim.path)
