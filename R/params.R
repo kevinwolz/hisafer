@@ -54,9 +54,9 @@ read_param_file <- function(path) {
       element.table <- read_element_table(sim, i, titles, NAMES)
       element.table.reduced <- element.table[!grepl("#", element.table$name),]
       if(nrow(element.table.reduced) > 0) {
-        toto <- list(list(value = element.table, commented = FALSE, range = NA, accepted = NA))
+        toto <- list(list(value = element.table, commented = FALSE, range = NA, type = NA, accepted = NA))
       } else {
-        toto <- list(list(value = element.table, commented = TRUE, range = NA, accepted = NA))
+        toto <- list(list(value = element.table, commented = TRUE, range = NA, type = NA, accepted = NA))
       }
       names(toto) <- "layers"
       new.sim[[list.title]] <- c(new.sim[[list.title]], toto)
@@ -66,9 +66,9 @@ read_param_file <- function(path) {
       element.table <- read_element_table(sim, i, titles, NAMES)
       element.table.reduced <- element.table[!grepl("#", element.table$name),]
       if(nrow(element.table.reduced) > 0) {
-        toto <- list(list(value = element.table, commented = FALSE, range = NA, accepted = NA))
+        toto <- list(list(value = element.table, commented = FALSE, range = NA, type = NA, accepted = NA))
       } else {
-        toto <- list(list(value = element.table, commented = TRUE, range = NA, accepted = NA))
+        toto <- list(list(value = element.table, commented = TRUE, range = NA, type = NA, accepted = NA))
       }
       names(toto) <- "layer.initialization"
       new.sim[[list.title]] <- c(new.sim[[list.title]], toto)
@@ -78,9 +78,9 @@ read_param_file <- function(path) {
       element.table <- read_element_table(sim, i, titles, NAMES)
       element.table.reduced <- element.table[!grepl("#", element.table$name),]
       if(nrow(element.table.reduced) > 0) {
-        toto <- list(list(value = element.table, commented = FALSE, range = NA, accepted = NA))
+        toto <- list(list(value = element.table, commented = FALSE, range = NA, type = NA, accepted = NA))
       } else {
-        toto <- list(list(value = element.table, commented = TRUE, range = NA, accepted = NA))
+        toto <- list(list(value = element.table, commented = TRUE, range = NA, type = NA, accepted = NA))
       }
       names(toto) <- "tree.initialization"
       new.sim[[list.title]] <- c(new.sim[[list.title]], toto)
@@ -90,9 +90,9 @@ read_param_file <- function(path) {
       element.table <- read_element_table(sim, i, titles, NAMES)
       element.table.reduced <- element.table[!grepl("#", element.table$name),]
       if(nrow(element.table.reduced) > 0) {
-        toto <- list(list(value = element.table, commented = FALSE, range = NA, accepted = NA))
+        toto <- list(list(value = element.table, commented = FALSE, range = NA, type = NA, accepted = NA))
       } else {
-        toto <- list(list(value = element.table, commented = TRUE, range = NA, accepted = NA))
+        toto <- list(list(value = element.table, commented = TRUE, range = NA, type = NA, accepted = NA))
       }
       names(toto) <- "root.initialization"
       new.sim[[list.title]] <- c(new.sim[[list.title]], toto)

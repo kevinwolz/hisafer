@@ -19,6 +19,7 @@ hisafe_params <- function(variable = "names", template = "agroforestry_default")
   PARAM_DEFAULTS  <- get_param_vals(TEMPLATE_PARAMS, "value")
   PARAM_RANGES    <- get_param_vals(TEMPLATE_PARAMS, "range")
   PARAM_ACCEPTED  <- get_param_vals(TEMPLATE_PARAMS, "accepted")
+  PARAM_TYPE      <- get_param_vals(TEMPLATE_PARAMS, "type")
 
   acceptable <- c(PARAM_NAMES, "names", "all")
   if(any(!(variable %in% acceptable))) {
@@ -28,19 +29,34 @@ hisafe_params <- function(variable = "names", template = "agroforestry_default")
 
   if(variable[1] == "all") {
     for(i in 1:length(PARAM_NAMES)){
-      cat(paste0("\n\n", PARAM_NAMES[i]))
-      cat(paste0("\nDefault: ", PARAM_DEFAULTS[[i]]))
-      if(!is.na(PARAM_RANGES[[i]]))   cat(paste0("\nAccepted Range: ",   PARAM_RANGES[[i]]))
-      if(!is.na(PARAM_ACCEPTED[[i]])) cat(paste0("\nAccepted Values: ",  PARAM_ACCEPTED[[i]]))
+      cat("\n\n", PARAM_NAMES[i])
+      if("tbl" %in% class(PARAM_DEFAULTS[[i]])){
+        cat("\n-- Default:\n")
+        print(PARAM_DEFAULTS[[i]])
+      } else {
+        cat("\n-- Default:", paste0(PARAM_DEFAULTS[[i]], collapse = ", "))
+      }
+
+      if(!all(is.na(PARAM_RANGES[[i]])))   cat("\n-- Accepted Range: [",  paste0(PARAM_RANGES[[i]], collapse = ", "), "] ", sep = "")
+      if(!all(is.na(PARAM_TYPE[[i]])))     cat("(", PARAM_TYPE[[i]], ")", sep = "")
+      if(!all(is.na(PARAM_ACCEPTED[[i]]))) cat("\n-- Accepted Values: ", paste0(PARAM_ACCEPTED[[i]], collapse = ", "))
+
     }
   } else if (variable[1] == "names") {
     cat(paste0(PARAM_NAMES, collapse = "\n"))
   } else {
     for(i in 1:length(variable)){
-      cat(paste0("\n", variable[i], "\n"))
-      cat(paste0("Default: ", PARAM_DEFAULTS[[variable]]))
-      if(!is.na(PARAM_RANGES[[variable]]))   cat(paste0("Accepted Range: ",   PARAM_RANGES[[variable]]))
-      if(!is.na(PARAM_ACCEPTED[[variable]])) cat(paste0("Accepted Values: ",  PARAM_ACCEPTED[[variable]]))
+      cat("\n\n", variable[i])
+      if("tbl" %in% class(PARAM_DEFAULTS[[variable[i]]])){
+        cat("\n-- Default:\n")
+        print(PARAM_DEFAULTS[[variable[i]]])
+      } else {
+        cat("\n-- Default:", paste0(PARAM_DEFAULTS[[variable[i]]], collapse = ", "))
+      }
+
+      if(!all(is.na(PARAM_RANGES[[variable[i]]])))   cat("\n-- Accepted Range: [",  paste0(PARAM_RANGES[[variable[i]]], collapse = ", "), "] ", sep = "")
+      if(!all(is.na(PARAM_TYPE[[variable[i]]])))     cat("(", PARAM_TYPE[[variable[i]]], ")", sep = "")
+      if(!all(is.na(PARAM_ACCEPTED[[variable[i]]]))) cat("\n-- Accepted Values:", paste0(PARAM_ACCEPTED[[variable[i]]], collapse = ", "))
     }
   }
   invisible(PARAM_NAMES)
