@@ -259,7 +259,7 @@ get_template_params <- function(template.path) {
   }
 
   sim.file  <- clean_path(list.files(template.path, ".sim", full.names = TRUE))
-  pld.file  <- list.files(clean_path(paste0(template.path, "/plotDescription")), ".pld", full.names = TRUE)
+  pld.file  <- clean_path(list.files(template.path, ".pld", full.names = TRUE))
   tree.file <- list.files(clean_path(paste0(template.path, "/treeSpecies")), paste0(template.tree, ".tree"), full.names = TRUE)
 
   sim.params  <- read_param_file(sim.file)

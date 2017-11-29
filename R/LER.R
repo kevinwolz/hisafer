@@ -1,7 +1,7 @@
-plot_LER <- function(face,
-                     cycle         = "all",
-                     color.palette = NULL,
-                     plot          = TRUE) {
+LER <- function(face,
+                cycle         = "all",
+                color.palette = NULL,
+                plot          = TRUE) {
   if(!("face" %in% class(face))) stop("face argument not of class face", call. = FALSE)
   if(cycle == "all") cycle <- c("carbon", "nitrogen", "water", "light")
 
