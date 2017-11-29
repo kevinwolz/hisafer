@@ -55,7 +55,8 @@ plot_annual_cycle <- function(hop,
                     annualWaterExtractedByMainCrop, # scale by main crop area
                     annualWaterExtractedByInterCrop, # scale by inter crop area
                     annualWaterExtractedByTrees,
-                    # -Irrigation,
+                    annualIrrigationInMainCrop, # scale by main crop area
+                    annualIrrigationInInterCrop, # scale by inter crop area
                     annualDrainage,
                     annualInterceptedRainByMainCrop, # scale by main crop area
                     annualInterceptedRainByInterCrop, # scale by inter crop area
@@ -98,21 +99,51 @@ plot_annual_cycle <- function(hop,
                                                             "export profiles"), call. = FALSE)
     plot.data <- fhop$annualplot %>%
       dplyr::select(SimulationName, Year,
-                    annualNitrogenExtractedByMainCrop, # scale by main crop area
-                    annualNitrogenExtractedByInterCrop, # scale by inter crop area
-                    annualNitrogenExtractedByTrees
-                    # -fertilizerMainCrop, # scale by main crop area
-                    # -fertilizerInterCrop, # scale by inter crop area
-                    # -irrigationNitrogenMainCrop, # scale by main crop area
-                    # -irrigationNitrogenInterCrop, # scale by inter crop area
-                    # -Deposition
-      ) %>%
-      # CALCULATIONS
-      tidyr::gather(key = "flux", value = "value", annualNitrogenExtractedByMainCrop:annualNitrogenExtractedByTrees)
+                    # mineralization
+                    # leaching (lixivation)
+                    # denitrification
+                    # exportation
+                    # fixation
+                    # humification
+                    # humus mineralization
+                    # immobilization
+                    # organisation
+                    # residuMineralization (INTERNAL?)
+                    # residus (INTERNAL?)
+                    # restitution
+                    # volatilization
+                    annualNitrogenExtractedByMainCrop, # scale by main crop area?
+                    annualNitrogenExtractedByInterCrop, # scale by inter crop area?
+                    annualNitrogenExtractedByTrees,
+                    annualNitrogenFertilisationInMainCrop,
+                    annualNitrogenFertilisationInInterCrop,
+                    annualNitrogenIrrigationInMainCrop,
+                    annualNitrogenIrrigationInInterCrop,
+                    annualNitrogenRainInMainCrop,
+                    annualNitrogenRainInInterCrop) %>%
+      dplyr::mutate(fertilization = -annualNitrogenFertilisationInMainCrop + -annualNitrogenFertilisationInInterCrop) %>%
+      dplyr::mutate(irrigation    = -annualNitrogenIrrigationInMainCrop    + -annualNitrogenIrrigationInInterCrop) %>%
+      dplyr::mutate(deposition    = -annualNitrogenRainInMainCrop          + -annualNitrogenRainInInterCrop) %>%
+      dplyr::select(-(annualNitrogenFertilisationInMainCrop:annualNitrogenRainInInterCrop)) %>%
+      tidyr::gather(key = "flux", value = "value", annualNitrogenExtractedByMainCrop:deposition) %>%
+      dplyr::mutate(flux = factor(flux,
+                                  levels = c("annualNitrogenExtractedByMainCrop",
+                                             "annualNitrogenExtractedByInterCrop",
+                                             "annualNitrogenExtractedByTrees",
+                                             "fertilization",
+                                             "irrigation",
+                                             "deposition"),
+                                  labels = c("Main crop",
+                                             "Intercrop",
+                                             "Trees",
+                                             "Fertilization",
+                                             "Irrigation",
+                                             "Deposition")))
 
     plot.title <- "Nitrogen Cycle"
     y.lab      <- "N flux (kg M ha-1)"
-
+    if(is.null(color.palette)) color.palette <- c("#999999", "#E69F00", "#56B4E9", "#009E73",
+                                                  "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
   } else if(cycle == "light") {
     required.profiles <- "annualplot"
     if(!all(required.profiles %in% names(fhop))) stop(paste(cycle, "cycle calculations require data from",

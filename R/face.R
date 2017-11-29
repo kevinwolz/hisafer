@@ -37,7 +37,8 @@ create_face <- function(agroforestry, forestry, monocrop, face.path) {
   multi.errors <- c(FC.multi.check, CC.multi.check)
   multi.errors <- paste0(multi.errors[!(multi.errors == "")], collapse = "\n")
   if(multi.errors != "") stop(multi.errors, call. = FALSE)
-  agroforestry$exp.path <- NULL
+
+  agroforestry$exp.path <- forestry$exp.path <- monocrop$exp.path <- NULL
 
   # Profile checks
   nonempty_profiles <- function(x) {
@@ -101,7 +102,7 @@ create_face <- function(agroforestry, forestry, monocrop, face.path) {
   # Check numbers of years and warn if different
   year.summary <- merged_hop[[common.col]] %>%
     dplyr::group_by(System, SimulationName) %>%
-    dplyr::summarize(n = dplyr::n_distinct(Year) - 1) %>%
+    dplyr::summarize(n = dplyr::n_distinct(Year)) %>%
     tidyr::unite(label, System, SimulationName, n, sep = ": ", remove = FALSE)
   year.summary$label <- gsub("NA: ", "", year.summary$label)
   if(length(unique(year.summary$n)) != 1) {

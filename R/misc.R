@@ -31,15 +31,15 @@ hisafe_params <- function(variable = "names", template = "agroforestry_default")
     for(i in 1:length(PARAM_NAMES)){
       if(i == 1) { cat(PARAM_NAMES[i]) } else { cat("\n\n", PARAM_NAMES[i]) }
       if("tbl" %in% class(PARAM_DEFAULTS[[i]])){
-        cat("\n-- Default:\n")
+        cat("\n  -- Default:\n")
         print(PARAM_DEFAULTS[[i]])
       } else {
-        cat("\n-- Default:", paste0(PARAM_DEFAULTS[[i]], collapse = ", "))
+        cat("\n  -- Default:", paste0(PARAM_DEFAULTS[[i]], collapse = ", "))
       }
 
-      if(!all(is.na(PARAM_RANGES[[i]])))   cat("\n-- Accepted Range: [",  paste0(PARAM_RANGES[[i]], collapse = ", "), "] ", sep = "")
+      if(!all(is.na(PARAM_RANGES[[i]])))   cat("\n  -- Accepted Range: [",  paste0(PARAM_RANGES[[i]], collapse = ", "), "] ", sep = "")
       if(!all(is.na(PARAM_TYPE[[i]])))     cat("(", PARAM_TYPE[[i]], ")", sep = "")
-      if(!all(is.na(PARAM_ACCEPTED[[i]]))) cat("\n-- Accepted Values: ", paste0(PARAM_ACCEPTED[[i]], collapse = ", "))
+      if(!all(is.na(PARAM_ACCEPTED[[i]]))) cat("\n  -- Accepted Values: ", paste0(PARAM_ACCEPTED[[i]], collapse = ", "))
 
     }
   } else if (variable[1] == "names") {
@@ -48,15 +48,15 @@ hisafe_params <- function(variable = "names", template = "agroforestry_default")
     for(i in 1:length(variable)){
       if(i == 1) { cat(variable[i]) } else { cat("\n\n", variable[i]) }
       if("tbl" %in% class(PARAM_DEFAULTS[[variable[i]]])){
-        cat("\n-- Default:\n")
+        cat("\n  -- Default:\n")
         print(PARAM_DEFAULTS[[variable[i]]])
       } else {
-        cat("\n-- Default:", paste0(PARAM_DEFAULTS[[variable[i]]], collapse = ", "))
+        cat("\n  -- Default:", paste0(PARAM_DEFAULTS[[variable[i]]], collapse = ", "))
       }
 
-      if(!all(is.na(PARAM_RANGES[[variable[i]]])))   cat("\n-- Accepted Range: [",  paste0(PARAM_RANGES[[variable[i]]], collapse = ", "), "] ", sep = "")
+      if(!all(is.na(PARAM_RANGES[[variable[i]]])))   cat("\n  -- Accepted Range: [",  paste0(PARAM_RANGES[[variable[i]]], collapse = ", "), "] ", sep = "")
       if(!all(is.na(PARAM_TYPE[[variable[i]]])))     cat("(", PARAM_TYPE[[variable[i]]], ")", sep = "")
-      if(!all(is.na(PARAM_ACCEPTED[[variable[i]]]))) cat("\n-- Accepted Values:", paste0(PARAM_ACCEPTED[[variable[i]]], collapse = ", "))
+      if(!all(is.na(PARAM_ACCEPTED[[variable[i]]]))) cat("\n  -- Accepted Values:", paste0(PARAM_ACCEPTED[[variable[i]]], collapse = ", "))
     }
   }
   invisible(PARAM_NAMES)
