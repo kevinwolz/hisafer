@@ -107,6 +107,7 @@ call_hisafe <- function(path, simu.name, capsis.path) {
   done.message <- paste0("\nDone with Hi-sAFe simulation: ", simu.name, ". This took ", simulationElapsedTime, " minutes.")
   cat(done.message, file = out, append = TRUE)
   cat(done.message)
+  close(out)
 
   ## Change working directory back to user's original directory
   setwd(pre.wd)
