@@ -2,30 +2,36 @@
 % Please edit documentation in R/run.R
 \name{run_hisafe}
 \alias{run_hisafe}
-\title{Run a Hi-sAFe simulation}
+\title{Run one or more Hi-sAFe simulations}
 \usage{
-run_hisafe(hip = NULL, path = NULL, simu.name = NULL,
+run_hisafe(hip = NULL, path = NULL, simu.names = "all",
+  parallel = FALSE, num.cores = NULL,
   capsis.path = "/Applications/Capsis/")
 }
 \arguments{
-\item{hip}{An object of class "hip" with a single simulation (row). Required if \code{path} and \code{simu.name} are not provided.}
+\item{hip}{An object of class "hip". Required if \code{path} is not provided.}
 
-\item{path}{A character string of the path to the folder containing the simulation folder. Required if \code{hip} is not provided.}
+\item{path}{A character string of the path (relative or absolute) to the directory containing the simulation folders.
+Required if \code{hip} is not provided.}
 
-\item{simu.name}{Name of the simulation to run. Required if \code{hip} is not provided.}
+\item{simu.names}{Names of the simulations to run. If "all", the default, then all simulations are run.}
+
+\item{parallel}{Logical, should parallel computing be used.}
+
+\item{num.cores}{Numbers of cores to use in parallel computing. If not provided, will default to one less than the total number of available cores.}
 
 \item{capsis.path}{A character string of the path to the Capsis folder}
 }
 \value{
-Invisibly returns a console log from simulation run.
+Invisibly returns a list of console logs from simulation runs.
 }
 \description{
-Runs a Hi-sAFe simulation - calls Hi-sAFe from command line.
+Runs one or more Hi-sAFe simulations
 }
 \examples{
 \dontrun{
 # Once a group Hi-sAFe simulations (experiment) is defined...
-myexp <- define_hisafe(path = "./simulations")
+myexp <- define_hisafe(path = "./simulations", exp.name = "lat_exp", latitude = c(30,60))
 
 # ...and built...
 build_hisafe(myexp)
@@ -33,7 +39,4 @@ build_hisafe(myexp)
 # the simulations can all be run:
 run_hisafe(myexp)
 }
-}
-\seealso{
-Other hisafe run functions: \code{\link{run_hisafe_exp}}
 }
