@@ -2,7 +2,7 @@
 % Please edit documentation in R/params.R
 \name{get_template_params}
 \alias{get_template_params}
-\title{Read all template parameters from sim, pld, and tree files}
+\title{Read all template parameters}
 \usage{
 get_template_params(template.path)
 }
@@ -13,5 +13,5 @@ get_template_params(template.path)
 A list containing all parameter values and constraints.
 }
 \description{
-Reads all template parameter values and constraints from sim, pld, and tree files
+Reads all template parameter values and constraints
 }

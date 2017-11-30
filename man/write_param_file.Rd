@@ -2,7 +2,7 @@
 % Please edit documentation in R/params.R
 \name{write_param_file}
 \alias{write_param_file}
-\title{Writes sim, pld, and tree files}
+\title{Writes parameter files}
 \usage{
 write_param_file(param.list, path)
 }
@@ -15,7 +15,7 @@ write_param_file(param.list, path)
 Invisibly returns \code{TRUE}.
 }
 \description{
-Writes sim, pld, and tree files after editing
+Writes parameter files after editing
 Used within \code{\link{build_structure}}.
 }
 \seealso{

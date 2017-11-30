@@ -16,7 +16,7 @@ plot_hisafe_ts(hop, variable, profile, time.lim = NULL, tree.id = NULL,
 \item{profile}{The profile for which to plot a timeseries. If 'annualtree' or 'annualplot', annual timeseries are created.
 If 'trees', 'plot', or 'climate', daily timeseries are created.}
 
-\item{time.lim}{If profile is an annual profile, a numeric vector of length two providing the \code{c(minimum, maximum)} of years (since planting) to plot.
+\item{time.lim}{If profile is an annual profile, a numeric vector of length two providing the \code{c(minimum, maximum)} of years to plot.
 If profile is daily profile, a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
 If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.}
 

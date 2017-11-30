@@ -2,7 +2,7 @@
 % Please edit documentation in R/params.R
 \name{read_param_file}
 \alias{read_param_file}
-\title{Reads sim, pld, and tree files}
+\title{Reads parameter files}
 \usage{
 read_param_file(path)
 }
@@ -13,7 +13,7 @@ read_param_file(path)
 A list containing all parameter values and constraints.
 }
 \description{
-Reads sim, pld, and tree files for editing
+Reads parameter files for editing
 Used within \code{\link{build_structure}}.
 }
 \seealso{

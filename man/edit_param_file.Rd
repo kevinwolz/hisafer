@@ -15,7 +15,7 @@ edit_param_file(param.list, exp.plan)
 A edited list containing all parameter values and constraints.
 }
 \description{
-Edits sim, pld, and tree files using the exp.plan of a hip object
+Edits parameter files using the exp.plan of a hip object
 Used within \code{\link{build_structure}}.
 }
 \seealso{

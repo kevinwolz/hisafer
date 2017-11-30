@@ -6,7 +6,7 @@
 #' @param variable A character string of the name of the variable to plot.
 #' @param profile The profile for which to plot a timeseries. If 'annualtree' or 'annualplot', annual timeseries are created.
 #' If 'trees', 'plot', or 'climate', daily timeseries are created.
-#' @param time.lim If profile is an annual profile, a numeric vector of length two providing the \code{c(minimum, maximum)} of years (since planting) to plot.
+#' @param time.lim If profile is an annual profile, a numeric vector of length two providing the \code{c(minimum, maximum)} of years to plot.
 #' If profile is daily profile, a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
 #' If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.
 #' @param tree.id A numeric vector indicating the ids of a subset of tree ids to plot. If no input, all trees will be plotted.
@@ -62,9 +62,9 @@ plot_hisafe_ts <- function(hop,
   ## Create profile-specific x aesthetic, axis label, plot theme, and time.lim filter
   if(profile %in% annual.profiles){
     x.var      <- "Year"
-    x.label    <- "Years after establishment"
+    x.label    <- "Year" # "Years after establishment"
     plot.data  <- hop[[profile]] %>%
-      dplyr::mutate(Year = Year - min(Year) + 1) # Create 0+ year values
+      dplyr::mutate(Year0 = Year - min(Year) + 1) # Create 0+ year values
     scale_x_ts <- scale_x_continuous(sec.axis = sec_axis(~ ., labels = NULL))
     if(!is.null(time.lim)) {
       if(is.na(time.lim[1])) { time.lim[1] <- min(plot.data$Year) }
@@ -161,7 +161,7 @@ plot_hisafe_ts <- function(hop,
 #' @param rowfacet One of "Year", "Month", or "SimulationName", indicating which variable to use for row faceting.
 #' @param colfacet One of "Year", "Month", or "SimulationName", indicating which variable to use for column faceting.
 #' @param sim.names A character string containing the SimulationNames to include. Use "all" to include all available values.
-#' @param years A numeric vector containing the years to include. Use "all" to include all available values.
+#' @param years A numeric vector containing the years (after planting) to include. Use "all" to include all available values.
 #' @param months A numeric vector containing the months to include. Use "all" to include all available values.
 #' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.
 #' @export

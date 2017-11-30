@@ -19,7 +19,7 @@ plot_hisafe_monthcells(hop, variable, colfacet = "SimulationName",
 
 \item{sim.names}{A character string containing the SimulationNames to include. Use "all" to include all available values.}
 
-\item{years}{A numeric vector containing the years to include. Use "all" to include all available values.}
+\item{years}{A numeric vector containing the years (after planting) to include. Use "all" to include all available values.}
 
 \item{months}{A numeric vector containing the months to include. Use "all" to include all available values.}
 

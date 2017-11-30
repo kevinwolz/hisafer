@@ -17,7 +17,7 @@ edit_param_element(param.list, variable, value)
 A edited list containing all parameter values and constraints.
 }
 \description{
-Edits an individual element of a sim, pld, or tree parameter list
+Edits an individual element of a parameter list
 Used within \code{\link{build_structure}}.
 }
 \seealso{

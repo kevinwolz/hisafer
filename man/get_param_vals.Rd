@@ -2,7 +2,7 @@
 % Please edit documentation in R/params.R
 \name{get_param_vals}
 \alias{get_param_vals}
-\title{Get values/constraints of template parameters from sim, pld, and tree files}
+\title{Get values/constraints of template parameters}
 \usage{
 get_param_vals(x, type)
 }
@@ -13,5 +13,5 @@ get_param_vals(x, type)
 A list containing parameter values/constraints.
 }
 \description{
-Gets values/constraints of all template parameters from sim, pld, and tree files
+Gets values/constraints of all template parameters
 }

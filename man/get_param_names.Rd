@@ -2,7 +2,7 @@
 % Please edit documentation in R/params.R
 \name{get_param_names}
 \alias{get_param_names}
-\title{Get names of template parameters from sim, pld, and tree files}
+\title{Get names of template parameters}
 \usage{
 get_param_names(x)
 }
@@ -13,5 +13,5 @@ get_param_names(x)
 A list containing parameter names by file type.
 }
 \description{
-Get names of all template parameters from sim, pld, and tree files
+Get names of all template parameters
 }
