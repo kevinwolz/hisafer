@@ -2,32 +2,30 @@
 % Please edit documentation in R/read.R
 \name{read_hisafe}
 \alias{read_hisafe}
-\title{Read output from a single Hi-sAFe simulation}
+\title{Read output from one or more Hi-sAFe simulations}
 \usage{
-read_hisafe(hip = NULL, path = NULL, simu.name = NULL, profiles = "all",
-  show.progress = TRUE, max.size = 3e+08)
+read_hisafe(hip = NULL, path = NULL, simu.names = "all",
+  profiles = "all", show.progress = TRUE, max.size = 3e+08)
 }
 \arguments{
 \item{hip}{An object of class "hip". To create a hip object see \code{\link{define_hisafe}}.
-Cannot provided both \code{hip} and \code{simu.name}.
 If \code{hip} is not provided, then \code{path} is required and the input data for the experiment is read from the experiment
 summary .csv file created when building the experiment.}
 
-\item{path}{A character string of the path to the directory containing the Hi-sAFe simulation folder.
-If \code{hip} is not provided, then \code{path} is required. If both \code{hip} and \code{path} are provided, \code{path} is used.}
+\item{path}{A character string of the path to the directory containing the Hi-sAFe simulation folders.
+If \code{hip} is not provided, then \code{path} is required. If \code{hip} is provided, \code{path} is ignored.}
 
-\item{simu.name}{The \code{SimulationName} of the Hi-sAFe simulation to read. This must be the same as the name of the Hi-sAFe simulation folder.
-Cannot provided both \code{hip} and \code{simu.name}.}
+\item{simu.names}{Names of the simulations to read. If "all", the default, then all simulations in the folder are read.}
 
 \item{profiles}{A character vector of the names of Hi-sAFe output profiles to read.
-If "all" the default, reads all supported Hi-sAFe output profiles. For currently supported profiles see: \code{\link{hisafe_profiles}}}
+#' If "all" the default, reads all supported Hi-sAFe output profiles. For currently supported profiles see: \code{\link{hisafe_profiles}}}
 
 \item{show.progress}{Logical indicating whether progress messsages should be printed to the console.}
 
 \item{max.size}{The maximum file size (in bytes) that should be read. Files larger than this value will be ignored, with a warning.}
 }
 \value{
-An object of class "hop". This is a list of 15 data frames (tibbles):
+An object of class "hop". This is a list of 16 data frames (tibbles):
 \itemize{
  \item{annualtree}
  \item{annualcrop}
@@ -35,26 +33,27 @@ An object of class "hop". This is a list of 15 data frames (tibbles):
  \item{trees}
  \item{plot}
  \item{climate}
- \item{roots}
  \item{monthCells}
  \item{cells}
+ \item{roots}
  \item{voxels}
- \item{variables}{ - variable descriptions and units from all profiles}
- \item{plot.info}{ - plot geometry data}
- \item{tree.info}{ - tree species and location data}
+ \item{variables}{ - variable descriptions and units from all read profiles}
+ \item{plot.info}{ - plot geometry data for each simulation}
+ \item{tree.info}{ - tree species and location data for each simulation}
  \item{exp.plan}{ - the exp.plan of the hip object that generated the simulation}
- \item{path}{ - the path to the simulation folder}
+ \item{path}{ - the paths to the simulation folders}
+ \item{exp.path}{ - the path to the experiment folder}
 }
 }
 \description{
-Reads the designated output profiles from a single Hi-sAFe simulation.
+Reads the designated output profiles from one or more Hi-sAFe simulations
 }
 \examples{
 \dontrun{
-# After reading in Hi-sAFe simulation data via:
-mydata <- read_hisafe(mysimhip)
+# Reading in Hi-sAFe simulation:
+myexp <- read_hisafe(myhip)
 
 # If only the annual tree data is required:
-mytreedata <- read_hisafe(mysimhip, profiles = "annualtree")
+mytreeexp <- read_hisafe(myhip, profiles = "annualtree")
 }
 }

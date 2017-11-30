@@ -174,6 +174,8 @@ hop_merge <- function(...) {
 
   merged_hop$variables <- dplyr::distinct(merged_hop$variables)
 
+  merged_hop$exp.path <- NA
+
   class(merged_hop) <- c("hop-group", "hop", class(merged_hop))
   return(merged_hop)
 }

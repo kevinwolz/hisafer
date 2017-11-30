@@ -209,9 +209,7 @@ Here are some basic plotting functions that can plot individual variables:
 - `plot_hisafe_voxels()` - plots tile plots of "voxels" data
 
 ```{r}
-plot_hisafe_ts(hop      = hop_exp, 
-               variable = "dbh",
-               profile  = "annualtree")
+plot_hisafe_ts(hop = hop_exp, variable = "dbh", profile = "annualtree")
 ```
 
 ```{r, fig.height = 10}
@@ -259,15 +257,15 @@ One very special case of analyzing Hi-sAFe simulations occurs when you want to c
 
 To create a `face` object, use `create_face()`and supply the three required `hop` objects along with a path to a diretory where you want all FACE analyses to be saved. The agroforestry `hop` can contain any number of agroforestry simulations, but the forestry `hop` and monocrop `hop` can only contain a single simulation each. 
 
-```{r, eval = FALSE}
+```{r, echo = FALSE}
+load(paste0(system.file("extdata", "vignette_output", package = "hisafer"), "/vignette_face.Rdata"))
+```
+
+```{r, eval = TRUE}
 myface <- create_face(agroforestry = AF.hop, 
                       forestry     = FC.hop, 
                       monocrop     = CC.hop, 
                       face.path    = "./simulations")
-```
-
-```{r, echo = FALSE}
-#load(paste0(system.file("extdata", "vignette_output", package = "hisafer"), "/vignette_face.Rdata"))
 ```
 
 Once you have a `face` object, the most common analysis is to calculate the various LER metrics of the agroforestry systems. You can do this using `LER()`.
@@ -276,7 +274,10 @@ LER(face = myface)
 ```
 
 Furthermore, just as for normal `hop` objects, you can also use `plot_annual_cycle()` and `plot_daily_cycle()` to compare the simulations in a `face` object. 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
+plot_annual_cycle(hop = myface, cycle = "carbon")
+```
+```{r, eval = TRUE}
 plot_annual_cycle(hop = myface, cycle = "light")
 ```
 

@@ -1,6 +1,6 @@
-#' Read output from a Hi-sAFe experiment
-#' @description Reads the designated output profiles from a Hi-sAFe experiiment (i.e. a group of Hi-sAFe simulations).
-#' @return An object of class "hop-group". This is a list of 16 data frames (tibbles):
+#' Read output from one or more Hi-sAFe simulations
+#' @description Reads the designated output profiles from one or more Hi-sAFe simulations
+#' @return An object of class "hop". This is a list of 16 data frames (tibbles):
 #' \itemize{
 #'  \item{annualtree}
 #'  \item{annualcrop}
@@ -8,15 +8,15 @@
 #'  \item{trees}
 #'  \item{plot}
 #'  \item{climate}
-#'  \item{roots}
 #'  \item{monthCells}
 #'  \item{cells}
+#'  \item{roots}
 #'  \item{voxels}
-#'  \item{variables}{ - variable descriptions and units from all profiles}
-#'  \item{plot.info}{ - plot geometry data}
-#'  \item{tree.info}{ - tree species and location data}
+#'  \item{variables}{ - variable descriptions and units from all read profiles}
+#'  \item{plot.info}{ - plot geometry data for each simulation}
+#'  \item{tree.info}{ - tree species and location data for each simulation}
 #'  \item{exp.plan}{ - the exp.plan of the hip object that generated the simulation}
-#'  \item{path}{ - the path to the simulation folder}
+#'  \item{path}{ - the paths to the simulation folders}
 #'  \item{exp.path}{ - the path to the experiment folder}
 #' }
 #' @param hip An object of class "hip". To create a hip object see \code{\link{define_hisafe}}.
@@ -24,7 +24,7 @@
 #' summary .csv file created when building the experiment.
 #' @param path A character string of the path to the directory containing the Hi-sAFe simulation folders.
 #' If \code{hip} is not provided, then \code{path} is required. If \code{hip} is provided, \code{path} is ignored.
-#' @param simu.names Names of the simulations to read. If "all", the default, then all simulations in the experiment folder are read.
+#' @param simu.names Names of the simulations to read. If "all", the default, then all simulations in the folder are read.
 #' @param profiles A character vector of the names of Hi-sAFe output profiles to read.
 #' #' If "all" the default, reads all supported Hi-sAFe output profiles. For currently supported profiles see: \code{\link{hisafe_profiles}}
 #' @param show.progress Logical indicating whether progress messsages should be printed to the console.
@@ -33,64 +33,69 @@
 #' @importFrom dplyr %>%
 #' @examples
 #' \dontrun{
-#' # After reading in Hi-sAFe simulation data via:
-#' myexp <- read_hisafe_exp(myexphip)
+#' # Reading in Hi-sAFe simulation:
+#' myexp <- read_hisafe(myhip)
 #'
 #' # If only the annual tree data is required:
-#' mytreeexp <- read_hisafe(myexphip, profiles = "annualtree")
+#' mytreeexp <- read_hisafe(myhip, profiles = "annualtree")
 #' }
-read_hisafe_exp <- function(hip = NULL,
-                            path = NULL,
-                            simu.names = "all",
-                            profiles = "all",
-                            show.progress = TRUE,
-                            max.size = 3e8) {
+read_hisafe <- function(hip           = NULL,
+                        path          = NULL,
+                        simu.names    = "all",
+                        profiles      = "all",
+                        show.progress = TRUE,
+                        max.size      = 3e8) {
 
-  if(!is.null(hip) & !("hip" %in% class(hip))) stop("data not of class hip", call. = FALSE)
+  if(!is.null(hip) & !("hip" %in% class(hip))) stop("data not of class hip",              call. = FALSE)
   if(is.null(hip) == is.null(path))            stop("must provide hip or path, not both", call. = FALSE)
 
   ## Read simulation inputs & extract cols that vary for binding to output data
   if(!is.null(hip)) {
-    EXP.PLAN <- hip$exp.plan
-    path     <- hip$path
+    EXP.PLAN   <- hip$exp.plan
+    path       <- hip$path
+    simu.names <- EXP.PLAN$SimulationName
   } else {
-    exp.name <- tail(strsplit(path, "/")[[1]], n = 1)
-    exp.summary.file <- clean_path(paste0(path, "/", exp.name, "_exp_summary.csv"))
-    if(file.exists(exp.summary.file)) {
+    exp.summary.file <- clean_path(paste0(path, "/", tail(strsplit(path, "/")[[1]], n = 1), "_exp_summary.csv"))
+    if(simu.names[1] == "all" & file.exists(exp.summary.file)) {
       EXP.PLAN <- readr::read_csv(exp.summary.file, col_types = readr::cols())
+      simu.names <- EXP.PLAN$SimulationName
+    } else if(simu.names[1] == "all" & !file.exists(exp.summary.file)){
+      stop("simu.names argument can only be 'all' if hip is provided or if an experiment summary file is available in the experiment folder")
+    } else if(simu.names[1] != "all" & file.exists(exp.summary.file)){
+      EXP.PLAN <- readr::read_csv(exp.summary.file, col_types = readr::cols()) %>%
+        dplyr::filter(SimulationName %in% simu.names)
+      simu.names <- EXP.PLAN$SimulationName
+    } else if(length(simu.names) == 1) {
+      EXP.PLAN <- dplyr::tibble(SimulationName = simu.names)
     } else {
-      warning("No experiment summary to read. This experiment was not created with hisafer.", call. = FALSE)
-      EXP.PLAN <- dplyr::tibble()
+      warning("hip not provided, and no experiment summary to read. This experiment was not created with hisafer.", call. = FALSE)
+      EXP.PLAN <- dplyr::tibble(SimulationName = simu.names)
     }
   }
 
-  EXP.PLAN <- EXP.PLAN[, purrr::map_lgl(EXP.PLAN, function(x) (length(unique(x)) != 1))]
-
-  if(simu.names[1] != "all") EXP.PLAN <- dplyr::filter(EXP.PLAN, SimulationName %in% simu.names)
-
-  # in case individual simulations were deleted from the experiment folder, but were still in the exp_summary.csv file
-  EXP.PLAN <- dplyr::filter(EXP.PLAN, SimulationName %in% list.dirs(path, recursive = FALSE, full.names = FALSE))
-
   ## Read all data from all simulations & combine
-  data <- purrr::map(EXP.PLAN$SimulationName,
-                     read_hisafe,
-                     hip = NULL,
-                     path = path,
-                     profiles = profiles,
+  data <- purrr::map(simu.names,
+                     read_simulation,
+                     hip           = NULL,
+                     path          = path,
+                     profiles      = profiles,
                      show.progress = show.progress,
-                     max.size = max.size) %>%
+                     max.size      = max.size) %>%
     purrr::pmap(dplyr::bind_rows)
+  ## Bind multiple simulations together
   # a more generic version of this line that handles cases where the number
   # of elements and order of names in each sublist can vary is:
   # purrr::map(map_df(data, ~ as.data.frame(purrr::map(.x, ~ unname(nest(.))))), bind_rows)
-  # However, this isn't necessary becasue read_hisafe_output always produces
-  # identically sized and named lists.
+  # However, this isn't necessary becasue read_simulation always produces identically sized and named lists.
+
 
   ## Tidy up data
   data_tidy <- function(x){
     if(nrow(x) > 0) {
       x <- dplyr::left_join(EXP.PLAN, x, by = "SimulationName") %>%   # add EXP.PLAN cols to annual data
         dplyr::filter(!is.na(Date))                                   # output profiles with no data will have NA's in all columns
+    } else {
+      x <- dplyr::tibble()
     }
     return(x)
   }
@@ -106,28 +111,36 @@ read_hisafe_exp <- function(hip = NULL,
   data$cells       <- data_tidy(data$cells)
   data$voxels      <- data_tidy(data$voxels)
   data$variables   <- dplyr::distinct(data$variables)            # remove duplicate variable descriptions
-  data$exp.path    <- path
+  data$exp.path    <- ifelse(nrow(EXP.PLAN) > 1, path, NA)
 
   ## Warn if lengths of all simulations are not equal
-  year.summary <- data[[as.numeric(which.max(purrr::map_int(data[names(data) != "exp.path"], nrow)))]] %>%
-    dplyr::group_by(SimulationName) %>%
-    dplyr::summarize(n = dplyr::n_distinct(Year) - 1) %>%
-    tidyr::unite(label, SimulationName, n, sep = ": ", remove = FALSE)
-  if(length(unique(year.summary$n)) != 1) {
-    year.length.warning <- paste(c("Simulation durations not equal!",
-                                   "  Be careful when comparing simulations.",
-                                   "  Simulation durations:",
-                                   paste("   --", year.summary$label, "years")),
-                                 collapse = "\n")
-    warning(year.length.warning, call. = FALSE)
+  if(length(simu.names) > 1) {
+    year.summary <- data[[as.numeric(which.max(purrr::map_int(data[names(data) != "exp.path"], nrow)))]] %>%
+      dplyr::group_by(SimulationName) %>%
+      dplyr::summarize(n = dplyr::n_distinct(Year) - 1) %>%
+      tidyr::unite(label, SimulationName, n, sep = ": ", remove = FALSE)
+    if(length(unique(year.summary$n)) != 1) {
+      year.length.warning <- paste(c("Simulation durations not equal!",
+                                     "  Be careful when comparing simulations.",
+                                     "  Simulation durations:",
+                                     paste("   --", year.summary$label, "years")),
+                                   collapse = "\n")
+      warning(year.length.warning, call. = FALSE)
+    }
   }
 
-  class(data) <- c("hop-group", "hop", class(data))
+  ## Assign class designators
+  if(length(simu.names) > 1) {
+    class(data) <- c("hop-group", "hop", class(data))
+  } else {
+    class(data) <- c("hop", class(data))
+  }
+
   return(data)
 }
 
 #' Read output from a single Hi-sAFe simulation
-#' @description Reads the designated output profiles from a single Hi-sAFe simulation.
+#' @description Reads the designated output profiles from a single Hi-sAFe simulation. Called from within \code{\link{read_hisafe}}.
 #' @return An object of class "hop". This is a list of 15 data frames (tibbles):
 #' \itemize{
 #'  \item{annualtree}
@@ -136,9 +149,9 @@ read_hisafe_exp <- function(hip = NULL,
 #'  \item{trees}
 #'  \item{plot}
 #'  \item{climate}
-#'  \item{roots}
 #'  \item{monthCells}
 #'  \item{cells}
+#'  \item{roots}
 #'  \item{voxels}
 #'  \item{variables}{ - variable descriptions and units from all profiles}
 #'  \item{plot.info}{ - plot geometry data}
@@ -158,34 +171,17 @@ read_hisafe_exp <- function(hip = NULL,
 #' If "all" the default, reads all supported Hi-sAFe output profiles. For currently supported profiles see: \code{\link{hisafe_profiles}}
 #' @param show.progress Logical indicating whether progress messsages should be printed to the console.
 #' @param max.size The maximum file size (in bytes) that should be read. Files larger than this value will be ignored, with a warning.
-#' @export
-#' @importFrom dplyr %>%
-#' @examples
-#' \dontrun{
-#' # After reading in Hi-sAFe simulation data via:
-#' mydata <- read_hisafe(mysimhip)
-#'
-#' # If only the annual tree data is required:
-#' mytreedata <- read_hisafe(mysimhip, profiles = "annualtree")
-#' }
-read_hisafe <- function(hip = NULL,
-                        path = NULL,
-                        simu.name = NULL,
-                        profiles = "all",
-                        show.progress = TRUE,
-                        max.size = 3e8) {
+read_simulation <- function(simu.name, hip, path, profiles, show.progress, max.size) {
 
   if(!is.null(hip) & !("hip" %in% class(hip)))              stop("data not of class hip", call. = FALSE)
   if(is.null(hip) == (is.null(simu.name) | is.null(path)))  stop("must provide hip OR (simu.name & path)", call. = FALSE)
 
+  simu.path <- clean_path(paste0(path, "/" , simu.name))
+
   ## Read simulation inputs
   if(!is.null(hip)) {
     EXP.PLAN  <- hip$exp.plan
-    path      <- hip$path
-    simu.name <- EXP.PLAN$SimulationName
-    simu.path <- clean_path(paste0(path, "/" , simu.name))
   } else {
-    simu.path <- clean_path(paste0(path, "/" , simu.name))
     simu.summary.file <- paste0(simu.path, "/", simu.name, "_simulation_summary.csv")
     if(file.exists(simu.summary.file)){
       EXP.PLAN <- readr::read_csv(paste0(simu.path, "/", simu.name, "_simulation_summary.csv"), col_types = readr::cols())
@@ -250,7 +246,7 @@ read_hisafe <- function(hip = NULL,
   if(ncol(variables) > 0) names(variables) <- c("Subject", "SubjectId", "VariableName", "Units", "Description", "VariableClass")
 
   ## Read plot characteristics from .PLD file
-  pld.path <- clean_path(paste0(simu.path, "/plotDescription/", simu.name, ".pld"))
+  pld.path <- paste0(simu.path, "/", simu.name, ".pld")
   pld <- read_param_file(pld.path)
   geometryOption      <- as.numeric(pld$PLOT$geometryOption$value)
   spacingBetweenRows  <- as.numeric(pld$PLOT$spacingBetweenRows$value)
@@ -275,9 +271,9 @@ read_hisafe <- function(hip = NULL,
                  trees      = trees.dv$data,
                  plot       = plot.dv$data,
                  climate    = climate.dv$data,
-                 roots      = roots.dv$data,
                  monthCells = monthCells.dv$data,
                  cells      = cells.dv$data,
+                 roots      = roots.dv$data,
                  voxels     = voxels.dv$data,
                  variables  = variables,
                  plot.info  = plot.info,
@@ -285,22 +281,21 @@ read_hisafe <- function(hip = NULL,
                  exp.plan   = EXP.PLAN,
                  path       = dplyr::tibble(SimulationName = simu.name, path = simu.path))
 
-  class(output) <- c("hop", class(output))
   return(output)
 }
 
 #' Read example Hi-sAFe experiment output
-#' @description Reads in an example Hi-sAFe experiment. For more details see \code{\link{read_hisafe_exp}}.
-#' @return An object of class "hop". For more details see \code{?read_hisafe_exp}.
+#' @description Reads in an example Hi-sAFe experiment. For more details see \code{\link{read_hisafe}}.
+#' @return An object of class "hop".
 #' @param profiles A character vector of the names of Hi-sAFe output profiles to read.
 #' "cells", "roots" and "voxels" profiles are not available in the example.
 #' @param show.progress Logical indicating whether progress messsages should be printed to the console.
 #' @export
-read_hisafe_example <- function(profiles = c("annualplot", "annualtree", "annualcrop", "plot", "trees", "climate", "monthCells"),
+read_hisafe_example <- function(profiles      = c("annualplot", "annualtree", "annualcrop", "plot", "trees", "climate", "monthCells"),
                                 show.progress = TRUE) {
-  hop <- read_hisafe_exp(path = clean_path(paste0(system.file("extdata", "example_output", package = "hisafer"), "/")),
-                         profiles = profiles,
-                         show.progress = show.progress)
+  hop <- read_hisafe(path          = clean_path(paste0(system.file("extdata", "example_output", package = "hisafer"), "/")),
+                     profiles      = profiles,
+                     show.progress = show.progress)
   return(hop)
 }
 
@@ -370,13 +365,13 @@ read_profile <- function(profile, path, show.progress = TRUE, max.size = 3e8) {
 }
 
 #' Read tree information from a Hi-sAFe pld file
-#' @description Reads tree information from a Hi-sAFe pld file. Used by \code{\link{read_hisafe}}.
+#' @description Reads tree information from a Hi-sAFe pld file. Used by \code{\link{read_simulation}}.
 #' @return A data frame (tibble) containing tree id, species, x and y.
 #' @param path A character string of the path to the directory containing the simulation folder.
 #' @param simu.name A character string of the simualation name.
 #' @importFrom dplyr %>%
 read_tree_info <- function(path, simu.name) {
-  pld <- read_param_file(clean_path(paste0(path, "/", simu.name, "/plotDescription/", simu.name, ".pld")))
+  pld <- read_param_file(clean_path(paste0(path, "/", simu.name, "/", simu.name, ".pld")))
   if(pld$TREE_INITIALIZATION$tree.initialization$commented == FALSE) {
     tree.info <- pld$TREE_INITIALIZATION$tree.initialization$value %>%
       dplyr::mutate(x = treeX, y = treeY) %>%

@@ -14,8 +14,8 @@ read_hisafe_example(profiles = c("annualplot", "annualtree", "annualcrop",
 \item{show.progress}{Logical indicating whether progress messsages should be printed to the console.}
 }
 \value{
-An object of class "hop". For more details see \code{?read_hisafe_exp}.
+An object of class "hop".
 }
 \description{
-Reads in an example Hi-sAFe experiment. For more details see \code{\link{read_hisafe_exp}}.
+Reads in an example Hi-sAFe experiment. For more details see \code{\link{read_hisafe}}.
 }

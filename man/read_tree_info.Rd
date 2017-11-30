@@ -15,5 +15,5 @@ read_tree_info(path, simu.name)
 A data frame (tibble) containing tree id, species, x and y.
 }
 \description{
-Reads tree information from a Hi-sAFe pld file. Used by \code{\link{read_hisafe}}.
+Reads tree information from a Hi-sAFe pld file. Used by \code{\link{read_simulation}}.
 }
