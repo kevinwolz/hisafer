@@ -211,7 +211,9 @@ plot_hisafe_monthcells <- function(hop,
   var.lengths <- purrr::map_int(avail.vars, length) > 1
   if(sum(var.lengths) > 2) stop("only two variables of (sim.names, years, months) can have length greater than one", call. = FALSE)
   fixed <- which(!(vars %in% c(colfacet, rowfacet)))
-  fixed.var <- paste(vars[fixed], "=", avail.vars[[fixed]])
+  fixed.var <- ifelse(vars[fixed] == "SimulationName",
+                      as.character(avail.vars[[fixed]]),
+                      paste(vars[fixed], "=", avail.vars[[fixed]]))
 
   ## Exract units of supplied variable from the "variables" slot
   var.unit <- hop$variables %>%
@@ -277,7 +279,7 @@ plot_hisafe_monthcells <- function(hop,
     labs(x = colfacet,
          y = rowfacet,
          fill = var.unit,
-         title = paste0(variable, " (", fixed.var, ")")) +
+         title = paste0(variable, "\n(", fixed.var, ")")) +
     scale_x_continuous(expand = c(0,0)) +
     scale_y_continuous(expand = c(0,0)) +
     facet_grid(reformulate(colfacet, rowfacet), switch = "both") +

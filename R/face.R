@@ -70,16 +70,13 @@ create_face <- function(agroforestry, forestry, monocrop, face.path) {
                           "-- one or more of the agroforestry simulation does/do not contain any trees", "")
   FC.tree.check <- ifelse(nrow(forestry$tree.info) == 0,
                           "-- the forestry simulation does/do not contain any trees", "")
-  CC.tree.check <- ifelse(nrow(monocrop$tree.info) > 0,
+  CC.tree.check <- ifelse((nrow(monocrop$tree.info) > 0 | nrow(monocrop$annualtree) > 0 | nrow(monocrop$trees) > 0),
                           "-- the monocrop simulation contains trees", "")
   tree.errors <- c(AG.tree.check, FC.tree.check, CC.tree.check)
   tree.errors <- paste0(tree.errors[!(tree.errors == "")], collapse = "\n")
   if(tree.errors != "") stop(tree.errors, call. = FALSE)
 
   # Edit SimluationNames & add system column
-  # agroforestry <- simu_rename(agroforestry,
-  #                             old.names = unique(agroforestry[[AF.profiles[1]]]$SimulationName),
-  #                             new.names = paste0("AF-", unique(agroforestry[[AF.profiles[1]]]$SimulationName)))
   forestry <- simu_rename(forestry,
                               old.names = unique(forestry[[FC.profiles[1]]]$SimulationName),
                               new.names = "Forestry")
@@ -89,10 +86,6 @@ create_face <- function(agroforestry, forestry, monocrop, face.path) {
   agroforestry <- augment_with_system(agroforestry, "Agroforestry")
   forestry     <- augment_with_system(forestry,     "Forestry")
   monocrop     <- augment_with_system(monocrop,     "Monocrop")
-
-  # Remove irrelevant moncrop profiles
-  monocrop[["annualtree"]] <- dplyr::tibble()
-  monocrop[["trees"]]      <- dplyr::tibble()
 
   # Merge hops
   hops <- list(agroforestry, forestry, monocrop)

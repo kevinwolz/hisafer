@@ -151,10 +151,10 @@ plot_annual_cycle <- function(hop,
                                                             "export profiles"), call. = FALSE)
     plot.data <- fhop$annualplot %>%
       dplyr::select(SimulationName, Year,
-                    annualParIncident,
-                    annualParInterceptedByMainCrop,
-                    annualParInterceptedByInterCrop,
-                    annualParInterceptedByTrees)
+                    annualParIncident, # need to scale by scene area
+                    annualParInterceptedByMainCrop, # need to scale by mainCrop area
+                    annualParInterceptedByInterCrop, # need to scale by interCrop area
+                    annualParInterceptedByTrees) # need to scale by scene area
 
     plot.data$annualParInterceptedByMainCrop[is.na(plot.data$annualParInterceptedByMainCrop)] <- 0
     plot.data$annualParInterceptedByInterCrop[is.na(plot.data$annualParInterceptedByInterCrop)] <- 0
