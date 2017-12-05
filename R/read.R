@@ -68,7 +68,7 @@ read_hisafe <- function(hip           = NULL,
     } else if(length(simu.names) == 1) {
       EXP.PLAN <- dplyr::tibble(SimulationName = simu.names)
     } else {
-      warning("hip not provided, and no experiment summary to read. This experiment was not created with hisafer.", call. = FALSE)
+      warning("hip not provided, and no experiment summary to read. This experiment may not have been created with hisafer.", call. = FALSE)
       EXP.PLAN <- dplyr::tibble(SimulationName = simu.names)
     }
   }

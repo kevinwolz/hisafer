@@ -9,12 +9,12 @@
 read_param_file <- function(path) {
   sim <- scan(file = path, what = "character", encoding = "latin1", sep = "\n", quiet = TRUE)
 
-  titles    <- grepl("##", substr(sim, 1, 2))    # which lines have are headers
-  withdata  <- grepl(" = ", sim)                 # which lines have data
-  tabledata <- grepl("Layer", sim) | grepl("LayerInit", sim) | grepl("TreeInit", sim) | grepl("RootInit", sim)
-  withdata  <- withdata | tabledata
-  notes     <- !(titles | withdata)              # lines which are neither headers nor have data are notes
-  comment  <- substr(sim, 1, 1) == "#"           # which lines are commented out
+  titles        <- grepl("##", substr(sim, 1, 2))         # which lines have are headers
+  single.hash   <- grepl("#",  substr(sim, 1, 1))          # which lines are commented out
+  has.equals    <- grepl(" = ", sim)
+  pld.tabledata <- grepl("Layer", sim) | grepl("LayerInit", sim) | grepl("TreeInit", sim) | grepl("RootInit", sim)
+  notes         <- single.hash & !titles & !has.equals & !pld.tabledata # which lines are notes
+  comment       <- substr(sim, 1, 1) == "#"
 
   read_element_table <- function(sim, i, titles, table.names) {
     if(any(which(titles) > i)) {
@@ -39,6 +39,7 @@ read_param_file <- function(path) {
 
   new.sim <- list()
   next_threshold <- 0
+  list.title <- "temp"
   for(i in 1:length(sim)) {
     if(i < next_threshold) next
     if(notes[i]) next
@@ -100,8 +101,7 @@ read_param_file <- function(path) {
     } else if(tolower(list.title) == "fertilization_parameters") {
       NAMES <- c("engamm", "orgeng", "deneng", "voleng")
       element.table <- read_element_table(sim, i, titles, NAMES)
-      element.table.reduced <- element.table[!grepl("#", element.table$name),]
-      if(nrow(element.table.reduced) > 0) {
+      if(nrow(element.table) > 0) {
         toto <- list(list(value = element.table, commented = FALSE, range = NA, type = NA, accepted = NA))
       } else {
         toto <- list(list(value = element.table, commented = TRUE, range = NA, type = NA, accepted = NA))
@@ -109,13 +109,11 @@ read_param_file <- function(path) {
       names(toto) <- "fertilization.parameters"
       new.sim[[list.title]] <- c(new.sim[[list.title]], toto)
       next_threshold <- i + nrow(element.table)
-    }
-    else if(tolower(list.title) == "residue_parameters") {
+    } else if(tolower(list.title) == "residue_parameters") {
       NAMES <- c("CroCo", "akres", "bkres", "awb", "bwb", "cwb", "ahres", "bhres", "kbio", "yres", "CNresmin",
                  "CNresmax", "qmulchruis0", "mouillabilmulch", "kcouvmlch", "albedomulchresidus", "Qmulchdec")
       element.table <- read_element_table(sim, i, titles, NAMES)
-      element.table.reduced <- element.table[!grepl("#", element.table$name),]
-      if(nrow(element.table.reduced) > 0) {
+      if(nrow(element.table) > 0) {
         toto <- list(list(value = element.table, commented = FALSE, range = NA, type = NA, accepted = NA))
       } else {
         toto <- list(list(value = element.table, commented = TRUE, range = NA, type = NA, accepted = NA))
