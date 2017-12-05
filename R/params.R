@@ -1,5 +1,5 @@
-#' Reads sim, pld, and tree files
-#' @description Reads sim, pld, and tree files for editing
+#' Reads parameter files
+#' @description Reads parameter files for editing
 #' Used within \code{\link{build_structure}}.
 #' @return A list containing all parameter values and constraints.
 #' @param path A character string of the path to the file to read.
@@ -97,6 +97,32 @@ read_param_file <- function(path) {
       names(toto) <- "root.initialization"
       new.sim[[list.title]] <- c(new.sim[[list.title]], toto)
       next_threshold <- i + nrow(element.table)
+    } else if(tolower(list.title) == "fertilization_parameters") {
+      NAMES <- c("engamm", "orgeng", "deneng", "voleng")
+      element.table <- read_element_table(sim, i, titles, NAMES)
+      element.table.reduced <- element.table[!grepl("#", element.table$name),]
+      if(nrow(element.table.reduced) > 0) {
+        toto <- list(list(value = element.table, commented = FALSE, range = NA, type = NA, accepted = NA))
+      } else {
+        toto <- list(list(value = element.table, commented = TRUE, range = NA, type = NA, accepted = NA))
+      }
+      names(toto) <- "fertilization.parameters"
+      new.sim[[list.title]] <- c(new.sim[[list.title]], toto)
+      next_threshold <- i + nrow(element.table)
+    }
+    else if(tolower(list.title) == "residue_parameters") {
+      NAMES <- c("CroCo", "akres", "bkres", "awb", "bwb", "cwb", "ahres", "bhres", "kbio", "yres", "CNresmin",
+                 "CNresmax", "qmulchruis0", "mouillabilmulch", "kcouvmlch", "albedomulchresidus", "Qmulchdec")
+      element.table <- read_element_table(sim, i, titles, NAMES)
+      element.table.reduced <- element.table[!grepl("#", element.table$name),]
+      if(nrow(element.table.reduced) > 0) {
+        toto <- list(list(value = element.table, commented = FALSE, range = NA, type = NA, accepted = NA))
+      } else {
+        toto <- list(list(value = element.table, commented = TRUE, range = NA, type = NA, accepted = NA))
+      }
+      names(toto) <- "residue.parameters"
+      new.sim[[list.title]] <- c(new.sim[[list.title]], toto)
+      next_threshold <- i + nrow(element.table)
     } else {
       line.text <- ifelse(comment[i], substr(sim[i], start = 2, stop = 10000), sim[i]) # remove first # only (definitions possible after another #)
 
@@ -154,8 +180,8 @@ read_param_file <- function(path) {
   return(new.sim)
 }
 
-#' Writes sim, pld, and tree files
-#' @description Writes sim, pld, and tree files after editing
+#' Writes parameter files
+#' @description Writes parameter files after editing
 #' Used within \code{\link{build_structure}}.
 #' @return Invisibly returns \code{TRUE}.
 #' @param.list A list containing all parameter values and constraints.
@@ -200,7 +226,7 @@ write_param_file <- function(param.list, path) {
 }
 
 #' Edits sim, pld, and tree files
-#' @description Edits sim, pld, and tree files using the exp.plan of a hip object
+#' @description Edits parameter files using the exp.plan of a hip object
 #' Used within \code{\link{build_structure}}.
 #' @return A edited list containing all parameter values and constraints.
 #' @param param.list A list containing all parameter values and constraints.
@@ -220,7 +246,7 @@ edit_param_file <- function(param.list, exp.plan) {
 }
 
 #' Edit an individual parameter element
-#' @description Edits an individual element of a sim, pld, or tree parameter list
+#' @description Edits an individual element of a parameter list
 #' Used within \code{\link{build_structure}}.
 #' @return A edited list containing all parameter values and constraints.
 #' @param param.list A list containing all parameter values and constraints.
@@ -242,8 +268,8 @@ edit_param_element <- function(param.list, variable, value) {
   return(param.list)
 }
 
-#' Read all template parameters from sim, pld, and tree files
-#' @description Reads all template parameter values and constraints from sim, pld, and tree files
+#' Read all template parameters
+#' @description Reads all template parameter values and constraints
 #' @return A list containing all parameter values and constraints.
 #' @param template.path A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
 get_template_params <- function(template.path) {
@@ -258,38 +284,45 @@ get_template_params <- function(template.path) {
     template.tree <- avail.template.trees[1]
   }
 
-  sim.file  <- clean_path(list.files(template.path, ".sim", full.names = TRUE))
-  pld.file  <- clean_path(list.files(template.path, ".pld", full.names = TRUE))
-  tree.file <- list.files(clean_path(paste0(template.path, "/treeSpecies")), paste0(template.tree, ".tree"), full.names = TRUE)
+  sim.file    <- clean_path(list.files(template.path, ".sim", full.names = TRUE))
+  pld.file    <- clean_path(list.files(template.path, ".pld", full.names = TRUE))
+  tree.file   <- list.files(paste0(template.path, "treeSpecies"), paste0(template.tree, ".tree"), full.names = TRUE)
+  hisafe.file <- clean_path(paste0(template.path, "generalParameters/hisafe.par"))
+  stics.file  <- clean_path(paste0(template.path, "generalParameters/stics.par"))
 
-  sim.params  <- read_param_file(sim.file)
-  pld.params  <- read_param_file(pld.file)
-  tree.params <- read_param_file(tree.file)
-
-  return(list(sim = sim.params, pld = pld.params, tree = tree.params))
+  sim.params    <- read_param_file(sim.file)
+  pld.params    <- read_param_file(pld.file)
+  tree.params   <- read_param_file(tree.file)
+  hisafe.params <- read_param_file(hisafe.file)
+  stics.params  <- read_param_file(stics.file)
+  return(list(sim = sim.params, pld = pld.params, tree = tree.params, hisafe = hisafe.params, stics = stics.params))
 }
 
-#' Get names of template parameters from sim, pld, and tree files
-#' @description Get names of all template parameters from sim, pld, and tree files
+#' Get names of template parameters
+#' @description Get names of all template parameters
 #' @return A list containing parameter names by file type.
 #' @param x A list containing all parameter values and constraints.
 get_param_names <- function(x) {
-  sim.names  <- unlist(purrr::map(x$sim,  names), use.names = FALSE)
-  pld.names  <- unlist(purrr::map(x$pld,  names), use.names = FALSE)
-  tree.names <- unlist(purrr::map(x$tree, names), use.names = FALSE)
-  return(list(sim = sim.names, pld = pld.names, tree = tree.names))
+  sim.names    <- unlist(purrr::map(x$sim,  names), use.names = FALSE)
+  pld.names    <- unlist(purrr::map(x$pld,  names), use.names = FALSE)
+  tree.names   <- unlist(purrr::map(x$tree, names), use.names = FALSE)
+  hisafe.names <- unlist(purrr::map(x$hisafe, names), use.names = FALSE)
+  stics.names  <- unlist(purrr::map(x$stics, names), use.names = FALSE)
+  return(list(sim = sim.names, pld = pld.names, tree = tree.names, hisafe = hisafe.names, stics = stics.names))
 }
 
-#' Get values/constraints of template parameters from sim, pld, and tree files
-#' @description Gets values/constraints of all template parameters from sim, pld, and tree files
+#' Get values/constraints of template parameters
+#' @description Gets values/constraints of all template parameters
 #' @return A list containing parameter values/constraints.
 #' @param x A list containing all parameter values and constraints.
 get_param_vals <- function(x, type) {
-  sim.vals <- pld.vals <- tree.vals <- list()
-  for(i in names(x$sim))  { sim.vals  <- c(sim.vals,  purrr::map(x$sim[[i]],  type)) }
-  for(i in names(x$pld))  { pld.vals  <- c(pld.vals,  purrr::map(x$pld[[i]],  type)) }
-  for(i in names(x$tree)) { tree.vals <- c(tree.vals, purrr::map(x$tree[[i]], type)) }
-  return(c(sim.vals, pld.vals, tree.vals))
+  sim.vals <- pld.vals <- tree.vals <- hisafe.vals <- stics.vals <- list()
+  for(i in names(x$sim))    { sim.vals    <- c(sim.vals,    purrr::map(x$sim[[i]],    type)) }
+  for(i in names(x$pld))    { pld.vals    <- c(pld.vals,    purrr::map(x$pld[[i]],    type)) }
+  for(i in names(x$tree))   { tree.vals   <- c(tree.vals,   purrr::map(x$tree[[i]],   type)) }
+  for(i in names(x$hisafe)) { hisafe.vals <- c(hisafe.vals, purrr::map(x$hisafe[[i]], type)) }
+  for(i in names(x$stics))  { stics.vals  <- c(stics.vals,  purrr::map(x$stics[[i]],  type)) }
+  return(c(sim.vals, pld.vals, tree.vals, hisafe.vals, stics.vals))
 }
 
 #' Gets the parameter actually used

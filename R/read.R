@@ -182,9 +182,9 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, max.s
   if(!is.null(hip)) {
     EXP.PLAN  <- hip$exp.plan
   } else {
-    simu.summary.file <- paste0(simu.path, "/", simu.name, "_simulation_summary.csv")
+    simu.summary.file <- paste0(simu.path, "/support/", simu.name, "_simulation_summary.csv")
     if(file.exists(simu.summary.file)){
-      EXP.PLAN <- readr::read_csv(paste0(simu.path, "/", simu.name, "_simulation_summary.csv"), col_types = readr::cols())
+      EXP.PLAN <- readr::read_csv(paste0(simu.path, "/support/", simu.name, "_simulation_summary.csv"), col_types = readr::cols())
     } else {
       warning("No simulation inputs summary (experimental plan) to read from simulation directory. This simulation was not created with hisafer.", call. = FALSE)
       EXP.PLAN <- dplyr::tibble()

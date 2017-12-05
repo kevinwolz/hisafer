@@ -133,9 +133,10 @@ build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, templat
   ## Any newly built files below will overwrite these files
   simu.path <- clean_path(paste0(path, "/", exp.plan$SimulationName))
   system(paste("cp -r", template.path, simu.path))
+  dir.create(paste0(simu.path, "/support"))
 
   ## Write out experiment summary
-  readr::write_csv(exp.plan.to.write, clean_path(paste0(simu.path, "/", exp.plan$SimulationName, "_simulation_summary.csv")))
+  readr::write_csv(exp.plan.to.write, clean_path(paste0(simu.path, "/support/", exp.plan$SimulationName, "_simulation_summary.csv")))
 
   ## Move weather file if one was provided
   if("weatherFile" %in% names(exp.plan)) {
@@ -204,9 +205,11 @@ build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, templat
 
   ## Edit files
   params.to.edit <- names(dplyr::select(exp.plan, -SimulationName))
-  sim.params.to.edit  <- params.to.edit[params.to.edit %in% PARAM_NAMES$sim]
-  pld.params.to.edit  <- params.to.edit[params.to.edit %in% PARAM_NAMES$pld]
-  tree.params.to.edit <- params.to.edit[params.to.edit %in% PARAM_NAMES$tree]
+  sim.params.to.edit    <- params.to.edit[params.to.edit %in% PARAM_NAMES$sim]
+  pld.params.to.edit    <- params.to.edit[params.to.edit %in% PARAM_NAMES$pld]
+  tree.params.to.edit   <- params.to.edit[params.to.edit %in% PARAM_NAMES$tree]
+  hisafe.params.to.edit <- params.to.edit[params.to.edit %in% PARAM_NAMES$hisafe]
+  stics.params.to.edit  <- params.to.edit[params.to.edit %in% PARAM_NAMES$stics]
 
   ## Edit pld file
   pld.path <- paste0(simu.path, "/template.pld")
@@ -242,5 +245,18 @@ build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, templat
     }
     write_param_file(tree.new, i)
   }
+
+  ## Edit Hi-sAFe general parameters file
+  hisafe.path <- paste0(simu.path, "/generalParameters/hisafe.par")
+  hisafe <- read_param_file(hisafe.path)
+  hisafe.new <- edit_param_file(hisafe, dplyr::select(exp.plan, hisafe.params.to.edit))
+  write_param_file(hisafe.new, hisafe.path)
+
+  ## Edit STICS general parameters file
+  stics.path <- paste0(simu.path, "/generalParameters/stics.par")
+  stics <- read_param_file(stics.path)
+  stics.new <- edit_param_file(stics, dplyr::select(exp.plan, stics.params.to.edit))
+  write_param_file(stics.new, stics.path)
+
   invisible(TRUE)
 }

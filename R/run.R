@@ -88,7 +88,7 @@ call_hisafe <- function(path, simu.name, capsis.path) {
   if(!dir.exists(sim.path)) stop(paste("The simulation", simu.name, "does not exist."), call. = FALSE)
 
   simulationStartTime <- proc.time()[3]
-  out <- file(paste0(sim.path, simu.name, "_simulation_log.txt"), open="w")
+  out <- file(paste0(sim.path, "support/", simu.name, "_simulation_log.txt"), open="w")
   cat("Beginning simulation:", simu.name, file = out)
   cat("\nBeginning simulation:", simu.name)
 
