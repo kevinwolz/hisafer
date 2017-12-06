@@ -48,49 +48,73 @@ plot_annual_cycle <- function(hop,
       dplyr::summarize(precipitation = -sum(precipitation)) %>%
       tidyr::gather(key = "flux", value = "value", precipitation)
 
-    annualplot <- fhop$annualplot %>%
-      dplyr::select(SimulationName, Year,
-                    annualWaterEvaporatedInMainCrop, # scale by main crop area
-                    annualWaterEvaporatedInInterCrop, # scale by inter crop area
-                    annualWaterExtractedByMainCrop, # scale by main crop area
-                    annualWaterExtractedByInterCrop, # scale by inter crop area
+    plot.data <- fhop$annualplot %>%
+      # Extract variables required for the water budget
+      dplyr::select(SimulationName, Year, mainCropArea, interCropArea,
+                    annualWaterEvaporatedInMainCrop,
+                    annualWaterEvaporatedInInterCrop,
+                    annualWaterExtractedByMainCrop,
+                    annualWaterExtractedByInterCrop,
                     annualWaterExtractedByTrees,
-                    annualIrrigationInMainCrop, # scale by main crop area
-                    annualIrrigationInInterCrop, # scale by inter crop area
+                    annualIrrigationInMainCrop,
+                    annualIrrigationInInterCrop,
                     annualDrainage,
-                    annualInterceptedRainByMainCrop, # scale by main crop area
-                    annualInterceptedRainByInterCrop, # scale by inter crop area
+                    annualInterceptedRainByMainCrop,
+                    annualInterceptedRainByInterCrop,
                     annualInterceptedRainByTrees,
                     annualRainTransmitted,
                     annualRunOff,
                     annualSurfaceRunOff,
-                    annualWaterExtractedInSaturationByMainCrop, # scale by main crop area
-                    annualWaterExtractedInSaturationByInterCrop, # scale by inter crop area
+                    annualWaterExtractedInSaturationByMainCrop,
+                    annualWaterExtractedInSaturationByInterCrop,
                     annualWaterExtractedInSaturationByTrees,
                     annualWaterFromSaturation,
                     annualWaterToDesaturation) %>%
-      # CALCULATIONS
-      tidyr::gather(key = "flux", value = "value", annualWaterEvaporatedInMainCrop:annualWaterExtractedByTrees)
-
-    plot.data <- bind_rows(annualplot, climate) %>%
+      # Scale by mainCrop or interCrop area
+      dplyr::mutate(annualWaterEvaporatedInMainCrop             = annualWaterEvaporatedInMainCrop             * mainCropArea  / (mainCropArea + interCropArea),
+                    annualWaterEvaporatedInInterCrop            = annualWaterEvaporatedInInterCrop            * interCropArea / (mainCropArea + interCropArea),
+                    annualWaterExtractedByMainCrop              = annualWaterExtractedByMainCrop              * mainCropArea  / (mainCropArea + interCropArea),
+                    annualWaterExtractedByInterCrop             = annualWaterExtractedByInterCrop             * interCropArea / (mainCropArea + interCropArea),
+                    annualIrrigationInMainCrop                  = annualIrrigationInMainCrop                  * mainCropArea  / (mainCropArea + interCropArea),
+                    annualIrrigationInInterCrop                 = annualIrrigationInInterCrop                 * interCropArea / (mainCropArea + interCropArea),
+                    annualInterceptedRainByMainCrop             = annualInterceptedRainByMainCrop             * mainCropArea  / (mainCropArea + interCropArea),
+                    annualInterceptedRainByInterCrop            = annualInterceptedRainByInterCrop            * interCropArea / (mainCropArea + interCropArea),
+                    annualWaterExtractedInSaturationByMainCrop  = annualWaterExtractedInSaturationByMainCrop  * mainCropArea  / (mainCropArea + interCropArea),
+                    annualWaterExtractedInSaturationByInterCrop = annualWaterExtractedInSaturationByInterCrop * interCropArea / (mainCropArea + interCropArea)) %>%
+      # Combine variables
+      dplyr::mutate(irrigation = -annualIrrigationInMainCrop + -annualIrrigationInInterCrop,
+                    aquifer = -annualWaterExtractedInSaturationByMainCrop + -annualWaterExtractedInSaturationByInterCrop + -annualWaterExtractedInSaturationByTrees,
+                    interception = annualInterceptedRainByMainCrop + annualInterceptedRainByInterCrop + annualInterceptedRainByTrees - annualRainTransmitted,
+                    evaporation = annualWaterEvaporatedInMainCrop + annualWaterEvaporatedInInterCrop) %>%
+      tidyr::gather(key = "flux", value = "value", annualWaterEvaporatedInMainCrop:annualWaterExtractedByTrees) %>%
+      dplyr::bind_rows(climate) %>%
       dplyr::mutate(flux = factor(flux,
-                                  levels = c("annualWaterEvaporatedInMainCrop",
-                                             "annualWaterEvaporatedInInterCrop",
+                                  levels = c("interception",
+                                             "annualSurfaceRunOff",
+                                             "annualDrainage",
+                                             "evaporation",
                                              "annualWaterExtractedByMainCrop",
                                              "annualWaterExtractedByInterCrop",
                                              "annualWaterExtractedByTrees",
+                                             "irrigation",
+                                             "aquifer",
                                              "precipitation"),
-                                  labels = c("Evaporation - main crop",
-                                             "Evaporation - secondary crop",
+                                  labels = c("Interception - all",
+                                             "Surface run-off",
+                                             "Drainage",
+                                             "Soil evaporation",
                                              "Transpiration - main crop",
                                              "Transpiration - secondary crop",
                                              "Transpiration - trees",
+                                             "Irrigation",
+                                             "Aquifer",
                                              "Precipitation")))
 
     plot.title <- "Water Cycle"
     y.lab      <- "Water flux (mm)"
-    if(is.null(color.palette)) color.palette <- c("#999999", "#E69F00", "#56B4E9", "#009E73",
-                                                  "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+    if(is.null(color.palette)) color.palette <- c("grey20", "grey40", "grey60", "grey80",
+                                                  "#D55E00", "#E69F00", "#F0E442",
+                                                  "#009E73", "#0072B2", "#56B4E9") # "#CC79A7"
 
   } else if(cycle == "nitrogen") {
     required.profiles <- "annualplot"
@@ -98,7 +122,8 @@ plot_annual_cycle <- function(hop,
                                                             paste(required.profiles, collapse = " and "),
                                                             "export profiles"), call. = FALSE)
     plot.data <- fhop$annualplot %>%
-      dplyr::select(SimulationName, Year,
+      # Extract variables required for the nitrogen budget
+      dplyr::select(SimulationName, Year, mainCropArea, interCropArea,
                     # mineralization
                     # leaching (lixivation)
                     # denitrification
@@ -121,9 +146,10 @@ plot_annual_cycle <- function(hop,
                     annualNitrogenIrrigationInInterCrop,
                     annualNitrogenRainInMainCrop,
                     annualNitrogenRainInInterCrop) %>%
-      dplyr::mutate(fertilization = -annualNitrogenFertilisationInMainCrop + -annualNitrogenFertilisationInInterCrop) %>%
-      dplyr::mutate(irrigation    = -annualNitrogenIrrigationInMainCrop    + -annualNitrogenIrrigationInInterCrop) %>%
-      dplyr::mutate(deposition    = -annualNitrogenRainInMainCrop          + -annualNitrogenRainInInterCrop) %>%
+      # Combine variables
+      dplyr::mutate(fertilization = -annualNitrogenFertilisationInMainCrop + -annualNitrogenFertilisationInInterCrop,
+                    irrigation    = -annualNitrogenIrrigationInMainCrop    + -annualNitrogenIrrigationInInterCrop,
+                    deposition    = -annualNitrogenRainInMainCrop          + -annualNitrogenRainInInterCrop) %>%
       dplyr::select(-(annualNitrogenFertilisationInMainCrop:annualNitrogenRainInInterCrop)) %>%
       tidyr::gather(key = "flux", value = "value", annualNitrogenExtractedByMainCrop:deposition) %>%
       dplyr::mutate(flux = factor(flux,
@@ -149,22 +175,27 @@ plot_annual_cycle <- function(hop,
     if(!all(required.profiles %in% names(fhop))) stop(paste(cycle, "cycle calculations require data from",
                                                             paste(required.profiles, collapse = " and "),
                                                             "export profiles"), call. = FALSE)
+    na.to.zero <- function(x) {
+      x[is.na(x)] <- 0
+      return(x)
+    }
+
     plot.data <- fhop$annualplot %>%
-      dplyr::select(SimulationName, Year,
-                    annualParIncident, # need to scale by scene area
-                    annualParInterceptedByMainCrop, # need to scale by mainCrop area
-                    annualParInterceptedByInterCrop, # need to scale by interCrop area
-                    annualParInterceptedByTrees) # need to scale by scene area
-
-    plot.data$annualParInterceptedByMainCrop[is.na(plot.data$annualParInterceptedByMainCrop)] <- 0
-    plot.data$annualParInterceptedByInterCrop[is.na(plot.data$annualParInterceptedByInterCrop)] <- 0
-    plot.data$annualParInterceptedByTrees[is.na(plot.data$annualParInterceptedByTrees)] <- 0
-
-    plot.data <- plot.data %>%
-      dplyr::mutate(InterceptedByMainCrop  = annualParInterceptedByMainCrop  / annualParIncident * 100) %>%
-      dplyr::mutate(InterceptedByInterCrop = annualParInterceptedByInterCrop / annualParIncident * 100) %>%
-      dplyr::mutate(InterceptedByTrees     = annualParInterceptedByTrees     / annualParIncident * 100) %>%
-      dplyr::mutate(notCaptured            = 100 - InterceptedByMainCrop - InterceptedByInterCrop - InterceptedByTrees) %>%
+      # Extract variables required for the light budget
+      dplyr::select(SimulationName, Year, mainCropArea, interCropArea,
+                    annualParIncident,
+                    annualParInterceptedByMainCrop,
+                    annualParInterceptedByInterCrop,
+                    annualParInterceptedByTrees) %>%
+      dplyr::mutate(annualParInterceptedByMainCrop  = na.to.zero(annualParInterceptedByMainCrop),
+                    annualParInterceptedByInterCrop = na.to.zero(annualParInterceptedByInterCrop),
+                    annualParInterceptedByTrees     = na.to.zero(annualParInterceptedByTrees)) %>%
+      # Scale by area to conver to moles and then make percentage of inceident par
+      dplyr::mutate(annualParIncident      = annualParIncident               * (mainCropArea + interCropArea),
+                    InterceptedByMainCrop  = annualParInterceptedByMainCrop  * mainCropArea                   / annualParIncident * 100,
+                    InterceptedByInterCrop = annualParInterceptedByInterCrop * interCropArea                  / annualParIncident * 100,
+                    InterceptedByTrees     = annualParInterceptedByTrees     * (mainCropArea + interCropArea) / annualParIncident * 100,
+                    notCaptured            = 100 - InterceptedByMainCrop - InterceptedByInterCrop - InterceptedByTrees) %>%
       dplyr::select(-(annualParIncident:annualParInterceptedByTrees)) %>%
       tidyr::gather(key = "flux", value = "value", InterceptedByMainCrop:notCaptured) %>%
       dplyr::mutate(flux = factor(flux,
@@ -177,7 +208,7 @@ plot_annual_cycle <- function(hop,
                                              "Secondary crop",
                                              "Main crop")))
     plot.title <- "Light Capture"
-    y.lab      <- "Intercepted light (%)"
+    y.lab      <- "Intercepted PAR (% of incident PAR)"
     if(is.null(color.palette)) color.palette <- c("#E69F00", "grey20", "#56B4E9", "#009E73")
   } else if(cycle == "carbon") {
     required.profiles <- "annualplot"
@@ -185,6 +216,7 @@ plot_annual_cycle <- function(hop,
                                                             paste(required.profiles, collapse = " and "),
                                                             "export profiles"), call. = FALSE)
     plot.data <- fhop$annualplot %>%
+      # Extract variables required for the carbon budget
       dplyr::select(SimulationName, Year,
                     maxTreesCarbonFoliage,
                     annualTreesCarbonBranches,
@@ -193,6 +225,7 @@ plot_annual_cycle <- function(hop,
                     annualTreesCarbonLabile,
                     annualTreesCarbonStem,
                     annualTreesCarbonStump) %>%
+      dplyr::mutate(annualTreesCarbonStump       = -annualTreesCarbonStump) %>%
       dplyr::mutate(annualTreesCarbonCoarseRoots = -annualTreesCarbonCoarseRoots) %>%
       dplyr::mutate(annualTreesCarbonFineRoots   = -annualTreesCarbonFineRoots) %>%
       tidyr::gather(key = "flux", value = "value", maxTreesCarbonFoliage:annualTreesCarbonStump) %>%
@@ -201,23 +234,24 @@ plot_annual_cycle <- function(hop,
                                              "annualTreesCarbonLabile",
                                              "annualTreesCarbonBranches",
                                              "annualTreesCarbonStem",
-                                             "annualTreesCarbonStump",
+                                             "annualTreesCarbonFineRoots",
                                              "annualTreesCarbonCoarseRoots",
-                                             "annualTreesCarbonFineRoots"),
+                                             "annualTreesCarbonStump"),
                                   labels = c("Leaves",
                                              "Labile",
                                              "Branches",
                                              "Stem",
-                                             "Stump",
+                                             "Fine Roots",
                                              "Coarse Roots",
-                                             "Fine Roots")))
+                                             "Stump"))) %>%
+      dplyr::mutate(value = value / 1e3) # convert from kg C ha-1 to Mg C ha-1
 
     plot.title <- "Tree Carbon Pools"
-    y.lab      <- "C storage (kg C ha-1)"
+    y.lab      <- "C storage (Mg C ha-1)"
     if(is.null(color.palette)) color.palette <- c("#009E73","#999999", "#D55E00", "#E69F00",
-                                                  "#F0E442", "#0072B2", "#56B4E9", "#CC79A7")
+                                                  "#56B4E9", "#0072B2", "#F0E442", "#CC79A7")
   } else {
-    stop("Cycle argument not supported. Use one of: water, nitrogen, light, carbon.", call. = FALSE)
+    stop("Cycle argument not supported. Use one of: carbon, nitrogen, water, light.", call. = FALSE)
   }
 
   ## Set faceting
