@@ -186,8 +186,8 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, max.s
     if(file.exists(simu.summary.file)){
       EXP.PLAN <- readr::read_csv(paste0(simu.path, "/support/", simu.name, "_simulation_summary.csv"), col_types = readr::cols())
     } else {
-      warning("No simulation inputs summary (experimental plan) to read from simulation directory. This simulation was not created with hisafer.", call. = FALSE)
-      EXP.PLAN <- dplyr::tibble()
+      warning("No simulation inputs summary (experimental plan) to read from simulation directory. This simulation may not have been created with hisafer.", call. = FALSE)
+      EXP.PLAN <- dplyr::tibble(SimulationName = simu.name)
     }
   }
 
@@ -264,12 +264,25 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, max.s
                              cellWidth           = cellWidth,
                              soilDepth           = soil.depth)
 
+  ## Ensure crop names are characters in annual plot and plot
+  clean_crop_name <- function(x) {
+    if("mainCropName" %in% names(x)) {
+      x$mainCropName <- as.character(x$mainCropName)
+      x$mainCropName[x$mainCropName == "0"]   <- NA
+    }
+    if("interCropName" %in% names(x)) {
+      x$interCropName <- as.character(x$interCropName)
+      x$interCropName[x$interCropName == "0"]   <- NA
+    }
+    return(x)
+  }
+
   ## Creatd output list & assign class
   output <- list(annualtree = annualtree.dv$data,
                  annualcrop = annualcrop.dv$data,
-                 annualplot = annualplot.dv$data,
+                 annualplot = clean_crop_name(annualplot.dv$data),
                  trees      = trees.dv$data,
-                 plot       = plot.dv$data,
+                 plot       = clean_crop_name(plot.dv$data),
                  climate    = climate.dv$data,
                  monthCells = monthCells.dv$data,
                  cells      = cells.dv$data,
