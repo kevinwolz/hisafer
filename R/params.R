@@ -37,6 +37,20 @@ read_param_file <- function(path) {
     return(table.tibble)
   }
 
+  tables <- list(layers                      = c("name", "thickness", "sand", "clay", "limeStone", "organicMatter",                             # .SIM
+                                                 "partSizeSand", "stone", "stoneType", "infiltrability"),
+                 layer_initialization        = c("name", "waterContent", "no3Concentration", "nh4concentration"),                               # .SIM
+                 tree_initialization         = c("name", "species", "age", "height", "crownBaseHeight", "truncatureRatio",                      # .SIM
+                                                 "leafToFineRootsRatio", "crownRadius", "treeX", "treeY"),
+                 root_initialization         = c("name", "shape", "repartition", "paramShape1", "paramShape2", "paramShape3", "amount"),        # .SIM
+                 residue_incorporation_table = c("julres", "coderes", "P_qres", "P_Crespc", "P_CsurNres", "P_Nminres", "P_eaures"),             # .TEC
+                 tillage_table               = c("jultrav", "profres", "proftrav"),                                                             # .TEC
+                 irrigation_table            = c("julapl", "qte"),                                                                              # .TEC
+                 fertilization_table         = c("julapN", "qte"),                                                                              # .TEC
+                 cutting_table               = c("julfauche", "hautcoupe", "lairesiduel", "msresiduel", "anitcoupe"),                           # .TEC
+                 fertilization_parameters    = c("engamm", "orgeng", "deneng", "voleng"),                                                       # hisafe.par
+                 residue_parameters          = c("CroCo", "akres", "bkres", "awb", "bwb", "cwb", "ahres", "bhres", "kbio", "yres", "CNresmin",  # hisafe.par
+                                                 "CNresmax", "qmulchruis0", "mouillabilmulch", "kcouvmlch", "albedomulchresidus", "Qmulchdec"))
   new.sim <- list()
   next_threshold <- 0
   list.title <- "temp"
@@ -50,75 +64,16 @@ read_param_file <- function(path) {
       toto <- list(c())
       names(toto) <- list.title
       new.sim <- c(new.sim, toto)
-    } else if(tolower(list.title) == "layers"){
-      NAMES <- c("name", "thickness", "sand", "clay", "limeStone", "organicMatter", "partSizeSand", "stone", "stoneType", "infiltrability")
-      element.table <- read_element_table(sim, i, titles, NAMES)
-      element.table.reduced <- element.table[!grepl("#", element.table$name),]
+    } else if(tolower(list.title) %in% names(tables)){
+      list.names <- tables[[tolower(list.title)]]
+      element.table <- read_element_table(sim, i, titles, list.names)
+      element.table.reduced <- element.table[!grepl("#", element.table[[1]]),]
       if(nrow(element.table.reduced) > 0) {
         toto <- list(list(value = element.table, commented = FALSE, range = NA, type = NA, accepted = NA))
       } else {
         toto <- list(list(value = element.table, commented = TRUE, range = NA, type = NA, accepted = NA))
       }
-      names(toto) <- "layers"
-      new.sim[[list.title]] <- c(new.sim[[list.title]], toto)
-      next_threshold <- i + nrow(element.table)
-    } else if(tolower(list.title) == "layer_initialization"){
-      NAMES <- c("name", "waterContent", "no3Concentration", "nh4concentration")
-      element.table <- read_element_table(sim, i, titles, NAMES)
-      element.table.reduced <- element.table[!grepl("#", element.table$name),]
-      if(nrow(element.table.reduced) > 0) {
-        toto <- list(list(value = element.table, commented = FALSE, range = NA, type = NA, accepted = NA))
-      } else {
-        toto <- list(list(value = element.table, commented = TRUE, range = NA, type = NA, accepted = NA))
-      }
-      names(toto) <- "layer.initialization"
-      new.sim[[list.title]] <- c(new.sim[[list.title]], toto)
-      next_threshold <- i + nrow(element.table)
-    } else if(tolower(list.title) == "tree_initialization"){
-      NAMES <- c("name", "species", "age", "height", "crownBaseHeight", "truncatureRatio", "leafToFineRootsRatio", "crownRadius", "treeX", "treeY")
-      element.table <- read_element_table(sim, i, titles, NAMES)
-      element.table.reduced <- element.table[!grepl("#", element.table$name),]
-      if(nrow(element.table.reduced) > 0) {
-        toto <- list(list(value = element.table, commented = FALSE, range = NA, type = NA, accepted = NA))
-      } else {
-        toto <- list(list(value = element.table, commented = TRUE, range = NA, type = NA, accepted = NA))
-      }
-      names(toto) <- "tree.initialization"
-      new.sim[[list.title]] <- c(new.sim[[list.title]], toto)
-      next_threshold <- i + nrow(element.table)
-    } else if(tolower(list.title) == "root_initialization") {
-      NAMES <- c("name", "shape", "repartition", "paramShape1", "paramShape2", "paramShape3", "amount")
-      element.table <- read_element_table(sim, i, titles, NAMES)
-      element.table.reduced <- element.table[!grepl("#", element.table$name),]
-      if(nrow(element.table.reduced) > 0) {
-        toto <- list(list(value = element.table, commented = FALSE, range = NA, type = NA, accepted = NA))
-      } else {
-        toto <- list(list(value = element.table, commented = TRUE, range = NA, type = NA, accepted = NA))
-      }
-      names(toto) <- "root.initialization"
-      new.sim[[list.title]] <- c(new.sim[[list.title]], toto)
-      next_threshold <- i + nrow(element.table)
-    } else if(tolower(list.title) == "fertilization_parameters") {
-      NAMES <- c("engamm", "orgeng", "deneng", "voleng")
-      element.table <- read_element_table(sim, i, titles, NAMES)
-      if(nrow(element.table) > 0) {
-        toto <- list(list(value = element.table, commented = FALSE, range = NA, type = NA, accepted = NA))
-      } else {
-        toto <- list(list(value = element.table, commented = TRUE, range = NA, type = NA, accepted = NA))
-      }
-      names(toto) <- "fertilization.parameters"
-      new.sim[[list.title]] <- c(new.sim[[list.title]], toto)
-      next_threshold <- i + nrow(element.table)
-    } else if(tolower(list.title) == "residue_parameters") {
-      NAMES <- c("CroCo", "akres", "bkres", "awb", "bwb", "cwb", "ahres", "bhres", "kbio", "yres", "CNresmin",
-                 "CNresmax", "qmulchruis0", "mouillabilmulch", "kcouvmlch", "albedomulchresidus", "Qmulchdec")
-      element.table <- read_element_table(sim, i, titles, NAMES)
-      if(nrow(element.table) > 0) {
-        toto <- list(list(value = element.table, commented = FALSE, range = NA, type = NA, accepted = NA))
-      } else {
-        toto <- list(list(value = element.table, commented = TRUE, range = NA, type = NA, accepted = NA))
-      }
-      names(toto) <- "residue.parameters"
+      names(toto) <- gsub("_", ".", names(tables)[names(tables) == tolower(list.title)])
       new.sim[[list.title]] <- c(new.sim[[list.title]], toto)
       next_threshold <- i + nrow(element.table)
     } else {
@@ -127,10 +82,10 @@ read_param_file <- function(path) {
       element.name  <- unlist(lapply(strsplit(line.text, split = "=", fixed = TRUE), "[[", 1))
       element.name  <- remove_whitespace(element.name) # remove tabs, leading, and trailing blanks
 
-      element.vals    <- purrr::map_chr(strsplit(line.text, split = "=", fixed = TRUE), 2)
-      element.vals    <- remove_whitespace(strsplit(element.vals, split = "#", fixed = TRUE)[[1]])
+      element.vals  <- purrr::map_chr(strsplit(line.text, split = "=", fixed = TRUE), 2)
+      element.vals  <- remove_whitespace(strsplit(element.vals, split = "#", fixed = TRUE)[[1]])
 
-      element.value   <- element.vals[1]
+      element.value <- element.vals[1]
       if(grepl(",", element.value)) {
         element.value <- strsplit(element.value, split = ",")
         if(substr(element.value[[1]][1], 1, 1) %in% as.character(0:9)) {
@@ -147,11 +102,11 @@ read_param_file <- function(path) {
 
         if(grepl("(", value.range, fixed = TRUE)) {
           value.type <- "continuous"
-          } else if(grepl("[", value.range, fixed = TRUE)) {
-            value.type <- "integer"
-          } else {
-            value.type <- NA
-          }
+        } else if(grepl("[", value.range, fixed = TRUE)) {
+          value.type <- "integer"
+        } else {
+          value.type <- NA
+        }
 
         if(value.range == "NA") {
           value.range <- NA
@@ -163,11 +118,11 @@ read_param_file <- function(path) {
 
         value.accepted <- element.vals[3]
         if(value.accepted == "NA") {
-            value.accepted <- NA
-          } else {
-            value.accepted <- strsplit(gsub("\\[|\\]|\\(|\\)", "", value.accepted), split = ",")[[1]]
-            value.accepted[value.accepted == "NA"] <- NA
-          }
+          value.accepted <- NA
+        } else {
+          value.accepted <- strsplit(gsub("\\[|\\]|\\(|\\)", "", value.accepted), split = ",")[[1]]
+          value.accepted[value.accepted == "NA"] <- NA
+        }
       } else {
         value.range    <- c(NA, NA)
         value.type     <- NA
