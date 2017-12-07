@@ -235,7 +235,7 @@ check_input_values <- function(hip) {
   }
 
   ## Crop Errors
-  crop.species.used <- unique(c(USED_PARAMS$mainCropSpecies$value, USED_PARAMS$interCropSpecies$value))
+  crop.species.used <- unique(c(unlist(USED_PARAMS$mainCropSpecies$value), unlist(USED_PARAMS$interCropSpecies$value)))
   if(any(!(crop.species.used %in% AVAIL_CROPS))) {
     crop.species.missing <- crop.species.used[!(crop.species.used %in% AVAIL_CROPS)]
     unsupported.crops.error <- paste("-- The following crop files are not available in the template idrectory: ", crop.species.missing)
@@ -244,7 +244,7 @@ check_input_values <- function(hip) {
   }
 
   ## itk Errors
-  crop.itks.used <- unique(c(USED_PARAMS$mainCropItk$value, USED_PARAMS$interCropItk$value))
+  crop.itks.used <- unique(c(unlist(USED_PARAMS$mainCropItk$value), unlist(USED_PARAMS$interCropItk$value)))
   if(any(!(crop.itks.used %in% AVAIL_TECS))) {
     crop.itks.missing <- crop.itks.used[!(crop.itks.used %in% AVAIL_TECS)]
     unsupported.itks.error <- paste("-- The following crop files are not available in the template idrectory: ", crop.itks.missing)
@@ -311,68 +311,31 @@ check_input_values <- function(hip) {
   nbTrees.error <- ifelse(USED_PARAMS$nbTrees$exp.plan,
                           "-- nbTrees cannot be defined directly using define_hisafe(). Instead the size of the tree initialziation table will be used.", "")
 
-  ## Modified Together Errors
-  tree.pruning.check  <- c(USED_PARAMS$treePruningYears$exp.plan,
-                           USED_PARAMS$treePruningProp$exp.plan,
-                           USED_PARAMS$treePruningMaxHeight$exp.plan,
-                           USED_PARAMS$treePruningDays$exp.plan)
-
-  tree.thinning.check <- c(USED_PARAMS$treeThinningIds$exp.plan,
-                           USED_PARAMS$treeThinningYears$exp.plan,
-                           USED_PARAMS$treeThinningDays$exp.plan)
-
-  root.pruning.check  <-  c(USED_PARAMS$treeRootPruningYears$exp.plan,
-                            USED_PARAMS$treeRootPruningDays$exp.plan,
-                            USED_PARAMS$treeRootPruningDistance$exp.plan,
-                            USED_PARAMS$treeRootPruningDepth$exp.plan)
-
-  tree.pruning.error  <- ifelse(all(tree.pruning.check) | all(!tree.pruning.check),  "",
-                                paste0("-- tree pruning parameters must all be modified together: ",
-                                       "treePruningYears, treePruningProp, treePruningMaxHeight, treePruningDays"))
-  tree.thinning.error <- ifelse(all(tree.thinning.check) | all(!tree.thinning.check), "",
-                                paste0("-- tree thinning parameters must all be modified together: ",
-                                       "treeThinningIds, treeThinningYears, treeThinningDays"))
-  root.pruning.error  <- ifelse(all(root.pruning.check) | all(!root.pruning.check),  "",
-                                paste0("-- root pruning parameters must all be modified together: ",
-                                       "treeRootPruningYears, treeRootPruningDays, treeRootPruningDistance, treeRootPruningDepth"))
-
   ## Timeseries Length Errors
-  if(all(tree.pruning.check)) {
-    treePruningYears.length     <- purrr::map_dbl(USED_PARAMS$treePruningYears$value,     length)
-    treePruningProp.length      <- purrr::map_dbl(USED_PARAMS$treePruningProp$value,      length)
-    treePruningMaxHeight.length <- purrr::map_dbl(USED_PARAMS$treePruningMaxHeight$value, length)
-    treePruningDays.length      <- purrr::map_dbl(USED_PARAMS$treePruningDays$value,      length)
+  treePruningYears.length     <- purrr::map_dbl(USED_PARAMS$treePruningYears$value,     length)
+  treePruningProp.length      <- purrr::map_dbl(USED_PARAMS$treePruningProp$value,      length)
+  treePruningMaxHeight.length <- purrr::map_dbl(USED_PARAMS$treePruningMaxHeight$value, length)
+  treePruningDays.length      <- purrr::map_dbl(USED_PARAMS$treePruningDays$value,      length)
 
-    treePruning.length.error <- ifelse(all(purrr::map_lgl(list(treePruningProp.length,
-                                                               treePruningMaxHeight.length,
-                                                               treePruningDays.length), identical, y = treePruningYears.length)),
-                                       "", "-- treePruningYears, treePruningProp, treePruningMaxHeight, and treePruningDays must have the same length")
-  } else {
-    treePruning.length.error <- ""
-  }
+  treePruning.length.error <- ifelse(all(purrr::map_lgl(list(treePruningProp.length,
+                                                             treePruningMaxHeight.length,
+                                                             treePruningDays.length), identical, y = treePruningYears.length)),
+                                     "", "-- treePruningYears, treePruningProp, treePruningMaxHeight, and treePruningDays must have the same length")
 
-  if(all(root.pruning.check)) {
-    treeThinningIds.length   <- purrr::map_dbl(USED_PARAMS$treeThinningIds$value,   length)
-    treeThinningYears.length <- purrr::map_dbl(USED_PARAMS$treeThinningYears$value, length)
-    treeThinningDays.length  <- purrr::map_dbl(USED_PARAMS$treeThinningDays$value,  length)
-    treeThinning.length.error <- ifelse(all(purrr::map_lgl(list(treeThinningYears.length, treeThinningDays.length), identical, y = treeThinningIds.length)),
-                                        "", "-- treeThinningIds, treeThinningYears, and treeThinningDays must have the same length")
-  } else {
-    treeThinning.length.error <- ""
-  }
+  treeThinningIds.length   <- purrr::map_dbl(USED_PARAMS$treeThinningIds$value,   length)
+  treeThinningYears.length <- purrr::map_dbl(USED_PARAMS$treeThinningYears$value, length)
+  treeThinningDays.length  <- purrr::map_dbl(USED_PARAMS$treeThinningDays$value,  length)
+  treeThinning.length.error <- ifelse(all(purrr::map_lgl(list(treeThinningYears.length, treeThinningDays.length), identical, y = treeThinningIds.length)),
+                                      "", "-- treeThinningIds, treeThinningYears, and treeThinningDays must have the same length")
 
-  if(all(root.pruning.check)) {
-    treeRootPruningYears.length    <- purrr::map_dbl(USED_PARAMS$treeRootPruningYears$value,    length)
-    treeRootPruningDays.length     <- purrr::map_dbl(USED_PARAMS$treeRootPruningDays$value,     length)
-    treeRootPruningDistance.length <- purrr::map_dbl(USED_PARAMS$treeRootPruningDistance$value, length)
-    treeRootPruningDepth.length    <- purrr::map_dbl(USED_PARAMS$treeRootPruningDepth$value,    length)
-    rootPruning.length.error <- ifelse(all(purrr::map_lgl(list(treeRootPruningDays.length,
-                                                               treeRootPruningDistance.length,
-                                                               treeRootPruningDepth.length), identical, y = treeRootPruningYears.length)), "",
-                                       "-- treeRootPruningYears, treeRootPruningDays, treeRootPruningDistance, and treeRootPruningDepth must have the same length")
-  } else {
-    rootPruning.length.error <- ""
-  }
+  treeRootPruningYears.length    <- purrr::map_dbl(USED_PARAMS$treeRootPruningYears$value,    length)
+  treeRootPruningDays.length     <- purrr::map_dbl(USED_PARAMS$treeRootPruningDays$value,     length)
+  treeRootPruningDistance.length <- purrr::map_dbl(USED_PARAMS$treeRootPruningDistance$value, length)
+  treeRootPruningDepth.length    <- purrr::map_dbl(USED_PARAMS$treeRootPruningDepth$value,    length)
+  rootPruning.length.error <- ifelse(all(purrr::map_lgl(list(treeRootPruningDays.length,
+                                                             treeRootPruningDistance.length,
+                                                             treeRootPruningDepth.length), identical, y = treeRootPruningYears.length)), "",
+                                     "-- treeRootPruningYears, treeRootPruningDays, treeRootPruningDistance, and treeRootPruningDepth must have the same length")
 
   ## Geometry Option Errors
   if(1 %in% USED_PARAMS$geometryOption$value & (USED_PARAMS$plotHeight$exp.plan | USED_PARAMS$plotWidth$exp.plan)) {
@@ -438,7 +401,6 @@ check_input_values <- function(hip) {
                   treeCropDistance.error, treeRootPruningDistance.error,
                   treePruningYears.error, treeThinningYears.error, treeRootPruningYears.error,
                   tree.root.error, EP.error, nbTrees.error,
-                  tree.pruning.error, tree.thinning.error, root.pruning.error,
                   treePruning.length.error, treeThinning.length.error, rootPruning.length.error,
                   nbtree.error, species.error, weed.error,
                   root.init.diam.error, wth.error,

@@ -133,7 +133,7 @@ build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, templat
   ## Any newly built files below will overwrite these files
   simu.path <- clean_path(paste0(path, "/", exp.plan$SimulationName))
   system(paste("cp -r", template.path, simu.path))
-  dir.create(paste0(simu.path, "/support"))
+  dir.create(paste0(simu.path, "/support"), showWarnings = FALSE)
 
   ## Write out experiment summary
   readr::write_csv(exp.plan.to.write, clean_path(paste0(simu.path, "/support/", exp.plan$SimulationName, "_simulation_summary.csv")))
@@ -156,7 +156,7 @@ build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, templat
     inter.crop.used <- PARAM_DEFAULTS$interCropSpecies
   }
   existing.plt <- list.files(paste0(simu.path, "/cropSpecies"), full.names = TRUE)
-  required.plt <- paste0(simu.path, "/cropSpecies/", c(main.crop.used, inter.crop.used))
+  required.plt <- paste0(simu.path, "/cropSpecies/", c(unlist(main.crop.used), unlist(inter.crop.used)))
   remove.plt   <- existing.plt[!(existing.plt %in% required.plt)]
   dum <- purrr::map(remove.plt, file.remove)
 
@@ -172,7 +172,7 @@ build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, templat
     inter.itk.used <- PARAM_DEFAULTS$interCropItk
   }
   existing.itk <- list.files(paste0(simu.path, "/cropInterventions"), full.names = TRUE)
-  required.itk <- paste0(simu.path, "/cropInterventions/", c(main.itk.used, inter.itk.used))
+  required.itk <- paste0(simu.path, "/cropInterventions/", c(unlist(main.itk.used), unlist(inter.itk.used)))
   remove.itk   <- existing.itk[!(existing.itk %in% required.itk)]
   dum <- purrr::map(remove.itk, file.remove)
 
@@ -213,8 +213,8 @@ build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, templat
 
   ## Edit pld file
   pld.path <- paste0(simu.path, "/template.pld")
-  pld <- read_param_file(pld.path)
-  pld.new <- edit_param_file(pld, dplyr::select(exp.plan, pld.params.to.edit)) %>%
+  pld      <- read_param_file(pld.path)
+  pld.new  <- edit_param_file(pld, dplyr::select(exp.plan, pld.params.to.edit)) %>%
     edit_param_element("nbTrees", num.trees) %>%
     edit_param_element("country", exp.plan$SimulationName) %>%
     edit_param_element("townShip", exp.plan$SimulationName) %>%
@@ -227,8 +227,8 @@ build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, templat
 
   ## Edit sim file
   sim.path <- paste0(simu.path, "/template.sim")
-  sim <- read_param_file(sim.path)
-  sim.new <- edit_param_file(sim, dplyr::select(exp.plan, sim.params.to.edit)) %>%
+  sim      <- read_param_file(sim.path)
+  sim.new  <- edit_param_file(sim, dplyr::select(exp.plan, sim.params.to.edit)) %>%
     edit_param_element("profileNames", paste0(profiles, collapse = ",")) %>%
     edit_param_element("exportFrequencies", paste0(SUPPORTED.PROFILES$freqs[match(profiles, SUPPORTED.PROFILES$profiles)], collapse = ","))
   write_param_file(sim.new, sim.path)
@@ -248,14 +248,14 @@ build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, templat
 
   ## Edit Hi-sAFe general parameters file
   hisafe.path <- paste0(simu.path, "/generalParameters/hisafe.par")
-  hisafe <- read_param_file(hisafe.path)
-  hisafe.new <- edit_param_file(hisafe, dplyr::select(exp.plan, hisafe.params.to.edit))
+  hisafe      <- read_param_file(hisafe.path)
+  hisafe.new  <- edit_param_file(hisafe, dplyr::select(exp.plan, hisafe.params.to.edit))
   write_param_file(hisafe.new, hisafe.path)
 
   ## Edit STICS general parameters file
   stics.path <- paste0(simu.path, "/generalParameters/stics.par")
-  stics <- read_param_file(stics.path)
-  stics.new <- edit_param_file(stics, dplyr::select(exp.plan, stics.params.to.edit))
+  stics      <- read_param_file(stics.path)
+  stics.new  <- edit_param_file(stics, dplyr::select(exp.plan, stics.params.to.edit))
   write_param_file(stics.new, stics.path)
 
   invisible(TRUE)

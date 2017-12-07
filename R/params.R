@@ -131,7 +131,16 @@ read_param_file <- function(path) {
       element.vals    <- remove_whitespace(strsplit(element.vals, split = "#", fixed = TRUE)[[1]])
 
       element.value   <- element.vals[1]
-      element.value   <- strsplit(element.value, split = ",")[[1]]
+      if(grepl(",", element.value)) {
+        element.value <- strsplit(element.value, split = ",")
+        if(substr(element.value[[1]][1], 1, 1) %in% as.character(0:9)) {
+          element.value <- purrr::map(element.value, as.numeric)
+        }
+      } else {
+        if(substr(element.value, 1, 1) %in% as.character(0:9)) {
+          element.value <- as.numeric(element.value)
+        }
+      }
 
       if(length(element.vals) > 1) {
         value.range <- element.vals[2]
@@ -201,7 +210,7 @@ write_param_file <- function(param.list, path) {
           sim.out <- paste(sim.out, paste0(comment.sign,
                                            names(param.list[[i]])[j],
                                            " = ",
-                                           paste0(param.list[[i]][[j]]$value, collapse = ",")),
+                                           paste0(param.list[[i]][[j]]$value[[1]], collapse = ",")),
                            sep = "\n")
         } else {
           table_out <- function(x, sim.out) {
@@ -233,12 +242,7 @@ write_param_file <- function(param.list, path) {
 #' @family hisafe param functions
 edit_param_file <- function(param.list, exp.plan) {
   for(i in names(exp.plan)){
-    if(is.list(exp.plan[[i]])) {
-      value <- exp.plan[[i]][[1]]
-    } else {
-      value <- exp.plan[[i]]
-    }
-    param.list <- edit_param_element(param.list, i, value)
+    param.list <- edit_param_element(param.list, i, exp.plan[[i]])
   }
   return(param.list)
 }

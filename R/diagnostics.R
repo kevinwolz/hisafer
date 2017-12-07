@@ -69,7 +69,8 @@ diag_hisafe_ts <- function(hop,
   } else {
     exp.plan.vars <- NULL
   }
-  dont.plot.vars <- c(exp.plan.vars, "Date", "Day", "Month", "Year", "JulianDay", "stepNum", "id", "x", "y", "mainCropName")
+  dont.plot.vars <- c(exp.plan.vars, "Date", "Day", "Month", "Year", "JulianDay", "stepNum", "id",
+                      "x", "y", "mainCropName", "interCropName", "mainCropArea", "interCropArea")
   var.names <- names(hop[[profile]])[!(names(hop[[profile]]) %in% dont.plot.vars)]
 
 
