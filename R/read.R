@@ -53,7 +53,7 @@ read_hisafe <- function(hip           = NULL,
   if(!is.null(hip)) {
     EXP.PLAN   <- hip$exp.plan
     path       <- hip$path
-    simu.names <- EXP.PLAN$SimulationName
+    if(simu.names[1] == "all") simu.names <- EXP.PLAN$SimulationName
   } else {
     exp.summary.file <- clean_path(paste0(path, "/", tail(strsplit(path, "/")[[1]], n = 1), "_exp_summary.csv"))
     if(simu.names[1] == "all" & file.exists(exp.summary.file)) {
@@ -255,7 +255,7 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, max.s
   plotHeight          <- as.numeric(pld$PLOT$plotHeight$value)
   treeLineOrientation <- as.numeric(pld$PLOT$treeLineOrientation$value)
   cellWidth           <- as.numeric(pld$PLOT$cellWidth$value)
-  soil.depth          <- sum(pld$LAYERS$layers$value$thickness)
+  soil.depth          <- sum(pld$LAYERS$layers$value[[1]]$thickness)
 
   plot.area <- ifelse(geometryOption == 1, spacingBetweenRows * spacingWithinRows, plotWidth * plotHeight)
   plot.info <- dplyr::tibble(SimulationName      = simu.name,
@@ -386,7 +386,7 @@ read_profile <- function(profile, path, show.progress = TRUE, max.size = 3e8) {
 read_tree_info <- function(path, simu.name) {
   pld <- read_param_file(clean_path(paste0(path, "/", simu.name, "/", simu.name, ".pld")))
   if(pld$TREE_INITIALIZATION$tree.initialization$commented == FALSE) {
-    tree.info <- pld$TREE_INITIALIZATION$tree.initialization$value %>%
+    tree.info <- pld$TREE_INITIALIZATION$tree.initialization$value[[1]] %>%
       dplyr::mutate(x = treeX, y = treeY) %>%
       dplyr::select(species, x, y)
     tree.info <- tree.info %>%

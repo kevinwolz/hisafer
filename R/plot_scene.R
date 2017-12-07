@@ -39,8 +39,8 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
                             template.commented = PARAM_COMMENTED)
   names(USED_PARAMS) <- unlist(PARAM_NAMES, use.names = FALSE)
 
-  mainCropSpecies     <- gsub("\\.plt", "", USED_PARAMS$mainCropSpecies$value[1])
-  interCropSpecies    <- gsub("\\.plt", "", USED_PARAMS$interCropSpecies$value[1])
+  mainCropSpecies     <- gsub("\\.plt", "", USED_PARAMS$mainCropSpecies$value[[1]][1])
+  interCropSpecies    <- gsub("\\.plt", "", USED_PARAMS$interCropSpecies$value[[1]][1])
   toric <- c(USED_PARAMS$toreXp$value, USED_PARAMS$toreXn$value, USED_PARAMS$toreYp$value, USED_PARAMS$toreYn$value)
   toric.lab <- ifelse(any(toric == 1), paste(c("Xp", "Xn", "Yp", "Yn")[as.logical(toric)], collapse = ","), "off")
 

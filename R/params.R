@@ -69,9 +69,9 @@ read_param_file <- function(path) {
       element.table <- read_element_table(sim, i, titles, list.names)
       element.table.reduced <- element.table[!grepl("#", element.table[[1]]),]
       if(nrow(element.table.reduced) > 0) {
-        toto <- list(list(value = element.table, commented = FALSE, range = NA, type = NA, accepted = NA))
+        toto <- list(list(value = list(element.table), commented = FALSE, range = NA, type = NA, accepted = NA))
       } else {
-        toto <- list(list(value = element.table, commented = TRUE, range = NA, type = NA, accepted = NA))
+        toto <- list(list(value = list(element.table), commented = TRUE, range = NA, type = NA, accepted = NA))
       }
       names(toto) <- gsub("_", ".", names(tables)[names(tables) == tolower(list.title)])
       new.sim[[list.title]] <- c(new.sim[[list.title]], toto)
@@ -160,7 +160,7 @@ write_param_file <- function(param.list, path) {
     }
     if(length(param.list[[i]]) > 0) {
       for(j in 1:length(param.list[[i]])) { # elements
-        if(!is.data.frame(param.list[[i]][[j]]$value)){ # is this a normal variable or a table of variables
+        if(!is.data.frame(param.list[[i]][[j]]$value[[1]])){ # is this a normal variable or a table of variables
           comment.sign <- ifelse(param.list[[i]][[j]]$commented, "#", "")
           sim.out <- paste(sim.out, paste0(comment.sign,
                                            names(param.list[[i]])[j],
@@ -176,7 +176,7 @@ write_param_file <- function(param.list, path) {
             return(sim.out)
           }
 
-          char.table <- dplyr::as_tibble(param.list[[i]][[j]]$value) %>%
+          char.table <- dplyr::as_tibble(param.list[[i]][[j]]$value[[1]]) %>%
             dplyr::mutate_all(as.character)
           sim.out <- table_out(char.table, sim.out)
         }

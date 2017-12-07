@@ -312,26 +312,26 @@ check_input_values <- function(hip) {
                           "-- nbTrees cannot be defined directly using define_hisafe(). Instead the size of the tree initialziation table will be used.", "")
 
   ## Timeseries Length Errors
-  treePruningYears.length     <- purrr::map_dbl(USED_PARAMS$treePruningYears$value,     length)
-  treePruningProp.length      <- purrr::map_dbl(USED_PARAMS$treePruningProp$value,      length)
-  treePruningMaxHeight.length <- purrr::map_dbl(USED_PARAMS$treePruningMaxHeight$value, length)
-  treePruningDays.length      <- purrr::map_dbl(USED_PARAMS$treePruningDays$value,      length)
+  treePruningYears.length     <- unique(purrr::map_dbl(USED_PARAMS$treePruningYears$value,     length))
+  treePruningProp.length      <- unique(purrr::map_dbl(USED_PARAMS$treePruningProp$value,      length))
+  treePruningMaxHeight.length <- unique(purrr::map_dbl(USED_PARAMS$treePruningMaxHeight$value, length))
+  treePruningDays.length      <- unique(purrr::map_dbl(USED_PARAMS$treePruningDays$value,      length))
 
   treePruning.length.error <- ifelse(all(purrr::map_lgl(list(treePruningProp.length,
                                                              treePruningMaxHeight.length,
                                                              treePruningDays.length), identical, y = treePruningYears.length)),
                                      "", "-- treePruningYears, treePruningProp, treePruningMaxHeight, and treePruningDays must have the same length")
 
-  treeThinningIds.length   <- purrr::map_dbl(USED_PARAMS$treeThinningIds$value,   length)
-  treeThinningYears.length <- purrr::map_dbl(USED_PARAMS$treeThinningYears$value, length)
-  treeThinningDays.length  <- purrr::map_dbl(USED_PARAMS$treeThinningDays$value,  length)
+  treeThinningIds.length   <- unique(purrr::map_dbl(USED_PARAMS$treeThinningIds$value,   length))
+  treeThinningYears.length <- unique(purrr::map_dbl(USED_PARAMS$treeThinningYears$value, length))
+  treeThinningDays.length  <- unique(purrr::map_dbl(USED_PARAMS$treeThinningDays$value,  length))
   treeThinning.length.error <- ifelse(all(purrr::map_lgl(list(treeThinningYears.length, treeThinningDays.length), identical, y = treeThinningIds.length)),
                                       "", "-- treeThinningIds, treeThinningYears, and treeThinningDays must have the same length")
 
-  treeRootPruningYears.length    <- purrr::map_dbl(USED_PARAMS$treeRootPruningYears$value,    length)
-  treeRootPruningDays.length     <- purrr::map_dbl(USED_PARAMS$treeRootPruningDays$value,     length)
-  treeRootPruningDistance.length <- purrr::map_dbl(USED_PARAMS$treeRootPruningDistance$value, length)
-  treeRootPruningDepth.length    <- purrr::map_dbl(USED_PARAMS$treeRootPruningDepth$value,    length)
+  treeRootPruningYears.length    <- unique(purrr::map_dbl(USED_PARAMS$treeRootPruningYears$value,    length))
+  treeRootPruningDays.length     <- unique(purrr::map_dbl(USED_PARAMS$treeRootPruningDays$value,     length))
+  treeRootPruningDistance.length <- unique(purrr::map_dbl(USED_PARAMS$treeRootPruningDistance$value, length))
+  treeRootPruningDepth.length    <- unique(purrr::map_dbl(USED_PARAMS$treeRootPruningDepth$value,    length))
   rootPruning.length.error <- ifelse(all(purrr::map_lgl(list(treeRootPruningDays.length,
                                                              treeRootPruningDistance.length,
                                                              treeRootPruningDepth.length), identical, y = treeRootPruningYears.length)), "",
