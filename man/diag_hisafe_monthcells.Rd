@@ -4,7 +4,8 @@
 \alias{diag_hisafe_monthcells}
 \title{Plot monthCells diagnostics of Hi-sAFe output}
 \usage{
-diag_hisafe_monthcells(hop, output.path = NULL)
+diag_hisafe_monthcells(hop, output.path = NULL, schemes = c("year.simname",
+  "month.simname", "month.year"))
 }
 \arguments{
 \item{hop}{An object of class "hop" or "hop-group" containing output data from one or more Hi-sAFe simulations.}
@@ -12,6 +13,8 @@ diag_hisafe_monthcells(hop, output.path = NULL)
 \item{output.path}{A character stting indicating the path to the directory where plots should be saved. Plots are
 saved in a subdirectory within this directory named /monthCells/facetScheme.
 If no value is provided, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis/diagnostics".}
+
+\item{schemes}{A character vector of the facet schemes to run. Possible schemes are described in Details and have the following names: \code{year.simname}, \code{month.simname}, \code{month.year}.}
 }
 \value{
 Invisibly returns a list of \code{ggplot} objects, grouped into two sublists based on the faceting scheme.

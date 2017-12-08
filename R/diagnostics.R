@@ -105,6 +105,7 @@ diag_hisafe_ts <- function(hop,
 #' @param output.path A character stting indicating the path to the directory where plots should be saved. Plots are
 #' saved in a subdirectory within this directory named /monthCells/facetScheme.
 #' If no value is provided, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis/diagnostics".
+#' @param schemes A character vector of the facet schemes to run. Possible schemes are described in Details and have the following names: \code{year.simname}, \code{month.simname}, \code{month.year}.
 #' @export
 #' @importFrom dplyr %>%
 #' @family hisafe diagnostic fucntions
@@ -116,7 +117,7 @@ diag_hisafe_ts <- function(hop,
 #' # You can create tile plots of every monthCells variable:
 #' diag_hisafe_monthcells(mydata)
 #' }
-diag_hisafe_monthcells <- function(hop, output.path = NULL) {
+diag_hisafe_monthcells <- function(hop, output.path = NULL, schemes = c("year.simname", "month.simname", "month.year")) {
 
   ## Check for data class and if profile exists
   if(!("hop" %in% class(hop)))  stop("hop argument not of class hop", call. = FALSE)
@@ -129,8 +130,6 @@ diag_hisafe_monthcells <- function(hop, output.path = NULL) {
     output.path <- clean_path(paste0(hop$path, "/analysis/diagnostics"))
   }
   monthcells.path <- clean_path(paste0(output.path, "/monthCells/"))
-  plot.dirs <- paste0(monthcells.path, c("year_simname/", "month_simname/", "month_year/"))
-  purrr::walk(plot.dirs, dir.create, recursive = TRUE, showWarnings = FALSE)
 
   ## Clean columns & extract names of variables to plot
   # cols with only "error!" output are all NA's and cause plot errors
@@ -138,44 +137,56 @@ diag_hisafe_monthcells <- function(hop, output.path = NULL) {
   var.names      <- names(hop$monthCells)[(which(names(hop$monthCells) == "cropSpeciesName") + 1):length(names(hop$monthCells))]
 
   ## Create plots
-  plot.list1 <- purrr::map(var.names, plot_hisafe_monthcells,
-                           hop       = hop,
-                           colfacet  = "SimulationName",
-                           rowfacet  = "Year",
-                           sim.names = "all",
-                           years     = seq(0, (max(hop$monthCells$Year) - min(hop$monthCells$Year)), 5),
-                           months    = 6)
-  file.names <- paste0("monthCells_year_simname_", var.names, ".png")
-  purrr::pwalk(list(file.names, plot.list1), ggplot2::ggsave, path = plot.dirs[1], scale = 2, width = 10, height = 10)
+  if("year.simname" %in% schemes){
+    plot.dir1 <- paste0(monthcells.path, "year_simname/")
+    dir.create(plot.dir1, recursive = TRUE, showWarnings = FALSE)
+    plot.list1 <- purrr::map(var.names, plot_hisafe_monthcells,
+                             hop       = hop,
+                             colfacet  = "SimulationName",
+                             rowfacet  = "Year",
+                             sim.names = "all",
+                             years     = seq(0, (max(hop$monthCells$Year) - min(hop$monthCells$Year)), 5),
+                             months    = 6)
+    file.names <- paste0("monthCells_year_simname_", var.names, ".png")
+    purrr::pwalk(list(file.names, plot.list1), ggplot2::ggsave, path = plot.dir1, scale = 2, width = 10, height = 10)
+  } else { plot.list1 <- list() }
 
-  plot.list2 <- purrr::map(var.names, plot_hisafe_monthcells,
-                           hop       = hop,
-                           colfacet  = "SimulationName",
-                           rowfacet  = "Month",
-                           sim.names = "all",
-                           years     = (round(median(hop$monthCells$Year),0) - min(hop$monthCells$Year)),
-                           months    = 1:12)
-  file.names <- paste0("monthCells_month_simname_", var.names, ".png")
-  purrr::pwalk(list(file.names, plot.list2), ggplot2::ggsave, path = plot.dirs[2], scale = 2, height = 10, width = 10)
+  if("month.simname" %in% schemes){
+    plot.dir2 <- paste0(monthcells.path, "month_simname/")
+    dir.create(plot.dir2, recursive = TRUE, showWarnings = FALSE)
+    plot.list2 <- purrr::map(var.names, plot_hisafe_monthcells,
+                             hop       = hop,
+                             colfacet  = "SimulationName",
+                             rowfacet  = "Month",
+                             sim.names = "all",
+                             years     = (round(median(hop$monthCells$Year),0) - min(hop$monthCells$Year)),
+                             months    = 1:12)
+    file.names <- paste0("monthCells_month_simname_", var.names, ".png")
+    purrr::pwalk(list(file.names, plot.list2), ggplot2::ggsave, path = plot.dir2, scale = 2, height = 10, width = 10)
+  } else { plot.list2 <- list() }
 
   plot.list3.tog <- list()
-  for(sim.name in unique(hop$monthCells$SimulationName)){
-    plot.list3 <- purrr::map(var.names, plot_hisafe_monthcells,
-                             hop       = hop,
-                             colfacet  = "Year",
-                             rowfacet  = "Month",
-                             sim.names = sim.name,
-                             years     = seq(0, (max(hop$monthCells$Year) - min(hop$monthCells$Year)), 5),
-                             months    = 1:12)
+  if("month.year" %in% schemes){
+    plot.dir3 <- paste0(monthcells.path, "month_year/")
+    dir.create(plot.dir3, recursive = TRUE, showWarnings = FALSE)
+    for(sim.name in unique(hop$monthCells$SimulationName)){
+      plot.list3 <- purrr::map(var.names, plot_hisafe_monthcells,
+                               hop       = hop,
+                               colfacet  = "Year",
+                               rowfacet  = "Month",
+                               sim.names = sim.name,
+                               years     = seq(0, (max(hop$monthCells$Year) - min(hop$monthCells$Year)), 5),
+                               months    = 1:12)
 
-    bad.plot.check <- unlist(purrr::map(plot.list3, is.logical))
-    plot.list3 <- plot.list3[!bad.plot.check]
+      bad.plot.check <- unlist(purrr::map(plot.list3, is.logical))
+      plot.list3 <- plot.list3[!bad.plot.check]
 
-    file.names <- paste0("monthCells_month_year_", sim.name, "_", var.names, ".png")
-    file.names <- file.names[!bad.plot.check]
+      file.names <- paste0("monthCells_month_year_", sim.name, "_", var.names, ".png")
+      file.names <- file.names[!bad.plot.check]
 
-    purrr::pwalk(list(file.names, plot.list3), ggplot2::ggsave, path = plot.dirs[3], scale = 2, height = 10, width = 10)
-    plot.list3.tog <- c(plot.list3.tog, plot.list3)
+      purrr::pwalk(list(file.names, plot.list3), ggplot2::ggsave, path = plot.dir3, scale = 2, height = 10, width = 10)
+      plot.list3.tog <- c(plot.list3.tog, plot.list3)
+    }
   }
 
   ## Invisibly return list of plot objects
