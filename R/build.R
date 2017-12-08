@@ -180,7 +180,7 @@ build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, templat
   if("tree.initialization" %in% names(exp.plan)){
     trees.used <- exp.plan$tree.initialization[[1]]$species
   } else if(PARAM_COMMENTED$tree.initialization == FALSE) {
-    trees.used <- PARAM_DEFAULTS$tree.initialization$species
+    trees.used <- PARAM_DEFAULTS$tree.initialization[[1]]$species
   } else {
     trees.used <- NA
   }
