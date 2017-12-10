@@ -4,12 +4,10 @@
 \alias{build_structure}
 \title{Builds the structure of a Hi-sAFe simulation}
 \usage{
-build_structure(exp.plan, exp.plan.to.write, path, profiles, template)
+build_structure(exp.plan, path, profiles, template)
 }
 \arguments{
 \item{exp.plan}{The exp.plan element of a "hip" object, containing a single row.}
-
-\item{exp.plan.to.write}{Same as \code{exp.plan} except that complex list/tibble elements are simplified to a number.}
 
 \item{path}{A character string of the path to the simulation folder.}
 

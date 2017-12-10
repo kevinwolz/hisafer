@@ -33,47 +33,9 @@ build_hisafe <- function(hip) {
     dir.create(simu.path, showWarnings = FALSE)
   }
 
-  ## Deal with tibble/list cols
-  tibble.params <- c("tree.initialization", "root.initialization", "layers", "layer.initialiation")
-  isnt_tibble_col <- function(x) !("tbl" %in% class(x[[1]]))
-  paste_together  <- function(x) unlist(purrr::map(x, paste, collapse = ","))
-  if(any(tibble.params %in% names(EXP.PLAN))) {
-    tibble.cols <- tibble.params[which(tibble.params %in% names(EXP.PLAN))]
-    exp.plan.to.write <- dplyr::select_if(EXP.PLAN, isnt_tibble_col) %>%
-      dplyr::mutate_if(is.list, paste_together)
-    find.unique.tibbles <- function(x, tibble.col) {
-      comps <- as.list(unique(x[tibble.col]))[[1]]
-      des <- 1:length(comps)
-      designators <- list()
-      for(i in 1:nrow(x)) {
-        designator <- des[purrr::map_lgl(comps, identical, y = x[i, tibble.col][[1]][[1]])]
-        designators <- c(designators, designator)
-      }
-      return(unlist(designators))
-    }
-    for(i in tibble.cols){
-      exp.plan.to.write[[i]] <- find.unique.tibbles(EXP.PLAN, i)
-      add_sim_names <- function(x, sim.name) {
-        x$SimulationName <- sim.name
-        x <- dplyr::select(x, SimulationName, dplyr::everything())
-        return(x)
-      }
-      tibble.out <- purrr::map2_df(as.list(EXP.PLAN[i])[[1]], EXP.PLAN$SimulationName, add_sim_names)
-
-      if(nrow(EXP.PLAN) > 1) {
-        readr::write_csv(tibble.out, clean_path(paste0(hip$path, "/",
-                                                       exp.name, "_",
-                                                       gsub("\\.", "_", i), "_summary.csv")))
-      } else {
-        readr::write_csv(tibble.out, clean_path(paste0(hip$path, "/",
-                                                       EXP.PLAN$SimulationName, "/",
-                                                       EXP.PLAN$SimulationName, "_",
-                                                       gsub("\\.", "_", i), "_summary.csv")))
-      }
-    }
-  } else {
-    exp.plan.to.write <- EXP.PLAN
-  }
+  ## Write out experiment summary
+  paste_together  <- function(x) unlist(purrr::map(x, paste, collapse = ";"))
+  exp.plan.to.write <- dplyr::mutate_if(EXP.PLAN, is.list, paste_together)
   if(nrow(EXP.PLAN) > 1) readr::write_csv(exp.plan.to.write, clean_path(paste0(hip$path, "/", exp.name, "_exp_summary.csv")))
 
   ## build folder tree & input files for each simulation in experiment
@@ -94,16 +56,11 @@ build_hisafe <- function(hip) {
     purrr::pmap(list) %>%
     purrr::map(create_tibble)
 
-  hip.to.write.list <- as.list(exp.plan.to.write) %>%
-    purrr::pmap(list) %>%
-    purrr::map(dplyr::as_tibble)
-
-  purrr::walk2(hip.list,
-               hip.to.write.list,
-               build_structure,
-               path     = hip$path,
-               profiles = hip$profiles,
-               template = hip$template)
+  purrr::walk(hip.list,
+              build_structure,
+              path     = hip$path,
+              profiles = hip$profiles,
+              template = hip$template)
 
   purrr::walk2(as.list(unique(EXP.PLAN$SimulationName)),
                as.list(clean_path(paste0(hip$path, "/", EXP.PLAN$SimulationName))),
@@ -117,11 +74,10 @@ build_hisafe <- function(hip) {
 #' @description Does the heavy lifting for \code{\link{build_hisafe}}.
 #' @return Invisibly returns a list containing the original hip object and supplied path.
 #' @param exp.plan The exp.plan element of a "hip" object, containing a single row.
-#' @param exp.plan.to.write Same as \code{exp.plan} except that complex list/tibble elements are simplified to a number.
 #' @param path A character string of the path to the simulation folder.
 #' @param profiles A character vector of export profiles the simulation to export.
 #' @param template A character string of the path to the Hi-sAFe directory structure/files to use as a template (or one of the strings signaling a default template)
-build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, template) {
+build_structure <- function(exp.plan, path, profiles, template) {
 
   template.path   <- get_template_path(template)
   TEMPLATE_PARAMS <- get_template_params(template.path)
@@ -135,7 +91,9 @@ build_structure <- function(exp.plan, exp.plan.to.write, path, profiles, templat
   system(paste("cp -r", template.path, simu.path))
   dir.create(paste0(simu.path, "/support"), showWarnings = FALSE)
 
-  ## Write out experiment summary
+  ## Write out simulation summary
+  paste_together  <- function(x) unlist(purrr::map(x, paste, collapse = ";"))
+  exp.plan.to.write <- dplyr::mutate_if(exp.plan, is.list, paste_together)
   readr::write_csv(exp.plan.to.write, clean_path(paste0(simu.path, "/support/", exp.plan$SimulationName, "_simulation_summary.csv")))
 
   ## Move weather file if one was provided
