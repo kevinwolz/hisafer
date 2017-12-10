@@ -4,9 +4,9 @@
 \alias{plot_hisafe_ts}
 \title{Plot timeseries of Hi-sAFe output variable}
 \usage{
-plot_hisafe_ts(hop, variable, profile, time.lim = NULL, tree.id = NULL,
+plot_hisafe_ts(hop, variable, profile, time.lim = NULL, tree.ids = NULL,
   color.palette = NULL, linetype.palette = NULL, aes.cols = list(color =
-  NULL, linetype = NULL), plot = TRUE)
+  NULL, linetype = NULL), crop.points = FALSE, plot = TRUE)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -20,7 +20,7 @@ If 'trees', 'plot', or 'climate', daily timeseries are created.}
 If profile is daily profile, a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
 If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.}
 
-\item{tree.id}{A numeric vector indicating the ids of a subset of tree ids to plot. If no input, all trees will be plotted.}
+\item{tree.ids}{A numeric vector indicating the ids of a subset of tree ids to plot. If no input, all trees will be plotted.}
 
 \item{color.palette}{A character stirng of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
 If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette. The default supports up to 24 simulations.}
@@ -30,6 +30,8 @@ If \code{NULL}, the default, then solid lines are used for all simulations. The 
 
 \item{aes.cols}{A list with arguments "color" and "linetype" containing character stirngs of the column names to use for plot aesthetics.
 If \code{NULL}, the default, then SimulationName is used for both aesthetics.}
+
+\item{crop.points}{Logical indicating if points should be plotted as well, with point shape desgnating the main crop name.}
 
 \item{plot}{If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.}
 }
