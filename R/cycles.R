@@ -17,18 +17,18 @@
 #' @examples
 #' \dontrun{
 #' # To plot the water cycle of a plot:
-#' water.plot <- plot_annual_cycle(myhop, "water")
+#' water.plot <- plot_cycle(myhop, "water")
 #'
 #' # Once you have the plot object, you can display it and save it:
 #' water.plot
 #' ggplot2::ggsave("water_cycle.png", water.plot)
 #' }
-plot_annual_cycle <- function(hop,
-                              cycle,
-                              simu.names    = "all",
-                              time.lim      = NULL,
-                              color.palette = NULL,
-                              plot          = TRUE) {
+plot_cycle <- function(hop,
+                       cycle,
+                       simu.names    = "all",
+                       time.lim      = NULL,
+                       color.palette = NULL,
+                       plot          = TRUE) {
 
   if(!("hop" %in% class(hop))) stop("hop argument not of class hop", call. = FALSE)
   if(simu.names[1] == "all") simu.names <- unique(hop$exp.plan$SimulationName)
@@ -251,7 +251,7 @@ plot_annual_cycle <- function(hop,
     if(is.null(color.palette)) color.palette <- c("#009E73","#999999", "#D55E00", "#E69F00",
                                                   "#56B4E9", "#0072B2", "#F0E442", "#CC79A7")
   } else {
-    stop("Cycle argument not supported. Use one of: carbon, nitrogen, water, light.", call. = FALSE)
+    stop("cycle argument not supported. Use one of: carbon, nitrogen, water, light.", call. = FALSE)
   }
 
   ## Set faceting
@@ -299,4 +299,124 @@ plot_annual_cycle <- function(hop,
   #ggsave("/Users/kevinwolz/Desktop/light.png", plot.obj, scale = 1, height = 8.5, width = 11)
 
   if(plot) return(plot.obj) else return(dplyr::mutate(plot.data, cycle = cycle))
+}
+
+
+#' Plot daily timeseries of nitrogen, water, or light capture
+#' @description Plots a daily timeseries of water, nitrogen, or light, capture
+#' @return If \code{plot = TRUE}, returns a ggplot object. If \code{plot = FALSE}, returns the data that would create the plot.
+#' If \code{hop} contains more than one simulation, the plot will be faceted by SimulationName.
+#' @param hop An object of class hop or face.
+#' @param years A numeric vector of the calendar years to include. If more than one year is provided, years are used as facets, and only a single value can be supplied to \code{simu.names}. If "all" is supplied, then all simulated years are used.
+#' @param simu.names A character vector of the SimulationNames within \code{hop} to include. The default, "all", includes all simulations.
+#' If more than one value is supplied to \code{years}, then a single value must be suppied to \code{simu.names}.
+#' @param color.palette A character stirng of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
+#' If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette.
+#' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.
+#' @export
+#' @importFrom dplyr %>%
+#' @import ggplot2
+#' @family hisafe analysis functions
+#' @examples
+#' \dontrun{
+#' # To plot the water cycle of a plot:
+#' daily.water.plot <- plot_daily_cycle(myhop, "water", time.lim = c("1996-01-01", "1997-01-01))
+#'
+#' # Once you have the plot object, you can display it and save it:
+#' water.plot
+#' ggplot2::ggsave("daily_water_cycle.png", daily.water.plot)
+#' }
+plot_daily_light <- function(hop,
+                             years,
+                             simu.names    = "all",
+                             color.palette = NULL,
+                             plot          = TRUE) {
+
+  if(!("hop" %in% class(hop)))     stop("hop argument not of class hop", call. = FALSE)
+  if(!all("plot" %in% names(hop))) stop("calculations require data from plot export profile", call. = FALSE)
+
+  if(simu.names[1] == "all") simu.names <- unique(hop$exp.plan$SimulationName)
+  if(years[1] == "all")      years      <- unique(hop$plot$Year[which(hop$plot$SimulationName %in% simu.names)])
+  if(length(years) > 1 & length(simu.names) > 1) stop("cannot supply multiple simu.names and multiple years", call. = FALSE)
+
+  na.to.zero <- function(x) {
+    x[is.na(x)] <- 0
+    return(x)
+  }
+
+  ## Extract required data from hop
+  #hop$plot$parInterceptedByInterCrop = 0
+  plot.data <- hop$plot %>%
+    dplyr::filter(SimulationName %in% simu.names) %>%
+    dplyr::filter(Year %in% years) %>%
+    dplyr::mutate(fake.date = lubridate::ymd(paste0("9999-", Month, "-", Day))) %>%
+    #dplyr::mutate(JulianDay = lubridate::parse_date_time(JulianDay, "j", quiet = TRUE)) %>%
+    # Extract variables required for the light budget
+    dplyr::select(SimulationName, Year, fake.date, mainCropArea, interCropArea,
+                  parIncident,
+                  parInterceptedByMainCrop,
+                  parInterceptedByInterCrop,
+                  parInterceptedByTrees) %>%
+    dplyr::mutate(parInterceptedByMainCrop  = na.to.zero(parInterceptedByMainCrop),
+                  parInterceptedByInterCrop = na.to.zero(parInterceptedByInterCrop),
+                  parInterceptedByTrees     = na.to.zero(parInterceptedByTrees)) %>%
+    # Scale by area to conver to moles and then make percentage of inceident par
+    dplyr::mutate(parIncident            = parIncident               * (mainCropArea + interCropArea),
+                  InterceptedByMainCrop  = parInterceptedByMainCrop  * mainCropArea                   / parIncident * 100,
+                  InterceptedByInterCrop = parInterceptedByInterCrop * interCropArea                  / parIncident * 100,
+                  InterceptedByTrees     = parInterceptedByTrees     * (mainCropArea + interCropArea) / parIncident * 100,
+                  notCaptured            = 100 - InterceptedByMainCrop - InterceptedByInterCrop - InterceptedByTrees) %>%
+    dplyr::select(-(parIncident:parInterceptedByTrees)) %>%
+    tidyr::gather(key = "flux", value = "value", InterceptedByMainCrop:notCaptured) %>%
+    dplyr::mutate(flux = factor(flux,
+                                levels = c("InterceptedByTrees",
+                                           "notCaptured",
+                                           "InterceptedByInterCrop",
+                                           "InterceptedByMainCrop"),
+                                labels = c("Trees",
+                                           "Not captured",
+                                           "Secondary crop",
+                                           "Main crop")))
+
+  ## Set faceting
+  if(length(years) == 1) {
+    plot.title <- paste0("Light Capture - ", years)
+    scale.x <- scale_x_date(expand = c(0,0), date_labels = "%b") # "%b-%Y"
+    if("face" %in% class(fhop)) {
+      AF.sims <- sort(fhop$exp.plan$SimulationName[!(fhop$exp.plan$SimulationName %in% c("Monocrop", "Forestry"))])
+      if(length(AF.sims) == 1) facet <- facet_wrap(~SimulationName, nrow = 1) else facet <- facet_wrap(~SimulationName)
+      all.sims <- c("Monocrop", AF.sims, "Forestry")
+      all.sims <- all.sims[all.sims %in% simu.names]
+      plot.data$SimulationName <- factor(plot.data$SimulationName, levels = all.sims)
+    } else if ("hop-group" %in% class(fhop)) {
+      facet <- facet_wrap(~SimulationName)
+    } else {
+      facet <- geom_blank()
+    }
+  } else {
+    plot.title <- paste0("Light Capture - ", simu.names)
+    scale.x    <- scale_x_date(expand = c(0,0), date_labels = "%b", limits = lubridate::ymd("9999-01-01", "9999-12-31"))
+    facet      <- facet_wrap(~Year)
+
+  }
+
+  if(is.null(color.palette)) color.palette <- c("#E69F00", "grey20", "#56B4E9", "#009E73")
+
+  ## Create plot
+  plot.obj <- ggplot(plot.data, aes(x = fake.date, y = value, fill = flux)) +
+    labs(x     = "Date",
+         y     = "Intercepted PAR (% of incident PAR)",
+         title = plot.title) +
+    facet +
+    scale.x +
+    scale_y_continuous(sec.axis = sec_axis(~ ., labels = NULL), expand = c(0,0)) +
+    geom_area(na.rm = TRUE) +
+    scale_fill_manual(values = color.palette) +
+    theme_hisafe_ts() +
+    theme(legend.title      = element_blank(),
+          axis.ticks.length = unit(5, "points"),
+          axis.text.x       = element_text(margin = margin(t = 5, unit = "points"), angle = 90, hjust = 1),
+          axis.text.y       = element_text(margin = margin(r = 5, unit = "points")))
+
+  if(plot) return(plot.obj) else return(plot.data)
 }
