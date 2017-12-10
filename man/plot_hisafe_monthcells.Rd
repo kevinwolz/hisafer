@@ -4,9 +4,10 @@
 \alias{plot_hisafe_monthcells}
 \title{Tile plot of Hi-sAFe monthCells output variable}
 \usage{
-plot_hisafe_monthcells(hop, variable, colfacet = "SimulationName",
-  rowfacet = "Year", sim.names = "all", years = seq(0, 40, 5),
-  months = 6, plot = TRUE)
+plot_hisafe_monthcells(hop, variable = "monthRelativeTotalParIncident",
+  colfacet = "SimulationName", rowfacet = "Year", sim.names = "all",
+  years = seq(0, 40, 5), months = 6, trees = TRUE, canopies = TRUE,
+  plot = TRUE)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -22,6 +23,10 @@ plot_hisafe_monthcells(hop, variable, colfacet = "SimulationName",
 \item{years}{A numeric vector containing the years (after planting) to include. Use "all" to include all available values.}
 
 \item{months}{A numeric vector containing the months to include. Use "all" to include all available values.}
+
+\item{trees}{Logical indicating if a point should be plotted at the location of each tree.}
+
+\item{canopies}{Logical indicating if an elipsoid should be plotted representing the size of each tree canopy.}
 
 \item{plot}{If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.}
 }

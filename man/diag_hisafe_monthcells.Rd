@@ -5,7 +5,7 @@
 \title{Plot monthCells diagnostics of Hi-sAFe output}
 \usage{
 diag_hisafe_monthcells(hop, output.path = NULL, schemes = c("year.simname",
-  "month.simname", "month.year"))
+  "month.simname", "month.year"), trees = TRUE, canopies = TRUE)
 }
 \arguments{
 \item{hop}{An object of class "hop" or "hop-group" containing output data from one or more Hi-sAFe simulations.}
@@ -15,6 +15,10 @@ saved in a subdirectory within this directory named /monthCells/facetScheme.
 If no value is provided, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis/diagnostics".}
 
 \item{schemes}{A character vector of the facet schemes to run. Possible schemes are described in Details and have the following names: \code{year.simname}, \code{month.simname}, \code{month.year}.}
+
+\item{trees}{Logical indicating if a point should be plotted at the location of each tree.}
+
+\item{canopies}{Logical indicating if an elipsoid should be plotted representing the size of each tree canopy.}
 }
 \value{
 Invisibly returns a list of \code{ggplot} objects, grouped into two sublists based on the faceting scheme.

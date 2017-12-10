@@ -163,6 +163,8 @@ plot_hisafe_ts <- function(hop,
 #' @param sim.names A character string containing the SimulationNames to include. Use "all" to include all available values.
 #' @param years A numeric vector containing the years (after planting) to include. Use "all" to include all available values.
 #' @param months A numeric vector containing the months to include. Use "all" to include all available values.
+#' @param trees Logical indicating if a point should be plotted at the location of each tree.
+#' @param canopies Logical indicating if an elipsoid should be plotted representing the size of each tree canopy.
 #' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.
 #' @export
 #' @importFrom dplyr %>%
@@ -190,12 +192,14 @@ plot_hisafe_ts <- function(hop,
 #' ggplot2::ggsave("tiled_monthDirectParIncident.png", tile.plot2)
 #' }
 plot_hisafe_monthcells <- function(hop,
-                                   variable,
+                                   variable  = "monthRelativeTotalParIncident",
                                    colfacet  = "SimulationName",
                                    rowfacet  = "Year",
                                    sim.names = "all",
                                    years     = seq(0, 40, 5),
                                    months    = 6,
+                                   trees     = TRUE,
+                                   canopies  = TRUE,
                                    plot      = TRUE) {
   if(!("hop" %in% class(hop)))  stop("hop argument not of class hop", call. = FALSE)
   if(nrow(hop$monthCells) == 0) stop("no data from monthCells profile found", call. = FALSE)
@@ -284,19 +288,6 @@ plot_hisafe_monthcells <- function(hop,
     scale_y_continuous(expand = c(0,0)) +
     facet_grid(reformulate(colfacet, rowfacet), switch = "both") +
     geom_tile(aes_string(fill = variable), na.rm = TRUE, color = "black") +
-    geom_point(data = diam.data,
-               color = "green",
-               size = 2,
-               na.rm = TRUE) +
-    ggforce::geom_ellipsis(data = diam.data,
-                           color = "green",
-                           size = 2,
-                           aes(x0 = x, y0 = y,
-                               a = crownRadiusInterRow,
-                               b = crownRadiusTreeLine,
-                               angle = 0),
-                           inherit.aes = FALSE,
-                           na.rm = TRUE) +
     viridis::scale_fill_viridis(option = "magma") +
     guides(fill = guide_colourbar(barwidth = 15,
                                   barheight = 1.5,
@@ -304,6 +295,27 @@ plot_hisafe_monthcells <- function(hop,
                                   nbin = 100)) +
     coord_equal() +
     theme_hisafe_tile()
+
+  if(trees) {
+    plot.obj <- plot.obj +
+      geom_point(data = diam.data,
+                 color = "green",
+                 size = 2,
+                 na.rm = TRUE)
+  }
+
+  if(canopies) {
+    plot.obj <- plot.obj +
+      ggforce::geom_ellipsis(data = diam.data,
+                             color = "green",
+                             size = 2,
+                             aes(x0 = x, y0 = y,
+                                 a = crownRadiusInterRow,
+                                 b = crownRadiusTreeLine,
+                                 angle = 0),
+                             inherit.aes = FALSE,
+                             na.rm = TRUE)
+  }
 
   if(plot) return(plot.obj) else return(plot.data)
 }

@@ -106,6 +106,8 @@ diag_hisafe_ts <- function(hop,
 #' saved in a subdirectory within this directory named /monthCells/facetScheme.
 #' If no value is provided, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis/diagnostics".
 #' @param schemes A character vector of the facet schemes to run. Possible schemes are described in Details and have the following names: \code{year.simname}, \code{month.simname}, \code{month.year}.
+#' @param trees Logical indicating if a point should be plotted at the location of each tree.
+#' @param canopies Logical indicating if an elipsoid should be plotted representing the size of each tree canopy.
 #' @export
 #' @importFrom dplyr %>%
 #' @family hisafe diagnostic fucntions
@@ -117,7 +119,11 @@ diag_hisafe_ts <- function(hop,
 #' # You can create tile plots of every monthCells variable:
 #' diag_hisafe_monthcells(mydata)
 #' }
-diag_hisafe_monthcells <- function(hop, output.path = NULL, schemes = c("year.simname", "month.simname", "month.year")) {
+diag_hisafe_monthcells <- function(hop,
+                                   output.path = NULL,
+                                   schemes     = c("year.simname", "month.simname", "month.year"),
+                                   trees       = TRUE,
+                                   canopies    = TRUE) {
 
   ## Check for data class and if profile exists
   if(!("hop" %in% class(hop)))  stop("hop argument not of class hop", call. = FALSE)
@@ -146,7 +152,9 @@ diag_hisafe_monthcells <- function(hop, output.path = NULL, schemes = c("year.si
                              rowfacet  = "Year",
                              sim.names = "all",
                              years     = seq(0, (max(hop$monthCells$Year) - min(hop$monthCells$Year)), 5),
-                             months    = 6)
+                             months    = 6,
+                             trees     = trees,
+                             canopies  = canopies)
     file.names <- paste0("monthCells_year_simname_", var.names, ".png")
     purrr::pwalk(list(file.names, plot.list1), ggplot2::ggsave, path = plot.dir1, scale = 2, width = 10, height = 10)
   } else { plot.list1 <- list() }
@@ -160,7 +168,9 @@ diag_hisafe_monthcells <- function(hop, output.path = NULL, schemes = c("year.si
                              rowfacet  = "Month",
                              sim.names = "all",
                              years     = (round(median(hop$monthCells$Year),0) - min(hop$monthCells$Year)),
-                             months    = 1:12)
+                             months    = 1:12,
+                             trees     = trees,
+                             canopies  = canopies)
     file.names <- paste0("monthCells_month_simname_", var.names, ".png")
     purrr::pwalk(list(file.names, plot.list2), ggplot2::ggsave, path = plot.dir2, scale = 2, height = 10, width = 10)
   } else { plot.list2 <- list() }
@@ -176,7 +186,9 @@ diag_hisafe_monthcells <- function(hop, output.path = NULL, schemes = c("year.si
                                rowfacet  = "Month",
                                sim.names = sim.name,
                                years     = seq(0, (max(hop$monthCells$Year) - min(hop$monthCells$Year)), 5),
-                               months    = 1:12)
+                               months    = 1:12,
+                               trees     = trees,
+                               canopies  = canopies)
 
       bad.plot.check <- unlist(purrr::map(plot.list3, is.logical))
       plot.list3 <- plot.list3[!bad.plot.check]
