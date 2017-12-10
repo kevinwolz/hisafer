@@ -122,6 +122,7 @@ hop_filter <- function(hop, simu.names) {
   profiles.to.check <- names(hop)[!(names(hop) %in% c("variables", "exp.path"))]
   profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
   for(i in profiles) { hop[[i]] <- dplyr::filter(hop[[i]], SimulationName %in% simu.names) }
+  if(length(simu.names) == 1) { class(hop) <- class(hop)[class(hop) != "hop-group"] }
   return(hop)
 }
 
