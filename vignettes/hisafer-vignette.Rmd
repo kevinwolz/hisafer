@@ -222,18 +222,30 @@ plot_hisafe_monthcells(hop       = hop_exp,
                        months    = 1:12)
 ```
 
-You can also compare the major Hi-sAFe "cycles" among your simulations by using `plot_annual_cycle()` and `plot_daily_cycle()`. Supported "cycles" include carbon, water, nitrogen, and light. 
-```{r, eval = FALSE}
-plot_annual_cycle(hop = hop_exp, cycle = "carbon")
+You can also compare the major Hi-sAFe "cycles" among your simulations by using `plot_hisafe_cycle()` and `plot_hisafe_use()`. Supported "cycles" include carbon, water, nitrogen, and light. 
+```{r, eval = TRUE}
+plot_hisafe_cycle(hop = hop_exp, cycle = "carbon")
 ```
 ```{r, eval = FALSE}
-plot_annual_cycle(hop = hop_exp, cycle = "nitrogen")
+plot_hisafe_cycle(hop = hop_exp, cycle = "nitrogen")
 ```
 ```{r, eval = FALSE}
-plot_annual_cycle(hop = hop_exp, cycle = "water")
+plot_hisafe_cycle(hop = hop_exp, cycle = "water")
+```
+```{r, eval = TRUE}
+plot_hisafe_cycle(hop = hop_exp, cycle = "light")
 ```
 ```{r, eval = FALSE}
-plot_annual_cycle(hop = hop_exp, cycle = "light")
+plot_hisafe_use(hop = hop_exp, cycle = "carbon", years = 2014)
+```
+```{r, eval = FALSE}
+plot_hisafe_use(hop = hop_exp, cycle = "nitrogen", years = 2014)
+```
+```{r, eval = FALSE}
+plot_hisafe_use(hop = hop_exp, cycle = "water", years = 2014)
+```
+```{r, eval = TRUE}
+plot_hisafe_use(hop = hop_exp, cycle = "light", years = 2014)
 ```
 
 By default, every hisafer analysis function returns a `ggplot` object. Each function, however, has an arguement `plot`, whch can be set to `FALSE` to instead return the data (a tibble) that would create the plot. 
@@ -244,7 +256,7 @@ Many custom analyses will be performed on an individual profile/component of a `
 hop_exp$plot
 ```
 
-Sometimes, during the Analysis phase, you will realize that the values of **SimulationName** that you provided during the define phase are not quite what you wanted. To rename each **SimulationName** in your `hop` object, you can use `simu_rename()`.
+Sometimes, during the Analysis phase, you will realize that the values of **SimulationName** that you provided during the define phase are not quite what you wanted. To rename each **SimulationName** in your `hop` object, you can use `hop_rename()`.
 
 You may also realize that you want to either remove some simulations from your `hop` object or even merge several `hop` objects togeter. These goals can be accomplished using the `hop_filter()` and `hop_merge()` functions. 
 
@@ -273,12 +285,18 @@ Once you have a `face` object, the most common analysis is to calculate the vari
 LER(face = myface)
 ```
 
-Furthermore, just as for normal `hop` objects, you can also use `plot_annual_cycle()` and `plot_daily_cycle()` to compare the simulations in a `face` object. 
+Furthermore, just as for normal `hop` objects, you can also use `plot_hisafe_cycle()` and `plot_hisafe_use()` to compare the simulations in a `face` object. 
 ```{r, eval = TRUE}
-plot_annual_cycle(hop = myface, cycle = "carbon")
+plot_hisafe_cycle(hop = myface, cycle = "carbon")
 ```
 ```{r, eval = TRUE}
-plot_annual_cycle(hop = myface, cycle = "light")
+plot_hisafe_cycle(hop = myface, cycle = "light")
+```
+```{r, eval = TRUE}
+plot_hisafe_use(hop = myface, cycle = "carbon", years = "all", simu.names = "Restinclieres-A2")
+```
+```{r, eval = TRUE}
+plot_hisafe_use(hop = myface, cycle = "light", years = "all", simu.names = "Restinclieres-A2")
 ```
 
 ### Notes
