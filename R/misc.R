@@ -1,3 +1,34 @@
+#' Display version numbers of Hi-sAFe and Java
+#' @description Displays the version numbers of Hi-sAFe and Java.
+#' @return Invisibly returns the Hi-sAFe version number
+#' @param capsis.path A character string of the path to the Capsis folder
+#' @export
+#' @examples
+#' \dontrun{
+#' hisafe_info()
+#' }
+hisafe_info <- function(capsis.path = "/Applications/Capsis") {
+
+  capsis.path <- R.utils::getAbsolutePath(capsis.path)
+
+  if(!dir.exists(capsis.path))                    stop("directory specified by capsis.path does not exist",          call. = FALSE)
+  if(!("capsis.sh" %in% list.files(capsis.path))) stop("directory specified by capsis.path does not contain Capsis", call. = FALSE)
+
+  #cat("Capsis Version:",  capsis.version)
+
+  hisafe.id.card <- clean_path(paste0(capsis.path, "/src/safe/idcard.properties"))
+  hisafe.info <- scan(hisafe.id.card, what = "character", encoding = "latin1", sep = "\n", quiet = TRUE)
+  hisafe.version <- strsplit(grep("Version = ", hisafe.info, value = TRUE), split = " = ", fixed = TRUE)[[1]][2]
+  cat("Hi-sAFe Version:", hisafe.version)
+
+  #cat("\n\nSTICS Version:",   stics.version)
+
+  cat("\n\nJava Version:")
+  system("java -version", wait = TRUE)
+
+  invisible(hisafe.version)
+}
+
 #' Display supported Hi-sAFe input parameters
 #' @description Displays supported Hi-sAFe input parameters, their default values, and their accepted/suggested ranges.
 #' @return Invisibly returns an alphebetized character vector of the names of supported Hi-sAFe prameters.
@@ -13,6 +44,9 @@
 #' hisafe_params("all")       # details of all parameters
 #' }
 hisafe_params <- function(variable = "names", template = "agroforestry_default") {
+
+  if(!is.character(variable))                           stop("variable argument must be a character vector",             call. = FALSE)
+  if(!(is.character(template) & length(template) == 1)) stop("template argument must be a character vector of length 1", call. = FALSE)
 
   TEMPLATE_PARAMS <- get_template_params(get_template_path(template))
   PARAM_NAMES     <- unlist(get_param_names(TEMPLATE_PARAMS), use.names = FALSE)
@@ -85,10 +119,11 @@ hisafe_profiles <- function(variable = "names") {
 #' @family hisafe helper functions
 #' @examples
 #' \dontrun{
-#' simu_rename(myhop, old.names = c("Sim_1", "Sim_2"), new.names = c("Lat30", "Lat60"))
+#' hop_rename(myhop, old.names = c("Sim_1", "Sim_2"), new.names = c("Lat30", "Lat60"))
 #' }
-simu_rename <- function(hop, old.names, new.names) {
-  if(!("hop" %in% class(hop))) stop("data not of class hop", call. = FALSE)
+hop_rename <- function(hop, old.names, new.names) {
+  if(!("hop" %in% class(hop)))                         stop("hop argument is not of class hop",                      call. = FALSE)
+  if(!all(old.names %in% hop$exp.plan$SimulationName)) stop("one or more values in old.names is not present in hop", call. = FALSE)
 
   profiles.to.check <- names(hop)[!(names(hop) %in% c("variables", "exp.path"))]
   profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
@@ -118,7 +153,10 @@ simu_rename <- function(hop, old.names, new.names) {
 #' }
 hop_filter <- function(hop, simu.names) {
   if(simu.names[1] == "all") return(hop)
-  if(!("hop" %in% class(hop))) stop("data not of class hop", call. = FALSE)
+
+  if(!("hop" %in% class(hop)))                          stop("hop argument is not of class hop",                       call. = FALSE)
+  if(!all(simu.names %in% hop$exp.plan$SimulationName)) stop("one or more values in simu.names is not present in hop", call. = FALSE)
+
   profiles.to.check <- names(hop)[!(names(hop) %in% c("variables", "exp.path"))]
   profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
   for(i in profiles) { hop[[i]] <- dplyr::filter(hop[[i]], SimulationName %in% simu.names) }
@@ -179,29 +217,4 @@ hop_merge <- function(...) {
 
   class(merged_hop) <- c("hop-group", "hop", class(merged_hop))
   return(merged_hop)
-}
-
-#' Display version numbers of Hi-sAFe and Java
-#' @description Displays the version numbers of Hi-sAFe and Java.
-#' @return Invisibly returns the Hi-sAFe version number
-#' @param capsis.path A character string of the path to the Capsis folder
-#' @export
-#' @examples
-#' \dontrun{
-#' hisafe_info()
-#' }
-hisafe_info <- function(capsis.path = "/Applications/Capsis") {
-  #cat("Capsis Version:",  capsis.version)
-
-  hisafe.id.card <- clean_path(paste0(capsis.path, "/src/safe/idcard.properties"))
-  hisafe.info <- scan(hisafe.id.card, what = "character", encoding = "latin1", sep = "\n", quiet = TRUE)
-  hisafe.version <- strsplit(grep("Version = ", hisafe.info, value = TRUE), split = " = ", fixed = TRUE)[[1]][2]
-  cat("Hi-sAFe Version:", hisafe.version)
-
-  #cat("\n\nSTICS Version:",   stics.version)
-
-  cat("\n\nJava Version:")
-  system("java -version", wait = TRUE)
-
-  invisible(hisafe.version)
 }

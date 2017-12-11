@@ -67,7 +67,15 @@ define_hisafe <- function(path,
                           factorial = FALSE,
                           force = FALSE, ...) {
 
-  param.list <- list(...)
+  path          <- R.utils::getAbsolutePath(path)
+  param.list    <- list(...)
+
+  if(!dir.exists(path))                                     stop("directory specified by path does not exist",               call. = FALSE)
+  if(!(is.character(exp.name) & length(exp.name) == 1))     stop("exp.name argument must be a character vector of length 1", call. = FALSE)
+  if(!(all(is.character(profiles)) | profiles[1] == "all")) stop("profiles argument must be 'all' or a character vector",    call. = FALSE)
+  if(!(is.character(template) & length(template) == 1))     stop("template argument must be a character vector of length 1", call. = FALSE)
+  if(!is.logical(factorial))                                stop("factorial argument must be a logical",                     call. = FALSE)
+  if(!is.logical(force))                                    stop("force argument must be a logical",                         call. = FALSE)
 
   ## Get profile names and check that they are present in template directory
   available.profiles <- get_available_profiles(get_template_path(template))
@@ -102,7 +110,7 @@ define_hisafe <- function(path,
   hip <- list(exp.plan = exp.plan,
               template = template,
               profiles = profiles,
-              path     = R.utils::getAbsolutePath(path))
+              path     = path)
 
   if(!force) {
     check_input_values(hip)
@@ -137,7 +145,22 @@ define_hisafe <- function(path,
 #' # To define a Hi-sAFe experiment from a file:
 #' myexp <- define_hisafe_file("./example_exp.csv")
 #' }
-define_hisafe_file <- function(file, path, profiles = "all", template = "agroforestry_default", force = FALSE) {
+define_hisafe_file <- function(file,
+                               path,
+                               profiles = "all",
+                               template = "agroforestry_default",
+                               force    = FALSE) {
+
+  path          <- R.utils::getAbsolutePath(path)
+  template.path <- get_template_path(template)
+
+  if(!(is.character(file) & length(file) == 1))             stop("file argument must be a character vector of length 1",     call. = FALSE)
+  if(!dir.exists(path))                                     stop("directory specified by path does not exist",               call. = FALSE)
+  if(!(all(is.character(profiles)) | profiles[1] == "all")) stop("profiles argument must be 'all' or a character vector",    call. = FALSE)
+  if(!(is.character(template) & length(template) == 1))     stop("template argument must be a character vector of length 1", call. = FALSE)
+  if(!dir.exists(template.path))                            stop("template directory does not exist",                        call. = FALSE)
+  if(!is.logical(force))                                    stop("force argument must be a logical",                         call. = FALSE)
+
   exp.plan <- dplyr::as_tibble(read.csv(file, header = TRUE, stringsAsFactors = FALSE))
 
   ## Get profile names and check that they are present in template directory
@@ -155,7 +178,7 @@ define_hisafe_file <- function(file, path, profiles = "all", template = "agrofor
   hip <- list(exp.plan = exp.plan,
               template = template,
               profiles = profiles,
-              path     = R.utils::getAbsolutePath(path))
+              path     = path)
 
   if(!force) {
     check_input_values(hip)
@@ -499,6 +522,10 @@ root_init_params <- function(reps        = 1,
                              paramShape2 = 0,
                              paramShape3 = 0,
                              amount      = 0.5) {
+
+  args <- list(reps, shape, repartition, paramShape1, paramShape2, paramShape3, amount)
+  if(any(!purrr::map_lgl(args, is.numeric))) stop("all arguments must be numeric")
+
   temp <- dplyr::as_tibble(data.frame(name        = "RootInit",
                                       shape       = shape,
                                       repartition = repartition,
@@ -543,6 +570,11 @@ tree_init_params <- function(species               = "walnut-hybrid",
                              crownRadius           = 0.25,
                              treeX                 = 0,
                              treeY                 = 0) {
+
+  args <- list(age, height, crownBaseHeight, truncatureRatio, leafToFineRootsRatio, crownRadius, treeX, treeY)
+  if(any(!purrr::map_lgl(args, is.numeric))) stop("all arguments except 'species' must be numeric")
+  if(!is.character(species))                 stop("species argument must be a character vector")
+
   out <- dplyr::as_tibble(data.frame(name                  = "TreeInit",
                                      species               = species,
                                      age                   = age,
@@ -571,6 +603,10 @@ tree_init_params <- function(species               = "walnut-hybrid",
 layer_init_params <- function(waterContent     = c(0.2, 0.3, 0.3, 0.3, 0.3),
                               no3Concentration = c(30, 14, 5, 2, 0),
                               nh4concentration = 0) {
+
+  args <- list(waterContent, no3Concentration, nh4concentration)
+  if(any(!purrr::map_lgl(args, is.numeric))) stop("all arguments must be numeric")
+
   out <- dplyr::as_tibble(data.frame(name             = "LayerInit",
                                      waterContent     = waterContent,
                                      no3Concentration = no3Concentration,
@@ -605,6 +641,10 @@ layer_params <- function(thick          = c(0.4, 0.4, 0.6, 1, 7),
                          stone          = 0,
                          stoneType      = 6,
                          infiltrability = 50) {
+
+  args <- list(thick, sand, clay, limeStone, organicMatter, partSizeSand, stone, stoneType, infiltrability)
+  if(any(!purrr::map_lgl(args, is.numeric))) stop("all arguments must be numeric")
+
   out <- dplyr::as_tibble(data.frame(name           = "Layer",
                                      thick          = thick,
                                      sand           = sand,

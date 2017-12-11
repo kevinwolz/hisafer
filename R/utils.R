@@ -24,6 +24,8 @@ get_template_path <- function(input) {
   } else {
     path <- clean_path(paste0(input, "/"))
   }
+  path <- R.utils::getAbsolutePath(path)
+  if(!dir.exists(path)) stop("template directory does not exist", call. = FALSE)
   return(path)
 }
 

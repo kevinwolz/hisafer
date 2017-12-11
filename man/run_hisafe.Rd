@@ -20,7 +20,7 @@ Required if \code{hip} is not provided.}
 
 \item{num.cores}{Numbers of cores to use in parallel computing. If not provided, will default to one less than the total number of available cores.}
 
-\item{capsis.path}{A character string of the path to the Capsis folder}
+\item{capsis.path}{A character string of the path (relative or absolute) to the Capsis folder}
 }
 \value{
 Invisibly returns a list of console logs from simulation runs.

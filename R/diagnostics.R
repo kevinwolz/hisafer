@@ -10,17 +10,18 @@
 #' @param output.path A character stting indicating the path to the directory where plots should be saved.
 #' Plots aresaved in a subdirectory within this directory named by \code{profile}.
 #' If no value is provided, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis/diagnostics".
-#' @param time.lim If profile is an annual profile, a numeric vector of length two providing the \code{c(minimum, maximum)} of years (since planting) to plot.
-#' If profile is daily profile, a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
-#' If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.
-#' @param tree.ids A numeric vector indicating the ids of a subset of tree ids to plot. If no input, all trees will be plotted.
-#' @param color.palette A character stirng of hex values  or R standard color names defining the color palette to use in plots with multiple simulations.
+#' @param simu.names A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.
+#' @param years A numeric vector of the years within \code{hop} to include. Use "all" to include all available values.
+#' @param tree.ids A numeric vector indicating a subset of tree ids to plot. Use "all" to include all available values.
+#' @param doy.lim A numeric vector of length two providing the \code{c(minimum, maximum)} of julian days to plot. Only applies if \code{profile} is a daily profile.
+#' @param color.palette A character stirng of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
 #' If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette. The default supports up to 24 simulations.
 #' @param linetype.palette A character stirng of values defining the linetype palette to use in plots with multiple simulations.
 #' If \code{NULL}, the default, then solid lines are used for all simulations. The default supports up to 24 simulations.
 #' @param aes.cols A list with arguments "color" and "linetype" containing character stirngs of the column names to use for plot aesthetics.
-#' If \code{NULL}, the default, then SimulationName is used for both aesthetics.
+#' @param facet.year A logical indicating whether, for daily profiles, the plot should be faceted by year. This helps with seeing finer level detail.
 #' @param crop.points Logical indicating if points should be plotted as well, with point shape desgnating the main crop name.
+#' Only applies when \code{profile} is 'plot' or 'annualplot'.
 #' @export
 #' @importFrom dplyr %>%
 #' @family hisafe diagnostic fucntions
@@ -37,21 +38,24 @@
 #' }
 diag_hisafe_ts <- function(hop,
                            profile,
-                           output.path        = NULL,
-                           time.lim           = NULL,
-                           tree.ids           = NULL,
-                           color.palette      = NULL,
-                           linetype.palette   = NULL,
-                           aes.cols           = list(color = NULL, linetype = NULL),
-                           crop.points        = FALSE) {
+                           output.path      = NULL,
+                           simu.names       = "all",
+                           years            = "all",
+                           tree.ids         = "all",
+                           doy.lim          = c(1, 366),
+                           color.palette    = NULL,
+                           linetype.palette = NULL,
+                           aes.cols         = list(color = "SimulationName", linetype = "SimulationName"),
+                           facet.year       = TRUE,
+                           crop.points      = FALSE) {
 
   annual.profiles <- c("annualtree", "annualplot")
   daily.profiles  <- c("trees", "plot", "climate")
 
-  ## Check for data class and if profile exists
-  if(!("hop" %in% class(hop)))                           stop("hop argument not of class hop", call. = FALSE)
-  if(!(profile %in% c(annual.profiles, daily.profiles))) stop("supplied profile is not supported", call. = FALSE)
-  if(nrow(hop[[profile]]) == 0)                          stop(paste("no data from", profile, "profile found"), call. = FALSE)
+  if(!("hop" %in% class(hop)))                                  stop("hop argument not of class hop",                             call. = FALSE)
+  if(!(profile %in% c(annual.profiles, daily.profiles)))        stop("supplied profile is not supported",                         call. = FALSE)
+  if(nrow(hop[[profile]]) == 0)                                 stop(paste("no data from", profile, "profile found"),             call. = FALSE)
+  if(!is.character(output.path))                                stop("output.path argument must be a character vector",           call. = FALSE)
 
   ## Create output directory
   if(is.null(output.path) & "hop-group" %in% class(hop)) {
@@ -80,11 +84,14 @@ diag_hisafe_ts <- function(hop,
   plot.list <- purrr::map(var.names, plot_hisafe_ts,
                           hop              = hop,
                           profile          = profile,
-                          time.lim         = time.lim,
+                          simu.names       = simu.names,
+                          years            = years,
                           tree.ids         = tree.ids,
+                          doy.lim          = doy.lim,
                           color.palette    = color.palette,
                           linetype.palette = linetype.palette,
                           aes.cols         = aes.cols,
+                          facet.year       = facet.year,
                           crop.points      = crop.points)
 
   ## Write plots to disk
@@ -129,8 +136,10 @@ diag_hisafe_monthcells <- function(hop,
                                    canopies    = TRUE) {
 
   ## Check for data class and if profile exists
-  if(!("hop" %in% class(hop)))  stop("hop argument not of class hop", call. = FALSE)
-  if(nrow(hop$monthCells) == 0) stop("no data from monthCells profile found", call. = FALSE)
+  if(!("hop" %in% class(hop)))   stop("hop argument not of class hop",                   call. = FALSE)
+  if(nrow(hop$monthCells) == 0)  stop("no data from monthCells profile found",           call. = FALSE)
+  if(!is.character(output.path)) stop("output.path argument must be a character vector", call. = FALSE)
+  if(!(schemes %in% c("year.simname", "month.simname", "month.year"))) stop("schemes argument must be one of: year.simname, month.simname, month.year", call. = FALSE)
 
   ## Create output directories
   if(is.null(output.path) & "hop-group" %in% class(hop)) {

@@ -26,12 +26,18 @@
 plot_hisafe_cycle <- function(hop,
                               cycle,
                               simu.names    = "all",
-                              time.lim      = NULL,
+                              time.lim      = c(NA, NA),
                               color.palette = NULL,
                               plot          = TRUE) {
 
   if(!("hop" %in% class(hop))) stop("hop argument not of class hop", call. = FALSE)
   if(simu.names[1] == "all") simu.names <- unique(hop$exp.plan$SimulationName)
+
+  if(!(cycle %in% c("carbon", "nitrogen", "water", "light")))   stop("cycle argument must be one of: carbon, nitrogen, water, light", call. = FALSE)
+  if(!(all(is.character(simu.names)) | simu.names[1] == "all")) stop("simu.names argument must be 'all' or a character vector",       call. = FALSE)
+  if(!(length(time.lim) == 2 & as.numeric(time.lim)))           stop("time.lim argument must be a numeric vector of length 2",        call. = FALSE)
+  if(!is.logical(plot))                                         stop("plot argument must be a logical",                               call. = FALSE)
+  if(!all(simu.names %in% hop$exp.plan$SimulationName))         stop("one or more values in simu.names is not present in hop",        call. = FALSE)
 
   if(cycle == "water") {
     required.profiles <- c("climate", "annualplot")
@@ -348,10 +354,12 @@ plot_hisafe_use <- function(hop,
   if(!(length(doy.lim) == 2 & all(doy.lim %in% 1:366)))         stop("doy.lim argument must be of length 2 with values in 1:366", call. = FALSE)
   if(!is.logical(plot))                                         stop("plot argument must be a logical",                           call. = FALSE)
 
-
   if(simu.names[1] == "all") simu.names <- unique(hop$exp.plan$SimulationName)
   if(years[1]      == "all") years      <- unique(hop$plot$Year[which(hop$plot$SimulationName %in% simu.names)])
   if(length(years) > 1 & length(simu.names) > 1) stop("cannot supply multiple simu.names and multiple years", call. = FALSE)
+
+  if(!all(years %in% hop$plot$Year))                stop("one or more values in years is not present in the plot profile of hop",      call. = FALSE)
+  if(!all(simu.names %in% hop$plot$SimulationName)) stop("one or more values in simu.names is not present in the plot profile of hop", call. = FALSE)
 
   if(cycle == "water") {
     # required.profiles <- c("climate", "plot")

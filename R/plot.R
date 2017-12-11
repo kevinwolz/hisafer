@@ -56,14 +56,15 @@ plot_hisafe_ts <- function(hop,
   daily.profiles  <- c("trees", "plot", "climate")
   tree.profiles   <- c("annualtree", "trees")
 
+  if(!("hop" %in% class(hop)))                                  stop("hop argument not of class hop",                             call. = FALSE)
+  if(!(profile %in% c(annual.profiles, daily.profiles)))        stop("supplied profile is not supported",                         call. = FALSE)
+  if(nrow(hop[[profile]]) == 0)                                 stop(paste("no data from", profile, "profile found"),             call. = FALSE)
+
   if(simu.names[1] == "all")                              simu.names <- unique(hop[[profile]]$SimulationName)
   if(years[1]      == "all")                              years      <- unique(hop[[profile]]$Year)
   if(tree.ids[1]   == "all" & profile %in% tree.profiles) tree.ids   <- unique(hop[[profile]]$id)
 
-  if(!("hop" %in% class(hop)))                                  stop("hop argument not of class hop",                             call. = FALSE)
   if(!is.character(variable) | length(variable) > 1)            stop("variable argument must be a character vector of length 1",  call. = FALSE)
-  if(!(profile %in% c(annual.profiles, daily.profiles)))        stop("supplied profile is not supported",                         call. = FALSE)
-  if(nrow(hop[[profile]]) == 0)                                 stop(paste("no data from", profile, "profile found"),             call. = FALSE)
   if(!(all(is.character(simu.names)) | simu.names[1] == "all")) stop("simu.names argument must be 'all' or a character vector",   call. = FALSE)
   if(!(all(is.numeric(years))        | years[1]      == "all")) stop("years argument must be 'all' or a numeric vector",          call. = FALSE)
   if(!(all(is.numeric(tree.ids))     | tree.ids[1]   == "all")) stop("tree.ids argument must be 'all' or a numeric vector",       call. = FALSE)

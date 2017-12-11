@@ -46,8 +46,13 @@ read_hisafe <- function(hip           = NULL,
                         show.progress = TRUE,
                         max.size      = 3e8) {
 
-  if(!is.null(hip) & !("hip" %in% class(hip))) stop("data not of class hip",              call. = FALSE)
-  if(is.null(hip) == is.null(path))            stop("must provide hip or path, not both", call. = FALSE)
+  if(!is.null(hip) & !("hip" %in% class(hip)))                  stop("data not of class hip",                                   call. = FALSE)
+  if(is.null(hip) == is.null(path))                             stop("must provide hip or path, not both",                      call. = FALSE)
+  if(!(all(is.character(simu.names)) | simu.names[1] == "all")) stop("simu.names argument must be 'all' or a character vector", call. = FALSE)
+  if(!(all(is.character(profiles))   | profiles[1]   == "all")) stop("profiles argument must be 'all' or a character vector",   call. = FALSE)
+  if(!is.logical(show.progress))                                stop("show.progress argument must be a logical",                call. = FALSE)
+  if(!(is.numeric(max.size) & length(max.size) == 1))           stop("max.size argument must be a positive integer",            call. = FALSE)
+  if(max.size %% 1 != 0 & max.size > 0)                         stop("max.size argument must be a positive integer",            call. = FALSE)
 
   ## Read simulation inputs & extract cols that vary for binding to output data
   if(!is.null(hip)) {
@@ -55,6 +60,8 @@ read_hisafe <- function(hip           = NULL,
     path       <- hip$path
     if(simu.names[1] == "all") simu.names <- EXP.PLAN$SimulationName
   } else {
+    path <- R.utils::getAbsolutePath(path)
+    if(!dir.exists(path)) stop("directory specified by path does not exist", call. = FALSE)
     exp.summary.file <- clean_path(paste0(path, "/", tail(strsplit(path, "/")[[1]], n = 1), "_exp_summary.csv"))
     if(simu.names[1] == "all" & file.exists(exp.summary.file)) {
       EXP.PLAN <- readr::read_csv(exp.summary.file, col_types = readr::cols())
@@ -306,6 +313,10 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, max.s
 #' @export
 read_hisafe_example <- function(profiles      = c("annualplot", "annualtree", "annualcrop", "plot", "trees", "climate", "monthCells"),
                                 show.progress = TRUE) {
+
+  if(!all(is.character(profiles))) stop("profiles argument must be a character vector", call. = FALSE)
+  if(!is.logical(show.progress))   stop("show.progress argument must be a logical",     call. = FALSE)
+
   hop <- read_hisafe(path          = clean_path(paste0(system.file("extdata", "example_output", package = "hisafer"), "/")),
                      profiles      = profiles,
                      show.progress = show.progress)

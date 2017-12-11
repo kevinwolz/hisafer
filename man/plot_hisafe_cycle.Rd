@@ -4,7 +4,7 @@
 \alias{plot_hisafe_cycle}
 \title{Plot annual barchart of carbon, nitrogen, water, or light cycle}
 \usage{
-plot_hisafe_cycle(hop, cycle, simu.names = "all", time.lim = NULL,
+plot_hisafe_cycle(hop, cycle, simu.names = "all", time.lim = c(NA, NA),
   color.palette = NULL, plot = TRUE)
 }
 \arguments{

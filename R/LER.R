@@ -2,8 +2,12 @@ LER <- function(face,
                 cycles         = "all",
                 color.palette = NULL,
                 plot          = TRUE) {
-  if(!("face" %in% class(face))) stop("face argument not of class face", call. = FALSE)
-  if(cycles == "all") cycles <- c("carbon", "nitrogen", "water", "light")
+
+  if(cycles[1] == "all") cycles <- c("carbon", "nitrogen", "water", "light")
+
+  if(!("face" %in% class(face)))                                      stop("face argument not of class face",                                     call. = FALSE)
+  if(!(cycles %in% c("carbon", "nitrogen", "water", "light", "all"))) stop("cycles argument must be one of: carbon, nitrogen, water, light, all", call. = FALSE)
+  if(!is.logical(plot))                                               stop("plot argument must be a logical",                                     call. = FALSE)
 
   ## Get flux data
   cycle.data <- purrr::map(cycles, plot_annual_cycle, hop = face, plot = FALSE) %>% dplyr::bind_rows()

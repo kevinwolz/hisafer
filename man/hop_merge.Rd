@@ -23,5 +23,5 @@ new_hop <- hop_merge(hop1, hop2, hop3)
 \seealso{
 Other hisafe helper functions: \code{\link{hisafe_params}},
   \code{\link{hisafe_profiles}}, \code{\link{hop_filter}},
-  \code{\link{simu_rename}}
+  \code{\link{hop_rename}}
 }

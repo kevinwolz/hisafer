@@ -20,7 +20,13 @@
 #' plot_hisafe_scene(myhip)
 #' }
 plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
+
   EXP.PLAN <- hip$exp.plan
+
+  if(!("hip" %in% class(hip)))                            stop("hip argument not of class hip",                             call. = FALSE)
+  if(!(is.character(simu.name) & length(simu.name) == 1)) stop("simu.name argument must be a character vector of length 1", call. = FALSE)
+  if(!(simu.name %in% EXP.PLAN$SimulationName))           stop("simu.name not present in hip",                              call. = FALSE)
+  if(!is.character(output.path))                          stop("output.path argument must be a character vector",           call. = FALSE)
 
   if(nrow(EXP.PLAN) > 1) {
     if(is.null(simu.name)) stop("must provide simu.name if hip contains more than one simulation", call. = FALSE)

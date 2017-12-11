@@ -3,7 +3,6 @@
 #' Used within \code{\link{build_structure}}.
 #' @return A list containing all parameter values and constraints.
 #' @param path A character string of the path to the file to read.
-#' @export
 #' @importFrom dplyr %>%
 #' @family hisafe param functions
 read_param_file <- function(path) {
@@ -148,7 +147,6 @@ read_param_file <- function(path) {
 #' @return Invisibly returns \code{TRUE}.
 #' @param.list A list containing all parameter values and constraints.
 #' @param path A character string of the path to the file to read.
-#' @export
 #' @family hisafe param functions
 write_param_file <- function(param.list, path) {
   sim.out <- character(0)
@@ -193,7 +191,6 @@ write_param_file <- function(param.list, path) {
 #' @return A edited list containing all parameter values and constraints.
 #' @param param.list A list containing all parameter values and constraints.
 #' @param exp.plan A exp.plan element of a hip object.
-#' @export
 #' @family hisafe param functions
 edit_param_file <- function(param.list, exp.plan) {
   for(i in names(exp.plan)){
@@ -209,7 +206,6 @@ edit_param_file <- function(param.list, exp.plan) {
 #' @param param.list A list containing all parameter values and constraints.
 #' @param variable A character string of the name of the variable to edit.
 #' @param value A numeric vector of the value to apply to the variable.
-#' @export
 #' @family hisafe param functions
 edit_param_element <- function(param.list, variable, value) {
   success <- FALSE

@@ -7,7 +7,7 @@
 #' @param simu.names Names of the simulations to run. If "all", the default, then all simulations are run.
 #' @param parallel Logical, should parallel computing be used.
 #' @param num.cores Numbers of cores to use in parallel computing. If not provided, will default to one less than the total number of available cores.
-#' @param capsis.path A character string of the path to the Capsis folder
+#' @param capsis.path A character string of the path (relative or absolute) to the Capsis folder
 #' @export
 #' @importFrom foreach %dopar%
 #' @importFrom foreach %do%
@@ -30,16 +30,25 @@ run_hisafe <- function(hip         = NULL,
                        num.cores   = NULL,
                        capsis.path = "/Applications/Capsis/") {
 
-  if(!is.null(hip) & !("hip" %in% class(hip))) stop("data not of class hip",              call. = FALSE)
-  if(is.null(hip) == is.null(path))            stop("must provide hip OR path, not both", call. = FALSE)
+  capsis.path <- R.utils::getAbsolutePath(capsis.path)
+  if(!is.null(path)) path <- R.utils::getAbsolutePath(path)
+
+  if(!is.null(hip) & !("hip" %in% class(hip)))                  stop("hip argument not of class hip",                                      call. = FALSE)
+  if(is.null(hip) == is.null(path))                             stop("must provide hip OR path, not both",                         call. = FALSE)
+  if(!dir.exists(path))                                         stop("directory specified by path does not exist",                 call. = FALSE)
+  if(!(all(is.character(simu.names)) | simu.names[1] == "all")) stop("simu.names argument must be 'all' or a character vector",    call. = FALSE)
+  if(!is.logical(parallel))                                     stop("parallel argument must be a logical",                        call. = FALSE)
+  if(!dir.exists(capsis.path))                                  stop("directory specified by capsis.path does not exist",          call. = FALSE)
+  if(!("capsis.sh" %in% list.files(capsis.path)))               stop("directory specified by capsis.path does not contain Capsis", call. = FALSE)
+  if(!((is.numeric(num.cores) & length(num.cores) == 1) | is.null(num.cores))) stop("num.cores argument must be a positive integer", call. = FALSE)
+  if(num.cores %% 1 != 0 & num.cores > 0)                                      stop("num.cores argument must be a positive integer", call. = FALSE)
 
   ## Determine path and simu.names to run
   if(is.null(path)) {
     path <- hip$path
     if(simu.names[1] == "all") simu.names <- hip$exp.plan$SimulationName
   } else {
-    path <- R.utils::getAbsolutePath(path)
-    if(simu.names[1] == "all") simu.names  <- purrr::map_chr(list.dirs(path, recursive = FALSE), function(x) tail(strsplit(x, "/")[[1]], n = 1))
+    if(simu.names[1] == "all") simu.names <- purrr::map_chr(list.dirs(path, recursive = FALSE), function(x) tail(strsplit(x, "/")[[1]], n = 1))
   }
 
   ## Ensure simulation directories exist
@@ -62,6 +71,7 @@ run_hisafe <- function(hip         = NULL,
     }
 
     if(is.null(num.cores)) num.cores <- min((parallel::detectCores() - 1), nrow(hip$exp.plan))
+    if(num.cores > parallel::detectCores()) stop(paste("There are only", parallel::detectCores(), "detectable cores on this computer."), call. = FALSE)
     if(num.cores == 1) stop("There is only 1 detectable core on this computer. Parallel computing is not possible.", call. = FALSE)
     cat("\nInitializing", length(simu.names), "simulations on", num.cores, "cores")
     cl <- parallel::makeCluster(num.cores)

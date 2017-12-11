@@ -31,6 +31,8 @@ create_face <- function(agroforestry, forestry, monocrop, face.path) {
   hop.errors <- paste0(hop.errors[!(hop.errors == "")], collapse = "\n")
   if(hop.errors != "") stop(paste("The following objects are not of class hop: ", hop.errors, collapse = "\n"), call. = FALSE)
 
+  if(!dir.exists(face.path)) stop("directory specfified by face.path does not exist", call. = FALSE)
+
   # Multiple control checks
   FC.multi.check <- ifelse("hop-group" %in% class(forestry), "-- forestry object can only contain a single simulation", "")
   CC.multi.check <- ifelse("hop-group" %in% class(monocrop), "-- monocrop object can only contain a single simulation", "")
@@ -77,10 +79,10 @@ create_face <- function(agroforestry, forestry, monocrop, face.path) {
   if(tree.errors != "") stop(tree.errors, call. = FALSE)
 
   # Edit SimluationNames & add system column
-  forestry <- simu_rename(forestry,
+  forestry <- hop_rename(forestry,
                               old.names = unique(forestry[[FC.profiles[1]]]$SimulationName),
                               new.names = "Forestry")
-  monocrop <- simu_rename(monocrop,
+  monocrop <- hop_rename(monocrop,
                               old.names = unique(monocrop[[CC.profiles[1]]]$SimulationName),
                               new.names = "Monocrop")
   agroforestry <- augment_with_system(agroforestry, "Agroforestry")
