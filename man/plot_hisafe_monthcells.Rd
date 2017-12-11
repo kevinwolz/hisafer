@@ -5,7 +5,7 @@
 \title{Tile plot of Hi-sAFe monthCells output variable}
 \usage{
 plot_hisafe_monthcells(hop, variable = "monthRelativeTotalParIncident",
-  colfacet = "SimulationName", rowfacet = "Year", sim.names = "all",
+  colfacet = "SimulationName", rowfacet = "Year", simu.names = "all",
   years = seq(0, 40, 5), months = 6, trees = TRUE, canopies = TRUE,
   plot = TRUE)
 }
@@ -18,7 +18,7 @@ plot_hisafe_monthcells(hop, variable = "monthRelativeTotalParIncident",
 
 \item{rowfacet}{One of "Year", "Month", or "SimulationName", indicating which variable to use for row faceting.}
 
-\item{sim.names}{A character string containing the SimulationNames to include. Use "all" to include all available values.}
+\item{simu.names}{A character string containing the SimulationNames to include. Use "all" to include all available values.}
 
 \item{years}{A numeric vector containing the years (after planting) to include. Use "all" to include all available values.}
 
@@ -44,7 +44,7 @@ You must ensure that the one varibale not used for faceting is fixed at a single
 \examples{
 \dontrun{
 # After reading in Hi-sAFe simulation data via:
-mydata <- read_hisafe_output("MySimulation", "./")
+mydata <- read_hisafe(path = "./")
 
 # You can create a tile plot of monthDirectParIncident:
 tile.plot <- plot_hisafe_monthCells(mydata, "monthDirectParIncident")
@@ -54,13 +54,13 @@ tile.plot <- plot_hisafe_monthCells(mydata, "monthDirectParIncident")
 tile.plot2 <- plot_hisafe_monthCells(mydata, "monthDirectParIncident",
                                      rowfacet = "SimulationName",
                                      colfacet = "Month",
-                                     sim.names = "all",
+                                     simu.names = "all",
                                      years = 20,
                                      months = 1:12)
 
 # Once you have the plot object, you can display it and save it:
 tile.plot2
-ggplot2::ggsave("tiled_monthDirectParIncident.png", tile.plot2)
+ggplot2::ggsave("monthDirectParIncident.png", tile.plot2)
 }
 }
 \seealso{

@@ -4,9 +4,11 @@
 \alias{plot_hisafe_ts}
 \title{Plot timeseries of Hi-sAFe output variable}
 \usage{
-plot_hisafe_ts(hop, variable, profile, time.lim = NULL, tree.ids = NULL,
-  color.palette = NULL, linetype.palette = NULL, aes.cols = list(color =
-  NULL, linetype = NULL), crop.points = FALSE, plot = TRUE)
+plot_hisafe_ts(hop, variable, profile, simu.names = "all", years = "all",
+  tree.ids = "all", doy.lim = c(1, 366), color.palette = NULL,
+  linetype.palette = NULL, aes.cols = list(color = "SimulationName",
+  linetype = "SimulationName"), facet.year = TRUE, crop.points = FALSE,
+  plot = TRUE)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -16,11 +18,13 @@ plot_hisafe_ts(hop, variable, profile, time.lim = NULL, tree.ids = NULL,
 \item{profile}{The profile for which to plot a timeseries. If 'annualtree' or 'annualplot', annual timeseries are created.
 If 'trees', 'plot', or 'climate', daily timeseries are created.}
 
-\item{time.lim}{If profile is an annual profile, a numeric vector of length two providing the \code{c(minimum, maximum)} of years to plot.
-If profile is daily profile, a character vector of length two providing the \code{c(minimum, maximum)} dates ('yyyy-mm-dd') to plot.
-If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.}
+\item{simu.names}{A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.}
 
-\item{tree.ids}{A numeric vector indicating the ids of a subset of tree ids to plot. If no input, all trees will be plotted.}
+\item{years}{A numeric vector of the years within \code{hop} to include. Use "all" to include all available values.}
+
+\item{tree.ids}{A numeric vector indicating a subset of tree ids to plot. Use "all" to include all available values.}
+
+\item{doy.lim}{A numeric vector of length two providing the \code{c(minimum, maximum)} of julian days to plot. Only applies if \code{profile} is a daily profile.}
 
 \item{color.palette}{A character stirng of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
 If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette. The default supports up to 24 simulations.}
@@ -28,16 +32,18 @@ If \code{NULL}, the default, then the default color palette is a color-blind-fri
 \item{linetype.palette}{A character stirng of values defining the linetype palette to use in plots with multiple simulations.
 If \code{NULL}, the default, then solid lines are used for all simulations. The default supports up to 24 simulations.}
 
-\item{aes.cols}{A list with arguments "color" and "linetype" containing character stirngs of the column names to use for plot aesthetics.
-If \code{NULL}, the default, then SimulationName is used for both aesthetics.}
+\item{aes.cols}{A list with arguments "color" and "linetype" containing character stirngs of the column names to use for plot aesthetics.}
 
-\item{crop.points}{Logical indicating if points should be plotted as well, with point shape desgnating the main crop name.}
+\item{facet.year}{A logical indicating whether, for daily profiles, the plot should be faceted by year. This helps with seeing finer level detail.}
+
+\item{crop.points}{Logical indicating if points should be plotted as well, with point shape desgnating the main crop name.
+Only applies when \code{profile} is 'plot' or 'annualplot'.}
 
 \item{plot}{If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.}
 }
 \value{
-Returns a ggplot object. If \code{hop} contains more than one simulation, the plot will contain multiple lines, colored and labeled by SimulationName.
-If the data contains two more tree ids, the plot will be faceted by tree id.
+If \code{plot = TRUE}, returns a ggplot object, otherwise the data that would create the plot is returned.
+If the data contains two more tree ids, the plot will be faceted by tree id. Otherwise, if \code{facet.year = TRUE}, plots of daily profiles will be faceted by year.
 }
 \description{
 Plots a daily or annual timeseries of a single Hi-sAFe output variable.
@@ -45,13 +51,13 @@ Plots a daily or annual timeseries of a single Hi-sAFe output variable.
 \examples{
 \dontrun{
 # After reading in Hi-sAFe simulation data via:
-mydata <- read_hisafe_output("MySimulation", "./")
+mydata <- read_hisafe(path = "./")
 
 # You can create an annual timeseries of carbonCoarseRoots:
-annual.plot <- plot_hisafe_ts(mydata, "carbonCoarseRoots")
+annual.plot <- plot_hisafe_ts(mydata, "carbonCoarseRoots", "annualtree")
 
 # For a daily timeseries instead:
-daily.plot <- plot_hisafe_ts(mydata, "carbonCoarseRoots", "daily")
+daily.plot <- plot_hisafe_ts(mydata, "carbonCoarseRoots", "trees")
 
 # Once you have the plot object, you can display it and save it:
 annual.plot
