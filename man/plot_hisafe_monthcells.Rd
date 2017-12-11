@@ -35,7 +35,6 @@ Returns a ggplot object.
 }
 \description{
 Plots a tile plot of a single Hi-sAFe monthCells output variable.
-If the hop objectcontains the "trees" profile with crown diameter variables, the tree locations and crown outlines are also drawn.
 }
 \details{
 This function is very picky! You can only facet by two of the three manipulable variables: SimulationName, Year, Month.
@@ -47,11 +46,11 @@ You must ensure that the one varibale not used for faceting is fixed at a single
 mydata <- read_hisafe(path = "./")
 
 # You can create a tile plot of monthDirectParIncident:
-tile.plot <- plot_hisafe_monthCells(mydata, "monthDirectParIncident")
+tile.plot <- plot_hisafe_monthcells(mydata, "monthDirectParIncident")
 
 # The default settings use data from June and facet by Year and Simulation Name.
 # If you instead want to just look at Year 20 and facet by Month and SimulationName:
-tile.plot2 <- plot_hisafe_monthCells(mydata, "monthDirectParIncident",
+tile.plot2 <- plot_hisafe_monthcells(mydata, "monthDirectParIncident",
                                      rowfacet = "SimulationName",
                                      colfacet = "Month",
                                      simu.names = "all",
@@ -64,7 +63,8 @@ ggplot2::ggsave("monthDirectParIncident.png", tile.plot2)
 }
 }
 \seealso{
-Other hisafe plot functions: \code{\link{plot_hisafe_cells}},
+Other hisafe plot functions: \code{\link{plot_hisafe_annualcrop}},
+  \code{\link{plot_hisafe_cells}},
   \code{\link{plot_hisafe_scene}},
   \code{\link{plot_hisafe_ts}},
   \code{\link{plot_hisafe_voxels}}

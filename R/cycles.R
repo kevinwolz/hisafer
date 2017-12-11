@@ -5,7 +5,7 @@
 #' @param hop An object of class hop or face.
 #' @param cycle One of "carbon", "nitrogen", "water", or "light".
 #' @param simu.names A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.
-#' @param time.lim A numeric vector of length two providing the \code{c(minimum, maximum)} of years (absolute or since planting) to plot.
+#' @param time.lim A numeric vector of length two providing the \code{c(minimum, maximum)} of calendar years (absolute or since planting) to plot.
 #' If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.
 #' @param color.palette A character stirng of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
 #' If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette.
@@ -33,17 +33,17 @@ plot_hisafe_cycle <- function(hop,
   if(!("hop" %in% class(hop))) stop("hop argument not of class hop", call. = FALSE)
   if(simu.names[1] == "all") simu.names <- unique(hop$exp.plan$SimulationName)
 
-  if(!(cycle %in% c("carbon", "nitrogen", "water", "light")))   stop("cycle argument must be one of: carbon, nitrogen, water, light", call. = FALSE)
-  if(!(all(is.character(simu.names)) | simu.names[1] == "all")) stop("simu.names argument must be 'all' or a character vector",       call. = FALSE)
-  if(!(length(time.lim) == 2 & as.numeric(time.lim)))           stop("time.lim argument must be a numeric vector of length 2",        call. = FALSE)
-  if(!is.logical(plot))                                         stop("plot argument must be a logical",                               call. = FALSE)
-  if(!all(simu.names %in% hop$exp.plan$SimulationName))         stop("one or more values in simu.names is not present in hop",        call. = FALSE)
+  if(!(cycle %in% c("carbon", "nitrogen", "water", "light")))                  stop("cycle argument must be one of: carbon, nitrogen, water, light", call. = FALSE)
+  if(!(all(is.character(simu.names)) | simu.names[1] == "all"))                stop("simu.names argument must be 'all' or a character vector",       call. = FALSE)
+  if(!(length(time.lim) == 2 & (is.numeric(time.lim) | all(is.na(time.lim))))) stop("time.lim argument must be a numeric vector of length 2",        call. = FALSE)
+  if(!is.logical(plot))                                                        stop("plot argument must be a logical",                               call. = FALSE)
+  if(!all(simu.names %in% hop$exp.plan$SimulationName))                        stop("one or more values in simu.names is not present in hop",        call. = FALSE)
 
   if(cycle == "water") {
     required.profiles <- c("climate", "annualplot")
     if(!all(required.profiles %in% names(hop))) stop(paste(paste(required.profiles, collapse = " and "),
-                                                            "export profiles required for", cycle,
-                                                            "cycle calculations but not found"), call. = FALSE)
+                                                           "export profiles required for", cycle,
+                                                           "cycle calculations but not found"), call. = FALSE)
     climate <- hop$climate %>%
       dplyr::filter(SimulationName %in% simu.names) %>%
       dplyr::select(SimulationName, Year, precipitation) %>%
@@ -123,8 +123,8 @@ plot_hisafe_cycle <- function(hop,
   } else if(cycle == "nitrogen") {
     required.profiles <- "annualplot"
     if(!all(required.profiles %in% names(hop))) stop(paste(paste(required.profiles, collapse = " and "),
-                                                            "export profiles required for", cycle,
-                                                            "cycle calculations but not found"), call. = FALSE)
+                                                           "export profiles required for", cycle,
+                                                           "cycle calculations but not found"), call. = FALSE)
     plot.data <- hop$annualplot %>%
       dplyr::filter(SimulationName %in% simu.names) %>%
       # Extract variables required for the nitrogen budget
@@ -178,8 +178,8 @@ plot_hisafe_cycle <- function(hop,
   } else if(cycle == "light") {
     required.profiles <- "annualplot"
     if(!all(required.profiles %in% names(hop))) stop(paste(paste(required.profiles, collapse = " and "),
-                                                            "export profiles required for", cycle,
-                                                            "cycle calculations but not found"), call. = FALSE)
+                                                           "export profiles required for", cycle,
+                                                           "cycle calculations but not found"), call. = FALSE)
     na.to.zero <- function(x) {
       x[is.na(x)] <- 0
       return(x)
@@ -219,8 +219,8 @@ plot_hisafe_cycle <- function(hop,
   } else if(cycle == "carbon") {
     required.profiles <- "annualplot"
     if(!all(required.profiles %in% names(hop))) stop(paste(paste(required.profiles, collapse = " and "),
-                                                            "export profiles required for", cycle,
-                                                            "cycle calculations but not found"), call. = FALSE)
+                                                           "export profiles required for", cycle,
+                                                           "cycle calculations but not found"), call. = FALSE)
     plot.data <- hop$annualplot %>%
       dplyr::filter(SimulationName %in% simu.names) %>%
       # Extract variables required for the carbon budget
@@ -280,12 +280,10 @@ plot_hisafe_cycle <- function(hop,
 
   ## Set time limits
   plot.data$Year0 <- plot.data$Year - min(plot.data$Year) + 1
-  if(!is.null(time.lim)) {
-    if(all(time.lim > 1000)) time.lim    <- time.lim - min(plot.data$Year) + 1
-    if(is.na(time.lim[1]))   time.lim[1] <- min(plot.data$Year0)
-    if(is.na(time.lim[2]))   time.lim[2] <- max(plot.data$Year0)
-    plot.data <- dplyr::filter(plot.data, Year >= time.lim[1], Year <= time.lim[2])
-  }
+  if(all(time.lim[!is.na(time.lim)] > 1000)) time.lim <- time.lim - min(plot.data$Year) + 1
+  if(is.na(time.lim[1])) time.lim[1] <- min(plot.data$Year0)
+  if(is.na(time.lim[2])) time.lim[2] <- max(plot.data$Year0)
+  plot.data <- dplyr::filter(plot.data, Year0 >= time.lim[1], Year0 <= time.lim[2])
 
   ## Create plot
   plot.obj <- ggplot(plot.data, aes(x = Year0, y = value, fill = flux)) +

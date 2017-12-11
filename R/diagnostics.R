@@ -52,10 +52,10 @@ diag_hisafe_ts <- function(hop,
   annual.profiles <- c("annualtree", "annualplot")
   daily.profiles  <- c("trees", "plot", "climate")
 
-  if(!("hop" %in% class(hop)))                                  stop("hop argument not of class hop",                             call. = FALSE)
-  if(!(profile %in% c(annual.profiles, daily.profiles)))        stop("supplied profile is not supported",                         call. = FALSE)
-  if(nrow(hop[[profile]]) == 0)                                 stop(paste("no data from", profile, "profile found"),             call. = FALSE)
-  if(!is.character(output.path))                                stop("output.path argument must be a character vector",           call. = FALSE)
+  if(!("hop" %in% class(hop)))                            stop("hop argument not of class hop",                   call. = FALSE)
+  if(!(profile %in% c(annual.profiles, daily.profiles)))  stop("supplied profile is not supported",               call. = FALSE)
+  if(nrow(hop[[profile]]) == 0)                           stop(paste("no data from", profile, "profile found"),   call. = FALSE)
+  if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character vector", call. = FALSE)
 
   ## Create output directory
   if(is.null(output.path) & "hop-group" %in% class(hop)) {
@@ -124,7 +124,7 @@ diag_hisafe_ts <- function(hop,
 #' @examples
 #' \dontrun{
 #' # After reading in Hi-sAFe simulation data via:
-#' mydata <- read_hisafe_output("MySimulation", "./")
+#' mydata <- read_hisafe(path = "./")
 #'
 #' # You can create tile plots of every monthCells variable:
 #' diag_hisafe_monthcells(mydata)
@@ -136,9 +136,9 @@ diag_hisafe_monthcells <- function(hop,
                                    canopies    = TRUE) {
 
   ## Check for data class and if profile exists
-  if(!("hop" %in% class(hop)))   stop("hop argument not of class hop",                   call. = FALSE)
-  if(nrow(hop$monthCells) == 0)  stop("no data from monthCells profile found",           call. = FALSE)
-  if(!is.character(output.path)) stop("output.path argument must be a character vector", call. = FALSE)
+  if(!("hop" %in% class(hop)))                                         stop("hop argument not of class hop",                                            call. = FALSE)
+  if(nrow(hop$monthCells) == 0)                                        stop("no data from monthCells profile found",                                    call. = FALSE)
+  if(!(is.character(output.path) | is.null(output.path)))              stop("output.path argument must be a character vector",                          call. = FALSE)
   if(!(schemes %in% c("year.simname", "month.simname", "month.year"))) stop("schemes argument must be one of: year.simname, month.simname, month.year", call. = FALSE)
 
   ## Create output directories
@@ -193,14 +193,14 @@ diag_hisafe_monthcells <- function(hop,
     dir.create(plot.dir3, recursive = TRUE, showWarnings = FALSE)
     for(sim.name in unique(hop$monthCells$SimulationName)){
       plot.list3 <- purrr::map(var.names, plot_hisafe_monthcells,
-                               hop       = hop,
-                               colfacet  = "Year",
-                               rowfacet  = "Month",
-                               sim.names = sim.name,
-                               years     = seq(0, (max(hop$monthCells$Year) - min(hop$monthCells$Year)), 5),
-                               months    = 1:12,
-                               trees     = trees,
-                               canopies  = canopies)
+                               hop        = hop,
+                               colfacet   = "Year",
+                               rowfacet   = "Month",
+                               simu.names = sim.name,
+                               years      = seq(0, (max(hop$monthCells$Year) - min(hop$monthCells$Year)), 5),
+                               months     = 1:12,
+                               trees      = trees,
+                               canopies   = canopies)
 
       bad.plot.check <- unlist(purrr::map(plot.list3, is.logical))
       plot.list3 <- plot.list3[!bad.plot.check]
@@ -215,4 +215,62 @@ diag_hisafe_monthcells <- function(hop,
 
   ## Invisibly return list of plot objects
   invisible(list(year.simname = plot.list1, month.simname = plot.list2, month.year = plot.list3.tog))
+}
+
+#' Plot annualcrop diagnostics of Hi-sAFe output
+#' @description Creates a tile plot of every Hi-sAFe annualcrop output variable. All plots are saved as png files to a specifified output path.
+#' @return Invisibly returns a list of \code{ggplot} objects.
+#' @param hop An object of class "hop" or "hop-group" containing output data from one or more Hi-sAFe simulations.
+#' @param output.path A character stting indicating the path to the directory where plots should be saved. Plots are
+#' saved in a subdirectory within this directory named /annualcrop
+#' If no value is provided, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis/diagnostics".
+#' @param trees Logical indicating if a point should be plotted at the location of each tree.
+#' @param canopies Logical indicating if an elipsoid should be plotted representing the size of each tree canopy.
+#' @export
+#' @importFrom dplyr %>%
+#' @family hisafe diagnostic fucntions
+#' @examples
+#' \dontrun{
+#' # After reading in Hi-sAFe simulation data via:
+#' mydata <- read_hisafe(path = "./")
+#'
+#' # You can create tile plots of every annualcrop variable:
+#' diag_hisafe_annualcrop(mydata)
+#' }
+diag_hisafe_annualcrop <- function(hop,
+                                   output.path = NULL,
+                                   trees       = TRUE,
+                                   canopies    = TRUE) {
+
+  ## Check for data class and if profile exists
+  if(!("hop" %in% class(hop)))                                         stop("hop argument not of class hop",                                            call. = FALSE)
+  if(nrow(hop$annualcrop) == 0)                                        stop("no data from annualcrop profile found",                                    call. = FALSE)
+  if(!(is.character(output.path) | is.null(output.path)))              stop("output.path argument must be a character vector",                          call. = FALSE)
+
+  ## Create output directories
+  if(is.null(output.path) & "hop-group" %in% class(hop)) {
+    output.path <- clean_path(paste0(hop$exp.path, "/analysis/diagnostics"))
+  } else if(is.null(output.path) & !("hop-group" %in% class(hop))){
+    output.path <- clean_path(paste0(hop$path, "/analysis/diagnostics"))
+  }
+  annualcrop.path <- clean_path(paste0(output.path, "/annualcrop/"))
+  dir.create(annualcrop.path, recursive = TRUE, showWarnings = FALSE)
+
+  ## Clean columns & extract names of variables to plot
+  # cols with only "error!" output are all NA's and cause plot errors
+  hop$annualcrop <- hop$annualcrop %>% dplyr::select_if(~sum(!is.na(.)) > 0)
+  var.names      <- names(hop$annualcrop)[(which(names(hop$annualcrop) == "y") + 1):length(names(hop$annualcrop))]
+
+  ## Create plots
+  plot.list <- purrr::map(var.names, plot_hisafe_annualcrop,
+                          hop        = hop,
+                          simu.names = "all",
+                          years      = seq(0, (max(hop$annualcrop$Year) - min(hop$annualcrop$Year)), 5),
+                          trees      = trees,
+                          canopies   = canopies)
+  file.names <- paste0("annualcrop_", var.names, ".png")
+  purrr::pwalk(list(file.names, plot.list), ggplot2::ggsave, path = annualcrop.path, scale = 2, width = 10, height = 10)
+
+  ## Invisibly return list of plot objects
+  invisible(plot.list)
 }

@@ -14,7 +14,7 @@ plot_hisafe_cycle(hop, cycle, simu.names = "all", time.lim = c(NA, NA),
 
 \item{simu.names}{A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.}
 
-\item{time.lim}{A numeric vector of length two providing the \code{c(minimum, maximum)} of years (absolute or since planting) to plot.
+\item{time.lim}{A numeric vector of length two providing the \code{c(minimum, maximum)} of calendar years (absolute or since planting) to plot.
 If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.}
 
 \item{color.palette}{A character stirng of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
