@@ -366,7 +366,7 @@ plot_hisafe_monthcells <- function(hop,
 #' @examples
 #' \dontrun{
 #' # After reading in Hi-sAFe simulation data via:
-#' mydata <- read_hisafe_output("MySimulation", "./")
+#' mydata <- read_hisafe(path = "./")
 #'
 #' # You can create a tile plot of relativeDirectParIncident:
 #' tile.plot <- plot_hisafe_cells(mydata, "relativeDirectParIncident", paste(1998, 6:8, 1, sep = "-"))
@@ -376,8 +376,10 @@ plot_hisafe_monthcells <- function(hop,
 #' ggplot2::ggsave("tiled_relativeDirectParIncident.png", tile.plot)
 #' }
 plot_hisafe_cells <- function(hop, variable, dates, plot = TRUE) {
-  if(!("hop" %in% class(hop))) stop("hop argument not of class hop", call. = FALSE)
-  if(nrow(hop$cells) == 0)     stop("no data from cells profile found", call. = FALSE)
+  if(!("hop" %in% class(hop))) stop("hop argument not of class hop",             call. = FALSE)
+  if(nrow(hop$cells) == 0)     stop("no data from cells profile found",          call. = FALSE)
+  if(!is.character(dates))     stop("dates argument must be a character vector", call. = FALSE)
+  if(!is.logical(plot))        stop("plot argument must be a logical",           call. = FALSE)
 
   ## Exract units of supplied variable from the "variables" slot
   var.unit <- hop$variables %>%
@@ -455,7 +457,7 @@ plot_hisafe_cells <- function(hop, variable, dates, plot = TRUE) {
 #' @examples
 #' \dontrun{
 #' # After reading in Hi-sAFe simulation data via:
-#' mydata <- read_hisafe_output("MySimulation", "./")
+#' mydata <- read_hisafe(path = "./")
 #'
 #' # You can create a tile plot of waterAvailable:
 #' tile.plot <- plot_hisafe_voxels(mydata, "waterAvailable", paste(1998, 6:8, 1, sep = "-"))
@@ -465,9 +467,11 @@ plot_hisafe_cells <- function(hop, variable, dates, plot = TRUE) {
 #' ggplot2::ggsave("tiled_waterAvailable.png", tile.plot)
 #' }
 plot_hisafe_voxels <- function(hop, variable, dates, plot = TRUE) {
-  if(!("hop" %in% class(hop)))                        stop("hop argument not of class hop", call. = FALSE)
-  if(nrow(hop$voxels) == 0)                           stop("no data from voxels profile found", call. = FALSE)
+  if(!("hop" %in% class(hop)))                        stop("hop argument not of class hop",                                  call. = FALSE)
+  if(nrow(hop$voxels) == 0)                           stop("no data from voxels profile found",                              call. = FALSE)
+  if(!is.character(dates))                            stop("dates argument must be a character vector",                      call. = FALSE)
   if("hop-group" %in% class(hop) & length(dates) > 1) stop("cannot supply more than one date for object of class hop-group", call. = FALSE)
+  if(!is.logical(plot))                               stop("plot argument must be a logical",                                call. = FALSE)
 
   ## Exract units of supplied variable from the "variables" slot
   var.unit <- hop$variables %>%

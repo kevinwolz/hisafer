@@ -25,7 +25,7 @@ If a single date is provided, SimulationName is used as the column facet. Otherw
 \examples{
 \dontrun{
 # After reading in Hi-sAFe simulation data via:
-mydata <- read_hisafe_output("MySimulation", "./")
+mydata <- read_hisafe(path = "./")
 
 # You can create a tile plot of waterAvailable:
 tile.plot <- plot_hisafe_voxels(mydata, "waterAvailable", paste(1998, 6:8, 1, sep = "-"))

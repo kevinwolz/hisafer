@@ -25,7 +25,7 @@ SimulationName is used as the column facet. Date is used as the row facet.
 \examples{
 \dontrun{
 # After reading in Hi-sAFe simulation data via:
-mydata <- read_hisafe_output("MySimulation", "./")
+mydata <- read_hisafe(path = "./")
 
 # You can create a tile plot of relativeDirectParIncident:
 tile.plot <- plot_hisafe_cells(mydata, "relativeDirectParIncident", paste(1998, 6:8, 1, sep = "-"))
