@@ -22,9 +22,10 @@ get_template_path <- function(input) {
   } else if(input == "restinclieres_monocrop") {
     path <- clean_path(paste0(system.file("extdata", "restinclieres_monocrop",     package = "hisafer"), "/"))
   } else {
-    path <- clean_path(paste0(input, "/"))
+    path <- input
   }
   path <- R.utils::getAbsolutePath(path)
+  path <- clean_path(paste0(path, "/"))
   if(!dir.exists(path)) stop("template directory does not exist", call. = FALSE)
   return(path)
 }

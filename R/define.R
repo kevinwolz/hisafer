@@ -70,7 +70,6 @@ define_hisafe <- function(path,
   path          <- R.utils::getAbsolutePath(path)
   param.list    <- list(...)
 
-  if(!dir.exists(path))                                     stop("directory specified by path does not exist",               call. = FALSE)
   if(!(is.character(exp.name) & length(exp.name) == 1))     stop("exp.name argument must be a character vector of length 1", call. = FALSE)
   if(!(all(is.character(profiles)) | profiles[1] == "all")) stop("profiles argument must be 'all' or a character vector",    call. = FALSE)
   if(!(is.character(template) & length(template) == 1))     stop("template argument must be a character vector of length 1", call. = FALSE)
@@ -524,7 +523,7 @@ root_init_params <- function(reps        = 1,
                              amount      = 0.5) {
 
   args <- list(reps, shape, repartition, paramShape1, paramShape2, paramShape3, amount)
-  if(any(!purrr::map_lgl(args, is.numeric))) stop("all arguments must be numeric")
+  if(!all(purrr::map_lgl(args, is.numeric) | purrr::map_lgl(args, is.na))) stop("all arguments must be numeric")
 
   temp <- dplyr::as_tibble(data.frame(name        = "RootInit",
                                       shape       = shape,
@@ -572,7 +571,7 @@ tree_init_params <- function(species               = "walnut-hybrid",
                              treeY                 = 0) {
 
   args <- list(age, height, crownBaseHeight, truncatureRatio, leafToFineRootsRatio, crownRadius, treeX, treeY)
-  if(any(!purrr::map_lgl(args, is.numeric))) stop("all arguments except 'species' must be numeric")
+  if(!all(purrr::map_lgl(args, is.numeric) | purrr::map_lgl(args, is.na))) stop("all arguments except 'species' must be numeric")
   if(!is.character(species))                 stop("species argument must be a character vector")
 
   out <- dplyr::as_tibble(data.frame(name                  = "TreeInit",
@@ -605,7 +604,7 @@ layer_init_params <- function(waterContent     = c(0.2, 0.3, 0.3, 0.3, 0.3),
                               nh4concentration = 0) {
 
   args <- list(waterContent, no3Concentration, nh4concentration)
-  if(any(!purrr::map_lgl(args, is.numeric))) stop("all arguments must be numeric")
+  if(!all(purrr::map_lgl(args, is.numeric) | purrr::map_lgl(args, is.na))) stop("all arguments must be numeric")
 
   out <- dplyr::as_tibble(data.frame(name             = "LayerInit",
                                      waterContent     = waterContent,
@@ -643,7 +642,7 @@ layer_params <- function(thick          = c(0.4, 0.4, 0.6, 1, 7),
                          infiltrability = 50) {
 
   args <- list(thick, sand, clay, limeStone, organicMatter, partSizeSand, stone, stoneType, infiltrability)
-  if(any(!purrr::map_lgl(args, is.numeric))) stop("all arguments must be numeric")
+  if(!all(purrr::map_lgl(args, is.numeric) | purrr::map_lgl(args, is.na))) stop("all arguments must be numeric")
 
   out <- dplyr::as_tibble(data.frame(name           = "Layer",
                                      thick          = thick,

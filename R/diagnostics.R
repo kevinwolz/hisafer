@@ -135,11 +135,13 @@ diag_hisafe_monthcells <- function(hop,
                                    trees       = TRUE,
                                    canopies    = TRUE) {
 
+  allowed.schemes <- c("year.simname", "month.simname", "month.year")
+
   ## Check for data class and if profile exists
-  if(!("hop" %in% class(hop)))                                         stop("hop argument not of class hop",                                            call. = FALSE)
-  if(nrow(hop$monthCells) == 0)                                        stop("no data from monthCells profile found",                                    call. = FALSE)
-  if(!(is.character(output.path) | is.null(output.path)))              stop("output.path argument must be a character vector",                          call. = FALSE)
-  if(!(schemes %in% c("year.simname", "month.simname", "month.year"))) stop("schemes argument must be one of: year.simname, month.simname, month.year", call. = FALSE)
+  if(!("hop" %in% class(hop)))                            stop("hop argument not of class hop",                                            call. = FALSE)
+  if(nrow(hop$monthCells) == 0)                           stop("no data from monthCells profile found",                                    call. = FALSE)
+  if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character vector",                          call. = FALSE)
+  if(!all(schemes %in% allowed.schemes))                  stop("schemes argument must be one of: year.simname, month.simname, month.year", call. = FALSE)
 
   ## Create output directories
   if(is.null(output.path) & "hop-group" %in% class(hop)) {
@@ -159,14 +161,14 @@ diag_hisafe_monthcells <- function(hop,
     plot.dir1 <- paste0(monthcells.path, "year_simname/")
     dir.create(plot.dir1, recursive = TRUE, showWarnings = FALSE)
     plot.list1 <- purrr::map(var.names, plot_hisafe_monthcells,
-                             hop       = hop,
-                             colfacet  = "SimulationName",
-                             rowfacet  = "Year",
-                             sim.names = "all",
-                             years     = seq(0, (max(hop$monthCells$Year) - min(hop$monthCells$Year)), 5),
-                             months    = 6,
-                             trees     = trees,
-                             canopies  = canopies)
+                             hop        = hop,
+                             colfacet   = "SimulationName",
+                             rowfacet   = "Year",
+                             simu.names = "all",
+                             years      = seq(0, (max(hop$monthCells$Year) - min(hop$monthCells$Year)), 5),
+                             months     = 6,
+                             trees      = trees,
+                             canopies   = canopies)
     file.names <- paste0("monthCells_year_simname_", var.names, ".png")
     purrr::pwalk(list(file.names, plot.list1), ggplot2::ggsave, path = plot.dir1, scale = 2, width = 10, height = 10)
   } else { plot.list1 <- list() }
@@ -175,14 +177,14 @@ diag_hisafe_monthcells <- function(hop,
     plot.dir2 <- paste0(monthcells.path, "month_simname/")
     dir.create(plot.dir2, recursive = TRUE, showWarnings = FALSE)
     plot.list2 <- purrr::map(var.names, plot_hisafe_monthcells,
-                             hop       = hop,
-                             colfacet  = "SimulationName",
-                             rowfacet  = "Month",
-                             sim.names = "all",
-                             years     = (round(median(hop$monthCells$Year),0) - min(hop$monthCells$Year)),
-                             months    = 1:12,
-                             trees     = trees,
-                             canopies  = canopies)
+                             hop        = hop,
+                             colfacet   = "SimulationName",
+                             rowfacet   = "Month",
+                             simu.names = "all",
+                             years      = (round(median(hop$monthCells$Year),0) - min(hop$monthCells$Year)),
+                             months     = 1:12,
+                             trees      = trees,
+                             canopies   = canopies)
     file.names <- paste0("monthCells_month_simname_", var.names, ".png")
     purrr::pwalk(list(file.names, plot.list2), ggplot2::ggsave, path = plot.dir2, scale = 2, height = 10, width = 10)
   } else { plot.list2 <- list() }
