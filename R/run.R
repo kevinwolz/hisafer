@@ -28,7 +28,7 @@ run_hisafe <- function(hip         = NULL,
                        simu.names  = "all",
                        parallel    = FALSE,
                        num.cores   = NULL,
-                       capsis.path = "/Applications/Capsis/") {
+                       capsis.path) {
 
   capsis.path <- R.utils::getAbsolutePath(capsis.path)
   if(!is.null(path)) path <- R.utils::getAbsolutePath(path)

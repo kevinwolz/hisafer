@@ -7,7 +7,7 @@
 #' \dontrun{
 #' hisafe_info()
 #' }
-hisafe_info <- function(capsis.path = "/Applications/Capsis") {
+hisafe_info <- function(capsis.path) {
 
   capsis.path <- R.utils::getAbsolutePath(capsis.path)
 
@@ -57,7 +57,7 @@ hisafe_params <- function(variable = "names", template = "agroforestry_default")
 
   acceptable <- c(PARAM_NAMES, "names", "all")
   if(any(!(variable %in% acceptable))) {
-    bad.vars <- variable[!(variable %in% acceptable)]
+    bad.vars <- sort(variable[!(variable %in% acceptable)])
     stop(paste0("The following are not supported Hi-sAFe input parameters: ", bad.vars))
   }
 
