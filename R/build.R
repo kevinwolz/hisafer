@@ -87,7 +87,7 @@ build_structure <- function(exp.plan, path, profiles, template) {
 
   ## Copy over folder structure & template files from Hi-sAFe template path
   ## Any newly built files below will overwrite these files
-  template.dir.components <- stringr::str_split(template.path, "/")[[1]]
+  template.dir.components <- strsplit(template.path, "/")[[1]]
   template.dir.components <- template.dir.components[template.dir.components != ""]
   template.folder.name    <- tail(template.dir.components, 1)
   dum <- file.copy(template.path, path, recursive = TRUE)
