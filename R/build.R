@@ -87,8 +87,12 @@ build_structure <- function(exp.plan, path, profiles, template) {
 
   ## Copy over folder structure & template files from Hi-sAFe template path
   ## Any newly built files below will overwrite these files
+  template.dir.components <- stringr::str_split(template.path, "/")[[1]]
+  template.dir.components <- template.dir.components[template.dir.components != ""]
+  template.folder.name    <- tail(template.dir.components, 1)
+  dum <- file.copy(template.path, path, recursive = TRUE)
+  dum <- file.rename(paste0(path, template.folder.name), paste0(path, exp.plan$SimulationName))
   simu.path <- clean_path(paste0(path, "/", exp.plan$SimulationName))
-  system(paste("cp -r", template.path, simu.path))
   dir.create(paste0(simu.path, "/support"), showWarnings = FALSE)
 
   ## Write out simulation summary
