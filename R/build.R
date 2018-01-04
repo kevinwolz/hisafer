@@ -91,7 +91,7 @@ build_structure <- function(exp.plan, path, profiles, template) {
   template.dir.components <- template.dir.components[template.dir.components != ""]
   template.folder.name    <- tail(template.dir.components, 1)
   dum <- file.copy(template.path, path, recursive = TRUE)
-  dum <- file.rename(paste0(path, template.folder.name), paste0(path, exp.plan$SimulationName))
+  dum <- file.rename(clean_path(paste0(path, "/", template.folder.name)), clean_path(paste0(path, "/", exp.plan$SimulationName)))
   simu.path <- clean_path(paste0(path, "/", exp.plan$SimulationName))
   dir.create(paste0(simu.path, "/support"), showWarnings = FALSE)
 
