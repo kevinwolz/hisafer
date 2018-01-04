@@ -9,21 +9,11 @@ remove_whitespace <- function(x) gsub("^\\s+|\\s+$", "", x)
 clean_path <- function(x) gsub("//", "/", x, fixed = TRUE)
 
 get_template_path <- function(input) {
-  if(input == "agroforestry_default") {
-    path <- clean_path(paste0(system.file("extdata", "agroforestry_default",      package = "hisafer"), "/"))
-  } else if(input == "forestry_default") {
-    path <- clean_path(paste0(system.file("extdata", "forestry_default",          package = "hisafer"), "/"))
-  } else if(input == "monocrop_default") {
-    path <- clean_path(paste0(system.file("extdata", "monocrop_default",          package = "hisafer"), "/"))
-  } else if(input == "restinclieres_agroforestry") {
-    path <- clean_path(paste0(system.file("extdata", "restinclieres_agroforestry", package = "hisafer"), "/"))
-  } else if(input == "restinclieres_forestry") {
-    path <- clean_path(paste0(system.file("extdata", "restinclieres_forestry", package = "hisafer"), "/"))
-  } else if(input == "restinclieres_monocrop") {
-    path <- clean_path(paste0(system.file("extdata", "restinclieres_monocrop",     package = "hisafer"), "/"))
-  } else {
-    path <- input
-  }
+  included.templates <- c("agroforestry_default", "forestry_default", "monocrop_default",
+                          "restinclieres_agroforestry", "restinclieres_forestry", "restinclieres_monocrop")
+  path <- ifelse(input %in% included.templates,
+                 system.file("extdata", input, package = "hisafer"),
+                 input)
   path <- R.utils::getAbsolutePath(path)
   path <- clean_path(paste0(path, "/"))
   if(!dir.exists(path)) stop("template directory does not exist", call. = FALSE)

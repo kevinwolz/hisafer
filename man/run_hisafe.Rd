@@ -5,8 +5,7 @@
 \title{Run one or more Hi-sAFe simulations}
 \usage{
 run_hisafe(hip = NULL, path = NULL, simu.names = "all",
-  parallel = FALSE, num.cores = NULL,
-  capsis.path = "/Applications/Capsis/")
+  parallel = FALSE, num.cores = NULL, capsis.path)
 }
 \arguments{
 \item{hip}{An object of class "hip". Required if \code{path} is not provided.}

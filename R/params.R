@@ -228,7 +228,7 @@ edit_param_element <- function(param.list, variable, value) {
 get_template_params <- function(template.path) {
 
   ## Determine which tree species to use from within the template for the .tree params
-  avail.template.trees <- unlist(purrr::map(strsplit(list.files(paste0(template.path, "treeSpecies")), split = ".", fixed = TRUE), 1))
+  avail.template.trees <- unlist(purrr::map(strsplit(list.files(clean_path(paste0(template.path, "/treeSpecies"))), split = ".", fixed = TRUE), 1))
   if(length(avail.template.trees) == 1) {
     template.tree <- avail.template.trees
   } else if("walnut-hybrid" %in% avail.template.trees) {

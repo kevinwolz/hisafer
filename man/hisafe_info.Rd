@@ -4,7 +4,7 @@
 \alias{hisafe_info}
 \title{Display version numbers of Hi-sAFe and Java}
 \usage{
-hisafe_info(capsis.path = "/Applications/Capsis")
+hisafe_info(capsis.path)
 }
 \arguments{
 \item{capsis.path}{A character string of the path to the Capsis folder}
