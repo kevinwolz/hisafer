@@ -223,7 +223,7 @@ check_input_values <- function(hip) {
   ## Unsupported inputs
   names.to.check <- names(EXP.PLAN)[!(names(EXP.PLAN) %in% c("SimulationName", "weatherFile"))]
   if(any(!(names.to.check %in% unlist(PARAM_NAMES, use.names = FALSE)))) {
-    unsupported.names   <- names.to.check[!(names.to.check %in% PARAM_NAMES)]
+    unsupported.names   <- names.to.check[!(names.to.check %in% unlist(PARAM_NAMES, use.names = FALSE))]
     unsupported.var.error <- c("The following variables are not supported:", paste0(unsupported.names, collapse = ", "))
   } else {
     unsupported.var.error <- ""
