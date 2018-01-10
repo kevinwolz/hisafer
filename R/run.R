@@ -63,7 +63,7 @@ run_hisafe <- function(hip         = NULL,
   }
 
   ## Set allowed memory
-  if(is.null(mem.spec)) mem.spec <- Sys.meminfo()$totalram@size * 1024 / parallel::detectCores()
+  if(is.null(mem.spec)) mem.spec <- memuse::Sys.meminfo()$totalram@size * 1024 / parallel::detectCores()
   pre.wd <- getwd()
   setwd(capsis.path)
   setmem.call <- paste0("sh setmem.sh ", mem.spec)
