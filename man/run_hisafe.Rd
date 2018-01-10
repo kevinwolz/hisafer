@@ -5,7 +5,7 @@
 \title{Run one or more Hi-sAFe simulations}
 \usage{
 run_hisafe(hip = NULL, path = NULL, simu.names = "all",
-  parallel = FALSE, num.cores = NULL, capsis.path)
+  parallel = FALSE, num.cores = NULL, mem.spec = NULL, capsis.path)
 }
 \arguments{
 \item{hip}{An object of class "hip". Required if \code{path} is not provided.}
@@ -17,7 +17,11 @@ Required if \code{hip} is not provided.}
 
 \item{parallel}{Logical, should parallel computing be used.}
 
-\item{num.cores}{Numbers of cores to use in parallel computing. If not provided, will default to one less than the total number of available cores.}
+\item{num.cores}{Numbers of cores to use in parallel computing.
+If not provided, will default to one less than the total number of available cores.}
+
+\item{mem.spec}{The maximum memory use (Mb) permitted for an individual instance of Capsis/Hi-sAFe.
+If not provided, will default to the total memory divided by the number of cores.}
 
 \item{capsis.path}{A character string of the path (relative or absolute) to the Capsis folder}
 }

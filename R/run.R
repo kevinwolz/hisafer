@@ -6,7 +6,10 @@
 #' Required if \code{hip} is not provided.
 #' @param simu.names Names of the simulations to run. If "all", the default, then all simulations are run.
 #' @param parallel Logical, should parallel computing be used.
-#' @param num.cores Numbers of cores to use in parallel computing. If not provided, will default to one less than the total number of available cores.
+#' @param num.cores Numbers of cores to use in parallel computing.
+#' If not provided, will default to one less than the total number of available cores.
+#' @param mem.spec The maximum memory use (Mb) permitted for an individual instance of Capsis/Hi-sAFe.
+#' If not provided, will default to the total memory divided by the number of cores.
 #' @param capsis.path A character string of the path (relative or absolute) to the Capsis folder
 #' @export
 #' @importFrom foreach %dopar%
@@ -28,12 +31,13 @@ run_hisafe <- function(hip         = NULL,
                        simu.names  = "all",
                        parallel    = FALSE,
                        num.cores   = NULL,
+                       mem.spec    = NULL,
                        capsis.path) {
 
   capsis.path <- R.utils::getAbsolutePath(capsis.path)
   if(!is.null(path)) path <- R.utils::getAbsolutePath(path)
 
-  if(!is.null(hip) & !("hip" %in% class(hip)))                  stop("hip argument not of class hip",                                      call. = FALSE)
+  if(!is.null(hip) & !("hip" %in% class(hip)))                  stop("hip argument not of class hip",                              call. = FALSE)
   if(is.null(hip) == is.null(path))                             stop("must provide hip OR path, not both",                         call. = FALSE)
   if(!dir.exists(path))                                         stop("directory specified by path does not exist",                 call. = FALSE)
   if(!(all(is.character(simu.names)) | simu.names[1] == "all")) stop("simu.names argument must be 'all' or a character vector",    call. = FALSE)
@@ -42,6 +46,7 @@ run_hisafe <- function(hip         = NULL,
   if(!("capsis.sh" %in% list.files(capsis.path)))               stop("directory specified by capsis.path does not contain Capsis", call. = FALSE)
   if(!((is.numeric(num.cores) & length(num.cores) == 1) | is.null(num.cores))) stop("num.cores argument must be a positive integer", call. = FALSE)
   if(num.cores %% 1 != 0 & num.cores > 0)                                      stop("num.cores argument must be a positive integer", call. = FALSE)
+  if(!((is.numeric(mem.spec) & length(mem.spec) == 1) | is.null(mem.spec)))    stop("mem.spec argument must be a positive integer",  call. = FALSE)
 
   ## Determine path and simu.names to run
   if(is.null(path)) {
@@ -57,12 +62,20 @@ run_hisafe <- function(hip         = NULL,
     stop(paste("The following simulations do not exist:", paste(simu.names[!dir.exists(sims.to.run)], collapse = ", ")), call. = FALSE)
   }
 
+  ## Set allowed memory
+  if(is.null(mem.spec)) mem.spec <- Sys.meminfo()$totalram@size * 1024 / parallel::detectCores()
+  pre.wd <- getwd()
+  setwd(capsis.path)
+  setmem.call <- paste0("sh setmem.sh ", mem.spec)
+  dum <- system(setmem.call, wait = TRUE)
+  setwd(pre.wd)
+
   ## Run
   if(parallel) {
     if(length(simu.names) == 1) stop("There is only 1 simulation to run. Parallel computing is not possible.", call. = FALSE)
 
     ## Check for packages required for parallel computing
-    parallel.packages <- c("foreach", "parallel", "doParallel")
+    parallel.packages <- c("foreach", "doParallel")
     package.check <- purrr::map_lgl(parallel.packages, requireNamespace, quietly = TRUE)
     if(any(!package.check)) {
       missing.packages <- parallel.packages[!package.check]

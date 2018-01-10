@@ -21,8 +21,8 @@ library(hisafer)
 ## Six Steps to Hi-sAFe Experimentation
 hisafer tools are organized via the six main steps of experimentation with Hi-sAFe: Define, Build, Run, Read, Diagnostics, Analysis. While hisafer can be used to interact with Hi-sAFe at any of these steps independently, enhanced functionality is available when using hisafer to interact with Hi-sAFe from the beginning.
 
-### 1. Create a TEMPLATE
-The first and most important step to running Hi-sAFe simulations is to create a template Hi-sAFe simulation directory. This template will be the foundation of simulations/experiments that you define in the next step. The template directory contians all files available for use when defining simulations/experiments, and the values of parameters in each file are the default values that will be used if other values are not defined in the next step. 
+### 0. Create a TEMPLATE
+The first and most important step to running Hi-sAFe simulations is to create a template Hi-sAFe simulation directory. This template will be the foundation of simulations/experiments that you define in the next step. The template directory contains all files available for use when defining simulations/experiments, and the values of parameters in each file are the default values that will be used if other values are not defined in the next step. 
 
 The template directory structure for the latest version of Hi-sAFe (v3.2) has all of the following containing within a single folder:
 
@@ -46,7 +46,7 @@ Luckily, hisafer already has several built-in template directories available for
 <!-- hisafer runs many checks on supplied parameters during the define phase. These checks can by (optionally) enhanced by including annotated contraints within the .SIM, .PLD, and .TREE files. These annotations take the form of commented strings on each line after the defined parameter. To define an allowed range............ --> 
 
 ### 1. DEFINE an experiment
-In this step, you willdefine one or more Hi-sAFe "simulations". Simulations are definied by specifying any number of Hi-SAFe input parameters from the .SIM, .PLD, or .TREE files that you wish to vary. Any Hi-SAFe input parameters not specified will simply inherit the default values from the files within the specfied template directory. 
+In this step, you will define one or more Hi-sAFe "simulations". Simulations are definied by specifying any number of Hi-SAFe input parameters from the .SIM, .PLD, or .TREE files that you wish to vary. Any Hi-SAFe input parameters not specified will simply inherit the default values from the files within the specfied template directory. 
 
 To see which Hi-SAFe input parameters are modifiable in your template, use `hisafe_params()`. You can modifty the `template` argument of `hisafe_params()` to be any of the other hisafer templates or a string to the path of your custom template. By default, `hisafe_params()` just provides the names of supported parameters. To also see the default values, range of allowed values, and range of suggested values for all parameters, use `hisafe_params("all")`
  
@@ -120,13 +120,13 @@ You can also use `define_hisafe_file()` to directly read an `exp.plan` object fr
 
 
 ### 2. BUILD simulation folders/files
-There is only one build function, and it only takes a single agrument: `build_hisafe()`. This function takes a `hip` object as an input and builds the actual folders/files on your computer that Hi-sAFe will read to run. These directories will be created in the location specififed in the `path` portion of the `hip` object. 
+There is only one build function, and it only takes a single arguement: `build_hisafe()`. This function takes a `hip` object as an input and builds the actual folders/files on your computer that Hi-sAFe will read to run. These directories will be created in the location specififed in the `path` portion of the `hip` object. 
 
 ```{r, eval = FALSE}
 build_hisafe(hip = hip_exp)
 ```
 
-In addition to building the folder/file structure, `build_hisfe()` also creates a map of each scene within the respective simulation folders. It is highly recommended to check these maps prior to running your simultions to ensure that the scene was built as intended.
+In addition to building the folder/file structure, `build_hisfe()` also creates a map of each scene within the respective simulation folders. It is highly recommended to check these maps prior to running your simulations to ensure that the scene was built as intended.
 
 
 ### 3. RUN simulations
@@ -144,7 +144,7 @@ run_hisafe_exp(hip         = hip_exp,
                capsis.path = "/Applications/Capsis/")
 ```
 
-`run_hisafe()`can also be used without a `hip` object to run Hi-sAFe simulations that were not create using hisafer. To do this, you must supply the `path` to the directory where the simulation folders are located. Just make sure the simulation folder/file structures are correct!
+`run_hisafe()`can also be used without a `hip` object to run Hi-sAFe simulations that were not created using hisafer. To do this, you must supply the `path` to the directory where the simulation folders are located. Just make sure the simulation folder/file structures are correct!
 
 ```{r, eval = FALSE}
 run_hisafe(path        = "./simulations"
@@ -175,7 +175,7 @@ The resulting object created by `read_hisafe()` is a `hop` obeject (for "Hi-sAFe
 - `path` - the paths to the simulation folders
 - `exp.path` - the path to the experiment folder
 
-If any Hi-sAFe output profiles specified by `profiles` were not created when Hi-sAFe was run, a warning will notify you. For any profiles not created by Hi-sAFe or not selected for reading, the the associated list components will be empty tibbles.
+If any Hi-sAFe output profiles specified by `profiles` were not created when Hi-sAFe was run, a warning will notify you. For any profiles not created by Hi-sAFe or not selected for reading, the associated list components will be empty tibbles.
 
 *WARNING: Depending on the number of simulations, length of simulations, and which output profiles are specified, reading in Hi-sAFe data can take a few minutes!*
 
@@ -193,7 +193,7 @@ load(paste0(system.file("extdata", "vignette_output", package = "hisafer"), "/vi
 
 
 ### 5. Data DIAGNOSTICS
-Prior to performing any analyses using your `hop` data, it is highly recommended to check some basic diagnostics on your simluations to ensure that the simulations ran as expected. To do so, hisafer provides some basic diagnostic functions that allow you to compare you various simulations side by side:
+Prior to performing any analyses using your `hop` data, it is highly recommended to check some basic diagnostics on your simluations to ensure that the simulations ran as expected. To do so, hisafer provides some basic diagnostic functions that allow you to compare your various simulations side by side:
 
 - `diag_hisafe_ts()` - can plot a timeseries plot for each variable in the "annualtree", "annualplot", "trees", "plot", and  "climate" data of a `hop` object.
 - `diag_hisafe_monthcells()` - plots a full range of tile plots for each variable in the "monthCells" data of a `hop` object.
@@ -300,4 +300,4 @@ plot_hisafe_use(hop = myface, cycle = "light", years = "all", simu.names = "Rest
 ```
 
 ### Notes
-*hisafer utilizes the tidyverse approach to R programming and data manipulation. While most consequneces of this approach are behind the scenes, one obvious example to users is that outputs from most hisafer fucntions are tibbles rather than simple data frames. This has little practical impact on your use of hisafer, but should improve your overall experience.*
+*hisafer utilizes the tidyverse approach to R programming and data manipulation. While most consequences of this approach are behind the scenes, one obvious example to users is that outputs from most hisafer functions are tibbles rather than simple data frames. This has little practical impact on your use of hisafer, but should improve your overall experience.*

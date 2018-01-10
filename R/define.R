@@ -523,7 +523,7 @@ root_init_params <- function(reps        = 1,
                              amount      = 0.5) {
 
   args <- list(reps, shape, repartition, paramShape1, paramShape2, paramShape3, amount)
-  if(!all(purrr::map_lgl(args, is.numeric) | purrr::map_lgl(args, is.na))) stop("all arguments must be numeric")
+  if(!all(purrr::map_lgl(args, is.numeric) | purrr::map_lgl(args, function(x) all(is.na(x))))) stop("all arguments must be numeric")
 
   temp <- dplyr::as_tibble(data.frame(name        = "RootInit",
                                       shape       = shape,
@@ -571,7 +571,7 @@ tree_init_params <- function(species               = "walnut-hybrid",
                              treeY                 = 0) {
 
   args <- list(age, height, crownBaseHeight, truncatureRatio, leafToFineRootsRatio, crownRadius, treeX, treeY)
-  if(!all(purrr::map_lgl(args, is.numeric) | purrr::map_lgl(args, is.na))) stop("all arguments except 'species' must be numeric")
+  if(!all(purrr::map_lgl(args, is.numeric) | purrr::map_lgl(args, function(x) all(is.na(x))))) stop("all arguments except 'species' must be numeric")
   if(!is.character(species))                 stop("species argument must be a character vector")
 
   out <- dplyr::as_tibble(data.frame(name                  = "TreeInit",
@@ -604,7 +604,7 @@ layer_init_params <- function(waterContent     = c(0.2, 0.3, 0.3, 0.3, 0.3),
                               nh4concentration = 0) {
 
   args <- list(waterContent, no3Concentration, nh4concentration)
-  if(!all(purrr::map_lgl(args, is.numeric) | purrr::map_lgl(args, is.na))) stop("all arguments must be numeric")
+  if(!all(purrr::map_lgl(args, is.numeric) | purrr::map_lgl(args, function(x) all(is.na(x))))) stop("all arguments must be numeric")
 
   out <- dplyr::as_tibble(data.frame(name             = "LayerInit",
                                      waterContent     = waterContent,
@@ -642,7 +642,7 @@ layer_params <- function(thick          = c(0.4, 0.4, 0.6, 1, 7),
                          infiltrability = 50) {
 
   args <- list(thick, sand, clay, limeStone, organicMatter, partSizeSand, stone, stoneType, infiltrability)
-  if(!all(purrr::map_lgl(args, is.numeric) | purrr::map_lgl(args, is.na))) stop("all arguments must be numeric")
+  if(!all(purrr::map_lgl(args, is.numeric) | purrr::map_lgl(args, function(x) all(is.na(x))))) stop("all arguments must be numeric")
 
   out <- dplyr::as_tibble(data.frame(name           = "Layer",
                                      thick          = thick,
