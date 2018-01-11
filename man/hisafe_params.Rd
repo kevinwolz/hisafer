@@ -26,6 +26,6 @@ hisafe_params("all")       # details of all parameters
 }
 \seealso{
 Other hisafe helper functions: \code{\link{hisafe_profiles}},
-  \code{\link{hop_filter}}, \code{\link{hop_merge}},
-  \code{\link{hop_rename}}
+  \code{\link{hop_date_filter}}, \code{\link{hop_filter}},
+  \code{\link{hop_merge}}, \code{\link{hop_rename}}
 }

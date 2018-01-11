@@ -218,3 +218,38 @@ hop_merge <- function(...) {
   class(merged_hop) <- c("hop-group", "hop", class(merged_hop))
   return(merged_hop)
 }
+
+#' Filter a hop object by date
+#' @description Filters a hop object by date.
+#' @return A hop object.
+#' @param hop A object of class hop or face.
+#' @param date.min A character string of the minimum date to keep in the format "YYYY-MM-DD".
+#' If NA, the minimum date in \code{hop} is used.
+#' @param date.max A character string of the maximum date to keep in the format "YYYY-MM-DD".
+#' If NA, the maximum date in \code{hop} is used.
+#' @export
+#' @family hisafe helper functions
+#' @examples
+#' \dontrun{
+#' newhop <- hop_date_filter(myhop, NA, "2010-01-01")
+#' }
+hop_date_filter <- function(hop, date.min = NA, date.max = NA) {
+  if(!("hop" %in% class(hop)))                                              stop("hop argument is not of class hop",                         call. = FALSE)
+  if(!(length(date.min) == 1 & (is.character(date.min) | is.na(date.min)))) stop("date.min argument must be a character vector of length 1", call. = FALSE)
+  if(!(length(date.max) == 1 & (is.character(date.max) | is.na(date.max)))) stop("date.max argument must be a character vector of length 1", call. = FALSE)
+
+  date.min <- lubridate::ymd(date.min)
+  date.max <- lubridate::ymd(date.max)
+
+  profiles.to.check <- names(hop)[!(names(hop) %in% c("exp.plan", "variables", "exp.path", "tree.info", "plot.info", "path"))]
+  profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
+
+  get_date_range <- function(profile, h) range(h[[profile]]$Date)
+  existing.ranges <- purrr::map(profiles, get_date_range, hop) %>%
+    do.call(what = "c")
+  if(is.na(date.min)) date.min <- min(existing.ranges)
+  if(is.na(date.max)) date.max <- max(existing.ranges)
+
+  for(i in profiles) { hop[[i]] <- dplyr::filter(hop[[i]], Date %in% seq(date.min, date.max, 1)) }
+  return(hop)
+}

@@ -24,6 +24,7 @@ newhop <- hop_filter(myhop, c("Sim_1", "Sim_2"))
 }
 \seealso{
 Other hisafe helper functions: \code{\link{hisafe_params}},
-  \code{\link{hisafe_profiles}}, \code{\link{hop_merge}},
+  \code{\link{hisafe_profiles}},
+  \code{\link{hop_date_filter}}, \code{\link{hop_merge}},
   \code{\link{hop_rename}}
 }
