@@ -19,7 +19,7 @@ If NA, the maximum date in \code{hop} is used.}
 A hop object.
 }
 \description{
-Filters a hop object by date
+Filters a hop object by date.
 }
 \examples{
 \dontrun{
