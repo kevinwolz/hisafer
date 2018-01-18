@@ -662,6 +662,15 @@ layer_params <- function(thick          = c(0.4, 0.4, 0.6, 1, 7),
 
   args <- list(thick, sand, clay, limeStone, organicMatter, partSizeSand, stone, stoneType, infiltrability)
   if(!all(purrr::map_lgl(args, is.numeric) | purrr::map_lgl(args, function(x) all(is.na(x))))) stop("all arguments must be numeric")
+  if(!all(is.numeric(thick)          & thick >= 0))                                   stop("thick must be greater than 0")
+  if(!all(is.numeric(sand)           & sand >= 0             & sand <= 100))          stop("sand must be between 1 and 100")
+  if(!all(is.numeric(clay)           & clay >= 0             & clay <= 100))          stop("clay must be between 1 and 100")
+  if(!all(is.numeric(limeStone)      & limeStone >= 0        & limeStone <= 100))     stop("limeStone must be 1 and 100")
+  if(!all(is.numeric(organicMatter)  & organicMatter >= 0    & organicMatter <= 100)) stop("organicMatter must be between 1 and 100")
+  if(!all(is.numeric(partSizeSand)   & partSizeSand >= 0))                            stop("partSizeSand must be greater than 0")
+  if(!all(is.numeric(stone)          & stone >= 0            & stone <= 100))         stop("stone must be between 0 and 100")
+  if(!all(stoneType %% 1 == 0        & stoneType >= 1        & stoneType <= 10))      stop("stoneType must be an integer between 1 and 10")
+  if(!all(is.numeric(infiltrability) & infiltrability >= 0))                          stop("infiltrability must be greater than 0")
 
   out <- dplyr::as_tibble(data.frame(name           = "Layer",
                                      thick          = thick,
@@ -673,6 +682,7 @@ layer_params <- function(thick          = c(0.4, 0.4, 0.6, 1, 7),
                                      stone          = stone,
                                      stoneType      = stoneType,
                                      infiltrability = infiltrability))
-  out <- dplyr::mutate_all(out, function(x) format(x, nsmall = 1, trim = TRUE))
+  out <- dplyr::mutate_at(out, .vars = dplyr::vars(-stoneType), .funs = function(x) format(x, nsmall = 1, trim = TRUE))
+  out <- dplyr::mutate(out, stoneType = format(stoneType, nsmall = 0, trim = TRUE))
   return(list(out))
 }
