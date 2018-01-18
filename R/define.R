@@ -484,15 +484,22 @@ check_range <- function(variable, exp.plan, template) {
 #' @param exp.plan The exp.plan of a "hip" object.
 #' @param template A list of template parameters and constraints
 check_type <- function(variable, exp.plan, template) {
-  if(!is.numeric(exp.plan[[variable]])) return("")
   type  <- get_param_vals(template, "type")[[variable]]
   if(is.na(type)) return("")
   if(type == "integer"){
-    if(all(exp.plan[[variable]] %% 1 == 0)) {
-      return("")
+    if(all(is.numeric(exp.plan[[variable]]))) {
+      if(!all(exp.plan[[variable]] %% 1 == 0)) {
+        return(paste0("-- ", variable, " - must be an integer"))
+      } else {
+        return("")
+      }
     } else {
       return(paste0("-- ", variable, " - must be an integer"))
     }
+  } else if(type == "real" & !all(is.numeric(exp.plan[[variable]]))){
+    return(paste0("-- ", variable, " - must be numeric"))
+  } else if(type == "character" & !all(is.character(exp.plan[[variable]]))){
+    return(paste0("-- ", variable, " - must be a character string/vector"))
   } else {
     return("")
   }

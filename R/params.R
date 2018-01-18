@@ -96,32 +96,12 @@ read_param_file <- function(path) {
         }
       }
 
-      if(length(element.vals) > 1) {
-        value.range <- element.vals[2]
-
-        if(grepl("(", value.range, fixed = TRUE)) {
-          value.type <- "continuous"
-        } else if(grepl("[", value.range, fixed = TRUE)) {
-          value.type <- "integer"
-        } else {
-          value.type <- NA
-        }
-
-        if(value.range == "NA") {
-          value.range <- NA
-        } else {
-          value.range <- strsplit(gsub("\\[|\\]|\\(|\\)", "", value.range), split = ",")[[1]]
-          value.range[value.range == "NA"] <- NA
-          value.range <- as.numeric(value.range)
-        }
-
-        value.accepted <- element.vals[3]
-        if(value.accepted == "NA") {
-          value.accepted <- NA
-        } else {
-          value.accepted <- strsplit(gsub("\\[|\\]|\\(|\\)", "", value.accepted), split = ",")[[1]]
-          value.accepted[value.accepted == "NA"] <- NA
-        }
+      ## PARAMETER CONSTRAINTS
+      if(element.name %in% PARAM.DEFS$name) {
+        element.def <- dplyr::filter(PARAM.DEFS, name == element.name)
+        value.range    <- c(element.def$min, element.def$max)
+        value.type     <- element.def$type
+        value.accepted <- stringr::str_split(element.def$allowed, ";")[[1]]
       } else {
         value.range    <- c(NA, NA)
         value.type     <- NA

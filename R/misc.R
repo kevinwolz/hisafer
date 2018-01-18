@@ -58,7 +58,7 @@ hisafe_params <- function(variable = "names", template = "agroforestry_default")
   acceptable <- c(PARAM_NAMES, "names", "all")
   if(any(!(variable %in% acceptable))) {
     bad.vars <- sort(variable[!(variable %in% acceptable)])
-    stop(paste0("The following are not supported Hi-sAFe input parameters: ", bad.vars))
+    stop(paste0("The following are not supported Hi-sAFe input parameters: ", bad.vars), call. = FALSE)
   }
 
   if(variable[1] == "all") {
