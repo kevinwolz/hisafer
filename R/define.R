@@ -610,6 +610,7 @@ layer_init_params <- function(waterContent     = c(0.2, 0.3, 0.3, 0.3, 0.3),
                                      waterContent     = waterContent,
                                      no3Concentration = no3Concentration,
                                      nh4concentration = nh4concentration))
+  out <- dplyr::mutate_all(out, function(x) format(x, nsmall = 1, trim = TRUE))
   return(list(out))
 }
 
@@ -654,5 +655,6 @@ layer_params <- function(thick          = c(0.4, 0.4, 0.6, 1, 7),
                                      stone          = stone,
                                      stoneType      = stoneType,
                                      infiltrability = infiltrability))
+  out <- dplyr::mutate_all(out, function(x) format(x, nsmall = 1, trim = TRUE))
   return(list(out))
 }

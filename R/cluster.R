@@ -7,7 +7,7 @@
 #' @param cluster.path A character string of the path on the cluster where the simulation folder is located.
 #' @param email A character string of the email address to notify with cluster job updates.
 #' @param num.cores The number of cores to request from the cluster.
-#' #' @export
+#' @export
 #' @family hisafe cluster functions
 #' @examples
 #' \dontrun{

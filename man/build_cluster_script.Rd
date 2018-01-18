@@ -17,8 +17,7 @@ This must match the name of .SIM file as well as the name of the folder that fil
 
 \item{email}{A character string of the email address to notify with cluster job updates.}
 
-\item{num.cores}{The number of cores to request from the cluster.
-#' @export}
+\item{num.cores}{The number of cores to request from the cluster.}
 }
 \value{
 Invisibly returns \code{TRUE}.

@@ -39,13 +39,14 @@ run_hisafe <- function(hip         = NULL,
 
   if(!is.null(hip) & !("hip" %in% class(hip)))                  stop("hip argument not of class hip",                                call. = FALSE)
   if(is.null(hip) == is.null(path))                             stop("must provide hip OR path, not both",                           call. = FALSE)
-  if(!dir.exists(path))                                         stop("directory specified by path does not exist",                   call. = FALSE)
   if(!(all(is.character(simu.names)) | simu.names[1] == "all")) stop("simu.names argument must be 'all' or a character vector",      call. = FALSE)
   if(!is.logical(parallel))                                     stop("parallel argument must be a logical",                          call. = FALSE)
   if(!dir.exists(capsis.path))                                  stop("directory specified by capsis.path does not exist",            call. = FALSE)
   if(!("capsis.sh" %in% list.files(capsis.path)))               stop("directory specified by capsis.path does not contain Capsis",   call. = FALSE)
-  if(!((is.numeric(num.cores) & length(num.cores) == 1) | is.null(num.cores))) stop("num.cores argument must be a positive integer", call. = FALSE)
-  if(num.cores %% 1 != 0 & num.cores > 0)                                      stop("num.cores argument must be a positive integer", call. = FALSE)
+  if(!is.null(num.cores)) {
+    if(!(is.numeric(num.cores) & length(num.cores) == 1))       stop("num.cores argument must be a positive integer",                call. = FALSE)
+    if(num.cores %% 1 != 0 & num.cores > 0)                     stop("num.cores argument must be a positive integer",                call. = FALSE)
+  }
   if(!((is.numeric(mem.spec) & length(mem.spec) == 1) | is.null(mem.spec)))    stop("mem.spec argument must be a positive integer",  call. = FALSE)
 
   ## Determine path and simu.names to run
@@ -55,6 +56,7 @@ run_hisafe <- function(hip         = NULL,
   } else {
     if(simu.names[1] == "all") simu.names <- purrr::map_chr(list.dirs(path, recursive = FALSE), function(x) tail(strsplit(x, "/")[[1]], n = 1))
   }
+  if(!dir.exists(path)) stop("directory specified by path does not exist", call. = FALSE)
 
   ## Ensure simulation directories exist
   sims.to.run <- clean_path(paste0(path, "//", simu.names))
@@ -72,7 +74,8 @@ run_hisafe <- function(hip         = NULL,
 
   ## Run
   if(parallel) {
-    if(length(simu.names) == 1) stop("There is only 1 simulation to run. Parallel computing is not possible.", call. = FALSE)
+    if(length(simu.names) == 1)        stop("There is only 1 simulation to run. Parallel computing is not possible.", call. = FALSE)
+    if(num.cores > length(simu.names)) stop("num.cores cannot be greater than length(simu.names)",                    call. = FALSE)
 
     ## Check for packages required for parallel computing
     parallel.packages <- c("foreach", "doParallel")
