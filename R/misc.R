@@ -49,11 +49,8 @@ hisafe_params <- function(variable = "names", template = "agroforestry_default")
   if(!(is.character(template) & length(template) == 1)) stop("template argument must be a character vector of length 1", call. = FALSE)
 
   TEMPLATE_PARAMS <- get_template_params(get_template_path(template))
-  PARAM_NAMES     <- unlist(get_param_names(TEMPLATE_PARAMS), use.names = FALSE)
+  PARAM_NAMES     <- sort(unlist(get_param_names(TEMPLATE_PARAMS), use.names = FALSE))
   PARAM_DEFAULTS  <- get_param_vals(TEMPLATE_PARAMS, "value")
-  PARAM_RANGES    <- get_param_vals(TEMPLATE_PARAMS, "range")
-  PARAM_ACCEPTED  <- get_param_vals(TEMPLATE_PARAMS, "accepted")
-  PARAM_TYPE      <- get_param_vals(TEMPLATE_PARAMS, "type")
 
   acceptable <- c(PARAM_NAMES, "names", "all")
   if(any(!(variable %in% acceptable))) {
@@ -63,6 +60,7 @@ hisafe_params <- function(variable = "names", template = "agroforestry_default")
 
   if(variable[1] == "all") {
     for(i in 1:length(PARAM_NAMES)){
+      var.def <- dplyr::filter(PARAM.DEFS, name == PARAM_NAMES[i])
       if(i == 1) { cat(PARAM_NAMES[i]) } else { cat("\n\n", PARAM_NAMES[i]) }
       if("tbl" %in% class(PARAM_DEFAULTS[[i]])){
         cat("\n  -- Default:\n")
@@ -70,16 +68,16 @@ hisafe_params <- function(variable = "names", template = "agroforestry_default")
       } else {
         cat("\n  -- Default:", paste0(PARAM_DEFAULTS[[i]], collapse = ", "))
       }
-
-      if(!all(is.na(PARAM_RANGES[[i]])))   cat("\n  -- Accepted Range: [",  paste0(PARAM_RANGES[[i]], collapse = ", "), "] ", sep = "")
-      if(!all(is.na(PARAM_TYPE[[i]])))     cat("(", PARAM_TYPE[[i]], ")", sep = "")
-      if(!all(is.na(PARAM_ACCEPTED[[i]]))) cat("\n  -- Accepted Values: ", paste0(PARAM_ACCEPTED[[i]], collapse = ", "))
-
+      cat("\n  -- Definition:", var.def$definition)
+      cat("\n  -- Units: ", var.def$unit, " (", var.def$type, ")", sep = "")
+      if(!all(is.na(c(var.def$min, var.def$max)))) cat("\n  -- Accepted Range: [", paste0(c(var.def$min, var.def$max), collapse = ", "), "] ", sep = "")
+      if(!all(is.na(var.def$accepted)))            cat("\n  -- Accepted Values: ", paste0(var.def$accepted, collapse = ", "))
     }
   } else if (variable[1] == "names") {
     cat(paste0(PARAM_NAMES, collapse = "\n"))
   } else {
     for(i in 1:length(variable)){
+      var.def <- dplyr::filter(PARAM.DEFS, name == variable[i])
       if(i == 1) { cat(variable[i]) } else { cat("\n\n", variable[i]) }
       if("tbl" %in% class(PARAM_DEFAULTS[[variable[i]]])){
         cat("\n  -- Default:\n")
@@ -87,10 +85,10 @@ hisafe_params <- function(variable = "names", template = "agroforestry_default")
       } else {
         cat("\n  -- Default:", paste0(PARAM_DEFAULTS[[variable[i]]], collapse = ", "))
       }
-
-      if(!all(is.na(PARAM_RANGES[[variable[i]]])))   cat("\n  -- Accepted Range: [",  paste0(PARAM_RANGES[[variable[i]]], collapse = ", "), "] ", sep = "")
-      if(!all(is.na(PARAM_TYPE[[variable[i]]])))     cat("(", PARAM_TYPE[[variable[i]]], ")", sep = "")
-      if(!all(is.na(PARAM_ACCEPTED[[variable[i]]]))) cat("\n  -- Accepted Values:", paste0(PARAM_ACCEPTED[[variable[i]]], collapse = ", "))
+      cat("\n  -- Definition:", var.def$definition)
+      cat("\n  -- Units: ", var.def$unit, " (", var.def$type, ")", sep = "")
+      if(!all(is.na(c(var.def$min, var.def$max)))) cat("\n  -- Accepted Range: [", paste0(c(var.def$min, var.def$max), collapse = ", "), "] ", sep = "")
+      if(!all(is.na(var.def$accepted)))            cat("\n  -- Accepted Values: ", paste0(var.def$accepted, collapse = ", "))
     }
   }
   invisible(PARAM_NAMES)

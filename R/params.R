@@ -96,23 +96,8 @@ read_param_file <- function(path) {
         }
       }
 
-      ## PARAMETER CONSTRAINTS
-      if(element.name %in% PARAM.DEFS$name) {
-        element.def <- dplyr::filter(PARAM.DEFS, name == element.name)
-        value.range    <- c(element.def$min, element.def$max)
-        value.type     <- element.def$type
-        value.accepted <- stringr::str_split(element.def$allowed, ";")[[1]]
-      } else {
-        value.range    <- c(NA, NA)
-        value.type     <- NA
-        value.accepted <- NA
-      }
-
       toto <- list(list(value     = element.value,
-                        commented = comment[i],
-                        range     = value.range,
-                        type      = value.type,
-                        accepted  = value.accepted))
+                        commented = comment[i]))
 
       names(toto) <- element.name
       new.sim[[list.title]] <- c(new.sim[[list.title]], toto)

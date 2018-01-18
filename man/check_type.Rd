@@ -4,19 +4,17 @@
 \alias{check_type}
 \title{Check validity of Hi-sAFe input numeric types}
 \usage{
-check_type(variable, exp.plan, template)
+check_type(variable, exp.plan)
 }
 \arguments{
 \item{variable}{A character string of the name of the variable to check.}
 
 \item{exp.plan}{The exp.plan of a "hip" object.}
-
-\item{template}{A list of template parameters and constraints}
 }
 \value{
 An error message or empty character stirng.
 }
 \description{
-Checks validity of Hi-sAFe inputs against accepted numeric types (continuous, integer) found in the comments of template files.
+Checks validity of Hi-sAFe inputs against accepted numeric types (continuous, integer) found in the package param_defs.txt file
 Used within \code{\link{check_input_values}}.
 }

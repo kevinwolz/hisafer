@@ -260,7 +260,7 @@ check_input_values <- function(hip) {
   crop.species.used <- unique(c(unlist(USED_PARAMS$mainCropSpecies$value), unlist(USED_PARAMS$interCropSpecies$value)))
   if(any(!(crop.species.used %in% AVAIL_CROPS))) {
     crop.species.missing <- crop.species.used[!(crop.species.used %in% AVAIL_CROPS)]
-    unsupported.crops.error <- paste("-- The following crop files are not available in the template idrectory: ", crop.species.missing)
+    unsupported.crops.error <- paste("-- The following crop files are not available in the template directory: ", crop.species.missing)
   } else {
     unsupported.crops.error <- ""
   }
@@ -269,7 +269,7 @@ check_input_values <- function(hip) {
   crop.itks.used <- unique(c(unlist(USED_PARAMS$mainCropItk$value), unlist(USED_PARAMS$interCropItk$value)))
   if(any(!(crop.itks.used %in% AVAIL_TECS))) {
     crop.itks.missing <- crop.itks.used[!(crop.itks.used %in% AVAIL_TECS)]
-    unsupported.itks.error <- paste("-- The following crop files are not available in the template idrectory: ", crop.itks.missing)
+    unsupported.itks.error <- paste("-- The following crop files are not available in the template directory: ", crop.itks.missing)
   } else {
     unsupported.itks.error <- ""
   }
@@ -411,9 +411,9 @@ check_input_values <- function(hip) {
   }
 
   ## Accepted & Range Errors
-  accepted.errors <- purrr::map_chr(names.to.check, check_accepted, exp.plan = EXP.PLAN, template = TEMPLATE_PARAMS)
-  range.errors    <- purrr::map_chr(names.to.check, check_range,    exp.plan = EXP.PLAN, template = TEMPLATE_PARAMS)
-  type.errors     <- purrr::map_chr(names.to.check, check_type,     exp.plan = EXP.PLAN, template = TEMPLATE_PARAMS)
+  accepted.errors <- purrr::map_chr(names.to.check, check_accepted, exp.plan = EXP.PLAN)
+  range.errors    <- purrr::map_chr(names.to.check, check_range,    exp.plan = EXP.PLAN)
+  type.errors     <- purrr::map_chr(names.to.check, check_type,     exp.plan = EXP.PLAN)
 
   all.errors <- c(errors, unsupported.var.error,
                   unique.sim.error, unique.simname.error, simname.space.error,
@@ -436,70 +436,81 @@ check_input_values <- function(hip) {
 }
 
 #' Check validity of Hi-sAFe accepted values
-#' @description Checks validity of Hi-sAFe inputs accepted values found in the comments of template files.
+#' @description Checks validity of Hi-sAFe inputs accepted values found in the package param_defs.txt file
 #' Used within \code{\link{check_input_values}}.
 #' @return An error message or empty character stirng.
 #' @param variable A character string of the name of the variable to check.
 #' @param exp.plan The exp.plan of a "hip" object.
-#' @param template A list of template parameters and constraints
-check_accepted <- function(variable, exp.plan, template) {
-  accepted.vals <- get_param_vals(template, "accepted")[[variable]]
-  accepted.pass <- (all(is.na(accepted.vals)) | all(as.character(exp.plan[[variable]]) %in% accepted.vals))
-  if(accepted.pass) {
-    return("")
+check_accepted <- function(variable, exp.plan) {
+  if(variable %in% PARAM.DEFS$name) {
+    element.def <- dplyr::filter(PARAM.DEFS, name == variable)
+    accepted.vals <- element.def$accepted
+    accepted.pass <- (all(is.na(accepted.vals)) | all(as.character(exp.plan[[variable]]) %in% accepted.vals))
+    if(accepted.pass) {
+      return("")
+    } else {
+      return(paste0("-- ", variable, " - must be one of: ", paste0(accepted.vals, collapse = ", ")))
+    }
   } else {
-    return(paste0("-- ", variable, " - must be one of: ", paste0(accepted.vals, collapse = ", ")))
+    return("")
   }
 }
 
 #' Check validity of Hi-sAFe input ranges
-#' @description Checks validity of Hi-sAFe inputs against accepted ranges found in the comments of template files.
+#' @description Checks validity of Hi-sAFe inputs against accepted ranges found in the package param_defs.txt file
 #' Used within \code{\link{check_input_values}}.
 #' @return An error message or empty character stirng.
 #' @param variable A character string of the name of the variable to check.
 #' @param exp.plan The exp.plan of a "hip" object.
-#' @param template A list of template parameters and constraints
-check_range <- function(variable, exp.plan, template) {
-  if(!is.numeric(exp.plan[[variable]])) return("")
-  min.val  <- get_param_vals(template, "range")[[variable]][1]
-  max.val  <- get_param_vals(template, "range")[[variable]][2]
-  max.pass <- (is.na(max.val) | all(exp.plan[[variable]] <= max.val))
-  min.pass <- (is.na(min.val) | all(exp.plan[[variable]] >= min.val))
-  if(max.pass & min.pass) {
+check_range <- function(variable, exp.plan) {
+  if(variable %in% PARAM.DEFS$name) {
+    element.def <- dplyr::filter(PARAM.DEFS, name == variable)
+    min.val  <- element.def$min
+    max.val  <- element.def$max
+    max.pass <- (is.na(max.val) | all(exp.plan[[variable]] <= max.val))
+    min.pass <- (is.na(min.val) | all(exp.plan[[variable]] >= min.val))
+    if(max.pass & min.pass) {
+      return("")
+    } else if(!is.na(max.val) & !is.na(min.val)) {
+      return(paste0("-- ", variable, " - must be betwen ", min.val, " and ", max.val))
+    } else if(is.na(max.val) & !is.na(min.val)) {
+      return(paste0("-- ", variable, " - must be greater than ", min.val))
+    } else if(!is.na(max.val) & is.na(min.val)) {
+      return(paste0("-- ", variable, " - must be less than ", max.val))
+    }
+  } else {
     return("")
-  } else if(!is.na(max.val) & !is.na(min.val)) {
-    return(paste0("-- ", variable, " - must be betwen ", min.val, " and ", max.val))
-  } else if(is.na(max.val) & !is.na(min.val)) {
-    return(paste0("-- ", variable, " - must be greater than ", min.val))
-  } else if(!is.na(max.val) & is.na(min.val)) {
-    return(paste0("-- ", variable, " - must be less than ", max.val))
   }
 }
 
 #' Check validity of Hi-sAFe input numeric types
-#' @description Checks validity of Hi-sAFe inputs against accepted numeric types (continuous, integer) found in the comments of template files.
+#' @description Checks validity of Hi-sAFe inputs against accepted numeric types (continuous, integer) found in the package param_defs.txt file
 #' Used within \code{\link{check_input_values}}.
 #' @return An error message or empty character stirng.
 #' @param variable A character string of the name of the variable to check.
 #' @param exp.plan The exp.plan of a "hip" object.
-#' @param template A list of template parameters and constraints
-check_type <- function(variable, exp.plan, template) {
-  type  <- get_param_vals(template, "type")[[variable]]
-  if(is.na(type)) return("")
-  if(type == "integer"){
-    if(all(is.numeric(exp.plan[[variable]]))) {
-      if(!all(exp.plan[[variable]] %% 1 == 0)) {
-        return(paste0("-- ", variable, " - must be an integer"))
+check_type <- function(variable, exp.plan) {
+  if(variable %in% PARAM.DEFS$name) {
+    element.def <- dplyr::filter(PARAM.DEFS, name == variable)
+    type  <- element.def$type
+    if(is.na(type)) return("")
+    if(type == "integer"){
+      if(all(is.numeric(exp.plan[[variable]]))) {
+        if(!all(exp.plan[[variable]] %% 1 == 0)) {
+          return(paste0("-- ", variable, " - must be an integer"))
+        } else {
+          return("")
+        }
       } else {
-        return("")
+        return(paste0("-- ", variable, " - must be an integer"))
       }
+    } else if(type == "real" & !all(is.numeric(exp.plan[[variable]]))){
+      return(paste0("-- ", variable, " - must be numeric"))
+    } else if(type == "character" & !all(is.character(exp.plan[[variable]]))){
+      return(paste0("-- ", variable, " - must be a character string/vector"))
     } else {
-      return(paste0("-- ", variable, " - must be an integer"))
+      return("")
     }
-  } else if(type == "real" & !all(is.numeric(exp.plan[[variable]]))){
-    return(paste0("-- ", variable, " - must be numeric"))
-  } else if(type == "character" & !all(is.character(exp.plan[[variable]]))){
-    return(paste0("-- ", variable, " - must be a character string/vector"))
   } else {
     return("")
   }
