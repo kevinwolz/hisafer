@@ -9,10 +9,10 @@ hop_date_filter(hop, date.min = NA, date.max = NA)
 \arguments{
 \item{hop}{A object of class hop or face.}
 
-\item{date.min}{A character string of the minimum date to keep in the format "YYYY-MM-DD".
+\item{date.min}{A character string of the minimum date to keep, in the format "YYYY-MM-DD".
 If NA, the minimum date in \code{hop} is used.}
 
-\item{date.max}{A character string of the maximum date to keep in the format "YYYY-MM-DD".
+\item{date.max}{A character string of the maximum date to keep, in the format "YYYY-MM-DD".
 If NA, the maximum date in \code{hop} is used.}
 }
 \value{

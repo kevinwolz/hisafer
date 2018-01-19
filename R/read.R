@@ -29,6 +29,10 @@
 #' #' If "all" the default, reads all supported Hi-sAFe output profiles. For currently supported profiles see: \code{\link{hisafe_profiles}}
 #' @param show.progress Logical indicating whether progress messsages should be printed to the console.
 #' @param max.size The maximum file size (in bytes) that should be read. Files larger than this value will be ignored, with a warning.
+#' @param date.min A character string of the minimum date to keep, in the format "YYYY-MM-DD".
+#' If NA, the minimum date in the output data is used.
+#' @param date.max A character string of the maximum date to keep, in the format "YYYY-MM-DD".
+#' If NA, the maximum date in the output data is used.
 #' @export
 #' @importFrom dplyr %>%
 #' @examples
@@ -44,7 +48,9 @@ read_hisafe <- function(hip           = NULL,
                         simu.names    = "all",
                         profiles      = "all",
                         show.progress = TRUE,
-                        max.size      = 3e8) {
+                        max.size      = 3e8,
+                        date.min      = NA,
+                        date.max      = NA) {
 
   if(!is.null(hip) & !("hip" %in% class(hip)))                  stop("data not of class hip",                                   call. = FALSE)
   if(is.null(hip) == is.null(path))                             stop("must provide hip or path, not both",                      call. = FALSE)
@@ -142,6 +148,8 @@ read_hisafe <- function(hip           = NULL,
   } else {
     class(data) <- c("hop", class(data))
   }
+
+  data <- hop_date_filter(data, date.min = date.min, date.max = date.max)
 
   return(data)
 }

@@ -5,7 +5,8 @@
 \title{Read output from one or more Hi-sAFe simulations}
 \usage{
 read_hisafe(hip = NULL, path = NULL, simu.names = "all",
-  profiles = "all", show.progress = TRUE, max.size = 3e+08)
+  profiles = "all", show.progress = TRUE, max.size = 3e+08,
+  date.min = NA, date.max = NA)
 }
 \arguments{
 \item{hip}{An object of class "hip". To create a hip object see \code{\link{define_hisafe}}.
@@ -23,6 +24,12 @@ If \code{hip} is not provided, then \code{path} is required. If \code{hip} is pr
 \item{show.progress}{Logical indicating whether progress messsages should be printed to the console.}
 
 \item{max.size}{The maximum file size (in bytes) that should be read. Files larger than this value will be ignored, with a warning.}
+
+\item{date.min}{A character string of the minimum date to keep, in the format "YYYY-MM-DD".
+If NA, the minimum date in the output data is used.}
+
+\item{date.max}{A character string of the maximum date to keep, in the format "YYYY-MM-DD".
+If NA, the maximum date in the output data is used.}
 }
 \value{
 An object of class "hop". This is a list of 16 data frames (tibbles):

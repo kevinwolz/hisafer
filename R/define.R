@@ -443,7 +443,7 @@ check_input_values <- function(hip) {
 check_accepted <- function(variable, exp.plan) {
   if(variable %in% PARAM.DEFS$name) {
     element.def <- dplyr::filter(PARAM.DEFS, name == variable)
-    accepted.vals <- element.def$accepted
+    accepted.vals <- stringr::str_split(element.def$accepted, ";")[[1]]
     accepted.pass <- (all(is.na(accepted.vals)) | all(as.character(exp.plan[[variable]]) %in% accepted.vals))
     if(accepted.pass) {
       return("")

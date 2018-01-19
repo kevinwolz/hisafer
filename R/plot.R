@@ -120,6 +120,8 @@ plot_hisafe_ts <- function(hop,
       dplyr::filter(Year %in% years) %>%
       dplyr::filter(JulianDay >= doy.lim[1], JulianDay <= doy.lim[2]) %>%
       dplyr::mutate(fake.date = lubridate::ymd(paste0("8000-", Month, "-", Day)))
+    yrs.to.remove <- unique(plot.data$Year)[table(plot.data$Year) == length(unique(plot.data$SimulationName))]
+    plot.data <- filter(plot.data, !(Year %in% yrs.to.remove))
   }
 
   ## Filter/Facet by supplied tree.ids

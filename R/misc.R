@@ -248,9 +248,9 @@ hop_merge <- function(...) {
 #' @description Filters a hop object by date.
 #' @return A hop object.
 #' @param hop A object of class hop or face.
-#' @param date.min A character string of the minimum date to keep in the format "YYYY-MM-DD".
+#' @param date.min A character string of the minimum date to keep, in the format "YYYY-MM-DD".
 #' If NA, the minimum date in \code{hop} is used.
-#' @param date.max A character string of the maximum date to keep in the format "YYYY-MM-DD".
+#' @param date.max A character string of the maximum date to keep, in the format "YYYY-MM-DD".
 #' If NA, the maximum date in \code{hop} is used.
 #' @export
 #' @family hisafe helper functions
