@@ -301,8 +301,8 @@ plot_hisafe_cycle <- function(hop,
           axis.text.x       = element_text(margin = margin(t = 5, unit = "points")),
           axis.text.y       = element_text(margin = margin(r = 5, unit = "points")))
 
-  #ggsave("/Users/kevinwolz/Desktop/carbon.png", plot.obj, scale = 1, height = 8.5, width = 11)
-  #ggsave("/Users/kevinwolz/Desktop/light.png", plot.obj, scale = 1, height = 8.5, width = 11)
+  #ggsave_fitmax("/Users/kevinwolz/Desktop/carbon.png", plot.obj)
+  #ggsave_fitmax("/Users/kevinwolz/Desktop/light.png", plot.obj)
 
   if(plot) return(plot.obj) else return(dplyr::mutate(plot.data, cycle = cycle))
 }
@@ -334,7 +334,7 @@ plot_hisafe_cycle <- function(hop,
 #'
 #' # Once you have the plot object, you can display it and save it:
 #' water.plot
-#' ggplot2::ggsave("light_capture.png", light.capture.plot)
+#' ggsave_fitmax("light_capture.png", light.capture.plot)
 #' }
 plot_hisafe_use <- function(hop,
                             cycle,
@@ -438,6 +438,10 @@ plot_hisafe_use <- function(hop,
   } else {
     stop("cycle argument not supported. Use one of: nitrogen, water, light.", call. = FALSE)
   }
+
+  ## Remove years with just one day
+  yrs.to.remove <- unique(plot.data$Year)[table(plot.data$Year) == length(unique(plot.data$flux))]
+  plot.data <- filter(plot.data, !(Year %in% yrs.to.remove))
 
   ## Set faceting
   if(length(years) == 1) {

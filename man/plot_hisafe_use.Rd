@@ -40,9 +40,10 @@ light.capture.plot <- plot_hisafe_use(myhop, "light", 2000)
 
 # Once you have the plot object, you can display it and save it:
 water.plot
-ggplot2::ggsave("light_capture.png", light.capture.plot)
+ggsave_fitmax("light_capture.png", light.capture.plot)
 }
 }
 \seealso{
-Other hisafe analysis functions: \code{\link{plot_hisafe_cycle}}
+Other hisafe analysis functions: \code{\link{analyze_hisafe}},
+  \code{\link{plot_hisafe_cycle}}
 }

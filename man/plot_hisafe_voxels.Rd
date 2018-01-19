@@ -32,7 +32,7 @@ tile.plot <- plot_hisafe_voxels(mydata, "waterAvailable", paste(1998, 6:8, 1, se
 
 # Once you have the plot object, you can display it and save it:
 tile.plot
-ggplot2::ggsave("tiled_waterAvailable.png", tile.plot)
+ggsave_fitmax("tiled_waterAvailable.png", tile.plot)
 }
 }
 \seealso{

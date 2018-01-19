@@ -14,7 +14,7 @@
 #' If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette. The default supports up to 24 simulations.
 #' @param linetype.palette A character stirng of values defining the linetype palette to use in plots with multiple simulations.
 #' If \code{NULL}, the default, then solid lines are used for all simulations. The default supports up to 24 simulations.
-#' @param aes.cols A list with arguments "color" and "linetype" containing character stirngs of the column names to use for plot aesthetics.
+#' @param aes.cols A list with arguments "color" and "linetype" containing character strings of the column names to use for plot aesthetics.
 #' @param facet.year A logical indicating whether, for daily profiles, the plot should be faceted by year. This helps with seeing finer level detail.
 #' @param crop.points Logical indicating if points should be plotted as well, with point shape desgnating the main crop name.
 #' Only applies when \code{profile} is 'plot' or 'annualplot'.
@@ -139,13 +139,18 @@ plot_hisafe_ts <- function(hop,
     }
   }
 
-  ## Palettes
-  if(is.null(color.palette))    color.palette    <- rep(c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7"), 3)
-  if(is.null(linetype.palette)) linetype.palette <- rep(c("solid", "dashed", "dotted"), each = 8)
-
   ## Aesthetics
   plot.data[[aes.cols$color]]    <- factor(plot.data[[aes.cols$color]])
   plot.data[[aes.cols$linetype]] <- factor(plot.data[[aes.cols$linetype]])
+
+  ## Palettes
+  if(is.null(color.palette)) color.palette <- rep(c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7"), 3)
+  if(aes.cols$color == aes.cols$linetype)  {
+    if(is.null(linetype.palette))  linetype.palette <- rep(c("solid", "dashed", "dotted"), each = 8)
+    scale_linetype <- scale_linetype_manual(values = linetype.palette)
+  } else {
+    scale_linetype <- scale_linetype_discrete()
+  }
 
   ## Create plot
   plot.obj <- ggplot(plot.data, aes_string(x        = x.var,
@@ -163,7 +168,7 @@ plot_hisafe_ts <- function(hop,
     scale_y_continuous(sec.axis = sec_axis(~ ., labels = NULL)) +
     geom_line(size = 1, na.rm = TRUE) +
     scale_color_manual(values = color.palette) +
-    scale_linetype_manual(values = linetype.palette) +
+    scale_linetype +
     theme_hisafe_ts() +
     theme.extra
 
@@ -214,7 +219,7 @@ plot_hisafe_ts <- function(hop,
 #'
 #' # Once you have the plot object, you can display it and save it:
 #' tile.plot2
-#' ggplot2::ggsave("monthDirectParIncident.png", tile.plot2)
+#' ggsave_fitmax("monthDirectParIncident.png", tile.plot2)
 #' }
 plot_hisafe_monthcells <- function(hop,
                                    variable   = "monthRelativeTotalParIncident",
@@ -392,7 +397,7 @@ plot_hisafe_monthcells <- function(hop,
 #'
 #' # Once you have the plot object, you can display it and save it:
 #' tile.plot
-#' ggplot2::ggsave("yield.png", tile.plot)
+#' ggsave_fitmax("yield.png", tile.plot)
 #' }
 plot_hisafe_annualcrop <- function(hop,
                                    variable   = "yieldMax",
@@ -545,7 +550,7 @@ plot_hisafe_annualcrop <- function(hop,
 #'
 #' # Once you have the plot object, you can display it and save it:
 #' tile.plot
-#' ggplot2::ggsave("tiled_relativeDirectParIncident.png", tile.plot)
+#' ggsave_fitmax("tiled_relativeDirectParIncident.png", tile.plot)
 #' }
 plot_hisafe_cells <- function(hop, variable, dates, plot = TRUE) {
   if(!("hop" %in% class(hop))) stop("hop argument not of class hop",             call. = FALSE)
@@ -636,7 +641,7 @@ plot_hisafe_cells <- function(hop, variable, dates, plot = TRUE) {
 #'
 #' # Once you have the plot object, you can display it and save it:
 #' tile.plot
-#' ggplot2::ggsave("tiled_waterAvailable.png", tile.plot)
+#' ggsave_fitmax("tiled_waterAvailable.png", tile.plot)
 #' }
 plot_hisafe_voxels <- function(hop, variable, dates, plot = TRUE) {
   if(!("hop" %in% class(hop)))                        stop("hop argument not of class hop",                                  call. = FALSE)
@@ -701,4 +706,209 @@ plot_hisafe_voxels <- function(hop, variable, dates, plot = TRUE) {
     theme_hisafe_tile()
 
   if(plot) return(plot.obj) else return(plot.data)
+}
+
+#' Save ggplot to correctly-shaped image file
+#' @description When a ggplot has a fixed panel aspect ratio, it can be a pain to find the right dimensions for the whole plot
+#' (including axes, margins, legends, etc) when saving it to a fixed-size graphical device. ggsave_fitmax takes a ggplot
+#' object and saves it as the largest image that fits inside the specified maximum height and width. The final image
+#' dimensions will exactly match one of \code{maxheight} or \code{maxwidth} and will not exceed the other.
+#' @param filename Name for the output image. By default the image format is guesssed from the file extension,
+#' but this can be overridden by specifying a value for device. See \code{ggplot2::ggsave} for details.
+#' @param plot A ggplot or gtable object.
+#' @param maxheight Numeric, giving largest allowable height of the plot. The final image will exactly match one of these and will not exceed the other.
+#' @param maxwidth Numeric, giving largest allowable width of the plot.
+#' @param units One of "in", "cm", "mm", giving units for the dimensions. Note that "px" does not work.
+#' @param ... Other arguments passed to \code{ggplot2::ggsave}, notably including dpi (to set pixel resolution of the output image)
+#' and limitsize (set to FALSE if you really do want an image larger than 50 inches).
+#' @details This is a convenience function that wraps two distinct steps: Looking up the plot dimensions using \code{get_dims},
+#' and saving the image using \code{ggplot2::ggsave}. If you need more flexibility in either step, skip this wrapper and call get_dims directly,
+#' then pass the computed dimensions to your favorite graphics device. See the examples in \code{get_dims} for an example.
+#' The dimension lookup was motivated by the difficulty of predicting image height & width when the panels have a fixed aspect ratio,
+#' but this wrapper should work as a one-call plotting command for plots with unconstrained ratios as well. Please report any that don't work.
+#' @author Chris Black \email{chris@ckblack.org}
+#' @export
+#' @examples
+#' \dontrun{
+#' a=ggplot(mtcars, aes(wt,mpg))+geom_point()+theme(aspect.ratio=0.75)
+#'
+#' # Saves a.pdf at 10.55 x 8 inches
+#' ggsave_fitmax(filename="a.pdf", plot=a, maxheight=8, maxwidth=12)
+#'
+#' # Saves a.png at 3163 x 2400 px
+#' # == (nominally!) 10.55 x 8 inches at 300 ppi.
+#' ggsave_fitmax(filename="a.png", plot=a, maxheight=8, maxwidth=12)
+#'
+#' # Saves aa.jpg at 1181 x 900 px
+#' # == 7.8 x 6 inches at 150 ppi... or 3.9 x 3 inches at 300 ppi, or 16.4 x 12.5 at 72 ppi, or...
+#' ggsave_fitmax(filename="aa.jpg", plot=a, maxheight=6, maxwidth=9, dpi=150)
+#'
+#' }
+ggsave_fitmax <- function(filename,
+                          plot,
+                          maxheight = 7,
+                          maxwidth  = maxheight,
+                          units     = "in", ...) {
+  dims = get_dims(ggobj     = plot,
+                  maxheight = maxheight,
+                  maxwidth  = maxwidth,
+                  units     = units)
+  ggplot2::ggsave(filename = filename,
+                  plot   = plot,
+                  height = dims$height,
+                  width  = dims$width,
+                  units  = units, ...)
+}
+
+#' Find overall dimensions of a ggplot
+#' @description Computes the largest possible dimensions for a fixed-aspect ggplot that still fits inside the given maximum height and width.
+#' @return A list containing actual image dimensions height and width, both numeric and with the same units as units.
+#' @param ggobj A ggplot or gtable object.
+#' but this can be overridden by specifying a value for device. See \code{ggplot2::ggsave} for details.
+#' @param maxheight Numeric, giving largest allowable height of the plot. The final image will exactly match one of these and will not exceed the other.
+#' @param maxwidth Numeric, giving largest allowable width of the plot.
+#' @param units Character, giving units for the dimensions. Must be recognized by both \code{png} and \code{grid::convertUnit},
+#' so possible values are probably limited to "in", "cm", "mm". Note especially that "px" does not work.
+#' @param ... Other arguments passed to png when setting up the throwaway plot.
+#' @details The motivating problem: When making a ggplot with fixed panel aspect ratios, the overall dimensions of the full
+#' plot still depend on the dimensions of other plot elements: axes, legends, titles, etc. In a facetted plot, this gets
+#' even trickier: "OK, it has three panels each with aspect ratio 1.5, so that adds up to... wait, does every panel get
+#' its own y-axis, or just the leftmost one?".
+#'
+#' ggplot apparently computes absolute dimensions for everything except the panels, so the approach taken here is to build
+#' the plot inside a throwaway graphical device, subtract off the parts of the image area used by non-panel elements, then
+#' divide the remainder up between panels. One dimension will be constrained by the size of the throwaway device, and we can
+#' then calculate the other dimension from the panel aspect ratio.
+#'
+#' The biggest known issue with this approach is that it's inefficient, because we have to build the plot twice.
+#' I don't know of any way around this. Do you?
+#' @note For pixel-based formats such as PNG, the conversion between pixels and physical inch/mm dimensions is more complicated that it sounds.
+#' In particular, some image viewers will treat a high-dpi image as a very large but low-dpi image. See the "Details" section of png for more,
+#' but the upshot is that ggsave_fitmax always produces a raster image containing the right number of pixels to produce the requested physical
+#' dimensions if displayed at the specified dpi.
+#' @author Chris Black \email{chris@ckblack.org}
+#' @examples
+#' \dontrun{
+#' # Extract dimensions of an existing ggplot object:
+#' a=ggplot(mtcars, aes(wt,mpg))+geom_point()+theme(aspect.ratio=0.75)
+#' d=get_dims(a, maxheight=12, maxwidth=8)
+#' d
+#' # $height
+#' # [1] 6.138644
+#'
+#' # $width
+#' # [1] 8
+#'
+#' # ==> "Oops, right. we want this plot to be wider than it is tall."
+#'
+#' d=get_dims(a, maxheight=8, maxwidth=12)
+#' d
+#' # $height
+#' # [1] 8
+#'
+#' # $width
+#' # [1] 10.48181
+#'
+#' # Can now use these dimensions to set up correctly-shaped graphics output
+#' png("plot_of_a.png", height=d$height, width=d$width)
+#' plot(a)
+#' dev.off()
+#' }
+get_dims <- function(ggobj,
+                     maxheight,
+                     maxwidth = maxheight,
+                     units    = "in", ...) {
+
+  # Internal helper function:
+  # Treat all null units in a unit object as if they were inches.
+  # This is a bad idea in gneral, but I use it here as a workaround.
+  # Extracting unit names from non-atomic unit objects is a pain,
+  # so questions like "which rows of this table layout have null heights?"
+  # are hard to answer. To work around it, I exploit an (undocumented!)
+  # quirk: When calculating the size of a table layout inside a Grid plot,
+  # convertUnit(...) treats null units as zero.
+  # Therefore
+  #	(convertHeight(grob_height, "in", valueOnly=TRUE)
+  #	- convertHeight(null_as_if_inch(grob_height), "in", valueOnly=TRUE))
+  # does the inverse of convertUnit: It gives the sum of all *null* heights
+  # in the object, treating *fixed* units as zero.
+  #
+  # Warning: I repeat, this approach ONLY makes any sense if
+  #	convertUnit(unit(1, "null"), "in", "x", valueOnly=T) == 0
+  # is true. Please check that it is before calling this code.
+  .null_as_if_inch = function(u){
+    if(!grid::is.unit(u)) return(u)
+    if(is.atomic(u)){
+      if("null" %in% attr(u, "unit")){
+        d = attr(u, "data")
+        u = unit(
+          x=as.vector(u),
+          units=gsub("null", "in", attr(u, "unit")),
+          data=d)
+      }
+      return(u)
+    }
+    if(inherits(u, "unit.arithmetic")){
+      l = .null_as_if_inch(u$arg1)
+      r = .null_as_if_inch(u$arg2)
+      if(is.null(r)){
+        args=list(l)
+      }else{
+        args=list(l,r)
+      }
+      return(do.call(u$fname, args))
+    }
+    if(inherits(u, "unit.list")){
+      return(do.call(grid::unit.c, lapply(u, .null_as_if_inch)))
+    }
+    return(u)
+  }
+
+  if(inherits(ggobj, "ggplot") && !isTRUE(ggobj$respect) &&
+     is.null(ggobj$theme$aspect.ratio) && is.null(ggobj$coordinates$ratio) &&
+     is.null(ggplot2::theme_get()$aspect.ratio)) {
+    return(list(height = maxheight, width = maxwidth))
+  }
+
+  tmpf = tempfile(pattern = "dispos-a-plot", fileext = ".png")
+  png(filename = tmpf,
+      height   = maxheight,
+      width    = maxwidth,
+      units    = units,
+      res      = 120, ...)
+
+  on.exit({
+    dev.off()
+    unlink(tmpf)
+  })
+
+  if (inherits(ggobj, "ggplot")) {
+    g = ggplot2::ggplotGrob(ggobj)
+  } else if (inherits(ggobj, "gtable")) {
+    g = ggobj
+  } else {
+    stop("Don't know how to get sizes for object of class ", deparse(class(ggobj)))
+  }
+
+  stopifnot(grid::convertUnit(unit(1, "null"), "in", "x", valueOnly = TRUE) == 0)
+  known_ht = sum(grid::convertHeight(g$heights, units, valueOnly = TRUE))
+  known_wd = sum(grid::convertWidth(g$widths,   units, valueOnly = TRUE))
+  free_ht  = maxheight - known_ht
+  free_wd  = maxwidth  - known_wd
+  all_null_rowhts = (grid::convertHeight(.null_as_if_inch(g$heights),
+                                         "in", valueOnly = TRUE) - grid::convertHeight(g$heights,
+                                                                                       "in", valueOnly = TRUE))
+  all_null_colwds = (grid::convertWidth(.null_as_if_inch(g$widths),
+                                        "in", valueOnly = TRUE) - grid::convertWidth(g$widths,
+                                                                                     "in", valueOnly = TRUE))
+  null_rowhts = all_null_rowhts[all_null_rowhts > 0]
+  null_colwds = all_null_colwds[all_null_colwds > 0]
+  panel_asps = matrix(null_rowhts, ncol = 1) %*% matrix(1 / null_colwds, nrow = 1)
+  max_rowhts = free_ht/sum(null_rowhts) * null_rowhts
+  max_colwds = free_wd/sum(null_colwds) * null_colwds
+  rowhts_if_maxwd = max_colwds[1] * panel_asps[, 1]
+  colwds_if_maxht = max_rowhts[1]/panel_asps[1, ]
+  height = min(maxheight, known_ht + sum(rowhts_if_maxwd))
+  width  = min(maxwidth,  known_wd + sum(colwds_if_maxht))
+  return(list(height = height, width = width))
 }

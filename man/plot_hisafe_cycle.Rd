@@ -40,5 +40,6 @@ ggplot2::ggsave("water_cycle.png", water.plot)
 }
 }
 \seealso{
-Other hisafe analysis functions: \code{\link{plot_hisafe_use}}
+Other hisafe analysis functions: \code{\link{analyze_hisafe}},
+  \code{\link{plot_hisafe_use}}
 }

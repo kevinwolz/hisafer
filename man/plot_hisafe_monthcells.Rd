@@ -59,7 +59,7 @@ tile.plot2 <- plot_hisafe_monthcells(mydata, "monthDirectParIncident",
 
 # Once you have the plot object, you can display it and save it:
 tile.plot2
-ggplot2::ggsave("monthDirectParIncident.png", tile.plot2)
+ggsave_fitmax("monthDirectParIncident.png", tile.plot2)
 }
 }
 \seealso{

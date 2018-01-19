@@ -96,7 +96,7 @@ diag_hisafe_ts <- function(hop,
 
   ## Write plots to disk
   file.names <- paste0(profile, "_", var.names, ".png")
-  purrr::pwalk(list(file.names, plot.list), ggplot2::ggsave, path = ts.path, width = 11, height = 8.5)
+  purrr::pwalk(list(file.names, plot.list), ggsave_fitmax, path = ts.path, scale = 2)
 
   ## Invisibly return list of plot objects
   invisible(plot.list)
@@ -170,7 +170,7 @@ diag_hisafe_monthcells <- function(hop,
                              trees      = trees,
                              canopies   = canopies)
     file.names <- paste0("monthCells_year_simname_", var.names, ".png")
-    purrr::pwalk(list(file.names, plot.list1), ggplot2::ggsave, path = plot.dir1, scale = 2, width = 10, height = 10)
+    purrr::pwalk(list(file.names, plot.list1), ggsave_fitmax, path = plot.dir1, scale = 2)
   } else { plot.list1 <- list() }
 
   if("month.simname" %in% schemes){
@@ -186,7 +186,7 @@ diag_hisafe_monthcells <- function(hop,
                              trees      = trees,
                              canopies   = canopies)
     file.names <- paste0("monthCells_month_simname_", var.names, ".png")
-    purrr::pwalk(list(file.names, plot.list2), ggplot2::ggsave, path = plot.dir2, scale = 2, height = 10, width = 10)
+    purrr::pwalk(list(file.names, plot.list2), ggsave_fitmax, path = plot.dir2, scale = 2)
   } else { plot.list2 <- list() }
 
   plot.list3.tog <- list()
@@ -210,7 +210,7 @@ diag_hisafe_monthcells <- function(hop,
       file.names <- paste0("monthCells_month_year_", sim.name, "_", var.names, ".png")
       file.names <- file.names[!bad.plot.check]
 
-      purrr::pwalk(list(file.names, plot.list3), ggplot2::ggsave, path = plot.dir3, scale = 2, height = 10, width = 10)
+      purrr::pwalk(list(file.names, plot.list3), ggsave_fitmax, path = plot.dir3, scale = 2)
       plot.list3.tog <- c(plot.list3.tog, plot.list3)
     }
   }
@@ -271,7 +271,7 @@ diag_hisafe_annualcrop <- function(hop,
                           trees      = trees,
                           canopies   = canopies)
   file.names <- paste0("annualcrop_", var.names, ".png")
-  purrr::pwalk(list(file.names, plot.list), ggplot2::ggsave, path = annualcrop.path, scale = 2, width = 10, height = 10)
+  purrr::pwalk(list(file.names, plot.list), ggsave_fitmax, path = annualcrop.path, scale = 2)
 
   ## Invisibly return list of plot objects
   invisible(plot.list)

@@ -42,7 +42,7 @@ tile.plot <- plot_hisafe_annualcrop(mydata, "yieldMax")
 
 # Once you have the plot object, you can display it and save it:
 tile.plot
-ggplot2::ggsave("yield.png", tile.plot)
+ggsave_fitmax("yield.png", tile.plot)
 }
 }
 \seealso{

@@ -32,7 +32,7 @@ If \code{NULL}, the default, then the default color palette is a color-blind-fri
 \item{linetype.palette}{A character stirng of values defining the linetype palette to use in plots with multiple simulations.
 If \code{NULL}, the default, then solid lines are used for all simulations. The default supports up to 24 simulations.}
 
-\item{aes.cols}{A list with arguments "color" and "linetype" containing character stirngs of the column names to use for plot aesthetics.}
+\item{aes.cols}{A list with arguments "color" and "linetype" containing character strings of the column names to use for plot aesthetics.}
 
 \item{facet.year}{A logical indicating whether, for daily profiles, the plot should be faceted by year. This helps with seeing finer level detail.}
 

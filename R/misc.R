@@ -278,3 +278,107 @@ hop_date_filter <- function(hop, date.min = NA, date.max = NA) {
   for(i in profiles) { hop[[i]] <- dplyr::filter(hop[[i]], Date %in% seq(date.min, date.max, 1)) }
   return(hop)
 }
+
+#' Shortcut to Hi-sAFe analysis
+#' @description Runs the various Hi-sAFe analysis/plot functions from a single call.
+#' @return Invisibly returns \code{TRUE}.
+#' @param hop A object of class hop or face.
+#' @param carbon Logical indicating if annual carbon plot should be made.
+#' @param light Logical indicating if annual light plot should be made.
+#' @param nitrogen Logical indicating if annual nitrogen plot should be made.
+#' @param water Logical indicating if annual water plot should be made.
+#' @param light.daily Logical indicating if daily light plots should be made.
+#' @param nitrogen.daily Logical indicating if daily nitrogens plot should be made.
+#' @param water.daily Logical indicating if daily water plots should be made.
+#' @param annualtree Logical indicating if annualtree profile diagnostic plots should be made.
+#' @param annualplot Logical indicating if annualplot profile diagnostic plots should be made.
+#' @param trees Logical indicating if trees profile diagnostic plots should be made.
+#' @param plot Logical indicating if plot profile diagnostic plots should be made.
+#' @param climate Logical indicating if climate profile diagnostic plots should be made.
+#' @param annualcrop Logical indicating if annualcrop profile diagnostic plots should be made.
+#' @param monthCells Logical indicating if monthCells profile diagnostic plots should be made.
+#' @param ... Other arguments passed to \code{\link{plot_hisafe_ts}}.
+#' @export
+#' @family hisafe analysis functions
+#' @examples
+#' \dontrun{
+#' analyze_hisafe(myhop)
+#' }
+analyze_hisafe <- function(hop,
+                           carbon          = TRUE,
+                           light           = TRUE,
+                           nitrogen        = FALSE,
+                           water           = FALSE,
+                           light.daily     = TRUE,
+                           nitrogen.daily  = FALSE,
+                           water.daily     = FALSE,
+                           annualtree      = TRUE,
+                           annualplot      = TRUE,
+                           trees           = TRUE,
+                           plot            = TRUE,
+                           climate         = TRUE,
+                           annualcrop      = TRUE,
+                           monthCells      = TRUE, ...) {
+
+  if(!("hop" %in% class(hop))) stop("hop argument is not of class hop", call. = FALSE)
+  if(!all(is.logical(c(carbon, light, nitrogen, water,
+                       light.daily, nitrogen.daily, water.daily,
+                       annualtree, annualplot, trees, plot, climate, annualcrop, monthCells)))) {
+    stop("all arguments except for hop must be logicals", call. = FALSE)
+  }
+
+  profiles.to.check <- names(hop)[!(names(hop) %in% c("variables", "plot.info", "tree.info", "exp.plan", "path", "exp.path"))]
+  profiles.avail <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
+  profiles.todo  <- c("annualtree", "annualplot", "trees", "plot", "climate")[c(annualtree, annualplot, trees, plot, climate)]
+  profiles.todo  <- profiles.avail[profiles.avail %in% profiles.todo]
+  annual.cycles.todo <- c("carbon", "light", "nitrogen", "water")[c(carbon, light, nitrogen, water)]
+  daily.cycles.todo  <- c("light", "nitrogen", "water")[c(light.daily, nitrogen.daily, water.daily)]
+
+  dir.create(clean_path(paste0(hop$exp.path, "/analysis/cycles/")), showWarnings = FALSE, recursive = TRUE)
+
+  ## ANNUAL CYCLES
+  if(length(annual.cycles.todo) >= 1) {
+    cat("\n-- Plotting annual cycles")
+    annual.cycle.plots <- purrr::map(annual.cycles.todo,
+                                     plot_hisafe_cycle,
+                                     hop = hop)
+    purrr::walk2(paste0(hop$exp.path, "/analysis/cycles/", annual.cycles.todo, ".png"),
+                 annual.cycle.plots,
+                 ggsave_fitmax,
+                 scale = 2)
+  }
+
+  ## DAILY CYCLES
+  if(length(daily.cycles.todo) >= 1) {
+    cat("\n-- Plotting daily cycles")
+    for(cycle in daily.cycles.todo) {
+      daily.cycle.plots <- purrr::map(hop$exp.plan$SimulationName,
+                                      plot_hisafe_use,
+                                      hop   = hop,
+                                      cycle = cycle,
+                                      years = "all")
+      purrr::walk2(paste0(hop$exp.path, "/analysis/cycles/", cycle, "_", hop$exp.plan$SimulationName, ".png"),
+                   daily.cycle.plots,
+                   ggsave_fitmax,
+                   scale = 2)
+    }
+  }
+
+  ## DIAGNOSTIC PLOTS
+  if(length(profiles.todo) >= 1) {
+    cat("\n-- Plotting annual and daily profile diagnostics")
+    purrr::walk(profiles.todo, diag_hisafe_ts, hop = hop, ...)
+  }
+
+  if(annualcrop) {
+    cat("\n-- Plotting annualcrop diagnostics")
+    diag_hisafe_annualcrop(hop)
+  }
+
+  if(monthCells) {
+    cat("\n-- Plotting monthCells diagnostics")
+    diag_hisafe_monthcells(hop)
+  }
+
+  invisible(TRUE)
+}

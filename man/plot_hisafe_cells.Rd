@@ -32,7 +32,7 @@ tile.plot <- plot_hisafe_cells(mydata, "relativeDirectParIncident", paste(1998, 
 
 # Once you have the plot object, you can display it and save it:
 tile.plot
-ggplot2::ggsave("tiled_relativeDirectParIncident.png", tile.plot)
+ggsave_fitmax("tiled_relativeDirectParIncident.png", tile.plot)
 }
 }
 \seealso{

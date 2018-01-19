@@ -173,11 +173,11 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
     theme(legend.position = "right")
 
   if(!is.null(output.path)){
-    ggsave(filename = clean_path(paste0(output.path, "/support/", EXP.PLAN$SimulationName, "_Scene.pdf")),
-           plot     = plot.obj,
-           scale    = 1,
-           height   = ifelse(WIDTH > HEIGHT, 8.5, 11),
-           width    = ifelse(WIDTH > HEIGHT, 11,  8.5))
+    ggsave_fitmax(filename = clean_path(paste0(output.path, "/support/", EXP.PLAN$SimulationName, "_Scene.pdf")),
+                  plot     = plot.obj)
+                  #scale    = 1,
+                  #height   = ifelse(WIDTH > HEIGHT, 8.5, 11),
+                  #width    = ifelse(WIDTH > HEIGHT, 11,  8.5))
   }
   return(plot.obj)
 }
