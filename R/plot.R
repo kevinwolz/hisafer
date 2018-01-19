@@ -11,9 +11,9 @@
 #' @param tree.ids A numeric vector indicating a subset of tree ids to plot. Use "all" to include all available values.
 #' @param doy.lim A numeric vector of length two providing the \code{c(minimum, maximum)} of julian days to plot. Only applies if \code{profile} is a daily profile.
 #' @param color.palette A character stirng of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
-#' If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette. The default supports up to 24 simulations.
+#' If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette. The default supports up to 48 simulations.
 #' @param linetype.palette A character stirng of values defining the linetype palette to use in plots with multiple simulations.
-#' If \code{NULL}, the default, then solid lines are used for all simulations. The default supports up to 24 simulations.
+#' If \code{NULL}, the default, then solid lines are used for all simulations. The default supports up to 48 simulations.
 #' @param aes.cols A list with arguments "color" and "linetype" containing character strings of the column names to use for plot aesthetics.
 #' @param facet.year A logical indicating whether, for daily profiles, the plot should be faceted by year. This helps with seeing finer level detail.
 #' @param crop.points Logical indicating if points should be plotted as well, with point shape desgnating the main crop name.
@@ -144,9 +144,9 @@ plot_hisafe_ts <- function(hop,
   plot.data[[aes.cols$linetype]] <- factor(plot.data[[aes.cols$linetype]])
 
   ## Palettes
-  if(is.null(color.palette)) color.palette <- rep(c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7"), 3)
+  if(is.null(color.palette)) color.palette <- rep(c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7"), 6)
   if(aes.cols$color == aes.cols$linetype)  {
-    if(is.null(linetype.palette))  linetype.palette <- rep(c("solid", "dashed", "dotted"), each = 8)
+    if(is.null(linetype.palette))  linetype.palette <- rep(1:6, each = 8)
     scale_linetype <- scale_linetype_manual(values = linetype.palette)
   } else {
     scale_linetype <- scale_linetype_discrete()

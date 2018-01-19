@@ -27,10 +27,10 @@ If 'trees', 'plot', or 'climate', daily timeseries are created.}
 \item{doy.lim}{A numeric vector of length two providing the \code{c(minimum, maximum)} of julian days to plot. Only applies if \code{profile} is a daily profile.}
 
 \item{color.palette}{A character stirng of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
-If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette. The default supports up to 24 simulations.}
+If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette. The default supports up to 48 simulations.}
 
 \item{linetype.palette}{A character stirng of values defining the linetype palette to use in plots with multiple simulations.
-If \code{NULL}, the default, then solid lines are used for all simulations. The default supports up to 24 simulations.}
+If \code{NULL}, the default, then solid lines are used for all simulations. The default supports up to 48 simulations.}
 
 \item{aes.cols}{A list with arguments "color" and "linetype" containing character strings of the column names to use for plot aesthetics.}
 
