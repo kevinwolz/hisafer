@@ -4,12 +4,26 @@
 \alias{hisafe_params}
 \title{Display supported Hi-sAFe input parameters}
 \usage{
-hisafe_params(variable = "names", template = "agroforestry_default")
+hisafe_params(variable = "names", search = FALSE,
+  template = "agroforestry_default")
 }
 \arguments{
 \item{variable}{If "names", the default, then just the names of supported Hi-sAFe parameters is printed to the console.
 If "all", then the names, default values, and accepted/suggested ranges of supported Hi-sAFe parameters is printed.
 Can also be a character vector of specific Hi-sAFe parameters of which to display details.}
+
+\item{search}{Logical indicating whether \code{variable} should be treated as a regular expression and
+searched for in the parameter names rather than matched literally.}
+
+\item{template}{A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
+hisafer comes with three "default" templates than can be used by specificying specific character strings:
+\itemize{
+ \item{"agroforestry_default"}{ - An agroforestry template based on the calibration simulation of Hi-sAFe using the Restinclieres A2
+ walnut-wheat agroforestry plot in Montpellier, France. Spacing is 13m between rows and 8m within rows.}
+ \item{"forestry_default"}{ - Walnut plantation forestry at tigher tree spacing of 5m between row and 3m within rows.
+ Crop is grass in all cells except for where the tree trunk is. Serves as a forestry control.}
+ \item{"monocrop_default"}{ - No trees. A scene with just a single cell of wheat. Serves as a monocrop control.}
+}}
 }
 \value{
 Invisibly returns an alphebetized character vector of the names of supported Hi-sAFe prameters.

@@ -35,6 +35,17 @@ hisafe_info <- function(capsis.path) {
 #' @param variable If "names", the default, then just the names of supported Hi-sAFe parameters is printed to the console.
 #' If "all", then the names, default values, and accepted/suggested ranges of supported Hi-sAFe parameters is printed.
 #' Can also be a character vector of specific Hi-sAFe parameters of which to display details.
+#' @param search Logical indicating whether \code{variable} should be treated as a regular expression and
+#' searched for in the parameter names rather than matched literally.
+#' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
+#' hisafer comes with three "default" templates than can be used by specificying specific character strings:
+#' \itemize{
+#'  \item{"agroforestry_default"}{ - An agroforestry template based on the calibration simulation of Hi-sAFe using the Restinclieres A2
+#'  walnut-wheat agroforestry plot in Montpellier, France. Spacing is 13m between rows and 8m within rows.}
+#'  \item{"forestry_default"}{ - Walnut plantation forestry at tigher tree spacing of 5m between row and 3m within rows.
+#'  Crop is grass in all cells except for where the tree trunk is. Serves as a forestry control.}
+#'  \item{"monocrop_default"}{ - No trees. A scene with just a single cell of wheat. Serves as a monocrop control.}
+#' }
 #' @export
 #' @family hisafe helper functions
 #' @examples
@@ -43,10 +54,11 @@ hisafe_info <- function(capsis.path) {
 #' hisafe_params("cellWidth") # details of cellWidth parameter
 #' hisafe_params("all")       # details of all parameters
 #' }
-hisafe_params <- function(variable = "names", template = "agroforestry_default") {
+hisafe_params <- function(variable = "names", search = FALSE, template = "agroforestry_default") {
 
-  if(!is.character(variable))                           stop("variable argument must be a character vector",             call. = FALSE)
-  if(!(is.character(template) & length(template) == 1)) stop("template argument must be a character vector of length 1", call. = FALSE)
+  if(!is.character(variable))                           stop("variable argument must be a character vector",                call. = FALSE)
+  if(!(is.character(template) & length(template) == 1)) stop("template argument must be a character vector of length 1",    call. = FALSE)
+  if(search & length(variable) > 1)                     stop("search = TRUE is only possible with a single variable input", call. = FALSE)
 
   TEMPLATE_PARAMS <- get_template_params(get_template_path(template))
   PARAM_NAMES     <- sort(unlist(get_param_names(TEMPLATE_PARAMS), use.names = FALSE))
@@ -55,7 +67,15 @@ hisafe_params <- function(variable = "names", template = "agroforestry_default")
   acceptable <- c(PARAM_NAMES, "names", "all")
   if(any(!(variable %in% acceptable))) {
     bad.vars <- sort(variable[!(variable %in% acceptable)])
-    stop(paste0("The following are not supported Hi-sAFe input parameters: ", bad.vars), call. = FALSE)
+    close.matches  <- purrr::map(bad.vars, stringdist::stringdist, b = PARAM_NAMES)
+    suggested.vars <- PARAM_NAMES[unlist(purrr::map(close.matches, which.min))]
+    if(!search){
+      stop(paste0("The following are not supported Hi-sAFe input parameters: ", paste(bad.vars, collapse = ", "),
+                  "\n       Did you mean: ", paste(suggested.vars, collapse = " or "), "?"), call. = FALSE)
+    } else {
+      cat(paste0("The following are not supported Hi-sAFe input parameters: ", paste(bad.vars, collapse = ", "),
+                 "\n Parameter names will be searched for these as regular expressions."))
+    }
   }
 
   if(variable[1] == "all") {
@@ -77,18 +97,25 @@ hisafe_params <- function(variable = "names", template = "agroforestry_default")
     cat(paste0(PARAM_NAMES, collapse = "\n"))
   } else {
     for(i in 1:length(variable)){
-      var.def <- dplyr::filter(PARAM.DEFS, name == variable[i])
-      if(i == 1) { cat(variable[i]) } else { cat("\n\n", variable[i]) }
-      if("tbl" %in% class(PARAM_DEFAULTS[[variable[i]]])){
-        cat("\n  -- Default:\n")
-        print(PARAM_DEFAULTS[[variable[i]]])
+      if(search) {
+        var.def <- dplyr::filter(PARAM.DEFS, stringr::str_detect(name, variable[i]))
+        if(nrow(var.def) == 0) stop(paste(variable[i], "was not detected in any Hi-sAFe input parameter names"), call. = FALSE)
       } else {
-        cat("\n  -- Default:", paste0(PARAM_DEFAULTS[[variable[i]]], collapse = ", "))
+        var.def <- dplyr::filter(PARAM.DEFS, name == variable[i])
       }
-      cat("\n  -- Definition:", var.def$definition)
-      cat("\n  -- Units: ", var.def$unit, " (", var.def$type, ")", sep = "")
-      if(!all(is.na(c(var.def$min, var.def$max)))) cat("\n  -- Accepted Range: [", paste0(c(var.def$min, var.def$max), collapse = ", "), "] ", sep = "")
-      if(!all(is.na(var.def$accepted)))            cat("\n  -- Accepted Values: ", paste0(var.def$accepted, collapse = ", "))
+      for(j in 1:nrow(var.def)){
+        cat("\n\n", var.def$name[j])
+        if("tbl" %in% class(PARAM_DEFAULTS[[var.def$name[j]]])){
+          cat("\n  -- Default:\n")
+          print(PARAM_DEFAULTS[[var.def$name[j]]])
+        } else {
+          cat("\n  -- Default:", paste0(PARAM_DEFAULTS[[var.def$name[j]]], collapse = ", "))
+        }
+        cat("\n  -- Definition:", var.def$definition[j])
+        cat("\n  -- Units: ", var.def$unit[j], " (", var.def$type[j], ")", sep = "")
+        if(!all(is.na(c(var.def$min[j], var.def$max[j])))) cat("\n  -- Accepted Range: [", paste0(c(var.def$min[j], var.def$max[j]), collapse = ", "), "] ", sep = "")
+        if(!all(is.na(var.def$accepted[j])))               cat("\n  -- Accepted Values: ", paste0(var.def$accepted[j], collapse = ", "))
+      }
     }
   }
   invisible(PARAM_NAMES)

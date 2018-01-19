@@ -23,7 +23,6 @@
 #'  Crop is grass in all cells except for where the tree trunk is. Serves as a forestry control.}
 #'  \item{"monocrop_default"}{ - No trees. A scene with just a single cell of wheat. Serves as a monocrop control.}
 #' }
-#' If "default", then the default template inluded with hisafer (i.e. the files used for Hi-sAFe calibtation) will be used.
 #' @param factorial If \code{FALSE}, the default, then supplied input values are recycled (i.e. such as for default behavior of \code{\link{data.frame}}).
 #' If \code{TRUE}, then a factorial experiment is created, in which an experiment is defined for each possible combination of supplied values.
 #' @param force Logical indicating wether the supplied values should be forced past the constraint checks. Use \code{TRUE} for development only.

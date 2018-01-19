@@ -24,8 +24,7 @@ hisafer comes with three "default" templates than can be used by specificying sp
  \item{"forestry_default"}{ - Walnut plantation forestry at tigher tree spacing of 5m between row and 3m within rows.
  Crop is grass in all cells except for where the tree trunk is. Serves as a forestry control.}
  \item{"monocrop_default"}{ - No trees. A scene with just a single cell of wheat. Serves as a monocrop control.}
-}
-If "default", then the default template inluded with hisafer (i.e. the files used for Hi-sAFe calibtation) will be used.}
+}}
 
 \item{factorial}{If \code{FALSE}, the default, then supplied input values are recycled (i.e. such as for default behavior of \code{\link{data.frame}}).
 If \code{TRUE}, then a factorial experiment is created, in which an experiment is defined for each possible combination of supplied values.}
