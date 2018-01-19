@@ -4,12 +4,12 @@
 \alias{build_cluster_script}
 \title{Builds a cluster shell script}
 \usage{
-build_cluster_script(simu.name, script.path, cluster.path, email,
-  num.cores = length(simu.name))
+build_cluster_script(hip = NULL, simu.names = NULL, script.path = NULL,
+  cluster.path, email, num.cores = 1)
 }
 \arguments{
-\item{simu.name}{A character string of the name of the simulation to create the script for.
-This must match the name of .SIM file as well as the name of the folder that file is in.}
+\item{simu.names}{A character vector of the names of the simulations to create the script for.
+This must match the names of .SIM files as well as the names of the folders that files are in.}
 
 \item{script.path}{A character string of the local path for where to create the cluster script file.}
 
