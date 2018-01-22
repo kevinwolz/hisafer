@@ -86,6 +86,13 @@ read_hisafe <- function(hip           = NULL,
     }
   }
 
+  ## Check for existance of all simualation folders
+  simu.paths <- clean_path(paste0(path, "/" , simu.names))
+  if(!all(purrr::map_lgl(simu.paths, dir.exists))) {
+    missing_simus <- simu.names[!purrr::map_lgl(simu.paths, dir.exists)]
+    stop(paste("the following simulations do not exist in the specified path:", paste(missing_simus, collapse = ", ")), call. = FALSE)
+  }
+
   ## Read all data from all simulations & combine
   data <- purrr::map(simu.names,
                      read_simulation,
@@ -293,16 +300,16 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, max.s
   }
 
   ## Creatd output list & assign class
-  output <- list(annualtree = distinct(annualtree.dv$data),
-                 annualcrop = distinct(annualcrop.dv$data),
-                 annualplot = distinct(clean_crop_name(annualplot.dv$data)),
-                 trees      = distinct(trees.dv$data),
-                 plot       = distinct(clean_crop_name(plot.dv$data)),
-                 climate    = distinct(climate.dv$data),
-                 monthCells = distinct(monthCells.dv$data),
-                 cells      = distinct(cells.dv$data),
-                 roots      = distinct(roots.dv$data),
-                 voxels     = distinct(voxels.dv$data),
+  output <- list(annualtree = dplyr::distinct(annualtree.dv$data),
+                 annualcrop = dplyr::distinct(annualcrop.dv$data),
+                 annualplot = dplyr::distinct(clean_crop_name(annualplot.dv$data)),
+                 trees      = dplyr::distinct(trees.dv$data),
+                 plot       = dplyr::distinct(clean_crop_name(plot.dv$data)),
+                 climate    = dplyr::distinct(climate.dv$data),
+                 monthCells = dplyr::distinct(monthCells.dv$data),
+                 cells      = dplyr::distinct(cells.dv$data),
+                 roots      = dplyr::distinct(roots.dv$data),
+                 voxels     = dplyr::distinct(voxels.dv$data),
                  variables  = variables,
                  plot.info  = plot.info,
                  tree.info  = read_tree_info(path, simu.name),
