@@ -8,7 +8,7 @@ diag_hisafe_monthcells(hop, output.path = NULL, schemes = c("year.simname",
   "month.simname", "month.year"), trees = TRUE, canopies = TRUE)
 }
 \arguments{
-\item{hop}{An object of class "hop" or "hop-group" containing output data from one or more Hi-sAFe simulations.}
+\item{hop}{An object of class "hop" or "face" containing output data from one or more Hi-sAFe simulations.}
 
 \item{output.path}{A character stting indicating the path to the directory where plots should be saved. Plots are
 saved in a subdirectory within this directory named /monthCells/facetScheme.
@@ -37,7 +37,7 @@ Month~Year plots are for all 12 months and every 5 years from 0:max, with each s
 \examples{
 \dontrun{
 # After reading in Hi-sAFe simulation data via:
-mydata <- read_hisafe(path = "./")
+mydata <- read_hisafe(path = "mydir", simu.names = "MySimulation")
 
 # You can create tile plots of every monthCells variable:
 diag_hisafe_monthcells(mydata)
@@ -45,5 +45,6 @@ diag_hisafe_monthcells(mydata)
 }
 \seealso{
 Other hisafe diagnostic fucntions: \code{\link{diag_hisafe_annualcrop}},
-  \code{\link{diag_hisafe_ts}}
+  \code{\link{diag_hisafe_ts}},
+  \code{\link{diag_hisafe_voxels}}
 }

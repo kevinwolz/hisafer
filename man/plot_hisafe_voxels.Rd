@@ -4,16 +4,33 @@
 \alias{plot_hisafe_voxels}
 \title{Tile plot of Hi-sAFe voxels output variable}
 \usage{
-plot_hisafe_voxels(hop, variable, dates, plot = TRUE)
+plot_hisafe_voxels(hop, variable, date.min = NA, date.max = NA, X = NA,
+  Y = NA, Z = NA, summarize.by = "z", vline.dates = NA, plot = TRUE)
 }
 \arguments{
 \item{hop}{An object of class hop.}
 
-\item{variable}{A character string of the name of the variable to color the tiles.}
+\item{variable}{A character string of the name of the variable to plot.}
 
-\item{dates}{A character vector containing the dates (yyyy-mm-dd) to include.}
+\item{date.min}{A character vector containing the minimum date (yyyy-mm-dd) to include.
+If \code{NA}, the default, than the minimum value in the voxels profile is used}
+
+\item{date.max}{A character vector containing the minimum date (yyyy-mm-dd) to include.
+If \code{NA}, the default, than the maximum value in the voxels profile is used}
+
+\item{summarize.by}{One of 'x', 'y', or 'z', indicating  an axis over which to average voxel values.
+If \code{NA}, the default, then now averaging is done and each voxel is plotted as its own line.}
+
+\item{vline.dates}{A character vector of dates (yyyy-mm-dd) at which to plot dashed vertical reference lines.
+If \code{NA}, the default, then no reference lines are drawn.}
 
 \item{plot}{If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.}
+
+\item{x}{A numeric vector of the x values of the voxels to include. If \code{NA}, the default, then all x values are used.}
+
+\item{y}{A numeric vector of the y values of the voxels to include. If \code{NA}, the default, then all y values are used.}
+
+\item{z}{A numeric vector of the z values of the voxels to include. If \code{NA}, the default, then all z values are used.}
 }
 \value{
 Returns ggplot object.

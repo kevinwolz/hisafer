@@ -375,11 +375,11 @@ read_hisafe_output_file <- function(profile){
 read_table_hisafe <- function(file, ...) {
   # using read.table rather readr::read_table because read_table is not working
   dplyr::as_tibble(read.table(file,
-                              header = TRUE,
-                              sep = "\t",
+                              header           = TRUE,
+                              sep              = "\t",
                               stringsAsFactors = FALSE,
-                              na.strings = c("NA", "error!", "NaN"), # "error!" is output by HISAFE & causes table merge errors if left; "NaN" output causes plot problems
-                              encoding = "latin1", ...))
+                              na.strings       = c("NA", "error!", "NaN"), # "error!" is output by HISAFE & causes table merge errors if left; "NaN" output causes plot problems
+                              encoding         = "latin1", ...))
 }
 
 #' Read a Hi-sAFe output profile
@@ -392,8 +392,8 @@ read_profile <- function(profile, path, show.progress = TRUE, max.size = 3e8) {
   file <- paste0(path, profile, ".txt")
   if(show.progress) cat(paste0("\n   -- reading:  ", profile, collapse = ", "))
   if(file.info(file)$size < max.size) {
-    profile.list      <- read_hisafe_output_file(file)
-    profile.data      <- profile.list$data %>%
+    profile.list <- read_hisafe_output_file(file)
+    profile.data <- profile.list$data %>%
       dplyr::mutate_if(is.logical, as.numeric)   # columns read as logical must be coered to numeric to prevent plotting errors
     profile.variables <- profile.list$variables %>% dplyr::mutate(VariableClass = profile)
   } else {

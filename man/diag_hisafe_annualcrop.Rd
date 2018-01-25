@@ -8,7 +8,7 @@ diag_hisafe_annualcrop(hop, output.path = NULL, trees = TRUE,
   canopies = TRUE)
 }
 \arguments{
-\item{hop}{An object of class "hop" or "hop-group" containing output data from one or more Hi-sAFe simulations.}
+\item{hop}{An object of class "hop" or "face" containing output data from one or more Hi-sAFe simulations.}
 
 \item{output.path}{A character stting indicating the path to the directory where plots should be saved. Plots are
 saved in a subdirectory within this directory named /annualcrop
@@ -27,7 +27,7 @@ Creates a tile plot of every Hi-sAFe annualcrop output variable. All plots are s
 \examples{
 \dontrun{
 # After reading in Hi-sAFe simulation data via:
-mydata <- read_hisafe(path = "./")
+mydata <- read_hisafe(path = "mydir", simu.names = "MySimulation")
 
 # You can create tile plots of every annualcrop variable:
 diag_hisafe_annualcrop(mydata)
@@ -35,5 +35,6 @@ diag_hisafe_annualcrop(mydata)
 }
 \seealso{
 Other hisafe diagnostic fucntions: \code{\link{diag_hisafe_monthcells}},
-  \code{\link{diag_hisafe_ts}}
+  \code{\link{diag_hisafe_ts}},
+  \code{\link{diag_hisafe_voxels}}
 }

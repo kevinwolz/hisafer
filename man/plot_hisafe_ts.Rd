@@ -5,9 +5,9 @@
 \title{Plot timeseries of Hi-sAFe output variable}
 \usage{
 plot_hisafe_ts(hop, variable, profile, simu.names = "all", years = "all",
-  tree.ids = "all", doy.lim = c(1, 366), color.palette = NULL,
-  linetype.palette = NULL, aes.cols = list(color = "SimulationName",
-  linetype = "SimulationName"), facet.year = TRUE, crop.points = FALSE,
+  tree.ids = "all", doy.lim = c(1, 366), color.palette = NA,
+  linetype.palette = NA, aes.cols = list(color = "SimulationName", linetype
+  = "SimulationName"), facet.year = TRUE, crop.points = FALSE,
   plot = TRUE)
 }
 \arguments{
@@ -15,7 +15,7 @@ plot_hisafe_ts(hop, variable, profile, simu.names = "all", years = "all",
 
 \item{variable}{A character string of the name of the variable to plot.}
 
-\item{profile}{The profile for which to plot a timeseries. If 'annualtree' or 'annualplot', annual timeseries are created.
+\item{profile}{A character string of the profile for which to plot a timeseries. If 'annualtree' or 'annualplot', annual timeseries are created.
 If 'trees', 'plot', or 'climate', daily timeseries are created.}
 
 \item{simu.names}{A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.}
@@ -26,11 +26,11 @@ If 'trees', 'plot', or 'climate', daily timeseries are created.}
 
 \item{doy.lim}{A numeric vector of length two providing the \code{c(minimum, maximum)} of julian days to plot. Only applies if \code{profile} is a daily profile.}
 
-\item{color.palette}{A character stirng of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
-If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette. The default supports up to 48 simulations.}
+\item{color.palette}{A character string of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
+If \code{NA}, the default, then the default color palette is a color-blind-friendly color palette. The default supports up to 48 simulations.}
 
-\item{linetype.palette}{A character stirng of values defining the linetype palette to use in plots with multiple simulations.
-If \code{NULL}, the default, then solid lines are used for all simulations. The default supports up to 48 simulations.}
+\item{linetype.palette}{A character string of values defining the linetype palette to use in plots with multiple simulations.
+If \code{NA}, the default, then solid lines are used for all simulations. The default supports up to 48 simulations.}
 
 \item{aes.cols}{A list with arguments "color" and "linetype" containing character strings of the column names to use for plot aesthetics.}
 
