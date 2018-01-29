@@ -711,7 +711,7 @@ plot_hisafe_voxels <- function(hop,
          caption  = plot.caption) +
     facet_wrap(~SimulationName) +
     scale_x_date(date_labels = "%d %b %Y") +
-    geom_line() +
+    geom_line(na.rm = TRUE) +
     scale_color_manual(values    = rep(c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7"), 6)) +
     scale_linetype_manual(values = rep(1:6, each = 8)) +
     theme_hisafe_ts() +
