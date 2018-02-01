@@ -47,16 +47,15 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
 
   mainCropSpecies  <- gsub("\\.plt", "", USED_PARAMS$mainCropSpecies$value[[1]][1])
   interCropSpecies <- gsub("\\.plt", "", USED_PARAMS$interCropSpecies$value[[1]][1])
-  toric <- c(USED_PARAMS$toreXp$value, USED_PARAMS$toreXn$value, USED_PARAMS$toreYp$value, USED_PARAMS$toreYn$value)
+  toric <- c(USED_PARAMS$toricXp$value, USED_PARAMS$toricXn$value, USED_PARAMS$toricYp$value, USED_PARAMS$toricYn$value)
   toric.lab <- ifelse(any(toric == 1), paste(c("Xp", "Xn", "Yp", "Yn")[as.logical(toric)], collapse = ","), "off")
 
   ## Calculate total soil depth
-  soil.depth <- sum(USED_PARAMS$layers$value$thickness)
+  soil.depth <- sum(USED_PARAMS$layers$value[[1]]$thickness)
 
   if(USED_PARAMS$nbTrees$value != 0) {
     ## Extract tree data
-    tree.init <- USED_PARAMS$tree.initialization$value
-    if("list" %in% class(tree.init)) tree.init <- tree.init[[1]]
+    tree.init <- USED_PARAMS$tree.initialization$value[[1]]
     tree.plot.data <- tree.data <- tree.init %>%
       dplyr::mutate(x = treeX, y = treeY) %>%
       dplyr::select(species, x, y)
@@ -176,18 +175,18 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
   }
 
   plot.obj <- ggplot(plot.data, aes(x = x, y = y)) +
-    labs(x = paste0(WIDTH, "m"),
-         y = paste0(HEIGHT, "m"),
-         color = "",
-         fill = "",
-         title = paste("Scene:", EXP.PLAN$SimulationName),
-         caption = paste0("Latitude: ", USED_PARAMS$latitude$value,
-                          " - Orientation: ", USED_PARAMS$treeLineOrientation$value,
-                          "\nCell width: ", USED_PARAMS$cellWidth$value,
-                          "m - Soil depth: ", soil.depth, "m",
-                          "\nSlope aspect: ", USED_PARAMS$slopeAspect$value,
+    labs(x       = paste0(WIDTH, "m"),
+         y       = paste0(HEIGHT, "m"),
+         color   = "",
+         fill    = "",
+         title   = paste("Scene:", EXP.PLAN$SimulationName),
+         caption = paste0("Latitude: ",           USED_PARAMS$latitude$value,
+                          " - Orientation: ",     USED_PARAMS$treeLineOrientation$value,
+                          "\nCell width: ",       USED_PARAMS$cellWidth$value,
+                          "m - Soil depth: ",     soil.depth, "m",
+                          "\nSlope aspect: ",     USED_PARAMS$slopeAspect$value,
                           " - Slope intensity: ", USED_PARAMS$slopeIntensity$value,
-                          "\nToric symmetry: ", toric.lab)) +
+                          "\nToric symmetry: ",   toric.lab)) +
     scale_x_continuous(expand = c(0,0)) +
     scale_y_continuous(expand = c(0,0)) +
     geom_tile(color = "black", aes(fill = crop)) +
@@ -195,7 +194,7 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
     geom_point(data = tree.plot.data, size = 10, aes(color = species), na.rm = TRUE) +
     geom_point(data = tree.plot.data, shape = 21, size = 10, na.rm = TRUE) +
     scale_color_manual(values = c("black", "grey70", "grey30", "grey50")) +
-    scale_fill_manual(values = c("white", "grey80")) +
+    scale_fill_manual(values  = c("white", "grey80")) +
     coord_equal() +
     theme_hisafe_tile() +
     theme(legend.position = "right")
