@@ -243,34 +243,47 @@ get_param_vals <- function(x, type) {
   return(c(sim.vals, pld.vals, tree.vals, hisafe.vals, stics.vals))
 }
 
-#' Gets the parameter actually used
-#' @description Gets the parameter actually used (i.e. the default or the defined)
-#' @return The value of the parameter
-#' @param variable A character string of the name of the variable to check.
-#' @param hip A "hip" object
-#' @param template.defaults A list containing the default values for all parameters.
-get_used_param <- function(variable, exp.plan, template.defaults, template.commented) {
-  if(variable %in% names(exp.plan)){
-    val <- exp.plan[[variable]]
-    exp <- TRUE
-    # if("list" %in% class(val)) {
-    #   if("tbl" %in% class(val[[1]])){
-    #     val <- val[[1]]
-    #   }
-    # }
-  } else {
-    commented <- template.commented[[variable]]
-    if(commented) {
-      val <- NA
-      exp <- FALSE
+#' Complies list of parameters actually used
+#' @description Compiles list of the parameters actually used (i.e. the default or the defined)
+#' @return List of used parameter values
+#' @param hip A "hip" object containing only a single simulation
+get_used_params <- function(hip) {
+  get_used_param <- function(variable, exp.plan, template.defaults, template.commented){
+    n.sims <- nrow(exp.plan)
+    if(variable %in% names(exp.plan)){
+      val <- exp.plan[[variable]]
+      exp <- TRUE
     } else {
-      val <- template.defaults[[variable]]
-      exp <- FALSE
-      if(substr(as.character(val)[1], 1, 1) %in% as.character(0:9)){
-        val <- as.numeric(val)
+      commented <- template.commented[[variable]]
+      if(commented) {
+        val <- NA
+        exp <- FALSE
+      } else {
+        val <- template.defaults[[variable]]
+        exp <- FALSE
+        if(substr(as.character(val)[1], 1, 1) %in% as.character(0:9)){
+          val <- as.numeric(val)
+        }
+        if(!("list" %in% class(val))) {
+          val <- rep(list(val), n.sims)
+        } else {
+          val <- rep(val, n.sims)
+        }
       }
     }
+    out <- list(value = val, exp.plan = exp)
+    return(out)
   }
-  out <- list(value = val, exp.plan = exp)
-  return(out)
+
+  TEMPLATE_PARAMS <- get_template_params(get_template_path(hip$template))
+  PARAM_NAMES     <- get_param_names(TEMPLATE_PARAMS)
+  PARAM_DEFAULTS  <- get_param_vals(TEMPLATE_PARAMS, "value")
+  PARAM_COMMENTED <- get_param_vals(TEMPLATE_PARAMS, "commented")
+  USED_PARAMS <- purrr::map(as.list(unlist(PARAM_NAMES, use.names = FALSE)),
+                            get_used_param,
+                            exp.plan           = dplyr::mutate_all(hip$exp.plan, as.list),
+                            template.defaults  = PARAM_DEFAULTS,
+                            template.commented = PARAM_COMMENTED)
+  names(USED_PARAMS) <- unlist(PARAM_NAMES, use.names = FALSE)
+  return(USED_PARAMS)
 }

@@ -21,59 +21,47 @@
 #' }
 plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
 
-  EXP.PLAN <- hip$exp.plan
-
   if(!("hip" %in% class(hip)))                            stop("hip argument not of class hip",                             call. = FALSE)
   if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character vector",           call. = FALSE)
 
-  if(nrow(EXP.PLAN) > 1) {
+  if(nrow(hip$exp.plan) > 1) {
     if(is.null(simu.name)) stop("must provide simu.name if hip contains more than one simulation", call. = FALSE)
     if(!(is.character(simu.name) & length(simu.name) == 1)) stop("simu.name argument must be a character vector of length 1", call. = FALSE)
-    if(!(simu.name %in% EXP.PLAN$SimulationName))           stop("simu.name not present in hip",                              call. = FALSE)
-    EXP.PLAN <- dplyr::filter(EXP.PLAN, SimulationName == simu.name)
+    if(!(simu.name %in% hip$exp.plan$SimulationName))           stop("simu.name not present in hip",                              call. = FALSE)
+    hip$exp.plan <- dplyr::filter(hip$exp.plan, SimulationName == simu.name)
   }
 
-  ## Get used parameters
-  TEMPLATE_PARAMS <- get_template_params(get_template_path(hip$template))
-  PARAM_NAMES     <- get_param_names(TEMPLATE_PARAMS)
-  PARAM_DEFAULTS  <- get_param_vals(TEMPLATE_PARAMS, "value")
-  PARAM_COMMENTED <- get_param_vals(TEMPLATE_PARAMS, "commented")
-  USED_PARAMS <- purrr::map(as.list(unlist(PARAM_NAMES, use.names = FALSE)),
-                            get_used_param,
-                            exp.plan           = EXP.PLAN,
-                            template.defaults  = PARAM_DEFAULTS,
-                            template.commented = PARAM_COMMENTED)
-  names(USED_PARAMS) <- unlist(PARAM_NAMES, use.names = FALSE)
+  USED_PARAMS <- get_used_params(hip)
+  get_used <- function(param) USED_PARAMS[[param]]$value[[1]]
 
-  mainCropSpecies  <- gsub("\\.plt", "", USED_PARAMS$mainCropSpecies$value[[1]][1])
-  interCropSpecies <- gsub("\\.plt", "", USED_PARAMS$interCropSpecies$value[[1]][1])
-  toric <- c(USED_PARAMS$toricXp$value, USED_PARAMS$toricXn$value, USED_PARAMS$toricYp$value, USED_PARAMS$toricYn$value)
+  mainCropSpecies  <- gsub("\\.plt", "", get_used("mainCropSpecies")[1])
+  interCropSpecies <- gsub("\\.plt", "", get_used("interCropSpecies")[1])
+  toric <- purrr::map_dbl(c("toricXp", "toricXn", "toricYp", "toricYn"), get_used)
   toric.lab <- ifelse(any(toric == 1), paste(c("Xp", "Xn", "Yp", "Yn")[as.logical(toric)], collapse = ","), "off")
 
   ## Calculate total soil depth
-  soil.depth <- sum(USED_PARAMS$layers$value[[1]]$thickness)
+  soil.depth <- sum(get_used("layers")$thickness)
 
-  if(USED_PARAMS$nbTrees$value != 0) {
+  if(get_used("nbTrees") != 0) {
     ## Extract tree data
-    tree.init <- USED_PARAMS$tree.initialization$value[[1]]
-    tree.plot.data <- tree.data <- tree.init %>%
+    tree.plot.data <- get_used("tree.initialization") %>%
       dplyr::mutate(x = treeX, y = treeY) %>%
       dplyr::select(species, x, y)
-    num.trees <- nrow(tree.data) #nbTrees is not an allowed entry to a hip object, but is rather modifying by build_hisafe based on nrow(tree.init.table)
+    num.trees <- nrow(tree.plot.data) #nbTrees is not an allowed entry to a hip object, but is rather modifying by build_hisafe based on nrow(tree.init.table)
   } else {
-    tree.plot.data <- tree.data <- tree_init_params("No trees", NA, NA, NA, NA, NA, NA, NA, NA)[[1]] %>%
+    tree.plot.data <- tree_init_params("No trees", NA, NA, NA, NA, NA, NA, NA, NA)[[1]] %>%
       dplyr::mutate_if(is.logical, as.numeric) %>%
       dplyr::mutate(x = treeX, y = treeY) %>%
       dplyr::select(species, x, y)
     num.trees <- 0
   }
   ## Calculate scene dimensions
-  if(USED_PARAMS$geometryOption$value == 1) {
-    WIDTH  <- USED_PARAMS$spacingBetweenRows$value / USED_PARAMS$cellWidth$value * sqrt(num.trees)
-    HEIGHT <- USED_PARAMS$spacingWithinRows$value  / USED_PARAMS$cellWidth$value * sqrt(num.trees)
+  if(get_used("geometryOption") == 1) {
+    WIDTH  <- get_used("spacingBetweenRows") / get_used("cellWidth") * sqrt(num.trees)
+    HEIGHT <- get_used("spacingWithinRows")  / get_used("cellWidth") * sqrt(num.trees)
   } else {
-    WIDTH  <- USED_PARAMS$plotWidth$value  / USED_PARAMS$cellWidth$value
-    HEIGHT <- USED_PARAMS$plotHeight$value / USED_PARAMS$cellWidth$value
+    WIDTH  <- get_used("plotWidth")  / get_used("cellWidth")
+    HEIGHT <- get_used("plotHeight") / get_used("cellWidth")
   }
 
   ## Create plot data
@@ -84,12 +72,12 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
     dplyr::as_tibble() %>%
     dplyr::arrange(desc(y), x) %>%
     dplyr::mutate(id = 1:nrow(.),
-                  x  = x - USED_PARAMS$cellWidth$value/2,
-                  y  = y - USED_PARAMS$cellWidth$value/2) # x and y are now cell centers
+                  x  = x - get_used("cellWidth")/2,
+                  y  = y - get_used("cellWidth")/2) # x and y are now cell centers
 
   if(num.trees > 0) {
     ## Modify tree locations for geometryOption = 1
-    if(USED_PARAMS$geometryOption$value == 1) {
+    if(get_used("geometryOption") == 1) {
       if(num.trees == 1) {
         tree.plot.data$x <- mean(plot.data$x)
         tree.plot.data$y <- mean(plot.data$y)
@@ -142,23 +130,23 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
       return(c(low.inside, high.inside))
     }
 
-    if(USED_PARAMS$treeCropDistance$value > 0) {
+    if(get_used("treeCropDistance") > 0) {
       xs <- as.list(tree.plot.data$x)
-      boundaries <- purrr::map(xs, create_range, USED_PARAMS$treeCropDistance$value)
-      boundaries <- purrr::map(boundaries, round_if_needed, USED_PARAMS$cellWidth$value)
+      boundaries <- purrr::map(xs, create_range, get_used("treeCropDistance"))
+      boundaries <- purrr::map(boundaries, round_if_needed, get_used("cellWidth"))
       x.inside   <- unlist(purrr::map(boundaries, which_inside, plot.data$x))
       x.inside   <- c(x.inside, check_x_runover(boundaries))
       plot.data$crop[which(plot.data$x %in% x.inside)] <- interCropSpecies
-    } else if(USED_PARAMS$weededAreaRadius$value > 0) {
+    } else if(get_used("weededAreaRadius") > 0) {
       xs <- as.list(tree.plot.data$x)
-      x.boundaries <- purrr::map(xs, create_range, USED_PARAMS$weededAreaRadius$value)
-      x.boundaries <- purrr::map(x.boundaries, round_if_needed, USED_PARAMS$cellWidth$value)
+      x.boundaries <- purrr::map(xs, create_range, get_used("weededAreaRadius"))
+      x.boundaries <- purrr::map(x.boundaries, round_if_needed, get_used("cellWidth"))
       x.inside     <- unlist(purrr::map(x.boundaries, which_inside, plot.data$x))
       x.inside     <- c(x.inside, check_x_runover(x.boundaries))
 
       ys <- as.list(tree.plot.data$y)
-      y.boundaries <- purrr::map(ys, create_range, USED_PARAMS$weededAreaRadius$value)
-      y.boundaries <- purrr::map(y.boundaries, round_if_needed, USED_PARAMS$cellWidth$value)
+      y.boundaries <- purrr::map(ys, create_range, get_used("weededAreaRadius"))
+      y.boundaries <- purrr::map(y.boundaries, round_if_needed, get_used("cellWidth"))
       y.inside     <- unlist(purrr::map(y.boundaries, which_inside, plot.data$y))
       y.inside     <- c(y.inside, check_y_runover(y.boundaries))
 
@@ -179,13 +167,13 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
          y       = paste0(HEIGHT, "m"),
          color   = "",
          fill    = "",
-         title   = paste("Scene:", EXP.PLAN$SimulationName),
-         caption = paste0("Latitude: ",           USED_PARAMS$latitude$value,
-                          " - Orientation: ",     USED_PARAMS$treeLineOrientation$value,
-                          "\nCell width: ",       USED_PARAMS$cellWidth$value,
+         title   = paste("Scene:", hip$exp.plan$SimulationName),
+         caption = paste0("Latitude: ",           get_used("latitude"),
+                          " - Orientation: ",     get_used("treeLineOrientation"),
+                          "\nCell width: ",       get_used("cellWidth"),
                           "m - Soil depth: ",     soil.depth, "m",
-                          "\nSlope aspect: ",     USED_PARAMS$slopeAspect$value,
-                          " - Slope intensity: ", USED_PARAMS$slopeIntensity$value,
+                          "\nSlope aspect: ",     get_used("slopeAspect"),
+                          " - Slope intensity: ", get_used("slopeIntensity"),
                           "\nToric symmetry: ",   toric.lab)) +
     scale_x_continuous(expand = c(0,0)) +
     scale_y_continuous(expand = c(0,0)) +
@@ -200,7 +188,7 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
     theme(legend.position = "right")
 
   if(!is.null(output.path)){
-    ggsave(filename = clean_path(paste0(output.path, "/support/", EXP.PLAN$SimulationName, "_Scene.pdf")),
+    ggsave(filename = clean_path(paste0(output.path, "/support/", hip$exp.plan$SimulationName, "_Scene.pdf")),
            plot     = plot.obj,
            height   = ifelse(WIDTH > HEIGHT, 8.5, 11),
            width    = ifelse(WIDTH > HEIGHT, 11,  8.5))

@@ -4,11 +4,11 @@
 \alias{analyze_hisafe}
 \title{Shortcut to Hi-sAFe analysis}
 \usage{
-analyze_hisafe(hop, carbon = TRUE, light = TRUE, nitrogen = FALSE,
-  water = FALSE, light.daily = TRUE, nitrogen.daily = FALSE,
-  water.daily = FALSE, annualtree = TRUE, annualplot = TRUE,
-  trees = TRUE, plot = TRUE, climate = TRUE, annualcrop = TRUE,
-  monthCells = TRUE, ...)
+analyze_hisafe(hop, carbon = TRUE, light = TRUE, nitrogen = TRUE,
+  water = TRUE, carbon.daily = TRUE, light.daily = TRUE,
+  nitrogen.daily = TRUE, water.daily = TRUE, annualtree = TRUE,
+  annualplot = TRUE, trees = TRUE, plot = TRUE, climate = TRUE,
+  annualcrop = TRUE, monthCells = TRUE, voxels = TRUE, ...)
 }
 \arguments{
 \item{hop}{A object of class hop or face.}
@@ -20,6 +20,8 @@ analyze_hisafe(hop, carbon = TRUE, light = TRUE, nitrogen = FALSE,
 \item{nitrogen}{Logical indicating if annual nitrogen plot should be made.}
 
 \item{water}{Logical indicating if annual water plot should be made.}
+
+\item{carbon.daily}{Logical indicating if daily carbon plots should be made.}
 
 \item{light.daily}{Logical indicating if daily light plots should be made.}
 
@@ -41,6 +43,8 @@ analyze_hisafe(hop, carbon = TRUE, light = TRUE, nitrogen = FALSE,
 
 \item{monthCells}{Logical indicating if monthCells profile diagnostic plots should be made.}
 
+\item{voxels}{Logical indicating if voxels profile diagnostic plots should be made.}
+
 \item{...}{Other arguments passed to \code{\link{plot_hisafe_ts}}.}
 }
 \value{
@@ -55,6 +59,6 @@ analyze_hisafe(myhop)
 }
 }
 \seealso{
-Other hisafe analysis functions: \code{\link{plot_hisafe_cycle}},
-  \code{\link{plot_hisafe_use}}
+Other hisafe analysis functions: \code{\link{plot_hisafe_cycle_annual}},
+  \code{\link{plot_hisafe_cycle_daily}}
 }

@@ -37,7 +37,8 @@ There are three methods for passing parameters to \code{define_hisafe}, one for 
 \itemize{
  \item{individual numeric or character values}{ - For parameters that require a single value (most parameters),
  a simulation can be defined via \code{parameterName = value}. To define an experiment, use \code{parameterName = c(value1, value2)}}
- \item{multiple numeric values}{ - For parameters that require multiple numeric values (e.g. tree pruning, tree thinning, and root pruning parameters),
+ \item{multiple numeric values}{ - For parameters that require multiple numeric values
+ (e.g. tree planting, tree pruning, tree thinning, and root pruning parameters),
  a simulation can be defined by wrapping one or more numeric vectors within a list.
  For a single simulation, use \code{parameterName = list(c(value1, value2, ...))}.
  For an experiment, use \code{parameterName = list(c(value1, value2, ...), c(value3, value4, ...))}.}

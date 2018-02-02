@@ -50,11 +50,11 @@ hisafe_info <- function(capsis.path) {
 #' @family hisafe helper functions
 #' @examples
 #' \dontrun{
-#' hisafe_params()            # just for parameter names
-#' hisafe_params("cellWidth") # details of cellWidth parameter
-#' hisafe_params("all")       # details of all parameters
+#' hip_params()            # just for parameter names
+#' hip_params("cellWidth") # details of cellWidth parameter
+#' hip_params("all")       # details of all parameters
 #' }
-hisafe_params <- function(variable = "names", search = FALSE, template = "agroforestry_default") {
+hip_params <- function(variable = "names", search = FALSE, template = "agroforestry_default") {
 
   if(!is.character(variable))                           stop("variable argument must be a character vector",                call. = FALSE)
   if(!(is.character(template) & length(template) == 1)) stop("template argument must be a character vector of length 1",    call. = FALSE)
@@ -80,7 +80,7 @@ hisafe_params <- function(variable = "names", search = FALSE, template = "agrofo
 
   if(variable[1] == "all") {
     for(i in 1:length(PARAM_NAMES)){
-      var.def <- dplyr::filter(PARAM.DEFS, name == PARAM_NAMES[i])
+      var.def <- dplyr::filter(INPUT.DEFS, name == PARAM_NAMES[i])
       if(i == 1) { cat(PARAM_NAMES[i]) } else { cat("\n\n", PARAM_NAMES[i]) }
       if("tbl" %in% class(PARAM_DEFAULTS[[i]])){
         cat("\n  -- Default:\n")
@@ -98,10 +98,10 @@ hisafe_params <- function(variable = "names", search = FALSE, template = "agrofo
   } else {
     for(i in 1:length(variable)){
       if(search) {
-        var.def <- dplyr::filter(PARAM.DEFS, stringr::str_detect(name, variable[i]))
+        var.def <- dplyr::filter(INPUT.DEFS, stringr::str_detect(name, variable[i]))
         if(nrow(var.def) == 0) stop(paste(variable[i], "was not detected in any Hi-sAFe input parameter names"), call. = FALSE)
       } else {
-        var.def <- dplyr::filter(PARAM.DEFS, name == variable[i])
+        var.def <- dplyr::filter(INPUT.DEFS, name == variable[i])
       }
       for(j in 1:nrow(var.def)){
         cat("\n\n", var.def$name[j])
@@ -287,6 +287,7 @@ hop_date_filter <- function(hop, date.min = NA, date.max = NA) {
 #' @param light Logical indicating if annual light plot should be made.
 #' @param nitrogen Logical indicating if annual nitrogen plot should be made.
 #' @param water Logical indicating if annual water plot should be made.
+#' @param carbon.daily Logical indicating if daily carbon plots should be made.
 #' @param light.daily Logical indicating if daily light plots should be made.
 #' @param nitrogen.daily Logical indicating if daily nitrogens plot should be made.
 #' @param water.daily Logical indicating if daily water plots should be made.
@@ -297,6 +298,7 @@ hop_date_filter <- function(hop, date.min = NA, date.max = NA) {
 #' @param climate Logical indicating if climate profile diagnostic plots should be made.
 #' @param annualcrop Logical indicating if annualcrop profile diagnostic plots should be made.
 #' @param monthCells Logical indicating if monthCells profile diagnostic plots should be made.
+#' @param voxels Logical indicating if voxels profile diagnostic plots should be made.
 #' @param ... Other arguments passed to \code{\link{plot_hisafe_ts}}.
 #' @export
 #' @family hisafe analysis functions
@@ -307,18 +309,20 @@ hop_date_filter <- function(hop, date.min = NA, date.max = NA) {
 analyze_hisafe <- function(hop,
                            carbon          = TRUE,
                            light           = TRUE,
-                           nitrogen        = FALSE,
-                           water           = FALSE,
+                           nitrogen        = TRUE,
+                           water           = TRUE,
+                           carbon.daily    = TRUE,
                            light.daily     = TRUE,
-                           nitrogen.daily  = FALSE,
-                           water.daily     = FALSE,
+                           nitrogen.daily  = TRUE,
+                           water.daily     = TRUE,
                            annualtree      = TRUE,
                            annualplot      = TRUE,
                            trees           = TRUE,
                            plot            = TRUE,
                            climate         = TRUE,
                            annualcrop      = TRUE,
-                           monthCells      = TRUE, ...) {
+                           monthCells      = TRUE,
+                           voxels          = TRUE, ...) {
 
   if(!("hop" %in% class(hop))) stop("hop argument is not of class hop", call. = FALSE)
   if(!all(is.logical(c(carbon, light, nitrogen, water,
@@ -332,17 +336,29 @@ analyze_hisafe <- function(hop,
   profiles.todo  <- c("annualtree", "annualplot", "trees", "plot", "climate")[c(annualtree, annualplot, trees, plot, climate)]
   profiles.todo  <- profiles.avail[profiles.avail %in% profiles.todo]
   annual.cycles.todo <- c("carbon", "light", "nitrogen", "water")[c(carbon, light, nitrogen, water)]
-  daily.cycles.todo  <- c("light", "nitrogen", "water")[c(light.daily, nitrogen.daily, water.daily)]
+  daily.cycles.todo  <- c("carbon", "light", "nitrogen", "water")[c(carbon.daily, light.daily, nitrogen.daily, water.daily)]
 
   dir.create(clean_path(paste0(hop$exp.path, "/analysis/cycles/")), showWarnings = FALSE, recursive = TRUE)
+
+  # ## SIMULATION CYCLES
+  # if(length(annual.cycles.todo) >= 1) {
+  #   cat("\n-- Plotting annual cycles")
+  #   sim.cycle.plots <- purrr::map(annual.cycles.todo,
+  #                                 plot_hisafe_cycle,
+  #                                 hop = hop)
+  #   purrr::walk2(paste0(hop$exp.path, "/analysis/cycles/", annual.cycles.todo, ".png"),
+  #                sim.cycle.plots,
+  #                ggsave_fitmax,
+  #                scale = 2)
+  # }
 
   ## ANNUAL CYCLES
   if(length(annual.cycles.todo) >= 1) {
     cat("\n-- Plotting annual cycles")
     annual.cycle.plots <- purrr::map(annual.cycles.todo,
-                                     plot_hisafe_cycle,
+                                     plot_hisafe_cycle_annual,
                                      hop = hop)
-    purrr::walk2(paste0(hop$exp.path, "/analysis/cycles/", annual.cycles.todo, ".png"),
+    purrr::walk2(paste0(hop$exp.path, "/analysis/cycles/", annual.cycles.todo, "_annual.png"),
                  annual.cycle.plots,
                  ggsave_fitmax,
                  scale = 2)
@@ -353,7 +369,7 @@ analyze_hisafe <- function(hop,
     cat("\n-- Plotting daily cycles")
     for(cycle in daily.cycles.todo) {
       daily.cycle.plots <- purrr::map(hop$exp.plan$SimulationName,
-                                      plot_hisafe_use,
+                                      plot_hisafe_cycle_daily,
                                       hop   = hop,
                                       cycle = cycle,
                                       years = "all")
@@ -370,14 +386,19 @@ analyze_hisafe <- function(hop,
     purrr::walk(profiles.todo, diag_hisafe_ts, hop = hop, ...)
   }
 
-  if(annualcrop) {
+  if(annualcrop & nrow(hop$annualcrop > 0)) {
     cat("\n-- Plotting annualcrop diagnostics")
     diag_hisafe_annualcrop(hop)
   }
 
-  if(monthCells) {
+  if(monthCells & nrow(hop$monthCells > 0)) {
     cat("\n-- Plotting monthCells diagnostics")
     diag_hisafe_monthcells(hop)
+  }
+
+  if(voxels & nrow(hop$voxels > 0)) {
+    cat("\n-- Plotting voxels diagnostics")
+    diag_hisafe_voxels(hop)
   }
 
   invisible(TRUE)

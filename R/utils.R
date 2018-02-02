@@ -4,7 +4,8 @@
 SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("annualplot", "annualtree", "annualcrop", "plot", "trees", "roots", "cells", "voxels", "climate", "monthCells"),
                                     freqs    = c(365,          365,          365,          1,      1,       1,       1,        1,       1,         30))
 
-PARAM.DEFS <- readr::read_delim(system.file("extdata", "param_defs.txt", package = "hisafer"), "\t", col_types = readr::cols())
+INPUT.DEFS  <- readr::read_delim(system.file("extdata", "input_defs.txt",  package = "hisafer"), "\t", col_types = readr::cols())
+#OUTPUT.DEFS <- readr::read_delim(system.file("extdata", "output_defs.txt", package = "hisafer"), "\t", col_types = readr::cols())
 
 remove_whitespace <- function(x) gsub("^\\s+|\\s+$", "", x)
 

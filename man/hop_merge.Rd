@@ -21,7 +21,7 @@ new_hop <- hop_merge(hop1, hop2, hop3)
 }
 }
 \seealso{
-Other hisafe helper functions: \code{\link{hisafe_params}},
+Other hisafe helper functions: \code{\link{hip_params}},
   \code{\link{hisafe_profiles}},
   \code{\link{hop_date_filter}}, \code{\link{hop_filter}},
   \code{\link{hop_rename}}
