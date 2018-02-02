@@ -204,7 +204,7 @@ check_input_values <- function(hip) {
   get_used_un    <- function(param) unlist(get_used(param))
   is_mod         <- function(param) USED_PARAMS[[param]]$exp.plan
   rm.na          <- function(x) x[!is.na(x)]
-  get_length     <- function(param) purrr::map(rm.na(get_used(param)), length)
+  get_length     <- function(param) purrr::map(get_used(param), function(x) if(is.na(x[1])) as.integer(0) else length(x))
   get_init_vals  <- function(tab, param) {
     tab <- get_used(tab)
     out.list <- list()
@@ -254,9 +254,8 @@ check_input_values <- function(hip) {
                                  "", "-- SimulationName - names cannot contains spaces")
 
   ## Tree Errors
-  unique_tree_species <- function(x) unique(x$species)
-  tree.species.used <- unique(unlist(purrr::map(get_used("tree.initialization"), unique_tree_species)))
-  if(any(!(tree.species.used %in% AVAIL_TREES))) {
+  tree.species.used <- unique(unlist(get_init_vals("tree.initialization", "species")))
+  if(!is.na(tree.species.used[1]) & any(!(tree.species.used %in% AVAIL_TREES))) {
     tree.species.missing <- tree.species.used[!(tree.species.used %in% AVAIL_TREES)]
     unsupported.trees.error <- paste("--", tree.species.missing, "is not a tree available in the template directory.")
   } else {
@@ -300,8 +299,10 @@ check_input_values <- function(hip) {
   bad.trees <- ""
   off.scene.trees <- ""
   for(i in 1:nrow(hip$exp.plan)) {
-    X <- get_used("tree.initialization")[[i]]$treeX
-    Y <- get_used("tree.initialization")[[i]]$treeY
+    X <- get_init_vals("tree.initialization", "treeX")[[i]]
+    Y <- get_init_vals("tree.initialization", "treeY")[[i]]
+    if(all(is.na(X) & is.na(Y))) next
+
     okay.loc <- (X == 0 & Y == 0) | (abs(X %% get_used("cellWidth")[[i]] - rep(get_used("cellWidth")[[i]] / 2, length(X))) < 1e-5 &
                                        abs(Y %% get_used("cellWidth")[[i]] - rep(get_used("cellWidth")[[i]] / 2, length(Y))) < 1e-5)
 

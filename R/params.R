@@ -264,11 +264,11 @@ get_used_params <- function(hip) {
         if(substr(as.character(val)[1], 1, 1) %in% as.character(0:9)){
           val <- as.numeric(val)
         }
-        if(!("list" %in% class(val))) {
-          val <- rep(list(val), n.sims)
-        } else {
-          val <- rep(val, n.sims)
-        }
+      }
+      if(!("list" %in% class(val))) {
+        val <- rep(list(val), n.sims)
+      } else {
+        val <- rep(val, n.sims)
       }
     }
     out <- list(value = val, exp.plan = exp)
