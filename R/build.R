@@ -80,19 +80,14 @@ build_hisafe <- function(hip) {
 #' (or one of the strings signaling a default template)
 build_structure <- function(exp.plan, path, profiles, template) {
 
-  template.path   <- get_template_path(template)
-  TEMPLATE_PARAMS <- get_template_params(template.path)
+  TEMPLATE_PARAMS <- get_template_params(template)
   PARAM_NAMES     <- get_param_names(TEMPLATE_PARAMS)
   PARAM_DEFAULTS  <- get_param_vals(TEMPLATE_PARAMS, "value")
   PARAM_COMMENTED <- get_param_vals(TEMPLATE_PARAMS, "commented")
 
   ## Copy over folder structure & template files from Hi-sAFe template path
   ## Any newly built files below will overwrite these files
-  template.dir.components <- strsplit(template.path, "/")[[1]]
-  template.dir.components <- template.dir.components[template.dir.components != ""]
-  template.folder.name    <- tail(template.dir.components, 1)
-  dum <- file.copy(template.path, path, recursive = TRUE)
-  dum <- file.rename(clean_path(paste0(path, "/", template.folder.name)), clean_path(paste0(path, "/", exp.plan$SimulationName)))
+  copy_hisafe_template(template, path, overwrite = TRUE, new.name = exp.plan$SimulationName)
   simu.path <- clean_path(paste0(path, "/", exp.plan$SimulationName))
   dir.create(paste0(simu.path, "/support"), showWarnings = FALSE)
 

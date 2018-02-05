@@ -189,11 +189,14 @@ edit_param_element <- function(param.list, variable, value) {
 #' Read all template parameters
 #' @description Reads all template parameter values and constraints
 #' @return A list containing all parameter values and constraints.
-#' @param template.path A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
-get_template_params <- function(template.path) {
+#' @param template A character string of the path to the Hi-sAFe directory structure/files to use as a template
+#' (or one of the strings signaling a default template)
+get_template_params <- function(template) {
+  template.path    <- get_template_path(template)
+  template.subpath <- get_template_subpath(template)
 
   ## Determine which tree species to use from within the template for the .tree params
-  avail.template.trees <- unlist(purrr::map(strsplit(list.files(clean_path(paste0(template.path, "/treeSpecies"))), split = ".", fixed = TRUE), 1))
+  avail.template.trees <- unlist(purrr::map(strsplit(list.files(clean_path(paste0(template.subpath, "/treeSpecies"))), split = ".", fixed = TRUE), 1))
   if(length(avail.template.trees) == 1) {
     template.tree <- avail.template.trees
   } else if("walnut-hybrid" %in% avail.template.trees) {
@@ -204,9 +207,9 @@ get_template_params <- function(template.path) {
 
   sim.file    <- clean_path(list.files(template.path, ".sim", full.names = TRUE))
   pld.file    <- clean_path(list.files(template.path, ".pld", full.names = TRUE))
-  tree.file   <- list.files(paste0(template.path, "treeSpecies"), paste0(template.tree, ".tree"), full.names = TRUE)
-  hisafe.file <- clean_path(paste0(template.path, "generalParameters/hisafe.par"))
-  stics.file  <- clean_path(paste0(template.path, "generalParameters/stics.par"))
+  tree.file   <- list.files(paste0(template.subpath, "treeSpecies"), paste0(template.tree, ".tree"), full.names = TRUE)
+  hisafe.file <- clean_path(paste0(template.subpath, "generalParameters/hisafe.par"))
+  stics.file  <- clean_path(paste0(template.subpath, "generalParameters/stics.par"))
 
   sim.params    <- read_param_file(sim.file)
   pld.params    <- read_param_file(pld.file)
@@ -275,7 +278,7 @@ get_used_params <- function(hip) {
     return(out)
   }
 
-  TEMPLATE_PARAMS <- get_template_params(get_template_path(hip$template))
+  TEMPLATE_PARAMS <- get_template_params(hip$template)
   PARAM_NAMES     <- get_param_names(TEMPLATE_PARAMS)
   PARAM_DEFAULTS  <- get_param_vals(TEMPLATE_PARAMS, "value")
   PARAM_COMMENTED <- get_param_vals(TEMPLATE_PARAMS, "commented")

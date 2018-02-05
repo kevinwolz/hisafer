@@ -40,7 +40,7 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
   toric.lab <- ifelse(any(toric == 1), paste(c("Xp", "Xn", "Yp", "Yn")[as.logical(toric)], collapse = ","), "off")
 
   ## Calculate total soil depth
-  soil.depth <- sum(get_used("layers")$thick)
+  soil.depth <- sum(get_used("layers")$thickness)
 
   if(get_used("nbTrees") != 0) {
     ## Extract tree data

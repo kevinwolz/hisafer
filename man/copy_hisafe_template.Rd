@@ -4,12 +4,16 @@
 \alias{copy_hisafe_template}
 \title{Copy a Hi-sAFe template to specified location}
 \usage{
-copy_hisafe_template(template, destination, overwrite = TRUE)
+copy_hisafe_template(template, destination, overwrite = TRUE,
+  new.name = NULL)
 }
 \arguments{
 \item{template}{A character string of the path to the Hi-sAFe directory structure/files to use as a template
 (or one of the strings signaling a default template)
 See \code{\link{define_hisafe}} for more details on available default templates.}
+
+\item{new.name}{A character string of the a name for the newly copied folder.
+If \code{NULL}, the default, then the name will remain the same as the original template folder.}
 
 \item{path}{A character string of the path to where the template folder should be copied.}
 }

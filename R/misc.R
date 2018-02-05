@@ -36,17 +36,28 @@ hisafe_info <- function(capsis.path) {
 #' (or one of the strings signaling a default template)
 #' See \code{\link{define_hisafe}} for more details on available default templates.
 #' @param path A character string of the path to where the template folder should be copied.
+#' @param new.name A character string of the a name for the newly copied folder.
+#' If \code{NULL}, the default, then the name will remain the same as the original template folder.
 #' @export
 #' @examples
 #' \dontrun{
 #' copy_hisafe_template("agroforestry_default", "/Users/myname/Desktop/")
 #' }
-copy_hisafe_template <- function(template, destination, overwrite = TRUE) {
+copy_hisafe_template <- function(template, destination, overwrite = TRUE, new.name = NULL) {
   template.path           <- get_template_path(template)
+  template.subpath        <- get_template_subpath(template)
   template.dir.components <- strsplit(template.path, "/")[[1]]
   template.dir.components <- template.dir.components[template.dir.components != ""]
   template.folder.name    <- tail(template.dir.components, 1)
   dum <- file.copy(template.path, destination, recursive = TRUE, overwrite = overwrite)
+  dum <- file.copy(list.files(template.subpath, full.names = TRUE),
+                   clean_path(paste0(destination, "/", template.folder.name)),
+                   recursive = TRUE,
+                   overwrite = overwrite)
+  if(!is.null(new.name)) {
+    dum <- file.rename(clean_path(paste0(destination, "/", template.folder.name)),
+                       clean_path(paste0(destination, "/", new.name)))
+  }
   invisible(dum)
 }
 
@@ -81,7 +92,7 @@ hip_params <- function(variable = "names", search = FALSE, template = "agrofores
   if(!(is.character(template) & length(template) == 1)) stop("template argument must be a character vector of length 1",    call. = FALSE)
   if(search & length(variable) > 1)                     stop("search = TRUE is only possible with a single variable input", call. = FALSE)
 
-  TEMPLATE_PARAMS <- get_template_params(get_template_path(template))
+  TEMPLATE_PARAMS <- get_template_params(template)
   PARAM_NAMES     <- sort(unlist(get_param_names(TEMPLATE_PARAMS), use.names = FALSE))
   PARAM_DEFAULTS  <- get_param_vals(TEMPLATE_PARAMS, "value")
 

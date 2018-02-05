@@ -77,7 +77,7 @@ define_hisafe <- function(path,
   if(!is.logical(force))                                    stop("force argument must be a logical",                         call. = FALSE)
 
   ## Get profile names and check that they are present in template directory
-  available.profiles <- get_available_profiles(get_template_path(template))
+  available.profiles <- get_available_profiles(template)
   if(profiles[1] == "all") {
     profiles <- available.profiles
   } else if(!all(profiles %in% available.profiles)) {
@@ -111,12 +111,7 @@ define_hisafe <- function(path,
               profiles = profiles,
               path     = path)
 
-  if(!force) {
-    check_input_values(hip)
-  } else {
-    warning("Bypassing validation of input parameter definitions can lead to unpredictable functionality of Hi-sAFe." ,
-            call. = FALSE, immediate. = TRUE)
-  }
+  check_input_values(hip, force)
 
   class(hip) <- c("hip", class(hip))
   return(hip)
@@ -163,7 +158,7 @@ define_hisafe_file <- function(file,
   exp.plan <- dplyr::as_tibble(read.csv(file, header = TRUE, stringsAsFactors = FALSE))
 
   ## Get profile names and check that they are present in template directory
-  available.profiles <- get_available_profiles(get_template_path(template))
+  available.profiles <- get_available_profiles(template)
   if(profiles[1] == "all") {
     profiles <- available.profiles
   } else if(!all(profiles %in% available.profiles)) {
@@ -179,12 +174,7 @@ define_hisafe_file <- function(file,
               profiles = profiles,
               path     = path)
 
-  if(!force) {
-    check_input_values(hip)
-  } else {
-    warning("Bypassing validation of input parameter definitions can lead to unpredictable functionality of Hi-sAFe." ,
-            call. = FALSE, immediate. = TRUE)
-  }
+  check_input_values(hip, force)
 
   class(hip) <- c("hip", class(hip))
   return(hip)
@@ -196,13 +186,20 @@ define_hisafe_file <- function(file,
 #' Used within \code{\link{define_hisafe}} and \code{\link{define_hisafe_file}}.
 #' @return Produces errors if issues are found. Otherwise, invisibly returns \code{TRUE}.
 #' @param hip An object of class "hip".
-check_input_values <- function(hip) {
+#' @param force Logical indicating wether the supplied values should be forced past the constraint checks. Use \code{TRUE} for development only.
+check_input_values <- function(hip, force) {
 
-  USED_PARAMS <- get_used_params(hip)
+  if(force) {
+    warning("Bypassing validation of input parameter definitions can lead to unpredictable functionality of Hi-sAFe." ,
+            call. = FALSE, immediate. = TRUE)
+    return(FALSE)
+  }
 
-  get_used       <- function(param) USED_PARAMS[[param]]$value
+  USED.PARAMS <- get_used_params(hip)
+
+  get_used       <- function(param) USED.PARAMS[[param]]$value
   get_used_un    <- function(param) unlist(get_used(param))
-  is_mod         <- function(param) USED_PARAMS[[param]]$exp.plan
+  is_mod         <- function(param) USED.PARAMS[[param]]$exp.plan
   rm.na          <- function(x) x[!is.na(x)]
   get_length     <- function(param) purrr::map(get_used(param), function(x) if(is.na(x[1])) as.integer(0) else length(x))
   get_init_vals  <- function(tab, param) {
@@ -220,18 +217,18 @@ check_input_values <- function(hip) {
   less_than      <- function(x, y) all(is.na(x) | x <= y)
 
   ## Get available template file names
-  template.path   <- get_template_path(hip$template)
-  AVAIL_CROPS     <- list.files(clean_path(paste0(template.path, "/cropSpecies")))
-  AVAIL_TECS      <- list.files(clean_path(paste0(template.path, "/cropInterventions")))
-  AVAIL_TREES     <- gsub("\\.tree", "", list.files(clean_path(paste0(template.path, "/treeSpecies"))))
+  avail.path  <- get_template_subpath(hip$template)
+  AVAIL.CROPS <- list.files(clean_path(paste0(avail.path, "/cropSpecies")))
+  AVAIL.TECS  <- list.files(clean_path(paste0(avail.path, "/cropInterventions")))
+  AVAIL.TREES <- gsub("\\.tree", "", list.files(clean_path(paste0(avail.path, "/treeSpecies"))))
 
   ## Initialize Error Message
   errors <-   "Hi-sAFe definition errors:"
 
   ## UNSUPPORTED INPUT, BAD CLASS, BAD RANGE ERRORS FIRST
   names.to.check <- names(hip$exp.plan)[!(names(hip$exp.plan) %in% c("SimulationName", "weatherFile"))]
-  if(any(!(names.to.check %in% names(USED_PARAMS)))) {
-    unsupported.names   <- names.to.check[!(names.to.check %in% names(USED_PARAMS))]
+  if(any(!(names.to.check %in% names(USED.PARAMS)))) {
+    unsupported.names   <- names.to.check[!(names.to.check %in% names(USED.PARAMS))]
     unsupported.var.error <- c("The following variables are not supported:", paste0(unsupported.names, collapse = ", "))
   } else {
     unsupported.var.error <- ""
@@ -255,8 +252,8 @@ check_input_values <- function(hip) {
 
   ## Tree Errors
   tree.species.used <- unique(unlist(get_init_vals("tree.initialization", "species")))
-  if(!is.na(tree.species.used[1]) & any(!(tree.species.used %in% AVAIL_TREES))) {
-    tree.species.missing <- tree.species.used[!(tree.species.used %in% AVAIL_TREES)]
+  if(!is.na(tree.species.used[1]) & any(!(tree.species.used %in% AVAIL.TREES))) {
+    tree.species.missing <- tree.species.used[!(tree.species.used %in% AVAIL.TREES)]
     unsupported.trees.error <- paste("--", tree.species.missing, "is not a tree available in the template directory.")
   } else {
     unsupported.trees.error <- ""
@@ -268,8 +265,8 @@ check_input_values <- function(hip) {
 
   ## Crop Errors
   crop.species.used <- unique(c(get_used_un("mainCropSpecies"), get_used_un("interCropSpecies")))
-  if(any(!(crop.species.used %in% AVAIL_CROPS))) {
-    crop.species.missing <- crop.species.used[!(crop.species.used %in% AVAIL_CROPS)]
+  if(any(!(crop.species.used %in% AVAIL.CROPS))) {
+    crop.species.missing <- crop.species.used[!(crop.species.used %in% AVAIL.CROPS)]
     unsupported.crops.error <- paste("-- The following crop .PLT files are not available in the template directory: ", paste(crop.species.missing, collapse = ", "))
   } else {
     unsupported.crops.error <- ""
@@ -277,8 +274,8 @@ check_input_values <- function(hip) {
 
   ## itk Errors
   crop.itks.used <- unique(c(get_used_un("mainCropItk"), get_used_un("interCropItk")))
-  if(any(!(crop.itks.used %in% AVAIL_TECS))) {
-    crop.itks.missing <- crop.itks.used[!(crop.itks.used %in% AVAIL_TECS)]
+  if(any(!(crop.itks.used %in% AVAIL.TECS))) {
+    crop.itks.missing <- crop.itks.used[!(crop.itks.used %in% AVAIL.TECS)]
     unsupported.itks.error <- paste("-- The following crop .TEC files are not available in the template directory: ", paste(crop.itks.missing, collapse = ", "))
   } else {
     unsupported.itks.error <- ""

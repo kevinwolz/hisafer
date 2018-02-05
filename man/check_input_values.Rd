@@ -4,10 +4,12 @@
 \alias{check_input_values}
 \title{Check validity of all Hi-sAFe inputs}
 \usage{
-check_input_values(hip)
+check_input_values(hip, force)
 }
 \arguments{
 \item{hip}{An object of class "hip".}
+
+\item{force}{Logical indicating wether the supplied values should be forced past the constraint checks. Use \code{TRUE} for development only.}
 }
 \value{
 Produces errors if issues are found. Otherwise, invisibly returns \code{TRUE}.
