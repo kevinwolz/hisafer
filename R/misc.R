@@ -418,17 +418,17 @@ analyze_hisafe <- function(hop,
     purrr::walk(profiles.todo, diag_hisafe_ts, hop = hop, ...)
   }
 
-  if(annualcrop & nrow(hop$annualcrop > 0)) {
+  if(annualcrop & nrow(hop$annualcrop) > 0) {
     cat("\n-- Plotting annualcrop diagnostics")
     diag_hisafe_annualcrop(hop)
   }
 
-  if(monthCells & nrow(hop$monthCells > 0)) {
+  if(monthCells & nrow(hop$monthCells) > 0) {
     cat("\n-- Plotting monthCells diagnostics")
     diag_hisafe_monthcells(hop)
   }
 
-  if(voxels & nrow(hop$voxels > 0)) {
+  if(voxels & nrow(hop$voxels) > 0) {
     cat("\n-- Plotting voxels diagnostics")
     diag_hisafe_voxels(hop)
   }
