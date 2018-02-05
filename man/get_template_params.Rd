@@ -4,10 +4,11 @@
 \alias{get_template_params}
 \title{Read all template parameters}
 \usage{
-get_template_params(template.path)
+get_template_params(template)
 }
 \arguments{
-\item{template.path}{A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.}
+\item{template}{A character string of the path to the Hi-sAFe directory structure/files to use as a template
+(or one of the strings signaling a default template)}
 }
 \value{
 A list containing all parameter values and constraints.

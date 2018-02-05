@@ -36,7 +36,7 @@ read_param_file <- function(path) {
     return(table.tibble)
   }
 
-  tables <- list(layers                      = c("name", "thickness", "sand", "clay", "limeStone", "organicMatter",                             # .SIM
+  tables <- list(layers                      = c("name", "thick", "sand", "clay", "limeStone", "organicMatter",                             # .SIM
                                                  "partSizeSand", "stone", "stoneType", "infiltrability"),
                  layer_initialization        = c("name", "waterContent", "no3Concentration", "nh4concentration"),                               # .SIM
                  tree_initialization         = c("name", "species", "age", "height", "crownBaseHeight", "truncatureRatio",                      # .SIM

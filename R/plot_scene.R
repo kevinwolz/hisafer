@@ -21,13 +21,13 @@
 #' }
 plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
 
-  if(!("hip" %in% class(hip)))                            stop("hip argument not of class hip",                             call. = FALSE)
-  if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character vector",           call. = FALSE)
+  if(!("hip" %in% class(hip)))                            stop("hip argument not of class hip",                   call. = FALSE)
+  if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character vector", call. = FALSE)
 
   if(nrow(hip$exp.plan) > 1) {
-    if(is.null(simu.name)) stop("must provide simu.name if hip contains more than one simulation", call. = FALSE)
-    if(!(is.character(simu.name) & length(simu.name) == 1)) stop("simu.name argument must be a character vector of length 1", call. = FALSE)
-    if(!(simu.name %in% hip$exp.plan$SimulationName))           stop("simu.name not present in hip",                              call. = FALSE)
+    if(is.null(simu.name))                                  stop("must provide simu.name if hip contains more than one simulation", call. = FALSE)
+    if(!(is.character(simu.name) & length(simu.name) == 1)) stop("simu.name argument must be a character vector of length 1",       call. = FALSE)
+    if(!(simu.name %in% hip$exp.plan$SimulationName))       stop("simu.name not present in hip",                                    call. = FALSE)
     hip$exp.plan <- dplyr::filter(hip$exp.plan, SimulationName == simu.name)
   }
 
@@ -40,7 +40,7 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
   toric.lab <- ifelse(any(toric == 1), paste(c("Xp", "Xn", "Yp", "Yn")[as.logical(toric)], collapse = ","), "off")
 
   ## Calculate total soil depth
-  soil.depth <- sum(get_used("layers")$thickness)
+  soil.depth <- sum(as.numeric(get_used("layers")$thick))
 
   if(get_used("nbTrees") != 0) {
     ## Extract tree data
