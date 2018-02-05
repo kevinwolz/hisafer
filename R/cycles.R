@@ -1,11 +1,11 @@
-#' Plot annual barchart of carbon, nitrogen, water, or light cycle
-#' @description Plots an annual barchart of the water, nitrogen, light, or carbon cycle
+#' Plot annual barchart of  major cycles
+#' @description Plots an annual barchart of tree carbon pools, water fluxes, nitrogen fluxes, or light capture.
 #' @return If \code{plot = TRUE}, returns a ggplot object. If \code{plot = FALSE}, returns the data that would create the plot.
 #' If \code{hop} contains more than one simulation, the plot will be faceted by SimulationName.
 #' @param hop An object of class hop or face.
 #' @param cycle One of "carbon", "nitrogen", "water", or "light".
 #' @param simu.names A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.
-#' @param time.lim A numeric vector of length two providing the \code{c(minimum, maximum)} of calendar years (absolute or since planting) to plot.
+#' @param year.lim A numeric vector of length two providing the \code{c(minimum, maximum)} of calendar years to plot.
 #' If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.
 #' @param color.palette A character stirng of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
 #' If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette.
@@ -21,244 +21,77 @@
 #'
 #' # Once you have the plot object, you can display it and save it:
 #' water.plot
-#' ggplot2::ggsave("water_cycle.png", water.plot)
+#' ggsave_fitmax("water_cycle.png", water.plot)
 #' }
-plot_hisafe_cycle <- function(hop,
-                              cycle,
-                              simu.names    = "all",
-                              time.lim      = c(NA, NA),
-                              color.palette = NULL,
-                              plot          = TRUE) {
+plot_hisafe_cycle_annual <- function(hop,
+                                     cycle,
+                                     simu.names    = "all",
+                                     year.lim      = c(NA, NA),
+                                     color.palette = NULL,
+                                     plot          = TRUE) {
 
   if(!("hop" %in% class(hop))) stop("hop argument not of class hop", call. = FALSE)
   if(simu.names[1] == "all") simu.names <- unique(hop$exp.plan$SimulationName)
 
   if(!(cycle %in% c("carbon", "nitrogen", "water", "light")))                  stop("cycle argument must be one of: carbon, nitrogen, water, light", call. = FALSE)
   if(!(all(is.character(simu.names)) | simu.names[1] == "all"))                stop("simu.names argument must be 'all' or a character vector",       call. = FALSE)
-  if(!(length(time.lim) == 2 & (is.numeric(time.lim) | all(is.na(time.lim))))) stop("time.lim argument must be a numeric vector of length 2",        call. = FALSE)
+  if(!(length(year.lim) == 2 & (is.numeric(year.lim) | all(is.na(year.lim))))) stop("year.lim argument must be a numeric vector of length 2",        call. = FALSE)
   if(!is.logical(plot))                                                        stop("plot argument must be a logical",                               call. = FALSE)
   if(!all(simu.names %in% hop$exp.plan$SimulationName))                        stop("one or more values in simu.names is not present in hop",        call. = FALSE)
 
   if(cycle == "water") {
-    required.profiles <- c("climate", "annualplot")
-    if(!all(required.profiles %in% names(hop))) stop(paste(paste(required.profiles, collapse = " and "),
-                                                           "export profiles required for", cycle,
-                                                           "cycle calculations but not found"), call. = FALSE)
-    climate <- hop$climate %>%
-      dplyr::filter(SimulationName %in% simu.names) %>%
-      dplyr::select(SimulationName, Year, precipitation) %>%
-      dplyr::group_by(SimulationName, Year) %>%
-      dplyr::summarize(precipitation = -sum(precipitation)) %>%
-      tidyr::gather(key = "flux", value = "value", precipitation)
-
-    plot.data <- hop$annualplot %>%
-      dplyr::filter(SimulationName %in% simu.names) %>%
-      # Extract variables required for the water budget
-      dplyr::select(SimulationName, Year, mainCropArea, interCropArea,
-                    annualWaterEvaporatedInMainCrop,
-                    annualWaterEvaporatedInInterCrop,
-                    annualWaterExtractedByMainCrop,
-                    annualWaterExtractedByInterCrop,
-                    annualWaterExtractedByTrees,
-                    annualIrrigationInMainCrop,
-                    annualIrrigationInInterCrop,
-                    annualDrainage,
-                    annualInterceptedRainByMainCrop,
-                    annualInterceptedRainByInterCrop,
-                    annualInterceptedRainByTrees,
-                    annualRainTransmitted,
-                    annualRunOff,
-                    annualSurfaceRunOff,
-                    annualWaterExtractedInSaturationByMainCrop,
-                    annualWaterExtractedInSaturationByInterCrop,
-                    annualWaterExtractedInSaturationByTrees,
-                    annualWaterFromSaturation,
-                    annualWaterToDesaturation) %>%
-      # Scale by mainCrop or interCrop area
-      dplyr::mutate(annualWaterEvaporatedInMainCrop             = annualWaterEvaporatedInMainCrop             * mainCropArea  / (mainCropArea + interCropArea),
-                    annualWaterEvaporatedInInterCrop            = annualWaterEvaporatedInInterCrop            * interCropArea / (mainCropArea + interCropArea),
-                    annualWaterExtractedByMainCrop              = annualWaterExtractedByMainCrop              * mainCropArea  / (mainCropArea + interCropArea),
-                    annualWaterExtractedByInterCrop             = annualWaterExtractedByInterCrop             * interCropArea / (mainCropArea + interCropArea),
-                    annualIrrigationInMainCrop                  = annualIrrigationInMainCrop                  * mainCropArea  / (mainCropArea + interCropArea),
-                    annualIrrigationInInterCrop                 = annualIrrigationInInterCrop                 * interCropArea / (mainCropArea + interCropArea),
-                    annualInterceptedRainByMainCrop             = annualInterceptedRainByMainCrop             * mainCropArea  / (mainCropArea + interCropArea),
-                    annualInterceptedRainByInterCrop            = annualInterceptedRainByInterCrop            * interCropArea / (mainCropArea + interCropArea),
-                    annualWaterExtractedInSaturationByMainCrop  = annualWaterExtractedInSaturationByMainCrop  * mainCropArea  / (mainCropArea + interCropArea),
-                    annualWaterExtractedInSaturationByInterCrop = annualWaterExtractedInSaturationByInterCrop * interCropArea / (mainCropArea + interCropArea)) %>%
-      # Combine variables
-      dplyr::mutate(irrigation = -annualIrrigationInMainCrop + -annualIrrigationInInterCrop,
-                    aquifer = -annualWaterExtractedInSaturationByMainCrop + -annualWaterExtractedInSaturationByInterCrop + -annualWaterExtractedInSaturationByTrees,
-                    interception = annualInterceptedRainByMainCrop + annualInterceptedRainByInterCrop + annualInterceptedRainByTrees - annualRainTransmitted,
-                    evaporation = annualWaterEvaporatedInMainCrop + annualWaterEvaporatedInInterCrop) %>%
-      tidyr::gather(key = "flux", value = "value", annualWaterEvaporatedInMainCrop:annualWaterExtractedByTrees) %>%
-      dplyr::bind_rows(climate) %>%
-      dplyr::mutate(flux = factor(flux,
-                                  levels = c("interception",
-                                             "annualSurfaceRunOff",
-                                             "annualDrainage",
-                                             "evaporation",
-                                             "annualWaterExtractedByMainCrop",
-                                             "annualWaterExtractedByInterCrop",
-                                             "annualWaterExtractedByTrees",
-                                             "irrigation",
-                                             "aquifer",
-                                             "precipitation"),
-                                  labels = c("Interception - all",
-                                             "Surface run-off",
-                                             "Drainage",
-                                             "Soil evaporation",
-                                             "Transpiration - main crop",
-                                             "Transpiration - secondary crop",
-                                             "Transpiration - trees",
-                                             "Irrigation",
-                                             "Aquifer",
-                                             "Precipitation")))
-
+    plot.data  <- get_water_fluxes(hop)
     plot.title <- "Water Cycle"
     y.lab      <- "Water flux (mm)"
-    if(is.null(color.palette)) color.palette <- c("grey20", "grey40", "grey60", "grey80",
-                                                  "#D55E00", "#E69F00", "#F0E442",
-                                                  "#009E73", "#0072B2", "#56B4E9") # "#CC79A7"
+    if(is.null(color.palette)) color.palette <- c("grey20", "grey40", "grey60", "grey80", "#D55E00", "#E69F00", "#F0E442", "#009E73", "#0072B2", "#56B4E9")
 
   } else if(cycle == "nitrogen") {
-    required.profiles <- "annualplot"
-    if(!all(required.profiles %in% names(hop))) stop(paste(paste(required.profiles, collapse = " and "),
-                                                           "export profiles required for", cycle,
-                                                           "cycle calculations but not found"), call. = FALSE)
-    plot.data <- hop$annualplot %>%
-      dplyr::filter(SimulationName %in% simu.names) %>%
-      # Extract variables required for the nitrogen budget
-      dplyr::select(SimulationName, Year, mainCropArea, interCropArea,
-                    # mineralization
-                    # leaching (lixivation)
-                    # denitrification
-                    # exportation
-                    # fixation
-                    # humification
-                    # humus mineralization
-                    # immobilization
-                    # organisation
-                    # residuMineralization (INTERNAL?)
-                    # residus (INTERNAL?)
-                    # restitution
-                    # volatilization
-                    annualNitrogenExtractedByMainCrop, # scale by main crop area?
-                    annualNitrogenExtractedByInterCrop, # scale by inter crop area?
-                    annualNitrogenExtractedByTrees,
-                    annualNitrogenFertilisationInMainCrop,
-                    annualNitrogenFertilisationInInterCrop,
-                    annualNitrogenIrrigationInMainCrop,
-                    annualNitrogenIrrigationInInterCrop,
-                    annualNitrogenRainInMainCrop,
-                    annualNitrogenRainInInterCrop) %>%
-      # Combine variables
-      dplyr::mutate(fertilization = -annualNitrogenFertilisationInMainCrop + -annualNitrogenFertilisationInInterCrop,
-                    irrigation    = -annualNitrogenIrrigationInMainCrop    + -annualNitrogenIrrigationInInterCrop,
-                    deposition    = -annualNitrogenRainInMainCrop          + -annualNitrogenRainInInterCrop) %>%
-      dplyr::select(-(annualNitrogenFertilisationInMainCrop:annualNitrogenRainInInterCrop)) %>%
-      tidyr::gather(key = "flux", value = "value", annualNitrogenExtractedByMainCrop:deposition) %>%
-      dplyr::mutate(flux = factor(flux,
-                                  levels = c("annualNitrogenExtractedByMainCrop",
-                                             "annualNitrogenExtractedByInterCrop",
-                                             "annualNitrogenExtractedByTrees",
-                                             "fertilization",
-                                             "irrigation",
-                                             "deposition"),
-                                  labels = c("Main crop",
-                                             "Intercrop",
-                                             "Trees",
-                                             "Fertilization",
-                                             "Irrigation",
-                                             "Deposition")))
-
+    plot.data  <- get_nitrogen_fluxes(hop)
     plot.title <- "Nitrogen Cycle"
     y.lab      <- "N flux (kg M ha-1)"
-    if(is.null(color.palette)) color.palette <- c("#999999", "#E69F00", "#56B4E9", "#009E73",
-                                                  "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
-  } else if(cycle == "light") {
-    required.profiles <- "annualplot"
-    if(!all(required.profiles %in% names(hop))) stop(paste(paste(required.profiles, collapse = " and "),
-                                                           "export profiles required for", cycle,
-                                                           "cycle calculations but not found"), call. = FALSE)
-    na.to.zero <- function(x) {
-      x[is.na(x)] <- 0
-      return(x)
-    }
+    if(is.null(color.palette)) color.palette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "black", "grey50")
 
-    plot.data <- hop$annualplot %>%
-      dplyr::filter(SimulationName %in% simu.names) %>%
-      # Extract variables required for the light budget
-      dplyr::select(SimulationName, Year, mainCropArea, interCropArea,
-                    annualParIncident,
-                    annualParInterceptedByMainCrop,
-                    annualParInterceptedByInterCrop,
-                    annualParInterceptedByTrees) %>%
-      dplyr::mutate(annualParInterceptedByMainCrop  = na.to.zero(annualParInterceptedByMainCrop),
-                    annualParInterceptedByInterCrop = na.to.zero(annualParInterceptedByInterCrop),
-                    annualParInterceptedByTrees     = na.to.zero(annualParInterceptedByTrees)) %>%
-      # Scale by area to conver to moles and then make percentage of inceident par
-      dplyr::mutate(annualParIncident      = annualParIncident               * (mainCropArea + interCropArea),
-                    InterceptedByMainCrop  = annualParInterceptedByMainCrop  * mainCropArea                   / annualParIncident * 100,
-                    InterceptedByInterCrop = annualParInterceptedByInterCrop * interCropArea                  / annualParIncident * 100,
-                    InterceptedByTrees     = annualParInterceptedByTrees     * (mainCropArea + interCropArea) / annualParIncident * 100,
-                    notCaptured            = 100 - InterceptedByMainCrop - InterceptedByInterCrop - InterceptedByTrees) %>%
-      dplyr::select(-(annualParIncident:annualParInterceptedByTrees)) %>%
-      tidyr::gather(key = "flux", value = "value", InterceptedByMainCrop:notCaptured) %>%
-      dplyr::mutate(flux = factor(flux,
-                                  levels = c("InterceptedByTrees",
-                                             "notCaptured",
-                                             "InterceptedByInterCrop",
-                                             "InterceptedByMainCrop"),
-                                  labels = c("Trees",
-                                             "Not captured",
-                                             "Secondary crop",
-                                             "Main crop")))
+  } else if(cycle == "light") {
+    plot.data  <- get_light_fluxes(hop)
     plot.title <- "Light Capture"
     y.lab      <- "Intercepted PAR (% of incident PAR)"
     if(is.null(color.palette)) color.palette <- c("#E69F00", "grey20", "#56B4E9", "#009E73")
-  } else if(cycle == "carbon") {
-    required.profiles <- "annualplot"
-    if(!all(required.profiles %in% names(hop))) stop(paste(paste(required.profiles, collapse = " and "),
-                                                           "export profiles required for", cycle,
-                                                           "cycle calculations but not found"), call. = FALSE)
-    plot.data <- hop$annualplot %>%
-      dplyr::filter(SimulationName %in% simu.names) %>%
-      # Extract variables required for the carbon budget
-      dplyr::select(SimulationName, Year,
-                    maxTreesCarbonFoliage,
-                    annualTreesCarbonBranches,
-                    annualTreesCarbonCoarseRoots,
-                    annualTreesCarbonFineRoots,
-                    annualTreesCarbonLabile,
-                    annualTreesCarbonStem,
-                    annualTreesCarbonStump) %>%
-      dplyr::mutate(annualTreesCarbonStump       = -annualTreesCarbonStump) %>%
-      dplyr::mutate(annualTreesCarbonCoarseRoots = -annualTreesCarbonCoarseRoots) %>%
-      dplyr::mutate(annualTreesCarbonFineRoots   = -annualTreesCarbonFineRoots) %>%
-      tidyr::gather(key = "flux", value = "value", maxTreesCarbonFoliage:annualTreesCarbonStump) %>%
-      dplyr::mutate(flux = factor(flux,
-                                  levels = c("maxTreesCarbonFoliage",
-                                             "annualTreesCarbonLabile",
-                                             "annualTreesCarbonBranches",
-                                             "annualTreesCarbonStem",
-                                             "annualTreesCarbonFineRoots",
-                                             "annualTreesCarbonCoarseRoots",
-                                             "annualTreesCarbonStump"),
-                                  labels = c("Leaves",
-                                             "Labile",
-                                             "Branches",
-                                             "Stem",
-                                             "Fine Roots",
-                                             "Coarse Roots",
-                                             "Stump"))) %>%
-      dplyr::mutate(value = value / 1e3) # convert from kg C ha-1 to Mg C ha-1
 
+  } else if(cycle == "carbon") {
+    plot.data  <- get_carbon_pools(hop) %>%
+      dplyr::group_by(SimulationName, Year, Month, Day, Date, JulianDay, flux) %>%
+      dplyr::summarize(value = sum(value)) %>% # sum all trees on scene
+      dplyr::ungroup()
     plot.title <- "Tree Carbon Pools"
-    y.lab      <- "C storage (Mg C ha-1)"
-    if(is.null(color.palette)) color.palette <- c("#009E73","#999999", "#D55E00", "#E69F00",
-                                                  "#56B4E9", "#0072B2", "#F0E442", "#CC79A7")
+    y.lab      <- "Tree C storage (Mg C ha-1)"
+    if(is.null(color.palette)) color.palette <- c("#009E73","#999999", "#D55E00", "#E69F00", "#56B4E9", "#0072B2", "#F0E442", "#CC79A7")
+
   } else {
     stop("cycle argument not supported. Use one of: carbon, nitrogen, water, light.", call. = FALSE)
+  }
+
+  ## Set time limits
+  if(is.na(year.lim[1])) year.lim[1] <- min(plot.data$Year)
+  if(is.na(year.lim[2])) year.lim[2] <- max(plot.data$Year)
+
+  ## Filter & Summarize plot data
+  plot.data <- plot.data %>%
+    dplyr::filter(SimulationName %in% simu.names) %>%
+    dplyr::filter(Year >= year.lim[1], Year <= year.lim[2]) %>%
+    dplyr::select(-Month, -Day, -Date, -JulianDay)
+
+  incomplete.yrs <- unique(plot.data$Year)[table(dplyr::filter(plot.data, flux == unique(flux)[1])$Year) / length(unique(plot.data$SimulationName)) < 365]
+
+  plot.data <- plot.data %>%
+    dplyr::filter(!(Year %in% incomplete.yrs)) %>%
+    dplyr::group_by(SimulationName, Year, flux)
+
+  if(cycle == "carbon") {
+    plot.data <- dplyr::summarize(plot.data, value = max(value))
+  } else if(cycle == "light") {
+    plot.data <- dplyr::summarize(plot.data, value = mean(value))
+  } else {
+    plot.data <- dplyr::summarize(plot.data, value = sum(value))
   }
 
   ## Set faceting
@@ -278,15 +111,8 @@ plot_hisafe_cycle <- function(hop,
     scale.x    <- scale_x_continuous(sec.axis = sec_axis(~ ., labels = NULL), expand = c(0,0))
   }
 
-  ## Set time limits
-  plot.data$Year0 <- plot.data$Year - min(plot.data$Year) + 1
-  if(all(time.lim[!is.na(time.lim)] > 1000)) time.lim <- time.lim - min(plot.data$Year) + 1
-  if(is.na(time.lim[1])) time.lim[1] <- min(plot.data$Year0)
-  if(is.na(time.lim[2])) time.lim[2] <- max(plot.data$Year0)
-  plot.data <- dplyr::filter(plot.data, Year0 >= time.lim[1], Year0 <= time.lim[2])
-
   ## Create plot
-  plot.obj <- ggplot(plot.data, aes(x = Year0, y = value, fill = flux)) +
+  plot.obj <- ggplot(plot.data, aes(x = Year, y = value, fill = flux)) +
     labs(x     = "Year",
          y     = y.lab,
          title = plot.title) +
@@ -298,22 +124,25 @@ plot_hisafe_cycle <- function(hop,
     theme_hisafe_ts() +
     theme(legend.title      = element_blank(),
           axis.ticks.length = unit(5, "points"),
-          axis.text.x       = element_text(margin = margin(t = 5, unit = "points")),
+          axis.text.x       = element_text(margin = margin(t = 5, unit = "points"), angle = 90, hjust = 1, vjust = 0.5),
           axis.text.y       = element_text(margin = margin(r = 5, unit = "points")))
 
-  #ggsave_fitmax("/Users/kevinwolz/Desktop/carbon.png", plot.obj)
-  #ggsave_fitmax("/Users/kevinwolz/Desktop/light.png", plot.obj)
+  #ggsave_fitmax("/Users/kevinwolz/Desktop/water.png", plot.obj, scale = 2)
+  #ggsave_fitmax("/Users/kevinwolz/Desktop/nitrogen.png", plot.obj, scale = 2)
+  out.data <- plot.data %>%
+    dplyr::mutate(cycle = cycle) %>%
+    dplyr::mutate_if(is.numeric, abs)
 
-  if(plot) return(plot.obj) else return(dplyr::mutate(plot.data, cycle = cycle))
+  if(plot) return(plot.obj) else return(out.data)
 }
 
 
-#' Plot daily timeseries of nitrogen, water, or light capture
-#' @description Plots a daily timeseries of water, nitrogen, or light, capture
+#' Plot daily timeseries of major cycles
+#' @description Plots a daily timeseries of carbon pools, water extraction, nitrogen extraction, or light capture
 #' @return If \code{plot = TRUE}, returns a ggplot object. If \code{plot = FALSE}, returns the data that would create the plot.
 #' If \code{hop} contains more than one simulation, the plot will be faceted by SimulationName.
 #' @param hop An object of class hop or face.
-#' @param cycle One of "nitrogen", "water", or "light".
+#' @param cycle One of "carbon", "nitrogen", "water", or "light".
 #' @param years A numeric vector of the calendar years to include.
 #' If more than one year is provided, years are used as facets, and only a single value can be supplied to \code{simu.names}.
 #' Use "all" to include all available values.
@@ -336,21 +165,21 @@ plot_hisafe_cycle <- function(hop,
 #' water.plot
 #' ggsave_fitmax("light_capture.png", light.capture.plot)
 #' }
-plot_hisafe_use <- function(hop,
-                            cycle,
-                            years,
-                            simu.names    = "all",
-                            doy.lim       = c(1, 366),
-                            color.palette = NULL,
-                            plot          = TRUE) {
+plot_hisafe_cycle_daily <- function(hop,
+                                    cycle,
+                                    years,
+                                    simu.names    = "all",
+                                    doy.lim       = c(1, 366),
+                                    color.palette = NULL,
+                                    plot          = TRUE) {
 
-  if(!("hop" %in% class(hop)))                                  stop("hop argument not of class hop",                             call. = FALSE)
-  if(!all("plot" %in% names(hop)))                              stop("plot export profile required but not found",                call. = FALSE)
-  if(!(cycle %in% c("nitrogen", "water", "light")))             stop("cycle argument must be one of: nitrogen, water, light",     call. = FALSE)
-  if(!(all(is.numeric(years))        | years[1]      == "all")) stop("years argument must be 'all' or a numeric vector",          call. = FALSE)
-  if(!(all(is.character(simu.names)) | simu.names[1] == "all")) stop("simu.names argument must be 'all' or a character vector",   call. = FALSE)
-  if(!(length(doy.lim) == 2 & all(doy.lim %in% 1:366)))         stop("doy.lim argument must be of length 2 with values in 1:366", call. = FALSE)
-  if(!is.logical(plot))                                         stop("plot argument must be a logical",                           call. = FALSE)
+  if(!("hop" %in% class(hop)))                                  stop("hop argument not of class hop",                                 call. = FALSE)
+  if(!all("plot" %in% names(hop)))                              stop("plot export profile required but not found",                    call. = FALSE)
+  if(!(cycle %in% c("carbon", "nitrogen", "water", "light")))   stop("cycle argument must be one of: carbon, nitrogen, water, light", call. = FALSE)
+  if(!(all(is.numeric(years))        | years[1]      == "all")) stop("years argument must be 'all' or a numeric vector",              call. = FALSE)
+  if(!(all(is.character(simu.names)) | simu.names[1] == "all")) stop("simu.names argument must be 'all' or a character vector",       call. = FALSE)
+  if(!(length(doy.lim) == 2 & all(doy.lim %in% 1:366)))         stop("doy.lim argument must be of length 2 with values in 1:366",     call. = FALSE)
+  if(!is.logical(plot))                                         stop("plot argument must be a logical",                               call. = FALSE)
 
   if(simu.names[1] == "all") simu.names <- unique(hop$exp.plan$SimulationName)
   if(years[1]      == "all") years      <- unique(hop$plot$Year[which(hop$plot$SimulationName %in% simu.names)])
@@ -360,84 +189,51 @@ plot_hisafe_use <- function(hop,
   if(!all(simu.names %in% hop$plot$SimulationName)) stop("one or more values in simu.names is not present in the plot profile of hop", call. = FALSE)
 
   if(cycle == "water") {
-    # required.profiles <- c("climate", "plot")
-    # if(!all(required.profiles %in% names(hop))) stop(paste(paste(required.profiles, collapse = " and "),
-    #                                                         "export profiles required for", cycle,
-    #                                                         "cycle calculations but not found"), call. = FALSE)
+    plot.data   <- get_water_fluxes(hop) %>%
+      dplyr::filter(flux %in% c("Transpiration - Trees", "Transpiration - Secondary crop", "Transpiration - Main crop")) %>%
+      dplyr::mutate(flux = droplevels(flux))
+    levels(plot.data$flux) <- c("Trees", "Secondary crop", "Main crop")
+    if(is.null(color.palette)) color.palette <- c("#E69F00", "#56B4E9", "#009E73")
+    cycle.geom  <- geom_area(aes(fill = flux), na.rm = TRUE)
+    cycle.scale <- scale_fill_manual(values = color.palette)
+    pre.title   <- "Water Extraction"
+    y.lab       <- "Extracted water (mm)"
 
-    # plot.data <- hop$plot %>%
-    #   dplyr::filter(SimulationName %in% simu.names) %>%
-    #   dplyr::filter(Year %in% years) %>%
-    #   dplyr::filter(JulianDay >= doy.lim[1], JulianDay <= doy.lim[2]) %>%
-    #   dplyr::mutate(fake.date = lubridate::ymd(paste0("8000-", Month, "-", Day))) %>%
-
-    cycle.geom  <- geom_line(aes(color = flux), na.rm = TRUE)
-    cycle.scale <- scale_color_manual(values = color.palette)
-    pre.title <- "Water Extraction"
-    y.lab     <- "Extracted water (mm)"
-    if(is.null(color.palette)) color.palette <- c("#E69F00", "grey20", "#56B4E9", "#009E73")
   } else if(cycle == "nitrogen") {
-
-    # plot.data <- hop$plot %>%
-    #   dplyr::filter(SimulationName %in% simu.names) %>%
-    #   dplyr::filter(Year %in% years) %>%
-    #   dplyr::filter(JulianDay >= doy.lim[1], JulianDay <= doy.lim[2]) %>%
-    #   dplyr::mutate(fake.date = lubridate::ymd(paste0("8000-", Month, "-", Day))) %>%
-
-    cycle.geom  <- geom_line(aes(color = flux), na.rm = TRUE)
-    cycle.scale <- scale_color_manual(values = color.palette)
+    plot.data   <- get_nitrogen_fluxes(hop) %>%
+      dplyr::filter(flux %in% c("Trees", "Secondary crop", "Main crop")) %>%
+      dplyr::mutate(flux = droplevels(flux))
+    if(is.null(color.palette)) color.palette <- c("#E69F00", "#56B4E9", "#009E73")
+    cycle.geom  <- geom_area(aes(fill = flux), na.rm = TRUE)
+    cycle.scale <- scale_fill_manual(values = color.palette)
     pre.title   <- "Nitrogen Extraction"
     y.lab       <- "Extracted nitrogen (kg ha-1)"
-    if(is.null(color.palette)) color.palette <- c("#E69F00", "grey20", "#56B4E9", "#009E73")
+
   } else if(cycle == "light") {
-
-    na.to.zero <- function(x) {
-      x[is.na(x)] <- 0
-      return(x)
-    }
-
-    ## Extract required data from hop
-    #hop$plot$parInterceptedByInterCrop = 0
-    plot.data <- hop$plot %>%
-      dplyr::filter(SimulationName %in% simu.names) %>%
-      dplyr::filter(Year %in% years) %>%
-      dplyr::filter(JulianDay >= doy.lim[1], JulianDay <= doy.lim[2]) %>%
-      dplyr::mutate(fake.date = lubridate::ymd(paste0("8000-", Month, "-", Day))) %>%
-      # Extract variables required for the light budget
-      dplyr::select(SimulationName, Year, fake.date, mainCropArea, interCropArea,
-                    parIncident,
-                    parInterceptedByMainCrop,
-                    parInterceptedByInterCrop,
-                    parInterceptedByTrees) %>%
-      dplyr::mutate(parInterceptedByMainCrop  = na.to.zero(parInterceptedByMainCrop),
-                    parInterceptedByInterCrop = na.to.zero(parInterceptedByInterCrop),
-                    parInterceptedByTrees     = na.to.zero(parInterceptedByTrees)) %>%
-      # Scale by area to conver to moles and then make percentage of inceident par
-      dplyr::mutate(parIncident            = parIncident               * (mainCropArea + interCropArea),
-                    InterceptedByMainCrop  = parInterceptedByMainCrop  * mainCropArea                   / parIncident * 100,
-                    InterceptedByInterCrop = parInterceptedByInterCrop * interCropArea                  / parIncident * 100,
-                    InterceptedByTrees     = parInterceptedByTrees     * (mainCropArea + interCropArea) / parIncident * 100,
-                    notCaptured            = 100 - InterceptedByMainCrop - InterceptedByInterCrop - InterceptedByTrees) %>%
-      dplyr::select(-(parIncident:parInterceptedByTrees)) %>%
-      tidyr::gather(key = "flux", value = "value", InterceptedByMainCrop:notCaptured) %>%
-      dplyr::mutate(flux = factor(flux,
-                                  levels = c("InterceptedByTrees",
-                                             "notCaptured",
-                                             "InterceptedByInterCrop",
-                                             "InterceptedByMainCrop"),
-                                  labels = c("Trees",
-                                             "Not captured",
-                                             "Secondary crop",
-                                             "Main crop")))
-
+    plot.data   <- get_light_fluxes(hop)
+    if(is.null(color.palette)) color.palette <- c("#E69F00", "grey20", "#56B4E9", "#009E73")
     cycle.geom  <- geom_area(aes(fill = flux), na.rm = TRUE)
     cycle.scale <- scale_fill_manual(values = color.palette)
     pre.title   <- "Light Capture"
     y.lab       <- "Intercepted PAR (% of incident PAR)"
-    if(is.null(color.palette)) color.palette <- c("#E69F00", "grey20", "#56B4E9", "#009E73")
-  } else {
-    stop("cycle argument not supported. Use one of: nitrogen, water, light.", call. = FALSE)
+
+  } else if(cycle == "carbon") {
+    plot.data   <- get_carbon_pools(hop)
+    if(is.null(color.palette)) color.palette <- c("#009E73","#999999", "#D55E00", "#E69F00", "#56B4E9", "#0072B2", "#F0E442", "#CC79A7")
+    cycle.geom  <- geom_area(aes(fill = flux), na.rm = TRUE)
+    cycle.scale <- scale_fill_manual(values = color.palette)
+    pre.title <- "Tree Carbon Pools"
+    y.lab      <- "Tree C storage (Mg C ha-1)"
+  }else {
+    stop("cycle argument not supported. Use one of: carbon, nitrogen, water, light.", call. = FALSE)
   }
+
+  ## Filter plot data & add (fake) date
+  plot.data <- plot.data %>%
+    dplyr::filter(SimulationName %in% simu.names) %>%
+    dplyr::filter(Year %in% years) %>%
+    dplyr::filter(JulianDay >= doy.lim[1], JulianDay <= doy.lim[2]) %>%
+    dplyr::mutate(date = lubridate::as_date(lubridate::parse_date_time(paste0("8000-", JulianDay), "%Y-%j")))
 
   ## Remove years with just one day
   yrs.to.remove <- unique(plot.data$Year)[table(plot.data$Year) == length(unique(plot.data$flux))]
@@ -446,7 +242,7 @@ plot_hisafe_use <- function(hop,
   ## Set faceting
   if(length(years) == 1) {
     plot.title <- paste(pre.title, "-", years)
-    scale.x <- scale_x_date(expand = c(0,0), date_labels = "%b") # "%b-%Y"
+    scale.x <- scale_x_date(expand = c(0,0), date_labels = "%b")
     if("face" %in% class(hop)) {
       AF.sims <- sort(hop$exp.plan$SimulationName[!(hop$exp.plan$SimulationName %in% c("Monocrop", "Forestry"))])
       if(length(AF.sims) == 1) facet <- facet_wrap(~SimulationName, nrow = 1) else facet <- facet_wrap(~SimulationName)
@@ -466,7 +262,7 @@ plot_hisafe_use <- function(hop,
   }
 
   ## Create plot
-  plot.obj <- ggplot(plot.data, aes(x = fake.date, y = value)) +
+  plot.obj <- ggplot(plot.data, aes(x = date, y = value)) +
     labs(x     = "Date",
          y     = y.lab,
          title = plot.title) +
@@ -481,5 +277,239 @@ plot_hisafe_use <- function(hop,
           axis.text.x       = element_text(margin = margin(t = 5, unit = "points"), angle = 90, hjust = 1, vjust = 0.5),
           axis.text.y       = element_text(margin = margin(r = 5, unit = "points")))
 
-  if(plot) return(plot.obj) else return(plot.data)
+  out.data <- plot.data %>%
+    dplyr::mutate(cycle = cycle) %>%
+    dplyr::mutate_if(is.numeric, abs)
+
+  #ggsave_fitmax("/Users/kevinwolz/Desktop/nitrogen_daily.png", plot.obj, scale = 2)
+  if(plot) return(plot.obj) else return(out.data)
+}
+
+
+#' Get water fluxes from a hop object
+#' @description Get water fluxes from a hop object.
+#' Used within \code{\link{plot_hisafe_cycle}}, \code{\link{plot_hisafe_cycle_annual}}, \code{\link{plot_hisafe_cycle_daily}}
+#' @return A tibble with extracted and calculated water fluxes.
+#' @param hop An object of class hop or face.
+#' @importFrom dplyr %>%
+get_water_fluxes <- function(hop) {
+  profile_check(hop, "water", c("plot", "climate"))
+
+  climate <- hop$climate %>%
+    dplyr::select(SimulationName, Year, Date, precipitation)
+
+  out <- hop$plot %>%
+    replace(is.na(.), 0) %>%
+    dplyr::mutate(#waterEvaporatedInMainCrop  = waterEvaporatedInMainCrop  * mainCropArea  / (mainCropArea + interCropArea),
+      #waterEvaporatedInInterCrop = waterEvaporatedInInterCrop * interCropArea / (mainCropArea + interCropArea),
+      #waterExtractedByMainCrop   = waterExtractedByMainCrop   * mainCropArea  / (mainCropArea + interCropArea),
+      #waterExtractedByInterCrop  = waterExtractedByInterCrop  * interCropArea / (mainCropArea + interCropArea),
+      #irrigationInMainCrop       = irrigationInMainCrop       * mainCropArea  / (mainCropArea + interCropArea),
+      #irrigationInInterCrop      = irrigationInInterCrop      * interCropArea / (mainCropArea + interCropArea),
+      #interceptedRainByMainCrop  = interceptedRainByMainCrop  * mainCropArea  / (mainCropArea + interCropArea),
+      #interceptedRainByInterCrop = interceptedRainByInterCrop * interCropArea / (mainCropArea + interCropArea),
+                  irrigation   = -irrigationInMainCrop     + -irrigationInInterCrop,
+                  aquifer      = -waterFromSaturation + waterToDesaturation +
+                                 -waterExtractedInSaturationByMainCrop + -waterExtractedInSaturationByInterCrop + -waterExtractedInSaturationByTrees,
+                  interception = interceptedRainByMainCrop + interceptedRainByInterCrop + interceptedRainByTrees,
+                  evaporation  = waterEvaporatedInMainCrop + waterEvaporatedInInterCrop) %>%
+    dplyr::left_join(climate, by = c("SimulationName", "Year", "Date")) %>%
+    dplyr::mutate(precipitation = -precipitation) %>%
+    dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay,
+                  runOff, drainage, evaporation, interception,
+                  waterExtractedByMainCrop, waterExtractedByInterCrop, waterExtractedByTrees,
+                  irrigation, aquifer, precipitation) %>%
+    tidyr::gather(key = "flux", value = "value", runOff:precipitation) %>%
+    dplyr::mutate(flux = factor(flux,
+                                levels = c("interception",
+                                           "runOff",
+                                           "drainage",
+                                           "evaporation",
+                                           "waterExtractedByTrees",
+                                           "waterExtractedByInterCrop",
+                                           "waterExtractedByMainCrop",
+                                           "irrigation",
+                                           "aquifer",
+                                           "precipitation"),
+                                labels = c("Interception",
+                                           "Run-off",
+                                           "Drainage",
+                                           "Soil evaporation",
+                                           "Transpiration - Trees",
+                                           "Transpiration - Secondary crop",
+                                           "Transpiration - Main crop",
+                                           "Irrigation",
+                                           "Aquifer",
+                                           "Precipitation")))
+  return(out)
+  # Extract variables required for the water budget
+  # dplyr::select(SimulationName, Year, mainCropArea, interCropArea,
+  #               waterEvaporatedInMainCrop,
+  #               waterEvaporatedInInterCrop,
+  #               waterExtractedByMainCrop,
+  #               waterExtractedByInterCrop,
+  #               waterExtractedByTrees,
+  #               irrigationInMainCrop,
+  #               irrigationInInterCrop,
+  #               drainage,
+  #               interceptedRainByMainCrop,
+  #               interceptedRainByInterCrop,
+  #               interceptedRainByTrees,
+  #               #rainTransmitted,
+  #               runOff,
+  #               #surfaceRunOff,
+  #               waterFromSaturation,
+  #               waterToDesaturation) %>%
+}
+
+#' Get nitrogen fluxes from a hop object
+#' @description Get nitrogen fluxes from a hop object.
+#' Used within \code{\link{plot_hisafe_cycle}}, \code{\link{plot_hisafe_cycle_annual}}, \code{\link{plot_hisafe_cycle_daily}}
+#' @return A tibble with extracted and calculated nitrogen fluxes.
+#' @param hop An object of class hop or face.
+#' @importFrom dplyr %>%
+get_nitrogen_fluxes <- function(hop) {
+  profile_check(hop, "nitrogen", "plot")
+  out <- hop$plot %>%
+    replace(is.na(.), 0) %>%
+    # Extract variables required for the nitrogen budget
+    # dplyr::select(SimulationName, Year, mainCropArea, interCropArea,
+    #               # mineralization
+    #               # leaching (lixivation)
+    #               # denitrification
+    #               # exportation
+    #               # fixation
+    #               # humification
+    #               # humus mineralization
+    #               # immobilization
+    #               # organisation
+  #               # residuMineralization (INTERNAL?)
+  #               # residus (INTERNAL?)
+  #               # restitution
+  #               # volatilization
+  #               nitrogenExtractedByMainCrop, # scale by main crop area?
+  #               nitrogenExtractedByInterCrop, # scale by inter crop area?
+  #               nitrogenExtractedByTrees,
+  #               nitrogenFertilisationInMainCrop,
+  #               nitrogenFertilisationInInterCrop,
+  #               nitrogenIrrigationInMainCrop,
+  #               nitrogenIrrigationInInterCrop,
+  #               nitrogenRainInMainCrop,
+  #               nitrogenRainInInterCrop) %>%
+  # Combine variables
+  dplyr::mutate(mineralization = -nitrogenHumusMineralisation     + -nitrogenResiduMineralisation,
+                fertilization  = -nitrogenFertilisationInMainCrop + -nitrogenFertilisationInInterCrop,
+                irrigation     = -nitrogenIrrigationInMainCrop    + -nitrogenIrrigationInInterCrop,
+                deposition     = -nitrogenRainInMainCrop          + -nitrogenRainInInterCrop) %>%
+    dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay,
+                  nitrogenExtractedByMainCrop, nitrogenExtractedByInterCrop, nitrogenExtractedByTrees,
+                  nitrogenFixation, nitrogenVolatilisation, nitrogenDenitrification,
+                  mineralization, fertilization, irrigation, deposition) %>%
+    tidyr::gather(key = "flux", value = "value", nitrogenExtractedByMainCrop:deposition) %>%
+    dplyr::mutate(flux = factor(flux,
+                                levels = c("nitrogenExtractedByTrees",
+                                           "nitrogenExtractedByInterCrop",
+                                           "nitrogenExtractedByMainCrop",
+                                           "nitrogenVolatilisation",
+                                           "nitrogenDenitrification",
+                                           "mineralization",
+                                           "fertilization",
+                                           "irrigation",
+                                           "deposition",
+                                           "nitrogenFixation"),
+                                labels = c("Trees",
+                                           "Secondary crop",
+                                           "Main crop",
+                                           "Volatilization",
+                                           "Denitrification",
+                                           "Mineralization",
+                                           "Fertilization",
+                                           "Irrigation",
+                                           "Deposition",
+                                           "Fixation")))
+  return(out)
+}
+
+#' Get light fluxes from a hop object
+#' @description Get light fluxes from a hop object.
+#' Used within \code{\link{plot_hisafe_cycle}}, \code{\link{plot_hisafe_cycle_annual}}, \code{\link{plot_hisafe_cycle_daily}}
+#' @return A tibble with extracted and calculated light fluxes.
+#' @param hop An object of class hop or face.
+#' @importFrom dplyr %>%
+get_light_fluxes <- function(hop) {
+  profile_check(hop, "light", "plot")
+  out <- hop$plot %>%
+    replace(is.na(.), 0) %>%
+    # Scale by area to conver to moles and then make percentage of inceident par
+    dplyr::mutate(parIncident            = parIncident               * (mainCropArea + interCropArea),
+                  InterceptedByMainCrop  = parInterceptedByMainCrop  * mainCropArea                   / parIncident * 100,
+                  InterceptedByInterCrop = parInterceptedByInterCrop * interCropArea                  / parIncident * 100,
+                  InterceptedByTrees     = parInterceptedByTrees     * (mainCropArea + interCropArea) / parIncident * 100,
+                  notCaptured            = 100 - InterceptedByMainCrop - InterceptedByInterCrop - InterceptedByTrees) %>%
+    dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay,
+                  InterceptedByTrees, notCaptured, InterceptedByInterCrop, InterceptedByMainCrop) %>%
+    tidyr::gather(key = "flux", value = "value", InterceptedByTrees:InterceptedByMainCrop) %>%
+    dplyr::mutate(flux = factor(flux,
+                                levels = c("InterceptedByTrees",
+                                           "notCaptured",
+                                           "InterceptedByInterCrop",
+                                           "InterceptedByMainCrop"),
+                                labels = c("Trees",
+                                           "Not captured",
+                                           "Secondary crop",
+                                           "Main crop")))
+  return(out)
+}
+
+#' Get carbon pools from a hop object
+#' @description Get carbon pools from a hop object.
+#' Used within \code{\link{plot_hisafe_cycle}}, \code{\link{plot_hisafe_cycle_annual}}, \code{\link{plot_hisafe_cycle_daily}}
+#' @return A tibble with extracted and calculated carbon pools.
+#' @param hop An object of class hop or face.
+#' @importFrom dplyr %>%
+get_carbon_pools <- function(hop) {
+  profile_check(hop, "carbon", "trees")
+  out <- hop$trees %>%
+    replace(is.na(.), 0) %>%
+    dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay, id,
+                  carbonFoliage, carbonBranches, carbonCoarseRoots, carbonFineRoots, carbonLabile, carbonStem, carbonStump) %>%
+    dplyr::mutate(carbonStump       = -carbonStump) %>%
+    dplyr::mutate(carbonCoarseRoots = -carbonCoarseRoots) %>%
+    dplyr::mutate(carbonFineRoots   = -carbonFineRoots) %>%
+    tidyr::gather(key = "flux", value = "value", carbonFoliage:carbonStump) %>%
+    dplyr::mutate(flux = factor(flux,
+                                levels = c("carbonFoliage",
+                                           "carbonLabile",
+                                           "carbonBranches",
+                                           "carbonStem",
+                                           "carbonFineRoots",
+                                           "carbonCoarseRoots",
+                                           "carbonStump"),
+                                labels = c("Leaves",
+                                           "Labile",
+                                           "Branches",
+                                           "Stem",
+                                           "Fine Roots",
+                                           "Coarse Roots",
+                                           "Stump"))) %>%
+    dplyr::mutate(value = value / 1e3) %>% # convert from kg C tree-1 to Mg C tree-1
+    dplyr::left_join(dplyr::select(hop$plot.info, SimulationName, plot.area), by = "SimulationName") %>%
+    dplyr::mutate(value = value / (plot.area / 10000)) # convert from Mg C tree-1 to Mg C ha-1
+  return(out)
+}
+
+
+#' Check for existiance of profiles in a hop object
+#' @description Checks for existiance of profiles in a hop object
+#' Used within \code{\link{get_water_fluxes}}, \code{\link{get_nitrogen_fluxes}}, \code{\link{get_light_fluxes}}, \code{\link{get_carbon_pools}}
+#' @return Throws an error if profiles are not found.
+#' @param hop An object of class hop or face.
+#' @param cycle Cycle name to print in error output.
+#' @param required.profiles A character vector of the names of the profiles to check for.
+profile_check <- function(hop, cycle, required.profiles) {
+  row_check <- function(x) nrow(hop[[x]]) > 0
+  not.found <- required.profiles[!purrr::map_lgl(required.profiles, row_check)]
+  if(length(not.found) > 0) stop(paste(paste(not.found, collapse = " and "),
+                                                         "export profiles required for", cycle,
+                                                         "cycle calculations but not found in hop"), call. = FALSE)
 }
