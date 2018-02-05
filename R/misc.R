@@ -29,6 +29,27 @@ hisafe_info <- function(capsis.path) {
   invisible(hisafe.version)
 }
 
+#' Copy a Hi-sAFe template to specified location
+#' @description Copies a Hi-sAFe template to specified location.
+#' @return Invisibly returns a logical vector indicating if the attempted fily copy succeeded.
+#' @param template A character string of the path to the Hi-sAFe directory structure/files to use as a template
+#' (or one of the strings signaling a default template)
+#' See \code{\link{define_hisafe}} for more details on available default templates.
+#' @param path A character string of the path to where the template folder should be copied.
+#' @export
+#' @examples
+#' \dontrun{
+#' copy_hisafe_template("agroforestry_default", "/Users/myname/Desktop/")
+#' }
+copy_hisafe_template <- function(template, destination, overwrite = TRUE) {
+  template.path           <- get_template_path(template)
+  template.dir.components <- strsplit(template.path, "/")[[1]]
+  template.dir.components <- template.dir.components[template.dir.components != ""]
+  template.folder.name    <- tail(template.dir.components, 1)
+  dum <- file.copy(template.path, destination, recursive = TRUE, overwrite = overwrite)
+  invisible(dum)
+}
+
 #' Display supported Hi-sAFe input parameters
 #' @description Displays supported Hi-sAFe input parameters, their default values, and their accepted/suggested ranges.
 #' @return Invisibly returns an alphebetized character vector of the names of supported Hi-sAFe prameters.

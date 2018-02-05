@@ -13,7 +13,8 @@ build_structure(exp.plan, path, profiles, template)
 
 \item{profiles}{A character vector of export profiles the simulation to export.}
 
-\item{template}{A character string of the path to the Hi-sAFe directory structure/files to use as a template (or one of the strings signaling a default template)}
+\item{template}{A character string of the path to the Hi-sAFe directory structure/files to use as a template
+(or one of the strings signaling a default template)}
 }
 \value{
 Invisibly returns a list containing the original hip object and supplied path.

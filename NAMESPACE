@@ -3,6 +3,7 @@
 export(analyze_hisafe)
 export(build_cluster_script)
 export(build_hisafe)
+export(copy_hisafe_template)
 export(create_face)
 export(define_hisafe)
 export(define_hisafe_file)

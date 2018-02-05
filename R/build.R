@@ -76,7 +76,8 @@ build_hisafe <- function(hip) {
 #' @param exp.plan The exp.plan element of a "hip" object, containing a single row.
 #' @param path A character string of the path to the simulation folder.
 #' @param profiles A character vector of export profiles the simulation to export.
-#' @param template A character string of the path to the Hi-sAFe directory structure/files to use as a template (or one of the strings signaling a default template)
+#' @param template A character string of the path to the Hi-sAFe directory structure/files to use as a template
+#' (or one of the strings signaling a default template)
 build_structure <- function(exp.plan, path, profiles, template) {
 
   template.path   <- get_template_path(template)
