@@ -6,7 +6,7 @@ SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("annualplot", "annualtree", "an
                                                  1,      1,       1,       1,        1,       1,             1,         30))
 
 INPUT.DEFS  <- readr::read_delim(system.file("extdata", "input_defs.txt",  package = "hisafer"), "\t", col_types = readr::cols())
-#OUTPUT.DEFS <- readr::read_delim(system.file("extdata", "output_defs.txt", package = "hisafer"), "\t", col_types = readr::cols())
+OUTPUT.DEFS <- dplyr::arrange(readr::read_delim(system.file("extdata", "output_defs.txt", package = "hisafer"), "\t", col_types = readr::cols()), profile, name)
 
 INCLUDED.TEMPLATES <- c("agroforestry_default",       "forestry_default",       "monocrop_default",
                         "restinclieres_agroforestry", "restinclieres_forestry", "restinclieres_monocrop")

@@ -8,9 +8,10 @@ hip_params(variable = "names", search = FALSE,
   template = "agroforestry_default")
 }
 \arguments{
-\item{variable}{If "names", the default, then just the names of supported Hi-sAFe parameters is printed to the console.
-If "all", then the names, default values, and accepted/suggested ranges of supported Hi-sAFe parameters is printed.
-Can also be a character vector of specific Hi-sAFe parameters of which to display details.}
+\item{variable}{A character vector of specific Hi-sAFe parameters of which to display details.
+Can also be a regular expression for which to search in Hi-sAFe parameter names.
+If "names", the default, then just the names of Hi-sAFe parameters is printed to the console.
+If "all", then the names, definitions, and units of all Hi-sAFe parameters is printed.}
 
 \item{search}{Logical indicating whether \code{variable} should be treated as a regular expression and
 searched for in the parameter names rather than matched literally.}
@@ -41,5 +42,6 @@ hip_params("all")       # details of all parameters
 \seealso{
 Other hisafe helper functions: \code{\link{hisafe_profiles}},
   \code{\link{hop_date_filter}}, \code{\link{hop_filter}},
-  \code{\link{hop_merge}}, \code{\link{hop_rename}}
+  \code{\link{hop_merge}}, \code{\link{hop_params}},
+  \code{\link{hop_rename}}
 }

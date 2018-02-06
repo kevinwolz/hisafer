@@ -64,9 +64,10 @@ copy_hisafe_template <- function(template, destination, overwrite = TRUE, new.na
 #' Display supported Hi-sAFe input parameters
 #' @description Displays supported Hi-sAFe input parameters, their default values, and their accepted/suggested ranges.
 #' @return Invisibly returns an alphebetized character vector of the names of supported Hi-sAFe prameters.
-#' @param variable If "names", the default, then just the names of supported Hi-sAFe parameters is printed to the console.
-#' If "all", then the names, default values, and accepted/suggested ranges of supported Hi-sAFe parameters is printed.
-#' Can also be a character vector of specific Hi-sAFe parameters of which to display details.
+#' @param variable A character vector of specific Hi-sAFe parameters of which to display details.
+#' Can also be a regular expression for which to search in Hi-sAFe parameter names.
+#' If "names", the default, then just the names of Hi-sAFe parameters is printed to the console.
+#' If "all", then the names, definitions, and units of all Hi-sAFe parameters is printed.
 #' @param search Logical indicating whether \code{variable} should be treated as a regular expression and
 #' searched for in the parameter names rather than matched literally.
 #' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
@@ -97,17 +98,12 @@ hip_params <- function(variable = "names", search = FALSE, template = "agrofores
   PARAM_DEFAULTS  <- get_param_vals(TEMPLATE_PARAMS, "value")
 
   acceptable <- c(PARAM_NAMES, "names", "all")
-  if(any(!(variable %in% acceptable))) {
+  if(any(!(variable %in% acceptable)) & !search) {
     bad.vars <- sort(variable[!(variable %in% acceptable)])
     close.matches  <- purrr::map(bad.vars, stringdist::stringdist, b = PARAM_NAMES)
     suggested.vars <- PARAM_NAMES[unlist(purrr::map(close.matches, which.min))]
-    if(!search){
-      stop(paste0("The following are not supported Hi-sAFe input parameters: ", paste(bad.vars, collapse = ", "),
-                  "\n       Did you mean: ", paste(suggested.vars, collapse = " or "), "?"), call. = FALSE)
-    } else {
-      cat(paste0("The following are not supported Hi-sAFe input parameters: ", paste(bad.vars, collapse = ", "),
-                 "\n Parameter names will be searched for these as regular expressions."))
-    }
+    stop(paste0("The following are not supported Hi-sAFe input parameters: ", paste(bad.vars, collapse = ", "),
+                "\n       Did you mean: ", paste(suggested.vars, collapse = " or "), "?"), call. = FALSE)
   }
 
   if(variable[1] == "all") {
@@ -128,10 +124,12 @@ hip_params <- function(variable = "names", search = FALSE, template = "agrofores
   } else if (variable[1] == "names") {
     cat(paste0(PARAM_NAMES, collapse = "\n"))
   } else {
+    if(search) cat("'variable' values will be searched as regular expressions.")
     for(i in 1:length(variable)){
       if(search) {
-        var.def <- dplyr::filter(INPUT.DEFS, stringr::str_detect(name, variable[i]))
-        if(nrow(var.def) == 0) stop(paste(variable[i], "was not detected in any Hi-sAFe input parameter names"), call. = FALSE)
+        var.def <- dplyr::filter(INPUT.DEFS, stringr::str_detect(tolower(name), variable[i]))
+        if(nrow(var.def) == 0) cat("\n\n  --", paste(variable[i], "was not detected in any Hi-sAFe input parameter names"))
+        next
       } else {
         var.def <- dplyr::filter(INPUT.DEFS, name == variable[i])
       }
@@ -151,6 +149,68 @@ hip_params <- function(variable = "names", search = FALSE, template = "agrofores
     }
   }
   invisible(PARAM_NAMES)
+}
+
+#' Display Hi-sAFe output variables
+#' @description Displays Hi-sAFe output variables, their definitions, and thier units.
+#' @return Invisibly returns an alphebetized character vector of the names of Hi-sAFe output variables
+#' @param variable A character vector of specific Hi-sAFe output variables of which to display details.
+#' Can also be a regular expression for which to search in Hi-sAFe output variable names.
+#' If "names", the default, then just the names of Hi-sAFe output variables is printed to the console.
+#' If "all", then the names, definitions, and units of all Hi-sAFe output variables is printed.
+#' @param search Logical indicating whether \code{variable} should be treated as a regular expression and
+#' searched for in the variable names rather than matched literally.
+#' @export
+#' @family hisafe helper functions
+#' @examples
+#' \dontrun{
+#' hop_params()                 # just for parameter names
+#' hop_params("carbonBranches") # details of cellWidth parameter
+#' hop_params("all")            # details of all parameters
+#' }
+hop_params <- function(variable = "names", search = FALSE) {
+
+  if(!is.character(variable))                           stop("variable argument must be a character vector",                call. = FALSE)
+  if(search & length(variable) > 1)                     stop("search = TRUE is only possible with a single variable input", call. = FALSE)
+
+  acceptable <- c(OUTPUT.DEFS$name, "names", "all")
+  if(any(!(variable %in% acceptable)) & !search) {
+    bad.vars <- sort(variable[!(variable %in% acceptable)])
+    close.matches  <- purrr::map(bad.vars, stringdist::stringdist, b = OUTPUT.DEFS$name)
+    suggested.vars <- OUTPUT.DEFS$name[unlist(purrr::map(close.matches, which.min))]
+    stop(paste0("The following are not supported Hi-sAFe input parameters: ", paste(bad.vars, collapse = ", "),
+                "\n       Did you mean: ", paste(suggested.vars, collapse = " or "), "?"), call. = FALSE)
+  }
+
+  if(variable[1] == "all") {
+    for(i in 1:nrow(OUTPUT.DEFS)){
+      var.def <- OUTPUT.DEFS[i, ]
+      if(i == 1) { cat(var.def$name) } else { cat("\n\n", var.def$name) }
+      cat("\n  -- Output profile:", var.def$profile)
+      cat("\n  -- Definition:",     var.def$definition)
+      cat("\n  -- Units:",          var.def$unit)
+    }
+  } else if (variable[1] == "names") {
+    cat(paste0(OUTPUT.DEFS$profile, " - ", OUTPUT.DEFS$name, collapse = "\n"))
+  } else {
+    if(search) cat("'variable' values will be searched as regular expressions.")
+    for(i in 1:length(variable)){
+      if(search) {
+        var.def <- dplyr::filter(OUTPUT.DEFS, stringr::str_detect(tolower(name), variable[i]))
+        if(nrow(var.def) == 0) cat("\n\n  --", paste(variable[i], "was not detected in any Hi-sAFe input parameter names"))
+        next
+      } else {
+        var.def <- dplyr::filter(OUTPUT.DEFS, name == variable[i])
+      }
+      for(j in 1:nrow(var.def)){
+        cat("\n\n", var.def$name[j])
+        cat("\n  -- Output profile:", var.def$profile[j])
+        cat("\n  -- Definition:",     var.def$definition[j])
+        cat("\n  -- Units:",          var.def$unit[j])
+      }
+    }
+    invisible(OUTPUT.DEFS$name)
+  }
 }
 
 #' Display supported Hi-sAFe output profiles
