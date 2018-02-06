@@ -21,7 +21,6 @@ Imports: ggplot2 (>= 2.2.1),
     R.utils (>= 2.5.0),
     parallel (>= 3.4.1),
     memuse (>= 4.0-0),
-    ggforce (>= 0.1.1),
     stringdist (>= 0.9.4.6)
 Remotes: thomasp85/ggforce
 License: GPL-3
@@ -31,5 +30,6 @@ RoxygenNote: 6.0.1
 Suggests: knitr,
     rmarkdown,
     foreach (>= 1.4.3),
-    doParallel (>= 1.0.11)
+    doParallel (>= 1.0.11),
+    ggforce (>= 0.1.1)
 VignetteBuilder: knitr

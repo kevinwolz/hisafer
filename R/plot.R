@@ -75,9 +75,9 @@ plot_hisafe_ts <- function(hop,
   if(!is.logical(crop.points))                                    stop("crop.points argument must be a logical",                    call. = FALSE)
   if(!is.logical(plot))                                           stop("plot argument must be a logical",                           call. = FALSE)
   if(!(variable %in% names(hop[[profile]])))                      stop(paste0(variable, " does not exist within ", profile, " profile.",
-                                                                            "\nCheck spelling and capitalization of variable name.",
-                                                                            "\nEnsure that the variable was included within the output profile."),
-                                                                     call. = FALSE)
+                                                                              "\nCheck spelling and capitalization of variable name.",
+                                                                              "\nEnsure that the variable was included within the output profile."),
+                                                                       call. = FALSE)
 
   if(!all(simu.names %in% unique(hop[[profile]]$SimulationName)))          stop(paste("not all values in simu.names are present in the", profile, "profile"), call. = FALSE)
   if(!all(years      %in% unique(hop[[profile]]$Year)))                    stop(paste("not all values in years are present in the",      profile, "profile"), call. = FALSE)
@@ -346,16 +346,22 @@ plot_hisafe_monthcells <- function(hop,
   }
 
   if(canopies) {
-    plot.obj <- plot.obj +
-      ggforce::geom_ellipsis(data = tree.data,
-                             color = "green",
-                             size = 2,
-                             aes(x0 = x, y0 = y,
-                                 a = crownRadiusInterRow,
-                                 b = crownRadiusTreeLine,
-                                 angle = 0),
-                             inherit.aes = FALSE,
-                             na.rm = TRUE)
+    package.check <- requireNamespace("ggforce", quietly = TRUE)
+    if(package.check) {
+      plot.obj <- plot.obj +
+        ggforce::geom_ellipsis(data = tree.data,
+                               color = "green",
+                               size = 2,
+                               aes(x0 = x, y0 = y,
+                                   a = crownRadiusInterRow,
+                                   b = crownRadiusTreeLine,
+                                   angle = 0),
+                               inherit.aes = FALSE,
+                               na.rm = TRUE)
+    } else {
+      warning("The package 'ggforce' is required for drawing tree conopies by plot_hisafe_monthcells(). Please install it or set canopies = FALSE.",
+              immediate = TRUE)
+    }
   }
 
   if(plot) return(plot.obj) else return(plot.data)
@@ -497,16 +503,22 @@ plot_hisafe_annualcrop <- function(hop,
   }
 
   if(canopies) {
-    plot.obj <- plot.obj +
-      ggforce::geom_ellipsis(data = tree.data,
-                             color = "green",
-                             size = 2,
-                             aes(x0 = x, y0 = y,
-                                 a = crownRadiusInterRow,
-                                 b = crownRadiusTreeLine,
-                                 angle = 0),
-                             inherit.aes = FALSE,
-                             na.rm = TRUE)
+    package.check <- requireNamespace("ggforce", quietly = TRUE)
+    if(package.check) {
+      plot.obj <- plot.obj +
+        ggforce::geom_ellipsis(data = tree.data,
+                               color = "green",
+                               size = 2,
+                               aes(x0 = x, y0 = y,
+                                   a = crownRadiusInterRow,
+                                   b = crownRadiusTreeLine,
+                                   angle = 0),
+                               inherit.aes = FALSE,
+                               na.rm = TRUE)
+    } else {
+      warning("The package 'ggforce' is required for drawing tree conopies by plot_hisafe_annualcrop(). Please install it or set canopies = FALSE.",
+              immediate = TRUE)
+    }
   }
 
   if(plot) return(plot.obj) else return(plot.data)
