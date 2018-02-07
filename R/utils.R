@@ -8,8 +8,8 @@ SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("annualplot", "annualtree", "an
 INPUT.DEFS  <- readr::read_delim(system.file("extdata", "input_defs.txt",  package = "hisafer"), "\t", col_types = readr::cols())
 OUTPUT.DEFS <- dplyr::arrange(readr::read_delim(system.file("extdata", "output_defs.txt", package = "hisafer"), "\t", col_types = readr::cols()), profile, name)
 
-INCLUDED.TEMPLATES <- c("agroforestry_default",       "forestry_default",       "monocrop_default",
-                        "restinclieres_agroforestry", "restinclieres_forestry", "restinclieres_monocrop")
+EXTDATA <- list.files(system.file("extdata", package = "hisafer"))
+INCLUDED.TEMPLATES <- EXTDATA[!(grepl("\\.", EXTDATA) | EXTDATA == "template_common")]
 INCLUDED.TEMPLATE.SUBPATH <- system.file("extdata", "template_common",  package = "hisafer")
 
 remove_whitespace <- function(x) gsub("^\\s+|\\s+$", "", x)
