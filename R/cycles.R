@@ -309,7 +309,7 @@ get_water_fluxes <- function(hop) {
       #interceptedRainByMainCrop  = interceptedRainByMainCrop  * mainCropArea  / (mainCropArea + interCropArea),
       #interceptedRainByInterCrop = interceptedRainByInterCrop * interCropArea / (mainCropArea + interCropArea),
                   irrigation   = -irrigationInMainCrop     + -irrigationInInterCrop,
-                  aquifer      = -waterFromSaturation + waterToDesaturation +
+                  aquifer      = -waterFromSaturation +
                                  -waterExtractedInSaturationByMainCrop + -waterExtractedInSaturationByInterCrop + -waterExtractedInSaturationByTrees,
                   interception = interceptedRainByMainCrop + interceptedRainByInterCrop + interceptedRainByTrees,
                   evaporation  = waterEvaporatedInMainCrop + waterEvaporatedInInterCrop) %>%
@@ -358,8 +358,7 @@ get_water_fluxes <- function(hop) {
   #               #rainTransmitted,
   #               runOff,
   #               #surfaceRunOff,
-  #               waterFromSaturation,
-  #               waterToDesaturation) %>%
+  #               waterFromSaturation) %>%
 }
 
 #' Get nitrogen fluxes from a hop object

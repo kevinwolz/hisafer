@@ -87,7 +87,7 @@ copy_hisafe_template <- function(template, destination, overwrite = TRUE, new.na
 #' hip_params("cellWidth") # details of cellWidth parameter
 #' hip_params("all")       # details of all parameters
 #' }
-hip_params <- function(variable = "names", search = FALSE, template = "agroforestry_default") {
+hip_params <- function(variable = "names", search = FALSE, template = "agroforestry") {
 
   if(!is.character(variable))                           stop("variable argument must be a character vector",                call. = FALSE)
   if(!(is.character(template) & length(template) == 1)) stop("template argument must be a character vector of length 1",    call. = FALSE)

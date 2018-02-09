@@ -38,6 +38,8 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
   interCropSpecies <- gsub("\\.plt", "", get_used("interCropSpecies")[1])
   toric <- purrr::map_dbl(c("toricXp", "toricXn", "toricYp", "toricYn"), get_used)
   toric.lab <- ifelse(any(toric == 1), paste(c("Xp", "Xn", "Yp", "Yn")[as.logical(toric)], collapse = ","), "off")
+  toric.x.both <- ifelse(sum(toric[1:2]) == 2, TRUE, FALSE)
+  toric.y.both <- ifelse(sum(toric[3:4]) == 2, TRUE, FALSE)
 
   ## Calculate total soil depth
   soil.depth <- sum(as.numeric(get_used("layers")$thick))
@@ -45,7 +47,8 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
   if(get_used("nbTrees") != 0) {
     ## Extract tree data
     tree.plot.data <- get_used("tree.initialization") %>%
-      dplyr::mutate(x = treeX, y = treeY) %>%
+      dplyr::mutate(x = treeX / get_used("cellWidth"),
+                    y = treeY / get_used("cellWidth")) %>%
       dplyr::select(species, x, y)
     num.trees <- nrow(tree.plot.data) #nbTrees is not an allowed entry to a hip object, but is rather modifying by build_hisafe based on nrow(tree.init.table)
   } else {
@@ -55,13 +58,17 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
       dplyr::select(species, x, y)
     num.trees <- 0
   }
-  ## Calculate scene dimensions
+  ## Calculate scene dimensions (cell size for plotting is always "1", but more/less cells added and labels adjusted based actual dimensions)
   if(get_used("geometryOption") == 1) {
-    WIDTH  <- get_used("spacingBetweenRows") / get_used("cellWidth") * sqrt(num.trees)
-    HEIGHT <- get_used("spacingWithinRows")  / get_used("cellWidth") * sqrt(num.trees)
+    WIDTH.lab  <- get_used("spacingBetweenRows")
+    HEIGHT.lab <- get_used("spacingWithinRows")
+    WIDTH  <- WIDTH.lab   / get_used("cellWidth") * sqrt(num.trees)
+    HEIGHT <- HEIGHT.lab  / get_used("cellWidth") * sqrt(num.trees)
   } else {
-    WIDTH  <- get_used("plotWidth")  / get_used("cellWidth")
-    HEIGHT <- get_used("plotHeight") / get_used("cellWidth")
+    WIDTH.lab  <- get_used("plotWidth")
+    HEIGHT.lab <- get_used("plotHeight")
+    WIDTH  <- WIDTH.lab  / get_used("cellWidth")
+    HEIGHT <- HEIGHT.lab / get_used("cellWidth")
   }
 
   ## Create plot data
@@ -72,8 +79,8 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
     dplyr::as_tibble() %>%
     dplyr::arrange(desc(y), x) %>%
     dplyr::mutate(id = 1:nrow(.),
-                  x  = x - get_used("cellWidth")/2,
-                  y  = y - get_used("cellWidth")/2) # x and y are now cell centers
+                  x  = x - 0.5,
+                  y  = y - 0.5) # x and y are now cell centers
 
   if(num.trees > 0) {
     ## Modify tree locations for geometryOption = 1
@@ -135,20 +142,20 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
       boundaries <- purrr::map(xs, create_range, get_used("treeCropDistance"))
       boundaries <- purrr::map(boundaries, round_if_needed, get_used("cellWidth"))
       x.inside   <- unlist(purrr::map(boundaries, which_inside, plot.data$x))
-      x.inside   <- c(x.inside, check_x_runover(boundaries))
+      if(toric.x.both) x.inside <- c(x.inside, check_x_runover(boundaries)) # if toric symetry is on, check for intercrop runover across toric symmetry
       plot.data$crop[which(plot.data$x %in% x.inside)] <- interCropSpecies
     } else if(get_used("weededAreaRadius") > 0) {
       xs <- as.list(tree.plot.data$x)
       x.boundaries <- purrr::map(xs, create_range, get_used("weededAreaRadius"))
       x.boundaries <- purrr::map(x.boundaries, round_if_needed, get_used("cellWidth"))
       x.inside     <- unlist(purrr::map(x.boundaries, which_inside, plot.data$x))
-      x.inside     <- c(x.inside, check_x_runover(x.boundaries))
+      if(toric.x.both) x.inside <- c(x.inside, check_x_runover(x.boundaries)) # if toric symetry is on, check for intercrop runover across toric symmetry
 
       ys <- as.list(tree.plot.data$y)
       y.boundaries <- purrr::map(ys, create_range, get_used("weededAreaRadius"))
       y.boundaries <- purrr::map(y.boundaries, round_if_needed, get_used("cellWidth"))
       y.inside     <- unlist(purrr::map(y.boundaries, which_inside, plot.data$y))
-      y.inside     <- c(y.inside, check_y_runover(y.boundaries))
+      if(toric.y.both) y.inside <- c(y.inside, check_y_runover(y.boundaries)) # if toric symetry is on, check for intercrop runover across toric symmetry
 
       cells.inside <- expand.grid(x.inside, y.inside) %>%
         dplyr::rename(x = Var1, y = Var2) %>%
@@ -163,8 +170,8 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
   }
 
   plot.obj <- ggplot(plot.data, aes(x = x, y = y)) +
-    labs(x       = paste0(WIDTH, "m"),
-         y       = paste0(HEIGHT, "m"),
+    labs(x       = paste0(WIDTH.lab,  "m"),
+         y       = paste0(HEIGHT.lab, "m"),
          color   = "",
          fill    = "",
          title   = paste("Scene:", hip$exp.plan$SimulationName),

@@ -4,8 +4,7 @@
 \alias{hip_params}
 \title{Display supported Hi-sAFe input parameters}
 \usage{
-hip_params(variable = "names", search = FALSE,
-  template = "agroforestry_default")
+hip_params(variable = "names", search = FALSE, template = "agroforestry")
 }
 \arguments{
 \item{variable}{A character vector of specific Hi-sAFe parameters of which to display details.

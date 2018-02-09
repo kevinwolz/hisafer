@@ -4,8 +4,8 @@
 \alias{define_hisafe_file}
 \title{Define a Hi-sAFe experiment from a file}
 \usage{
-define_hisafe_file(file, path, profiles = "all",
-  template = "agroforestry_default", force = FALSE)
+define_hisafe_file(file, path, profiles = "all", template = "agroforestry",
+  force = FALSE)
 }
 \arguments{
 \item{file}{A character string of the path to a csv file.

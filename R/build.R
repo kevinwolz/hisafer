@@ -98,7 +98,7 @@ build_structure <- function(exp.plan, path, profiles, template) {
 
   ## Move weather file if one was provided
   if("weatherFile" %in% names(exp.plan)) {
-    dum <- file.remove(paste0(simu.path, "/weather.wth"))
+    dum <- file.remove(list.files(simu.path, ".wth$", full.names = TRUE))
     dum <- file.copy(exp.plan$weatherFile, simu.path)
   }
 
@@ -170,21 +170,15 @@ build_structure <- function(exp.plan, path, profiles, template) {
   stics.params.to.edit  <- params.to.edit[params.to.edit %in% PARAM_NAMES$stics]
 
   ## Edit pld file
-  pld.path <- paste0(simu.path, "/template.pld")
+  pld.path <- list.files(simu.path, ".pld$", full.names = TRUE)
   pld      <- read_param_file(pld.path)
   pld.new  <- edit_param_file(pld, dplyr::select(exp.plan, pld.params.to.edit)) %>%
-    edit_param_element("nbTrees", num.trees) %>%
-    edit_param_element("country", exp.plan$SimulationName) %>%
-    edit_param_element("townShip", exp.plan$SimulationName) %>%
-    edit_param_element("site", exp.plan$SimulationName) %>%
-    edit_param_element("name", exp.plan$SimulationName) %>%
-    edit_param_element("longitude", 0) %>%
-    edit_param_element("elevation", 0)
+    edit_param_element("nbTrees", num.trees)
   write_param_file(pld.new, pld.path)
   dum <- file.rename(pld.path, paste0(simu.path, "/", exp.plan$SimulationName, ".pld"))
 
   ## Edit sim file
-  sim.path <- paste0(simu.path, "/template.sim")
+  sim.path <- list.files(simu.path, ".sim$", full.names = TRUE)
   sim      <- read_param_file(sim.path)
   sim.new  <- edit_param_file(sim, dplyr::select(exp.plan, sim.params.to.edit)) %>%
     edit_param_element("profileNames", paste0(profiles, collapse = ",")) %>%
@@ -193,7 +187,7 @@ build_structure <- function(exp.plan, path, profiles, template) {
   dum <- file.rename(sim.path, paste0(simu.path, "/", exp.plan$SimulationName, ".sim"))
 
   ## Edit tree file
-  tree.path <- list.files(paste0(simu.path, "/treeSpecies"), pattern = "\\.tree", full.names = TRUE)
+  tree.path <- list.files(paste0(simu.path, "/treeSpecies"), pattern = "\\.tree$", full.names = TRUE)
   for(i in tree.path) {
     tree <- read_param_file(i)
     if(length(tree.params.to.edit > 0)) {

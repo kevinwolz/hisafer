@@ -5,8 +5,7 @@
 \title{Define a Hi-sAFe experiment}
 \usage{
 define_hisafe(path, exp.name = "experiment", profiles = "all",
-  template = "agroforestry_default", factorial = FALSE, force = FALSE,
-  ...)
+  template = "agroforestry", factorial = FALSE, force = FALSE, ...)
 }
 \arguments{
 \item{path}{A character string of the path (relative or absolute) to the directory where the simulation/experiment is to be built.}

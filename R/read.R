@@ -60,6 +60,8 @@ read_hisafe <- function(hip           = NULL,
   if(!(is.numeric(max.size) & length(max.size) == 1))           stop("max.size argument must be a positive integer",            call. = FALSE)
   if(max.size %% 1 != 0 & max.size > 0)                         stop("max.size argument must be a positive integer",            call. = FALSE)
 
+  if(profiles[1] == "all" & !is.null(hip)) profiles <- hip$profiles
+
   ## Read simulation inputs & extract cols that vary for binding to output data
   if(!is.null(hip)) {
     EXP.PLAN   <- hip$exp.plan
@@ -277,7 +279,7 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, max.s
   plotHeight          <- as.numeric(pld$PLOT$plotHeight$value)
   treeLineOrientation <- as.numeric(pld$PLOT$treeLineOrientation$value)
   cellWidth           <- as.numeric(pld$PLOT$cellWidth$value)
-  soil.depth          <- sum(pld$LAYERS$layers$value[[1]]$thickness)
+  soil.depth          <- sum(pld$LAYERS$layers$value[[1]]$thick)
 
   plot.area <- ifelse(geometryOption == 1, spacingBetweenRows * spacingWithinRows, plotWidth * plotHeight)
   plot.info <- dplyr::tibble(SimulationName      = simu.name,

@@ -63,7 +63,7 @@
 define_hisafe <- function(path,
                           exp.name = "experiment",
                           profiles = "all",
-                          template = "agroforestry_default",
+                          template = "agroforestry",
                           factorial = FALSE,
                           force = FALSE, ...) {
 
@@ -142,7 +142,7 @@ define_hisafe <- function(path,
 define_hisafe_file <- function(file,
                                path,
                                profiles = "all",
-                               template = "agroforestry_default",
+                               template = "agroforestry",
                                force    = FALSE) {
 
   path          <- R.utils::getAbsolutePath(path)
