@@ -1,9 +1,9 @@
 ## This SUPPORTED.PROFILES object is only needed to write the exportFrequencies line of the sim file within build_structure().
 ## There is no better way to do this until a better way to describe export profiles and frequenceies in Hi-sAFe is determined.
 SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("annualplot", "annualtree", "annualcrop",
-                                                 "plot", "trees", "roots", "cells", "voxels", "voxelsDebug", "climate", "monthCells"),
+                                                 "plot", "trees", "cells", "cellsDetail", "voxels", "voxelsDetail", "voxelsDebug", "climate", "monthCells"),
                                     freqs    = c(365,          365,          365,
-                                                 1,      1,       1,       1,        1,       1,             1,         30))
+                                                 1,      1,       1,        1,            1,        1,               1,             1,         30))
 
 INPUT.DEFS  <- readr::read_delim(system.file("extdata", "input_defs.txt",  package = "hisafer"), "\t", col_types = readr::cols())
 OUTPUT.DEFS <- dplyr::arrange(readr::read_delim(system.file("extdata", "output_defs.txt", package = "hisafer"), "\t", col_types = readr::cols()), profile, name)
@@ -13,7 +13,6 @@ INCLUDED.TEMPLATES <- EXTDATA[!(grepl("\\.", EXTDATA) | EXTDATA == "template_com
 INCLUDED.TEMPLATE.SUBPATH <- system.file("extdata", "template_common",  package = "hisafer")
 
 remove_whitespace <- function(x) gsub("^\\s+|\\s+$", "", x)
-
 clean_path        <- function(x) gsub("//", "/", x, fixed = TRUE)
 
 get_template_path <- function(template) {
@@ -41,4 +40,3 @@ get_available_profiles <- function(template) {
   profiles <- gsub("\\.pro", "", list.files(clean_path(paste0(path, "/exportParameters")), pattern = "\\.pro"))
   return(profiles)
 }
-

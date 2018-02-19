@@ -10,7 +10,6 @@
 #'  \item{climate}
 #'  \item{monthCells}
 #'  \item{cells}
-#'  \item{roots}
 #'  \item{voxels}
 #'  \item{variables}{ - variable descriptions and units from all read profiles}
 #'  \item{plot.info}{ - plot geometry data for each simulation}
@@ -30,9 +29,11 @@
 #' @param show.progress Logical indicating whether progress messsages should be printed to the console.
 #' @param max.size The maximum file size (in bytes) that should be read. Files larger than this value will be ignored, with a warning.
 #' @param date.min A character string of the minimum date to keep, in the format "YYYY-MM-DD".
-#' If NA, the minimum date in the output data is used.
+#' If NA, the minimum date in the output data is used. Only used if \code{dates} is \code{NULL}.
 #' @param date.max A character string of the maximum date to keep, in the format "YYYY-MM-DD".
-#' If NA, the maximum date in the output data is used.
+#' If NA, the maximum date in the output data is used. Only used if \code{dates} is \code{NULL}.
+#' @param dates A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates to keep.
+#' If \code{NULL}, then \code{date.max} and \code{date.min} are used instad.
 #' @export
 #' @importFrom dplyr %>%
 #' @examples
@@ -50,9 +51,10 @@ read_hisafe <- function(hip           = NULL,
                         show.progress = TRUE,
                         max.size      = 3e8,
                         date.min      = NA,
-                        date.max      = NA) {
+                        date.max      = NA,
+                        dates         = NULL) {
 
-  if(!is.null(hip) & !("hip" %in% class(hip)))                  stop("data not of class hip",                                   call. = FALSE)
+  is_hip(hip, error = TRUE)
   if(is.null(hip) == is.null(path))                             stop("must provide hip or path, not both",                      call. = FALSE)
   if(!(all(is.character(simu.names)) | simu.names[1] == "all")) stop("simu.names argument must be 'all' or a character vector", call. = FALSE)
   if(!(all(is.character(profiles))   | profiles[1]   == "all")) stop("profiles argument must be 'all' or a character vector",   call. = FALSE)
@@ -114,7 +116,7 @@ read_hisafe <- function(hip           = NULL,
   ## Tidy up data
   data_tidy <- function(x){
     if(nrow(x) > 0) {
-      x <- dplyr::left_join(EXP.PLAN, x, by = "SimulationName") %>%   # add EXP.PLAN cols to annual data
+      x <- dplyr::left_join(EXP.PLAN, x, by = "SimulationName") %>%   # add EXP.PLAN cols
         dplyr::filter(!is.na(Date))                                   # output profiles with no data will have NA's in all columns
     } else {
       x <- dplyr::tibble()
@@ -128,7 +130,6 @@ read_hisafe <- function(hip           = NULL,
   data$trees       <- data_tidy(data$trees)
   data$plot        <- data_tidy(data$plot)
   data$climate     <- data_tidy(data$climate)
-  data$roots       <- data_tidy(data$roots)
   data$monthCells  <- data_tidy(data$monthCells)
   data$cells       <- data_tidy(data$cells)
   data$voxels      <- data_tidy(data$voxels)
@@ -158,7 +159,7 @@ read_hisafe <- function(hip           = NULL,
     class(data) <- c("hop", class(data))
   }
 
-  data <- hop_date_filter(data, date.min = date.min, date.max = date.max)
+  data <- hop_date_filter(data, date.min = date.min, date.max = date.max, dates = dates)
 
   return(data)
 }
@@ -175,7 +176,6 @@ read_hisafe <- function(hip           = NULL,
 #'  \item{climate}
 #'  \item{monthCells}
 #'  \item{cells}
-#'  \item{roots}
 #'  \item{voxels}
 #'  \item{variables}{ - variable descriptions and units from all profiles}
 #'  \item{plot.info}{ - plot geometry data}
@@ -197,7 +197,7 @@ read_hisafe <- function(hip           = NULL,
 #' @param max.size The maximum file size (in bytes) that should be read. Files larger than this value will be ignored, with a warning.
 read_simulation <- function(simu.name, hip, path, profiles, show.progress, max.size) {
 
-  if(!is.null(hip) & !("hip" %in% class(hip)))              stop("data not of class hip", call. = FALSE)
+  is_hip(hip, error = TRUE)
   if(is.null(hip) == (is.null(simu.name) | is.null(path)))  stop("must provide hip OR (simu.name & path)", call. = FALSE)
 
   simu.path <- clean_path(paste0(path, "/" , simu.name))
@@ -242,6 +242,25 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, max.s
     out <- list()
   }
 
+  if("cellsDetail" %in% profiles) {
+    out$cells$data <- out$cells$data %>%
+      dplyr::left_join(out$cellsDetail$data , by = dplyr::vars(SimulationName:y))
+    out$cells$variables <- dplyr::bind_rows(out$cells$variables, out$cellsDetail$variables)
+    out$cellsDetail <- NULL
+  }
+  if("voxelsDetail" %in% profiles) {
+    out$voxels$data <- out$voxels$data %>%
+      dplyr::left_join(out$voxelsDetail$data , by = dplyr::vars(SimulationName:z))
+    out$voxels$variables <- dplyr::bind_rows(out$voxels$variables, out$voxelsDetail$variables)
+    out$voxelsDetail <- NULL
+  }
+  if("voxelsDebug" %in% profiles) {
+    out$voxels$data <- out$voxels$data %>%
+      dplyr::left_join(out$voxelsDebug$data , by = dplyr::vars(SimulationName:z))
+    out$voxels$variables <- dplyr::bind_rows(out$voxels$variables, out$voxelsDebug$variables)
+    out$voxelsDebug <- NULL
+  }
+
   get_prof <- function(out, prof) {
     if(is.null(out[[prof]])) {
       dv <- list(data = dplyr::tibble(), variables = dplyr::tibble())
@@ -257,13 +276,12 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, max.s
   trees.dv      <- get_prof(out, "trees")
   plot.dv       <- get_prof(out, "plot")
   climate.dv    <- get_prof(out, "climate")
-  roots.dv      <- get_prof(out, "roots")
   monthCells.dv <- get_prof(out, "monthCells")
   cells.dv      <- get_prof(out, "cells")
   voxels.dv     <- get_prof(out, "voxels")
 
   ## Combine variables into one tibble, remove duplicates, rename col headers in English
-  vars.to.pull <- list(annualtree.dv, annualcrop.dv, annualplot.dv, trees.dv, plot.dv, climate.dv, roots.dv, monthCells.dv, cells.dv, voxels.dv)
+  vars.to.pull <- list(annualtree.dv, annualcrop.dv, annualplot.dv, trees.dv, plot.dv, climate.dv, monthCells.dv, cells.dv, voxels.dv)
   variables <- purrr::map(vars.to.pull, "variables") %>%
     dplyr::bind_rows() %>%
     dplyr::distinct()
@@ -277,16 +295,20 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, max.s
   spacingWithinRows   <- as.numeric(pld$PLOT$spacingWithinRows$value)
   plotWidth           <- as.numeric(pld$PLOT$plotWidth$value)
   plotHeight          <- as.numeric(pld$PLOT$plotHeight$value)
-  treeLineOrientation <- as.numeric(pld$PLOT$treeLineOrientation$value)
+  northOrientation    <- as.numeric(pld$PLOT$northOrientation$value)
   cellWidth           <- as.numeric(pld$PLOT$cellWidth$value)
-  soil.depth          <- sum(pld$LAYERS$layers$value[[1]]$thick)
+  soilDepth           <- sum(pld$LAYERS$layers$value[[1]]$thick)
+  waterTable          <- pld$SOIL$waterTable$value
 
   plot.area <- ifelse(geometryOption == 1, spacingBetweenRows * spacingWithinRows, plotWidth * plotHeight)
   plot.info <- dplyr::tibble(SimulationName      = simu.name,
+                             plotWidth           = ifelse(geometryOption == 1, spacingBetweenRows, plotWidth),
+                             plotHeight          = ifelse(geometryOption == 1, spacingWithinRows,  plotHeight),
                              plot.area           = plot.area,
-                             treeLineOrientation = treeLineOrientation,
+                             northOrientation    = northOrientation,
                              cellWidth           = cellWidth,
-                             soilDepth           = soil.depth)
+                             soilDepth           = soilDepth,
+                             waterTable          = waterTable)
 
   ## Ensure crop names are characters in annual plot and plot
   clean_crop_name <- function(x) {
@@ -310,7 +332,6 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, max.s
                  climate    = dplyr::distinct(climate.dv$data),
                  monthCells = dplyr::distinct(monthCells.dv$data),
                  cells      = dplyr::distinct(cells.dv$data),
-                 roots      = dplyr::distinct(roots.dv$data),
                  voxels     = dplyr::distinct(voxels.dv$data),
                  variables  = variables,
                  plot.info  = plot.info,
@@ -325,7 +346,7 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, max.s
 #' @description Reads in an example Hi-sAFe experiment. For more details see \code{\link{read_hisafe}}.
 #' @return An object of class "hop".
 #' @param profiles A character vector of the names of Hi-sAFe output profiles to read.
-#' "cells", "roots" and "voxels" profiles are not available in the example.
+#' "cells", and "voxels" profiles are not available in the example.
 #' @param show.progress Logical indicating whether progress messsages should be printed to the console.
 #' @export
 read_hisafe_example <- function(profiles      = c("annualplot", "annualtree", "annualcrop", "plot", "trees", "climate", "monthCells"),
@@ -407,21 +428,50 @@ read_profile <- function(profile, path, show.progress = TRUE, max.size = 3e8) {
 
 #' Read tree information from a Hi-sAFe pld file
 #' @description Reads tree information from a Hi-sAFe pld file. Used by \code{\link{read_simulation}}.
-#' @return A data frame (tibble) containing tree id, species, x and y.
+#' @return A data frame (tibble) containing tree id, species, x, y, and pruning/root pruning parameters.
 #' @param path A character string of the path to the directory containing the simulation folder.
 #' @param simu.name A character string of the simualation name.
 #' @importFrom dplyr %>%
 read_tree_info <- function(path, simu.name) {
-  pld <- read_param_file(clean_path(paste0(path, "/", simu.name, "/", simu.name, ".pld")))
-  if(pld$TREE_INITIALIZATION$tree.initialization$commented == FALSE) {
+  sim <- read_param_file(paste0(clean_path(paste0(path, "/", simu.name, "/")), simu.name, ".sim"))
+  pld <- read_param_file(paste0(clean_path(paste0(path, "/", simu.name, "/")), simu.name, ".pld"))
+  if(!pld$TREE_INITIALIZATION$tree.initialization$commented) {
     tree.info <- pld$TREE_INITIALIZATION$tree.initialization$value[[1]] %>%
       dplyr::mutate(x = treeX, y = treeY) %>%
       dplyr::select(species, x, y)
     tree.info <- tree.info %>%
       dplyr::mutate(id = 1:nrow(tree.info)) %>%
       dplyr::mutate(SimulationName = rep(simu.name, nrow(tree.info))) %>%
+      dplyr::mutate(simulationYearStart = sim$SIMULATION$simulationYearStart$value) %>%
       dplyr::select(SimulationName, id, dplyr::everything())
+    if(!sim$TREE_PRUNING$treePruningYears$commented) {
+      tree.info <- tree.info %>%
+        dplyr::mutate(treePruningYears     = sim$TREE_PRUNING$treePruningYears$value) %>%
+        dplyr::mutate(treePruningProp      = sim$TREE_PRUNING$treePruningProp$value) %>%
+        dplyr::mutate(treePruningMaxHeight = sim$TREE_PRUNING$treePruningMaxHeight$value) %>%
+        dplyr::mutate(treePruningDays      = sim$TREE_PRUNING$treePruningDays$value)
+    } else {
+      tree.info <- tree.info %>%
+        dplyr::mutate(treePruningYears     = list(as.numeric(NA))) %>%
+        dplyr::mutate(treePruningProp      = list(as.numeric(NA))) %>%
+        dplyr::mutate(treePruningMaxHeight = list(as.numeric(NA))) %>%
+        dplyr::mutate(treePruningDays      = list(as.numeric(NA)))
+    }
+    if(!sim$TREE_ROOT_PRUNING$treeRootPruningYears$commented) {
+      tree.info <- tree.info %>%
+        dplyr::mutate(treeRootPruningYears    = sim$TREE_ROOT_PRUNING$treeRootPruningYears$value) %>%
+        dplyr::mutate(treeRootPruningDays     = sim$TREE_ROOT_PRUNING$treeRootPruningDays$value) %>%
+        dplyr::mutate(treeRootPruningDistance = sim$TREE_ROOT_PRUNING$treeRootPruningDistance$value) %>%
+        dplyr::mutate(treeRootPruningDepth    = sim$TREE_ROOT_PRUNING$treeRootPruningDepth$value)
+    } else {
+      tree.info <- tree.info %>%
+        dplyr::mutate(treeRootPruningYears    = list(as.numeric(NA))) %>%
+        dplyr::mutate(treeRootPruningDays     = list(as.numeric(NA))) %>%
+        dplyr::mutate(treeRootPruningDistance = list(as.numeric(NA))) %>%
+        dplyr::mutate(treeRootPruningDepth    = list(as.numeric(NA)))
+    }
   } else {
     tree.info <- dplyr::tibble()
   }
+  return(tree.info)
 }

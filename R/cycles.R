@@ -30,7 +30,7 @@ plot_hisafe_cycle_annual <- function(hop,
                                      color.palette = NULL,
                                      plot          = TRUE) {
 
-  if(!("hop" %in% class(hop))) stop("hop argument not of class hop", call. = FALSE)
+  is_hop(hop, error = TRUE)
   if(simu.names[1] == "all") simu.names <- unique(hop$exp.plan$SimulationName)
 
   if(!(cycle %in% c("carbon", "nitrogen", "water", "light")))                  stop("cycle argument must be one of: carbon, nitrogen, water, light", call. = FALSE)
@@ -173,7 +173,7 @@ plot_hisafe_cycle_daily <- function(hop,
                                     color.palette = NULL,
                                     plot          = TRUE) {
 
-  if(!("hop" %in% class(hop)))                                  stop("hop argument not of class hop",                                 call. = FALSE)
+  is_hop(hop, error = TRUE)
   if(!all("plot" %in% names(hop)))                              stop("plot export profile required but not found",                    call. = FALSE)
   if(!(cycle %in% c("carbon", "nitrogen", "water", "light")))   stop("cycle argument must be one of: carbon, nitrogen, water, light", call. = FALSE)
   if(!(all(is.numeric(years))        | years[1]      == "all")) stop("years argument must be 'all' or a numeric vector",              call. = FALSE)
@@ -293,7 +293,13 @@ plot_hisafe_cycle_daily <- function(hop,
 #' @param hop An object of class hop or face.
 #' @importFrom dplyr %>%
 get_water_fluxes <- function(hop) {
-  profile_check(hop, "water", c("plot", "climate"))
+  profile_check(hop, c("plot", "climate"), error = TRUE)
+  # variable_check(hop, "plot",
+  #                c("mainCropArea", "interCropArea", "parIncident", "parInterceptedByMainCrop", "parInterceptedByInterCrop", "parInterceptedByTrees"),
+  #                error = TRUE)
+  # variable_check(hop, "climate",
+  #                c("mainCropArea", "interCropArea", "parIncident", "parInterceptedByMainCrop", "parInterceptedByInterCrop", "parInterceptedByTrees"),
+  #                error = TRUE)
 
   climate <- hop$climate %>%
     dplyr::select(SimulationName, Year, Date, precipitation)
@@ -368,7 +374,10 @@ get_water_fluxes <- function(hop) {
 #' @param hop An object of class hop or face.
 #' @importFrom dplyr %>%
 get_nitrogen_fluxes <- function(hop) {
-  profile_check(hop, "nitrogen", "plot")
+  profile_check(hop, "plot", error = TRUE)
+  # variable_check(hop, "plot",
+  #                c("mainCropArea", "interCropArea", "parIncident", "parInterceptedByMainCrop", "parInterceptedByInterCrop", "parInterceptedByTrees"),
+  #                error = TRUE)
   out <- hop$plot %>%
     replace(is.na(.), 0) %>%
     # Extract variables required for the nitrogen budget
@@ -436,7 +445,10 @@ get_nitrogen_fluxes <- function(hop) {
 #' @param hop An object of class hop or face.
 #' @importFrom dplyr %>%
 get_light_fluxes <- function(hop) {
-  profile_check(hop, "light", "plot")
+  profile_check(hop, "plot", error = TRUE)
+  variable_check(hop, "plot",
+                 c("mainCropArea", "interCropArea", "parIncident", "parInterceptedByMainCrop", "parInterceptedByInterCrop", "parInterceptedByTrees"),
+                 error = TRUE)
   out <- hop$plot %>%
     replace(is.na(.), 0) %>%
     # Scale by area to conver to moles and then make percentage of inceident par
@@ -467,7 +479,10 @@ get_light_fluxes <- function(hop) {
 #' @param hop An object of class hop or face.
 #' @importFrom dplyr %>%
 get_carbon_pools <- function(hop) {
-  profile_check(hop, "carbon", "trees")
+  profile_check(hop, "trees", error = TRUE)
+  variable_check(hop, "trees",
+                 c("carbonFoliage", "carbonBranches", "carbonCoarseRoots", "carbonFineRoots", "carbonLabile", "carbonStem", "carbonStump"),
+                 error = TRUE)
   out <- hop$trees %>%
     replace(is.na(.), 0) %>%
     dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay, id,
@@ -495,20 +510,4 @@ get_carbon_pools <- function(hop) {
     dplyr::left_join(dplyr::select(hop$plot.info, SimulationName, plot.area), by = "SimulationName") %>%
     dplyr::mutate(value = value / (plot.area / 10000)) # convert from Mg C tree-1 to Mg C ha-1
   return(out)
-}
-
-
-#' Check for existiance of profiles in a hop object
-#' @description Checks for existiance of profiles in a hop object
-#' Used within \code{\link{get_water_fluxes}}, \code{\link{get_nitrogen_fluxes}}, \code{\link{get_light_fluxes}}, \code{\link{get_carbon_pools}}
-#' @return Throws an error if profiles are not found.
-#' @param hop An object of class hop or face.
-#' @param cycle Cycle name to print in error output.
-#' @param required.profiles A character vector of the names of the profiles to check for.
-profile_check <- function(hop, cycle, required.profiles) {
-  row_check <- function(x) nrow(hop[[x]]) > 0
-  not.found <- required.profiles[!purrr::map_lgl(required.profiles, row_check)]
-  if(length(not.found) > 0) stop(paste(paste(not.found, collapse = " and "),
-                                                         "export profiles required for", cycle,
-                                                         "cycle calculations but not found in hop"), call. = FALSE)
 }

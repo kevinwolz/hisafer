@@ -29,7 +29,7 @@ diag_hisafe_ts <- function(hop, profile, output.path = NULL, ...) {
 
   annual.profiles <- c("annualtree", "annualplot")
   daily.profiles  <- c("trees", "plot", "climate")
-  if(!("hop" %in% class(hop)))                            stop("hop argument not of class hop",                   call. = FALSE)
+  is_hop(hop, error = TRUE)
   if(!(profile %in% c(annual.profiles, daily.profiles)))  stop("supplied profile is not supported",               call. = FALSE)
   if(nrow(hop[[profile]]) == 0)                           stop(paste("no data from", profile, "profile found"),   call. = FALSE)
   if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character vector", call. = FALSE)
@@ -104,7 +104,7 @@ diag_hisafe_monthcells <- function(hop,
                                    canopies    = TRUE) {
 
   allowed.schemes <- c("year.simname", "month.simname", "month.year")
-  if(!("hop" %in% class(hop)))                            stop("hop argument not of class hop",                                            call. = FALSE)
+  is_hop(hop, error = TRUE)
   if(nrow(hop$monthCells) == 0)                           stop("no data from monthCells profile found",                                    call. = FALSE)
   if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character vector",                          call. = FALSE)
   if(!all(schemes %in% allowed.schemes))                  stop("schemes argument must be one of: year.simname, month.simname, month.year", call. = FALSE)
@@ -210,7 +210,7 @@ diag_hisafe_annualcrop <- function(hop,
                                    trees       = TRUE,
                                    canopies    = TRUE) {
 
-  if(!("hop" %in% class(hop)))                                         stop("hop argument not of class hop",                                            call. = FALSE)
+  is_hop(hop, error = TRUE)
   if(nrow(hop$annualcrop) == 0)                                        stop("no data from annualcrop profile found",                                    call. = FALSE)
   if(!(is.character(output.path) | is.null(output.path)))              stop("output.path argument must be a character vector",                          call. = FALSE)
 
@@ -268,7 +268,7 @@ diag_hisafe_annualcrop <- function(hop,
 #' }
 diag_hisafe_voxels <- function(hop, output.path = NULL, ...) {
 
-  if(!("hop" %in% class(hop)))                            stop("hop argument not of class hop",                   call. = FALSE)
+  is_hop(hop, error = TRUE)
   if(nrow(hop$voxels) == 0)                               stop(paste("no data from voxels profile found"),        call. = FALSE)
   if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character vector", call. = FALSE)
 

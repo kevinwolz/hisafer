@@ -6,7 +6,7 @@
 \usage{
 read_hisafe(hip = NULL, path = NULL, simu.names = "all",
   profiles = "all", show.progress = TRUE, max.size = 3e+08,
-  date.min = NA, date.max = NA)
+  date.min = NA, date.max = NA, dates = NULL)
 }
 \arguments{
 \item{hip}{An object of class "hip". To create a hip object see \code{\link{define_hisafe}}.
@@ -26,10 +26,13 @@ If \code{hip} is not provided, then \code{path} is required. If \code{hip} is pr
 \item{max.size}{The maximum file size (in bytes) that should be read. Files larger than this value will be ignored, with a warning.}
 
 \item{date.min}{A character string of the minimum date to keep, in the format "YYYY-MM-DD".
-If NA, the minimum date in the output data is used.}
+If NA, the minimum date in the output data is used. Only used if \code{dates} is \code{NULL}.}
 
 \item{date.max}{A character string of the maximum date to keep, in the format "YYYY-MM-DD".
-If NA, the maximum date in the output data is used.}
+If NA, the maximum date in the output data is used. Only used if \code{dates} is \code{NULL}.}
+
+\item{dates}{A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates to keep.
+If \code{NULL}, then \code{date.max} and \code{date.min} are used instad.}
 }
 \value{
 An object of class "hop". This is a list of 16 data frames (tibbles):
@@ -42,7 +45,6 @@ An object of class "hop". This is a list of 16 data frames (tibbles):
  \item{climate}
  \item{monthCells}
  \item{cells}
- \item{roots}
  \item{voxels}
  \item{variables}{ - variable descriptions and units from all read profiles}
  \item{plot.info}{ - plot geometry data for each simulation}

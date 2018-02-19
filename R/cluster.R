@@ -23,7 +23,7 @@ build_cluster_script <- function(hip         = NULL,
                                  email,
                                  num.cores = 1) { # length(simu.names)
 
-  if(!is.null(hip) & !("hip" %in% class(hip)))                                 stop("data not of class hip",                                        call. = FALSE)
+  is_hip(hip, error = TRUE)
   if(is.null(hip) == is.null(script.path))                                     stop("must provide hip or script.path, not both",                    call. = FALSE)
   if(!(all(is.character(simu.names)) | is.null(simu.names)))                   stop("simu.names argument must be 'all' or a character vector",      call. = FALSE)
   if(!(is.character(email) & length(email) == 1))                              stop("email argument must be a character vector of length 1",        call. = FALSE)

@@ -36,7 +36,6 @@ An object of class "hop". This is a list of 15 data frames (tibbles):
  \item{climate}
  \item{monthCells}
  \item{cells}
- \item{roots}
  \item{voxels}
  \item{variables}{ - variable descriptions and units from all profiles}
  \item{plot.info}{ - plot geometry data}

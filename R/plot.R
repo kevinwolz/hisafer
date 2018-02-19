@@ -56,28 +56,26 @@ plot_hisafe_ts <- function(hop,
   daily.profiles  <- c("trees", "plot", "climate")
   tree.profiles   <- c("annualtree", "trees")
 
-  if(!("hop" %in% class(hop)))                                  stop("hop argument not of class hop",                             call. = FALSE)
-  if(!(profile %in% c(annual.profiles, daily.profiles)))        stop("supplied profile is not supported",                         call. = FALSE)
-  if(nrow(hop[[profile]]) == 0)                                 stop(paste("no data from", profile, "profile found"),             call. = FALSE)
+  is_hop(hop, error = TRUE)
+  profile_check(hop, profile, error = TRUE)
+  variable_check(hop, profile, variable, error = TRUE)
+  if(!(profile %in% c(annual.profiles, daily.profiles))) stop("supplied profile is not supported", call. = FALSE)
 
   if(simu.names[1] == "all")                              simu.names <- unique(hop[[profile]]$SimulationName)
   if(years[1]      == "all")                              years      <- unique(hop[[profile]]$Year)
   if(tree.ids[1]   == "all" & profile %in% tree.profiles) tree.ids   <- unique(hop[[profile]]$id)
 
-  if(!is.character(variable) | length(variable) > 1)              stop("variable argument must be a character vector of length 1",  call. = FALSE)
-  if(!(all(is.character(simu.names)) | simu.names[1] == "all"))   stop("simu.names argument must be 'all' or a character vector",   call. = FALSE)
-  if(!(all(is.numeric(years))        | years[1]      == "all"))   stop("years argument must be 'all' or a numeric vector",          call. = FALSE)
-  if(!(all(is.numeric(tree.ids))     | tree.ids[1]   == "all"))   stop("tree.ids argument must be 'all' or a numeric vector",       call. = FALSE)
+  if(length(variable) > 1)                                        stop("variable argument must be a character vector of length 1",  call. = FALSE)
+  if(!all(is.character(simu.names)))                              stop("simu.names argument must be 'all' or a character vector",   call. = FALSE)
+  if(!all(is.numeric(years)))                                     stop("years argument must be 'all' or a numeric vector",          call. = FALSE)
+  if(!all(is.numeric(tree.ids)))                                  stop("tree.ids argument must be 'all' or a numeric vector",       call. = FALSE)
   if(!(length(doy.lim) == 2 & all(doy.lim %in% 1:366)))           stop("doy.lim argument must be of length 2 with values in 1:366", call. = FALSE)
   if(!(is.na(color.palette) | is.character(color.palette)))       stop("color.palette argument must be a character vector",         call. = FALSE)
   if(!(is.na(linetype.palette) | is.character(linetype.palette))) stop("linetype.palette argument must be a character vector",      call. = FALSE)
   if(!is.logical(facet.year))                                     stop("facet.year argument must be a logical",                     call. = FALSE)
   if(!is.logical(crop.points))                                    stop("crop.points argument must be a logical",                    call. = FALSE)
   if(!is.logical(plot))                                           stop("plot argument must be a logical",                           call. = FALSE)
-  if(!(variable %in% names(hop[[profile]])))                      stop(paste0(variable, " does not exist within ", profile, " profile.",
-                                                                              "\nCheck spelling and capitalization of variable name.",
-                                                                              "\nEnsure that the variable was included within the output profile."),
-                                                                       call. = FALSE)
+  variable_check(hop, profile, variable, error = TRUE)
 
   if(!all(simu.names %in% unique(hop[[profile]]$SimulationName)))          stop(paste("not all values in simu.names are present in the", profile, "profile"), call. = FALSE)
   if(!all(years      %in% unique(hop[[profile]]$Year)))                    stop(paste("not all values in years are present in the",      profile, "profile"), call. = FALSE)
@@ -228,28 +226,25 @@ plot_hisafe_monthcells <- function(hop,
                                    canopies   = TRUE,
                                    plot       = TRUE) {
 
-  if(!("hop" %in% class(hop)))                                  stop("hop argument not of class hop",                                         call. = FALSE)
-  if(nrow(hop$monthCells) == 0)                                 stop("no data from monthCells profile found",                                 call. = FALSE)
-  if(!is.character(variable) | length(variable) > 1)            stop("variable argument must be a character vector of length 1",              call. = FALSE)
-  if(!(colfacet %in% c("Year", "Month", "SimulationName")))     stop("colfacet must be one of: Year, Month, SimulationName",                  call. = FALSE)
-  if(!(rowfacet %in% c("Year", "Month", "SimulationName")))     stop("rowfacet must be one of: Year, Month, SimulationName",                  call. = FALSE)
-  if(!(all(is.character(simu.names)) | simu.names[1] == "all")) stop("simu.names argument must be 'all' or a character vector",               call. = FALSE)
-  if(!(is.numeric(years)             | years[1]      == "all")) stop("years argument must be 'all' or a numeric vector",                      call. = FALSE)
-  if(!(all(months %in% 1:12)         | months[1]     == "all")) stop("months argument must be 'all' or a numeric vector with values in 1:12", call. = FALSE)
-  if(!is.logical(trees))                                        stop("trees argument must be a logical",                                      call. = FALSE)
-  if(!is.logical(canopies))                                     stop("canopies argument must be a logical",                                   call. = FALSE)
-  if(!is.logical(plot))                                         stop("plot argument must be a logical",                                       call. = FALSE)
-  if(!(variable %in% names(hop$monthCells)))                    stop(paste0(variable, " does not exist within monthCells profile.",
-                                                                            "\nCheck spelling and capitalization of variable name.",
-                                                                            "\nEnsure that the variable was included within the output profile."),
-                                                                     call. = FALSE)
+  is_hop(hop, error = TRUE)
+  profile_check(hop, "monthCells", error = TRUE)
+  variable_check(hop, "monthCells", variable, error = TRUE)
 
   if(simu.names[1] == "all") simu.names <- unique(hop$monthCells$SimulationName)
   if(years[1]      == "all") years      <- unique(hop$monthCells$Year) -  min(hop$monthCells$Year)
   if(months[1]     == "all") months     <- unique(hop$monthCells$Month)
 
-  if(!all(simu.names %in% hop$monthCells$SimulationName)) stop("one or more values in simu.names is not present in the monthCells profile of hop", call. = FALSE)
-  if(!all(months %in% hop$monthCells$Month))              stop("one or more values in months is not present in the monthCells profile of hop",     call. = FALSE)
+  if(length(variable) > 1)                                  stop("variable argument must be a character vector of length 1",              call. = FALSE)
+  if(!(colfacet %in% c("Year", "Month", "SimulationName"))) stop("colfacet must be one of: Year, Month, SimulationName",                  call. = FALSE)
+  if(!(rowfacet %in% c("Year", "Month", "SimulationName"))) stop("rowfacet must be one of: Year, Month, SimulationName",                  call. = FALSE)
+  if(!all(is.character(simu.names)))                        stop("simu.names argument must be 'all' or a character vector",               call. = FALSE)
+  if(!is.numeric(years))                                    stop("years argument must be 'all' or a numeric vector",                      call. = FALSE)
+  if(!all(months %in% 1:12))                                stop("months argument must be 'all' or a numeric vector with values in 1:12", call. = FALSE)
+  if(!is.logical(trees))                                    stop("trees argument must be a logical",                                      call. = FALSE)
+  if(!is.logical(canopies))                                 stop("canopies argument must be a logical",                                   call. = FALSE)
+  if(!is.logical(plot))                                     stop("plot argument must be a logical",                                       call. = FALSE)
+  if(!all(simu.names %in% hop$monthCells$SimulationName))   stop("one or more values in simu.names is not present in the monthCells profile of hop", call. = FALSE)
+  if(!all(months %in% hop$monthCells$Month))                stop("one or more values in months is not present in the monthCells profile of hop",     call. = FALSE)
 
   ## Determine which variable is not part of faceting & trigger associated error
   vars <- c("SimulationName", "Year", "Month")
@@ -300,7 +295,7 @@ plot_hisafe_monthcells <- function(hop,
       tree.data <- hop$trees %>%
         dplyr::mutate(Year = Year - min(Year) + 1) %>% # Create 0+ year values
         dplyr::filter(SimulationName %in% simu.names) %>%
-        dplyr::filter(Year %in% years) %>%
+        dplyr::filter(Year  %in% years) %>%
         dplyr::filter(Month %in% months) %>%
         dplyr::filter(Day == 1) %>%
         dplyr::select(SimulationName, Year, Month, id, crownRadiusInterRow, crownRadiusTreeLine) %>%
@@ -330,18 +325,18 @@ plot_hisafe_monthcells <- function(hop,
     facet_grid(reformulate(colfacet, rowfacet), switch = "both") +
     geom_tile(aes_string(fill = variable), na.rm = TRUE, color = "black") +
     viridis::scale_fill_viridis(option = "magma") +
-    guides(fill = guide_colourbar(barwidth = 15,
-                                  barheight = 1.5,
+    guides(fill = guide_colourbar(barwidth    = 15,
+                                  barheight   = 1.5,
                                   title.vjust = 0.8,
-                                  nbin = 100)) +
+                                  nbin        = 100)) +
     coord_equal() +
     theme_hisafe_tile()
 
   if(trees) {
     plot.obj <- plot.obj +
-      geom_point(data = tree.data,
+      geom_point(data  = tree.data,
                  color = "green",
-                 size = 2,
+                 size  = 2,
                  na.rm = TRUE)
   }
 
@@ -349,15 +344,16 @@ plot_hisafe_monthcells <- function(hop,
     package.check <- requireNamespace("ggforce", quietly = TRUE)
     if(package.check) {
       plot.obj <- plot.obj +
-        ggforce::geom_ellipsis(data = tree.data,
+        ggforce::geom_ellipsis(data  = tree.data,
                                color = "green",
-                               size = 2,
-                               aes(x0 = x, y0 = y,
-                                   a = crownRadiusInterRow,
-                                   b = crownRadiusTreeLine,
+                               size  = 2,
+                               aes(x0    = x,
+                                   y0    = y,
+                                   a     = crownRadiusInterRow,
+                                   b     = crownRadiusTreeLine,
                                    angle = 0),
                                inherit.aes = FALSE,
-                               na.rm = TRUE)
+                               na.rm       = TRUE)
     } else {
       warning("The package 'ggforce' is required for drawing tree conopies by plot_hisafe_monthcells(). Please install it or set canopies = FALSE.",
               immediate = TRUE)
@@ -403,23 +399,20 @@ plot_hisafe_annualcrop <- function(hop,
                                    canopies   = TRUE,
                                    plot       = TRUE) {
 
-  if(!("hop" %in% class(hop)))                                  stop("hop argument not of class hop",                            call. = FALSE)
-  if(nrow(hop$annualcrop) == 0)                                 stop("no data found in annualcrop profile",                      call. = FALSE)
-  if(!is.character(variable) | length(variable) > 1)            stop("variable argument must be a character vector of length 1", call. = FALSE)
-  if(!(all(is.character(simu.names)) | simu.names[1] == "all")) stop("simu.names argument must be 'all' or a character vector",  call. = FALSE)
-  if(!(is.numeric(years)             | years[1]      == "all")) stop("years argument must be 'all' or a numeric vector",         call. = FALSE)
-  if(!is.logical(trees))                                        stop("trees argument must be a logical",                         call. = FALSE)
-  if(!is.logical(canopies))                                     stop("canopies argument must be a logical",                      call. = FALSE)
-  if(!is.logical(plot))                                         stop("plot argument must be a logical",                          call. = FALSE)
-  if(!(variable %in% names(hop$annualcrop)))                    stop(paste0(variable, " does not exist within annualcrop profile.",
-                                                                            "\nCheck spelling and capitalization of variable name.",
-                                                                            "\nEnsure that the variable was included within the output profile."),
-                                                                     call. = FALSE)
+  is_hop(hop, error = TRUE)
+  profile_check(hop, "annualcrop", error = TRUE)
+  variable_check(hop, "annualcrop", variable, error = TRUE)
 
   if(simu.names[1] == "all") simu.names <- unique(hop$annualcrop$SimulationName)
   if(years[1]      == "all") years      <- unique(hop$annualcrop$Year) -  min(hop$annualcrop$Year) else years <- years[years != 0]
 
-  if(!all(simu.names %in% hop$monthCells$SimulationName)) stop("one or more values in simu.names is not present in the monthCells profile of hop", call. = FALSE)
+  if(length(variable) > 1)                           stop("variable argument must be a character vector of length 1", call. = FALSE)
+  if(!all(is.character(simu.names)))                 stop("simu.names argument must be 'all' or a character vector",  call. = FALSE)
+  if(!is.numeric(years))                             stop("years argument must be 'all' or a numeric vector",         call. = FALSE)
+  if(!is.logical(trees))                             stop("trees argument must be a logical",                         call. = FALSE)
+  if(!is.logical(canopies))                          stop("canopies argument must be a logical",                      call. = FALSE)
+  if(!is.logical(plot))                              stop("plot argument must be a logical",                          call. = FALSE)
+  if(!all(simu.names %in% hop$annualcrop$SimulationName)) stop("one or more values in simu.names is not present in the annualcrop profile of hop", call. = FALSE)
 
   ## Filter for provided simu.names, years & months
   plot.data <- hop$annualcrop %>%
@@ -470,8 +463,8 @@ plot_hisafe_annualcrop <- function(hop,
         tree.data$y[i] <- tree.data$y[i] + tree.data$y.center[i]
       } else {
         cellWidth <- max(diff(plot.data[plot.data$SimulationName == tree.data$SimulationName[i],]$x))
-        tree.data$x[i] <- tree.data$x[i] - cellWidth/2
-        tree.data$y[i] <- tree.data$y[i] - cellWidth/2
+        tree.data$x[i] <- tree.data$x[i] - cellWidth / 2
+        tree.data$y[i] <- tree.data$y[i] - cellWidth / 2
       }
     }
   }
@@ -482,15 +475,15 @@ plot_hisafe_annualcrop <- function(hop,
          y     = "Year",
          fill  = get_units(hop, "annualcrop", variable),
          title = variable) +
-    scale_x_continuous(expand = c(0,0)) +
-    scale_y_continuous(expand = c(0,0)) +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(expand = c(0, 0)) +
     facet_grid(Year ~ SimulationName, switch = "both") +
     geom_tile(aes_string(fill = variable), na.rm = TRUE, color = "black") +
     viridis::scale_fill_viridis(option = "magma") +
-    guides(fill = guide_colourbar(barwidth = 15,
-                                  barheight = 1.5,
+    guides(fill = guide_colourbar(barwidth    = 15,
+                                  barheight   = 1.5,
                                   title.vjust = 0.8,
-                                  nbin = 100)) +
+                                  nbin        = 100)) +
     coord_equal() +
     theme_hisafe_tile()
 
@@ -506,15 +499,16 @@ plot_hisafe_annualcrop <- function(hop,
     package.check <- requireNamespace("ggforce", quietly = TRUE)
     if(package.check) {
       plot.obj <- plot.obj +
-        ggforce::geom_ellipsis(data = tree.data,
+        ggforce::geom_ellipsis(data  = tree.data,
                                color = "green",
-                               size = 2,
-                               aes(x0 = x, y0 = y,
-                                   a = crownRadiusInterRow,
-                                   b = crownRadiusTreeLine,
+                               size  = 2,
+                               aes(x0    = x,
+                                   y0    = y,
+                                   a     = crownRadiusInterRow,
+                                   b     = crownRadiusTreeLine,
                                    angle = 0),
                                inherit.aes = FALSE,
-                               na.rm = TRUE)
+                               na.rm       = TRUE)
     } else {
       warning("The package 'ggforce' is required for drawing tree conopies by plot_hisafe_annualcrop(). Please install it or set canopies = FALSE.",
               immediate = TRUE)
@@ -549,20 +543,18 @@ plot_hisafe_annualcrop <- function(hop,
 #' ggsave_fitmax("tiled_relativeDirectParIncident.png", tile.plot)
 #' }
 plot_hisafe_cells <- function(hop, variable, dates, plot = TRUE) {
-  if(!("hop" %in% class(hop))) stop("hop argument not of class hop",             call. = FALSE)
-  if(nrow(hop$cells) == 0)     stop("no data from cells profile found",          call. = FALSE)
-  if(!is.character(dates))     stop("dates argument must be a character vector", call. = FALSE)
-  if(!is.logical(plot))        stop("plot argument must be a logical",           call. = FALSE)
+
+  is_hop(hop, error = TRUE)
+  profile_check(hop, "cells", error = TRUE)
+  variable_check(hop, "cells", variable, error = TRUE)
+
+  if(length(variable) > 1) stop("variable argument must be a character vector of length 1", call. = FALSE)
+  if(!is.character(dates)) stop("dates argument must be a character vector",                call. = FALSE)
+  if(!is.logical(plot))    stop("plot argument must be a logical",                          call. = FALSE)
 
   ## Filter for provided dates
   plot.data <- hop$cells %>%
     dplyr::filter(Date %in% lubridate::ymd(dates))
-
-  ## Check for existence of variable within hop profile
-  if(!(variable %in% names(plot.data))) stop(paste0(variable, " does not exist within cells profile.",
-                                                    "\nCheck spelling and capitalization of variable name.",
-                                                    "\nAlso check to ensure that this variable was included within the output profile definition."),
-                                             call. = FALSE)
 
   ## Find tree locations for each simulation
   tree.locations <- plot.data %>%
@@ -654,24 +646,20 @@ plot_hisafe_voxels <- function(hop,
                                vline.dates  = NA,
                                plot         = TRUE) {
 
-  if(!("hop" %in% class(hop)))                               stop("hop argument not of class hop",                                call. = FALSE)
-  if(nrow(hop$voxels) == 0)                                  stop("no data from voxels profile found",                            call. = FALSE)
-  if(!((is.na(date.min) | is.character(date.min)) & length(date.min) == 1))  stop("date.min must be a character vector of length 1", call. = FALSE)
-  if(!((is.na(date.max) | is.character(date.max)) & length(date.max) == 1))  stop("date.max must be a character vector of length 1", call. = FALSE)
-  if(!(all(is.na(X)) | is.numeric(X)))                       stop("x must be numeric",                                            call. = FALSE)
-  if(!(all(is.na(Y)) | is.numeric(Y)))                       stop("y must be numeric",                                            call. = FALSE)
-  if(!(all(is.na(Z)) | is.numeric(Z)))                       stop("z must be numeric",                                            call. = FALSE)
-  if(!((summarize.by %in% c("x", "y", "z")) | is.na(summarize.by))) stop("summarize.by must be one of 'x', 'y', or 'z'",          call. = FALSE)
-  if(!(all(is.na(vline.dates)) | is.character(vline.dates))) stop("vline.dates must be a character vector",                       call. = FALSE)
-  if(!is.logical(plot))                                      stop("plot argument must be a logical",                              call. = FALSE)
+  is_hop(hop, error = TRUE)
+  profile_check(hop, "voxels", error = TRUE)
+  variable_check(hop, "voxels", variable, error = TRUE)
 
-  if(length(unique(hop$plot.info$soilDepth)) > 1) warning("maximum soil depth is not consistent across all simluations within the hop", call. = FALSE)
-
-  ## Check for existence of variable within hop profile
-  if(!(variable %in% names(hop$voxels))) stop(paste0(variable, " does not exist within voxels profile.",
-                                                     "\nCheck spelling and capitalization of variable name.",
-                                                     "\nAlso check to ensure that this variable was included within the output profile definition."),
-                                              call. = FALSE)
+  if(length(variable) > 1)                                                   stop("variable argument must be a character vector of length 1", call. = FALSE)
+  if(!((is.na(date.min) | is.character(date.min)) & length(date.min) == 1))  stop("date.min must be a character vector of length 1",          call. = FALSE)
+  if(!((is.na(date.max) | is.character(date.max)) & length(date.max) == 1))  stop("date.max must be a character vector of length 1",          call. = FALSE)
+  if(!(all(is.na(X)) | is.numeric(X)))                                       stop("X must be numeric",                                        call. = FALSE)
+  if(!(all(is.na(Y)) | is.numeric(Y)))                                       stop("Y must be numeric",                                        call. = FALSE)
+  if(!(all(is.na(Z)) | is.numeric(Z)))                                       stop("Z must be numeric",                                        call. = FALSE)
+  if(!((summarize.by %in% c("x", "y", "z")) | is.na(summarize.by)))          stop("summarize.by must be one of 'x', 'y', or 'z'",             call. = FALSE)
+  if(!(all(is.na(vline.dates)) | is.character(vline.dates)))                 stop("vline.dates must be a character vector",                   call. = FALSE)
+  if(!is.logical(plot))                                                      stop("plot argument must be a logical",                          call. = FALSE)
+  if(length(unique(hop$plot.info$soilDepth)) > 1) warning("maximum soil depth is not consistent across all simluations within the hop",       call. = FALSE)
 
   ## Filter for provided dates & voxels
   if(is.na(date.min)) date.min <- min(hop$voxels$Date)

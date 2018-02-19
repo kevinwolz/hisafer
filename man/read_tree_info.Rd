@@ -12,7 +12,7 @@ read_tree_info(path, simu.name)
 \item{simu.name}{A character string of the simualation name.}
 }
 \value{
-A data frame (tibble) containing tree id, species, x and y.
+A data frame (tibble) containing tree id, species, x, y, and pruning/root pruning parameters.
 }
 \description{
 Reads tree information from a Hi-sAFe pld file. Used by \code{\link{read_simulation}}.

@@ -21,7 +21,7 @@
 #' }
 plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
 
-  if(!("hip" %in% class(hip)))                            stop("hip argument not of class hip",                   call. = FALSE)
+  is_hip(hip, error = TRUE)
   if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character vector", call. = FALSE)
 
   if(nrow(hip$exp.plan) > 1) {
@@ -89,18 +89,18 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
         tree.plot.data$x <- mean(plot.data$x)
         tree.plot.data$y <- mean(plot.data$y)
       } else if(num.trees == 4) {
-        tree.plot.data$x <- mean(plot.data$x) * c(1,3,1,3)/2
-        tree.plot.data$y <- mean(plot.data$y) * c(1,1,3,3)/2
+        tree.plot.data$x <- mean(plot.data$x) * c(1, 3, 1, 3) / 2
+        tree.plot.data$y <- mean(plot.data$y) * c(1, 1, 3, 3) / 2
       } else if(num.trees == 9) {
-        tree.plot.data$x <- mean(plot.data$x) * c(1,3,5,1,3,5,1,3,5)/3
-        tree.plot.data$y <- mean(plot.data$y) * c(1,1,1,3,3,3,5,5,5)/3
+        tree.plot.data$x <- mean(plot.data$x) * c(1, 3, 5, 1, 3, 5, 1, 3, 5) / 3
+        tree.plot.data$y <- mean(plot.data$y) * c(1, 1, 1, 3, 3, 3, 5, 5, 5) / 3
       }
     }
 
     ## Determine interCrop cells
     create_range    <- function(x, tcd)   c(x - tcd, x + tcd)
-    roundup         <- function(from, to) ceiling(from / to)*to
-    rounddown       <- function(from, to) floor(from   / to)*to
+    roundup         <- function(from, to) ceiling(from / to) * to
+    rounddown       <- function(from, to) floor(from   / to) * to
     round_if_needed <- function(x, cw){
       if(all(x %% cw == 0)){
         out <- x
@@ -175,15 +175,15 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
          color   = "",
          fill    = "",
          title   = paste("Scene:", hip$exp.plan$SimulationName),
-         caption = paste0("Latitude: ",           get_used("latitude"),
-                          " - Orientation: ",     get_used("treeLineOrientation"),
-                          "\nCell width: ",       get_used("cellWidth"),
-                          "m - Soil depth: ",     soil.depth, "m",
-                          "\nSlope aspect: ",     get_used("slopeAspect"),
-                          " - Slope intensity: ", get_used("slopeIntensity"),
-                          "\nToric symmetry: ",   toric.lab)) +
-    scale_x_continuous(expand = c(0,0)) +
-    scale_y_continuous(expand = c(0,0)) +
+         caption = paste0("Latitude: ",             get_used("latitude"),
+                          " - North orientation: ", get_used("northOrientation"),
+                          "\nCell width: ",         get_used("cellWidth"),
+                          "m - Soil depth: ",       soil.depth, "m",
+                          "\nSlope aspect: ",       get_used("slopeAspect"),
+                          " - Slope intensity: ",   get_used("slopeIntensity"),
+                          "\nToric symmetry: ",     toric.lab)) +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(expand = c(0, 0)) +
     geom_tile(color = "black", aes(fill = crop)) +
     geom_text(aes(label = id)) +
     geom_point(data = tree.plot.data, size = 10, aes(color = species), na.rm = TRUE) +

@@ -1,2 +1,0 @@
-SimulationName,latitude,treeLineOrientation,cellWidth,spacingBetweenRows,spacingWithinRows,slopeIntensity,slopeAspect,windMeanForce,treeSpecies,treeHeight,rootShape,nbSimulations,simulationYearStart,simulationDayStart,mainCropSpecies,interCropSpecies,treeCropDistance,weededAreaRadius,weatherFile,toricSymmetry,treePruningFreq,treePruningProp,treePruningMaxHeight,treeRootPruningFreq,treeRootPruningDistance,treeRootPruningDepth
-Sim_1,30,0,1,13,9,0,0,5,walnut-hybrid,1,1,30,1995,240,durum-wheat,weed-restinclieres,0.5,0,default,XY,2,0.3,4,0,0.5,0

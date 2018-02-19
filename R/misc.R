@@ -239,7 +239,7 @@ hisafe_profiles <- function(variable = "names") {
 #' hop_rename(myhop, old.names = c("Sim_1", "Sim_2"), new.names = c("Lat30", "Lat60"))
 #' }
 hop_rename <- function(hop, old.names, new.names) {
-  if(!("hop" %in% class(hop)))                         stop("hop argument is not of class hop",                      call. = FALSE)
+  is_hop(hop, error = TRUE)
   if(!all(old.names %in% hop$exp.plan$SimulationName)) stop("one or more values in old.names is not present in hop", call. = FALSE)
 
   profiles.to.check <- names(hop)[!(names(hop) %in% c("variables", "exp.path"))]
@@ -269,9 +269,8 @@ hop_rename <- function(hop, old.names, new.names) {
 #' newhop <- hop_filter(myhop, c("Sim_1", "Sim_2"))
 #' }
 hop_filter <- function(hop, simu.names) {
+  is_hop(hop, error = TRUE)
   if(simu.names[1] == "all") return(hop)
-
-  if(!("hop" %in% class(hop)))                          stop("hop argument is not of class hop",                       call. = FALSE)
   if(!all(simu.names %in% hop$exp.plan$SimulationName)) stop("one or more values in simu.names is not present in hop", call. = FALSE)
 
   profiles.to.check <- names(hop)[!(names(hop) %in% c("variables", "exp.path"))]
@@ -295,15 +294,13 @@ hop_filter <- function(hop, simu.names) {
 hop_merge <- function(...) {
 
   hops <- list(...)
-
-  check_class <- function(x) { ("hop" %in% class(x)) }
-  if(!all(purrr::map_lgl(hops, check_class))) stop("one or more supplied objects not of class hop", call. = FALSE)
+  if(!all(purrr::map_lgl(hops, is_hop))) stop("one or more supplied objects not of class hop", call. = FALSE)
 
   make_names_unique <- function(x, num){ paste0(num, "-", x) }
   old.names <- purrr::map(purrr::map(hops, "exp.plan"), "SimulationName")
 
   if(any(duplicated(as.character(unlist(old.names))))) {
-    hops <- purrr::pmap(list(hop = hops,
+    hops <- purrr::pmap(list(hop       = hops,
                              old.names = old.names,
                              new.names = purrr::map2(old.names, 1:length(old.names), make_names_unique)),
                         simu_rename)
@@ -324,13 +321,10 @@ hop_merge <- function(...) {
   unique.cols <- unique.cols[unique.cols != "SimulationName"]
   other.cols  <- names(hip)[!(names(hip) %in% c("SimulationName", unique.cols))]
 
-  merged_hop$exp.plan <- dplyr::bind_cols(hip[, "SimulationName"], hip[,  unique.cols], hip[, other.cols])
-
-  merged_hop$exp.plan <- dplyr::select(merged_hop$exp.plan, "SimulationName", unique.cols)
-
+  merged_hop$exp.plan  <- dplyr::bind_cols(hip[, "SimulationName"], hip[,  unique.cols], hip[, other.cols])
+  merged_hop$exp.plan  <- dplyr::select(merged_hop$exp.plan, "SimulationName", unique.cols)
   merged_hop$variables <- dplyr::distinct(merged_hop$variables)
-
-  merged_hop$exp.path <- NA
+  merged_hop$exp.path  <- NA
 
   class(merged_hop) <- c("hop-group", "hop", class(merged_hop))
   return(merged_hop)
@@ -341,34 +335,153 @@ hop_merge <- function(...) {
 #' @return A hop object.
 #' @param hop A object of class hop or face.
 #' @param date.min A character string of the minimum date to keep, in the format "YYYY-MM-DD".
-#' If NA, the minimum date in \code{hop} is used.
+#' If NA, the minimum date in the output data is used. Only used if \code{dates} is \code{NULL}.
 #' @param date.max A character string of the maximum date to keep, in the format "YYYY-MM-DD".
-#' If NA, the maximum date in \code{hop} is used.
+#' If NA, the maximum date in the output data is used. Only used if \code{dates} is \code{NULL}.
+#' @param dates A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates to keep.
+#' If \code{NULL}, then \code{date.max} and \code{date.min} are used instad.
 #' @export
 #' @family hisafe helper functions
 #' @examples
 #' \dontrun{
 #' newhop <- hop_date_filter(myhop, NA, "2010-01-01")
 #' }
-hop_date_filter <- function(hop, date.min = NA, date.max = NA) {
-  if(!("hop" %in% class(hop)))                                              stop("hop argument is not of class hop",                         call. = FALSE)
-  if(!(length(date.min) == 1 & (is.character(date.min) | is.na(date.min)))) stop("date.min argument must be a character vector of length 1", call. = FALSE)
-  if(!(length(date.max) == 1 & (is.character(date.max) | is.na(date.max)))) stop("date.max argument must be a character vector of length 1", call. = FALSE)
-
-  date.min <- lubridate::ymd(date.min)
-  date.max <- lubridate::ymd(date.max)
+hop_date_filter <- function(hop, date.min = NA, date.max = NA, dates = NULL) {
+  is_hop(hop, error = TRUE)
+  if(!(length(date.min) == 1 & (is.character(date.min) | is.na(date.min)))) stop("date.min argument must be a character vector of length 1",   call. = FALSE)
+  if(!(length(date.max) == 1 & (is.character(date.max) | is.na(date.max)))) stop("date.max argument must be a character vector of length 1",   call. = FALSE)
+  if(!(is.character(dates) | is.null(dates) | "Date" %in% class(dates)))    stop("dates argument must be a character or vector in the
+                                                                                 format YYYY-MM-DD or a vector of class Date",                 call. = FALSE)
+  if(!is.null(dates) & (!is.na(date.min) | !is.na(date.min)))            warning("date.min and date.max are ignored if dates is not NULL", .immediate = TRUE)
 
   profiles.to.check <- names(hop)[!(names(hop) %in% c("exp.plan", "variables", "exp.path", "tree.info", "plot.info", "path"))]
   profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
 
-  get_date_range <- function(profile, h) range(h[[profile]]$Date)
-  existing.ranges <- purrr::map(profiles, get_date_range, hop) %>%
-    do.call(what = "c")
-  if(is.na(date.min)) date.min <- min(existing.ranges)
-  if(is.na(date.max)) date.max <- max(existing.ranges)
+  if(is.null(dates)) {
+    date.min <- lubridate::ymd(date.min)
+    date.max <- lubridate::ymd(date.max)
 
-  for(i in profiles) { hop[[i]] <- dplyr::filter(hop[[i]], Date %in% seq(date.min, date.max, 1)) }
+    get_date_range <- function(profile, h) range(h[[profile]]$Date)
+    existing.ranges <- purrr::map(profiles, get_date_range, hop) %>%
+      do.call(what = "c")
+    if(is.na(date.min)) date.min <- min(existing.ranges)
+    if(is.na(date.max)) date.max <- max(existing.ranges)
+
+    for(i in profiles) { hop[[i]] <- dplyr::filter(hop[[i]], Date %in% seq(date.min, date.max, 1)) }
+  } else {
+    dates <- lubridate::ymd(dates)
+    for(i in profiles) { hop[[i]] <- dplyr::filter(hop[[i]], Date %in% dates) }
+  }
+
   return(hop)
+}
+
+#' Check if an object is of class hip
+#' @description Checks if an object is of class hip
+#' @return A logical.
+#' @param x An object to check.
+#' @export
+#' @family hisafe helper functions
+#' @examples
+#' \dontrun{
+#' is_hip(myhip)
+#' }
+is_hip <- function(hip, error = FALSE) {
+  check <- (is.null(hip) | "hip" %in% class(hip))
+  if(error) {
+    if(!check) stop("hip argument not of class hip", call. = FALSE)
+    invisible(check)
+  } else {
+    return(check)
+  }
+}
+
+#' Check if an object is of class hop
+#' @description Checks if an object is of class hop.
+#' @return A logical.
+#' @param x An object to check.
+#' @export
+#' @family hisafe helper functions
+#' @examples
+#' \dontrun{
+#' is_hop(myhop)
+#' }
+is_hop <- function(hop, error = FALSE) {
+  check <- (is.null(hop) | "hop" %in% class(hop))
+  if(error) {
+    if(!check) stop("hop argument not of class hop", call. = FALSE)
+    invisible(check)
+  } else {
+    return(check)
+  }
+}
+
+#' Check for existiance of profiles in a hop object
+#' @description Checks for existiance of profiles in a hop object
+#' @return A logical vector the same length as \code{profiles} indicating whether each profile is found in \code{hop}.
+#' If \code{error} is \code{TRUE}, this vector is returned invisibly.
+#' @param hop An object of class hop or face.
+#' @param profiles A character vector of the names of the profiles to check for.
+#' @param error Logical indicating whehter or not an error should be thrown if any profiles in \code{profiles} are not found.
+#' @export
+#' @family hisafe helper functions
+#' @examples
+#' \dontrun{
+#' profile_check(myhop, "voxels")
+#' }
+profile_check <- function(hop, profiles, error = FALSE) {
+  is_hop(hop, error = TRUE)
+  not.supported <- profiles[!(profiles %in% SUPPORTED.PROFILES$profiles)]
+  if(length(not.supported) > 0) stop(paste("The following profiles are not supported profiles:", paste(not.supported, collapse = ", ")), call. = FALSE)
+  if(!is.logical(error))        stop("'error' argument must be a logical", call. = FALSE)
+
+  check <- purrr::map_lgl(profiles, function(x) nrow(hop[[x]]) > 0)
+  not.found <- profiles[!check]
+  if(error) {
+    if(length(not.found) > 0) {
+      stop(paste("The following export profiles are required but not found in hop:",
+                 paste(not.found, collapse = ", ")), call. = FALSE)
+    }
+    invisible(check)
+  } else {
+    return(check)
+  }
+}
+
+#' Check for existiance of variables in a hop object
+#' @description Checks for existiance of variables within a profile of a hop object
+#' @return A logical vector the same length as \code{variables} indicating whether each variable is found in \code{hop}.
+#' If \code{error} is \code{TRUE}, this vector is returned invisibly.
+#' @param hop An object of class hop or face.
+#' @param profile A character string of the name of the profile to check within.
+#' @param variables A character vector of the names of the variables to check for.
+#' @param error Logical indicating whehter or not an error should be thrown if any variables in \code{variables} are not found.
+#' @export
+#' @family hisafe helper functions
+#' @examples
+#' \dontrun{
+#' variable_check(myhop, "trees", "carbonBranches")
+#' }
+variable_check <- function(hop, profile, variables, error = FALSE) {
+  is_hop(hop, error = TRUE)
+  profile_check(hop, profile, error = TRUE)
+  if(!is.character(variables))                    stop("variable(s) argument must be a character vector", call. = FALSE)
+  if(!is.logical(error))                          stop("'error' argument must be a logical",              call. = FALSE)
+
+  check <- purrr::map_lgl(variables, function(x) x %in% names(hop[[profile]]))
+  not.found <- variables[!check]
+  if(error) {
+    if(length(not.found) > 0) {
+      stop(paste0("The following variables were not found within the ", profile, " profile in hop: ",
+                  paste(not.found, collapse = ", "),
+                  "\nCheck spelling and capitalization of variable names.",
+                  "\nEnsure that the variables were included within the output profile."),
+           call. = FALSE)
+    }
+    invisible(check)
+  } else {
+    return(check)
+  }
 }
 
 #' Shortcut to Hi-sAFe analysis
@@ -416,7 +529,7 @@ analyze_hisafe <- function(hop,
                            monthCells      = TRUE,
                            voxels          = TRUE, ...) {
 
-  if(!("hop" %in% class(hop))) stop("hop argument is not of class hop", call. = FALSE)
+  is_hop(hop, error = TRUE)
   if(!all(is.logical(c(carbon, light, nitrogen, water,
                        light.daily, nitrogen.daily, water.daily,
                        annualtree, annualplot, trees, plot, climate, annualcrop, monthCells)))) {

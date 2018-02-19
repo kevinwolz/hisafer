@@ -9,7 +9,7 @@ read_hisafe_example(profiles = c("annualplot", "annualtree", "annualcrop",
 }
 \arguments{
 \item{profiles}{A character vector of the names of Hi-sAFe output profiles to read.
-"cells", "roots" and "voxels" profiles are not available in the example.}
+"cells", and "voxels" profiles are not available in the example.}
 
 \item{show.progress}{Logical indicating whether progress messsages should be printed to the console.}
 }

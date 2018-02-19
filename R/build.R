@@ -20,7 +20,7 @@
 #' build_hisafe(myexp)
 #' }
 build_hisafe <- function(hip) {
-  if(!("hip" %in% class(hip))) stop("hip argument not of class hip", call. = FALSE)
+  is_hip(hip, error = TRUE)
 
   EXP.PLAN <- hip$exp.plan
   dir.create(hip$path, showWarnings = FALSE, recursive = TRUE)

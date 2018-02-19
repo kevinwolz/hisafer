@@ -42,5 +42,7 @@ hip_params("all")       # details of all parameters
 Other hisafe helper functions: \code{\link{hisafe_profiles}},
   \code{\link{hop_date_filter}}, \code{\link{hop_filter}},
   \code{\link{hop_merge}}, \code{\link{hop_params}},
-  \code{\link{hop_rename}}
+  \code{\link{hop_rename}}, \code{\link{is_hip}},
+  \code{\link{is_hop}}, \code{\link{profile_check}},
+  \code{\link{variable_check}}
 }

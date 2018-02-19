@@ -37,7 +37,7 @@ run_hisafe <- function(hip         = NULL,
   capsis.path <- R.utils::getAbsolutePath(capsis.path)
   if(!is.null(path)) path <- R.utils::getAbsolutePath(path)
 
-  if(!is.null(hip) & !("hip" %in% class(hip)))                  stop("hip argument not of class hip",                                call. = FALSE)
+  is_hip(hip, error = TRUE)
   if(is.null(hip) == is.null(path))                             stop("must provide hip OR path, not both",                           call. = FALSE)
   if(!(all(is.character(simu.names)) | simu.names[1] == "all")) stop("simu.names argument must be 'all' or a character vector",      call. = FALSE)
   if(!is.logical(parallel))                                     stop("parallel argument must be a logical",                          call. = FALSE)
