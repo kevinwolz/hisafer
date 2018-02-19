@@ -18,11 +18,15 @@ If "all" (the default), then all supported profiles will be exported.}
 \item{template}{A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
 hisafer comes with three "default" templates than can be used by specificying specific character strings:
 \itemize{
- \item{"agroforestry_default"}{ - An agroforestry template based on the calibration simulation of Hi-sAFe using the Restinclieres A2
- walnut-wheat agroforestry plot in Montpellier, France. Spacing is 13m between rows and 8m within rows.}
- \item{"forestry_default"}{ - Walnut plantation forestry at tigher tree spacing of 5m between row and 3m within rows.
- Crop is grass in all cells except for where the tree trunk is. Serves as a forestry control.}
- \item{"monocrop_default"}{ - No trees. A scene with just a single cell of wheat. Serves as a monocrop control.}
+ \item{"agroforestry"}{ - a simple alley cropping template, with trees spaced at 9m x 13m and a durum wheat alley crop}
+ \item{"forestry"}{ - a simple forestry template, with trees spaced at 5m x 7m and an understory of bare soil}
+ \item{"monocrop"}{ - a simple, single-celled monocrop template with durum-wheat}
+ \item{"restinclieres_agroforestry_A2"}{ - a template based on the agroforestry calibration simulation of Hi-sAFe in Plot A2 at Restinclieres in Southern France}
+ \item{"restinclieres_agroforestry_A3"}{ - a template based on the agroforestry calibration simulation of Hi-sAFe in Plot A3 at Restinclieres in Southern France}
+ \item{"restinclieres_forestry_A4"}{ - a template based on the forestry calibration simulation of Hi-sAFe in Plot A4 at Restinclieres in Southern France}
+ \item{"restinclieres_monocrop_A2"}{ - a template basd on the monocrop calibration simulation of Hi-sAFe in Plot A2 at Restinclieres in Southern France}
+ \item{"restinclieres_monocrop_A3"}{ - a template basd on the monocrop calibration simulation of Hi-sAFe in Plot A3 at Restinclieres in Southern France}
+ \item{"castries_agroforestry"}{ - a template basd on the agroforestry validation simulation of Hi-sAFe at Castries in Southern France}
 }}
 
 \item{factorial}{If \code{FALSE}, the default, then supplied input values are recycled (i.e. such as for default behavior of \code{\link{data.frame}}).

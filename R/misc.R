@@ -485,7 +485,7 @@ variable_check <- function(hop, profile, variables, error = FALSE) {
 }
 
 #' Shortcut to Hi-sAFe analysis
-#' @description Runs the various Hi-sAFe analysis/plot functions from a single call.
+#' @description Runs the various Hi-sAFe analysis functions from a single call.
 #' @return Invisibly returns \code{TRUE}.
 #' @param hop A object of class hop or face.
 #' @param carbon Logical indicating if annual carbon plot should be made.
@@ -496,15 +496,6 @@ variable_check <- function(hop, profile, variables, error = FALSE) {
 #' @param light.daily Logical indicating if daily light plots should be made.
 #' @param nitrogen.daily Logical indicating if daily nitrogens plot should be made.
 #' @param water.daily Logical indicating if daily water plots should be made.
-#' @param annualtree Logical indicating if annualtree profile diagnostic plots should be made.
-#' @param annualplot Logical indicating if annualplot profile diagnostic plots should be made.
-#' @param trees Logical indicating if trees profile diagnostic plots should be made.
-#' @param plot Logical indicating if plot profile diagnostic plots should be made.
-#' @param climate Logical indicating if climate profile diagnostic plots should be made.
-#' @param annualcrop Logical indicating if annualcrop profile diagnostic plots should be made.
-#' @param monthCells Logical indicating if monthCells profile diagnostic plots should be made.
-#' @param voxels Logical indicating if voxels profile diagnostic plots should be made.
-#' @param ... Other arguments passed to \code{\link{plot_hisafe_ts}}.
 #' @export
 #' @family hisafe analysis functions
 #' @examples
@@ -519,27 +510,13 @@ analyze_hisafe <- function(hop,
                            carbon.daily    = TRUE,
                            light.daily     = TRUE,
                            nitrogen.daily  = TRUE,
-                           water.daily     = TRUE,
-                           annualtree      = TRUE,
-                           annualplot      = TRUE,
-                           trees           = TRUE,
-                           plot            = TRUE,
-                           climate         = TRUE,
-                           annualcrop      = TRUE,
-                           monthCells      = TRUE,
-                           voxels          = TRUE, ...) {
+                           water.daily     = TRUE) {
 
   is_hop(hop, error = TRUE)
-  if(!all(is.logical(c(carbon, light, nitrogen, water,
-                       light.daily, nitrogen.daily, water.daily,
-                       annualtree, annualplot, trees, plot, climate, annualcrop, monthCells)))) {
+  if(!all(is.logical(c(carbon, light, nitrogen, water, light.daily, nitrogen.daily, water.daily)))) {
     stop("all arguments except for hop must be logicals", call. = FALSE)
   }
 
-  profiles.to.check <- names(hop)[!(names(hop) %in% c("variables", "plot.info", "tree.info", "exp.plan", "path", "exp.path"))]
-  profiles.avail <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
-  profiles.todo  <- c("annualtree", "annualplot", "trees", "plot", "climate")[c(annualtree, annualplot, trees, plot, climate)]
-  profiles.todo  <- profiles.avail[profiles.avail %in% profiles.todo]
   annual.cycles.todo <- c("carbon", "light", "nitrogen", "water")[c(carbon, light, nitrogen, water)]
   daily.cycles.todo  <- c("carbon", "light", "nitrogen", "water")[c(carbon.daily, light.daily, nitrogen.daily, water.daily)]
 
@@ -583,27 +560,6 @@ analyze_hisafe <- function(hop,
                    ggsave_fitmax,
                    scale = 2)
     }
-  }
-
-  ## DIAGNOSTIC PLOTS
-  if(length(profiles.todo) >= 1) {
-    cat("\n-- Plotting annual and daily profile diagnostics")
-    purrr::walk(profiles.todo, diag_hisafe_ts, hop = hop, ...)
-  }
-
-  if(annualcrop & nrow(hop$annualcrop) > 0) {
-    cat("\n-- Plotting annualcrop diagnostics")
-    diag_hisafe_annualcrop(hop)
-  }
-
-  if(monthCells & nrow(hop$monthCells) > 0) {
-    cat("\n-- Plotting monthCells diagnostics")
-    diag_hisafe_monthcells(hop)
-  }
-
-  if(voxels & nrow(hop$voxels) > 0) {
-    cat("\n-- Plotting voxels diagnostics")
-    diag_hisafe_voxels(hop)
   }
 
   invisible(TRUE)

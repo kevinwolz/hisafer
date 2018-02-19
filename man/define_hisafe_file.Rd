@@ -4,8 +4,8 @@
 \alias{define_hisafe_file}
 \title{Define a Hi-sAFe experiment from a file}
 \usage{
-define_hisafe_file(file, path, profiles = "all", template = "agroforestry",
-  force = FALSE)
+define_hisafe_file(file, path, exp.name = "experiment", profiles = "all",
+  template = "agroforestry", force = FALSE)
 }
 \arguments{
 \item{file}{A character string of the path to a csv file.
@@ -13,6 +13,8 @@ Each row in the file should represent a Hi-sAFe simulation and each column a Hi-
 For more information on supported parameters, use \code{\link{hisafe_params}}.}
 
 \item{path}{A character string of the path (relative or absolute) to the directory where the simulation/experiment is to be built.}
+
+\item{exp.name}{A character string of the name of the experiment folder. Only used if defining more than one simulation.}
 
 \item{profiles}{A character vector of Hi-sAFe export profiles to be exported by Hi-sAFe. If "all" (the default), then all supported profiles will be exported.}
 

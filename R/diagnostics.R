@@ -305,3 +305,67 @@ diag_hisafe_voxels <- function(hop, output.path = NULL, ...) {
   ## Invisibly return list of plot objects
   invisible(plot.list)
 }
+
+#' Shortcut to Hi-sAFe diagnostics
+#' @description Runs the various Hi-sAFe diagnostic functions from a single call.
+#' @return Invisibly returns \code{TRUE}.
+#' @param hop A object of class hop or face.
+#' @param annualtree Logical indicating if annualtree profile diagnostic plots should be made.
+#' @param annualplot Logical indicating if annualplot profile diagnostic plots should be made.
+#' @param trees Logical indicating if trees profile diagnostic plots should be made.
+#' @param plot Logical indicating if plot profile diagnostic plots should be made.
+#' @param climate Logical indicating if climate profile diagnostic plots should be made.
+#' @param annualcrop Logical indicating if annualcrop profile diagnostic plots should be made.
+#' @param monthCells Logical indicating if monthCells profile diagnostic plots should be made.
+#' @param voxels Logical indicating if voxels profile diagnostic plots should be made.
+#' @param ... Other arguments passed to \code{\link{plot_hisafe_ts}}.
+#' @export
+#' @family hisafe diagnostic functions
+#' @examples
+#' \dontrun{
+#' diag_hisafe(myhop)
+#' }
+diag_hisafe <- function(hop,
+                        annualtree = TRUE,
+                        annualplot = TRUE,
+                        trees      = TRUE,
+                        plot       = TRUE,
+                        climate    = TRUE,
+                        annualcrop = TRUE,
+                        monthCells = TRUE,
+                        voxels     = TRUE, ...) {
+
+  is_hop(hop, error = TRUE)
+  if(!all(is.logical(c(annualtree, annualplot, trees, plot, climate, annualcrop, monthCells)))) {
+    stop("all arguments except for hop must be logicals", call. = FALSE)
+  }
+
+  profiles.to.check <- names(hop)[!(names(hop) %in% c("variables", "plot.info", "tree.info", "exp.plan", "path", "exp.path"))]
+  profiles.avail <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
+  profiles.todo  <- c("annualtree", "annualplot", "trees", "plot", "climate")[c(annualtree, annualplot, trees, plot, climate)]
+  profiles.todo  <- profiles.avail[profiles.avail %in% profiles.todo]
+
+  if(length(profiles.todo) >= 1) {
+    for(p in profiles.todo) {
+      cat("\n-- Plotting", p, "diagnostics")
+      diag_hisafe_ts(hop = hop, profile = p, ...)
+    }
+  }
+
+  if(annualcrop & nrow(hop$annualcrop) > 0) {
+    cat("\n-- Plotting annualcrop diagnostics")
+    diag_hisafe_annualcrop(hop)
+  }
+
+  if(monthCells & nrow(hop$monthCells) > 0) {
+    cat("\n-- Plotting monthCells diagnostics")
+    diag_hisafe_monthcells(hop)
+  }
+
+  if(voxels & nrow(hop$voxels) > 0) {
+    cat("\n-- Plotting voxels diagnostics")
+    diag_hisafe_voxels(hop)
+  }
+
+  invisible(TRUE)
+}

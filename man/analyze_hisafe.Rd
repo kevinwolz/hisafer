@@ -6,9 +6,7 @@
 \usage{
 analyze_hisafe(hop, carbon = TRUE, light = TRUE, nitrogen = TRUE,
   water = TRUE, carbon.daily = TRUE, light.daily = TRUE,
-  nitrogen.daily = TRUE, water.daily = TRUE, annualtree = TRUE,
-  annualplot = TRUE, trees = TRUE, plot = TRUE, climate = TRUE,
-  annualcrop = TRUE, monthCells = TRUE, voxels = TRUE, ...)
+  nitrogen.daily = TRUE, water.daily = TRUE)
 }
 \arguments{
 \item{hop}{A object of class hop or face.}
@@ -28,30 +26,12 @@ analyze_hisafe(hop, carbon = TRUE, light = TRUE, nitrogen = TRUE,
 \item{nitrogen.daily}{Logical indicating if daily nitrogens plot should be made.}
 
 \item{water.daily}{Logical indicating if daily water plots should be made.}
-
-\item{annualtree}{Logical indicating if annualtree profile diagnostic plots should be made.}
-
-\item{annualplot}{Logical indicating if annualplot profile diagnostic plots should be made.}
-
-\item{trees}{Logical indicating if trees profile diagnostic plots should be made.}
-
-\item{plot}{Logical indicating if plot profile diagnostic plots should be made.}
-
-\item{climate}{Logical indicating if climate profile diagnostic plots should be made.}
-
-\item{annualcrop}{Logical indicating if annualcrop profile diagnostic plots should be made.}
-
-\item{monthCells}{Logical indicating if monthCells profile diagnostic plots should be made.}
-
-\item{voxels}{Logical indicating if voxels profile diagnostic plots should be made.}
-
-\item{...}{Other arguments passed to \code{\link{plot_hisafe_ts}}.}
 }
 \value{
 Invisibly returns \code{TRUE}.
 }
 \description{
-Runs the various Hi-sAFe analysis/plot functions from a single call.
+Runs the various Hi-sAFe analysis functions from a single call.
 }
 \examples{
 \dontrun{
