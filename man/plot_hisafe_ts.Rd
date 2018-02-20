@@ -5,10 +5,10 @@
 \title{Plot timeseries of Hi-sAFe output variable}
 \usage{
 plot_hisafe_ts(hop, variable, profile, simu.names = "all", years = "all",
-  tree.ids = "all", doy.lim = c(1, 366), color.palette = NA,
-  linetype.palette = NA, aes.cols = list(color = "SimulationName", linetype
-  = "SimulationName"), facet.year = TRUE, crop.points = FALSE,
-  plot = TRUE)
+  tree.ids = "all", date.min = NA, date.max = NA, doy.lim = c(1, 365),
+  color.palette = NA, linetype.palette = NA, aes.cols = list(color =
+  "SimulationName", linetype = "SimulationName"), facet.year = TRUE,
+  crop.points = FALSE, plot = TRUE)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -23,6 +23,12 @@ If 'trees', 'plot', or 'climate', daily timeseries are created.}
 \item{years}{A numeric vector of the years within \code{hop} to include. Use "all" to include all available values.}
 
 \item{tree.ids}{A numeric vector indicating a subset of tree ids to plot. Use "all" to include all available values.}
+
+\item{date.min}{A character string of the minimum date to keep, in the format "YYYY-MM-DD" or of class Date.
+If NA, the minimum date in the output data is used.}
+
+\item{date.max}{A character string of the maximum date to keep, in the format "YYYY-MM-DD" or of class Date.
+If NA, the maximum date in the output data is used.}
 
 \item{doy.lim}{A numeric vector of length two providing the \code{c(minimum, maximum)} of julian days to plot. Only applies if \code{profile} is a daily profile.}
 

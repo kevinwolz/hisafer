@@ -27,6 +27,9 @@
 #' @param profiles A character vector of the names of Hi-sAFe output profiles to read.
 #' #' If "all" the default, reads all supported Hi-sAFe output profiles. For currently supported profiles see: \code{\link{hisafe_profiles}}
 #' @param show.progress Logical indicating whether progress messsages should be printed to the console.
+#' @param read.inputs Logical indicating whether data should be read from the .PLD and .SIM files for the tree.info and plot.info data slots.
+#' Setting this to \code{FALSE} severly limits hisafer's plotting/analysis capacity.
+#' Should only be set to \code{FALSE} if input files are corrupted.
 #' @param max.size The maximum file size (in bytes) that should be read. Files larger than this value will be ignored, with a warning.
 #' @param date.min A character string of the minimum date to keep, in the format "YYYY-MM-DD".
 #' If NA, the minimum date in the output data is used. Only used if \code{dates} is \code{NULL}.
@@ -49,6 +52,7 @@ read_hisafe <- function(hip           = NULL,
                         simu.names    = "all",
                         profiles      = "all",
                         show.progress = TRUE,
+                        read.inputs   = TRUE,
                         max.size      = 3e8,
                         date.min      = NA,
                         date.max      = NA,
@@ -104,6 +108,7 @@ read_hisafe <- function(hip           = NULL,
                      path          = path,
                      profiles      = profiles,
                      show.progress = show.progress,
+                     read.inputs   = read.inputs,
                      max.size      = max.size) %>%
     purrr::pmap(dplyr::bind_rows)
   ## Bind multiple simulations together
@@ -138,7 +143,8 @@ read_hisafe <- function(hip           = NULL,
 
   ## Warn if lengths of all simulations are not equal
   if(length(simu.names) > 1) {
-    year.summary <- data[[as.numeric(which.max(purrr::map_int(data[names(data) != "exp.path"], nrow)))]] %>%
+    profiles.to.check <- c("annualplot", "annualtree", "annualcrop", "plot", "trees", "cells", "voxels", "climate", "monthCells")
+    year.summary <- data[[as.numeric(which.max(purrr::map_int(data[names(data) %in% profiles.to.check], nrow)))]] %>%
       dplyr::group_by(SimulationName) %>%
       dplyr::summarize(n = dplyr::n_distinct(Year) - 1) %>%
       tidyr::unite(label, SimulationName, n, sep = ": ", remove = FALSE)
@@ -159,7 +165,7 @@ read_hisafe <- function(hip           = NULL,
     class(data) <- c("hop", class(data))
   }
 
-  data <- hop_date_filter(data, date.min = date.min, date.max = date.max, dates = dates)
+  data <- hop_filter(hop = data, date.min = date.min, date.max = date.max, dates = dates)
 
   return(data)
 }
@@ -191,11 +197,14 @@ read_hisafe <- function(hip           = NULL,
 #' If \code{hip} is not provided, then \code{path} is required. If both \code{hip} and \code{path} are provided, \code{path} is used.
 #' @param simu.name The \code{SimulationName} of the Hi-sAFe simulation to read. This must be the same as the name of the Hi-sAFe simulation folder.
 #' Cannot provided both \code{hip} and \code{simu.name}.
+#' @param read.inputs Logical indicating whether data should be read from the .PLD and .SIM files for the tree.info and plot.info data slots.
+#' Setting this to \code{FALSE} severly limits hisafer's plotting/analysis capacity.
+#' Should only be set to \code{FALSE} if input files are corrupted.
 #' @param profiles A character vector of the names of Hi-sAFe output profiles to read.
 #' If "all" the default, reads all supported Hi-sAFe output profiles. For currently supported profiles see: \code{\link{hisafe_profiles}}
 #' @param show.progress Logical indicating whether progress messsages should be printed to the console.
 #' @param max.size The maximum file size (in bytes) that should be read. Files larger than this value will be ignored, with a warning.
-read_simulation <- function(simu.name, hip, path, profiles, show.progress, max.size) {
+read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.inputs, max.size) {
 
   is_hip(hip, error = TRUE)
   if(is.null(hip) == (is.null(simu.name) | is.null(path)))  stop("must provide hip OR (simu.name & path)", call. = FALSE)
@@ -217,7 +226,7 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, max.s
 
   ## Create profile paths
   if(profiles[1] == "all") profiles <- SUPPORTED.PROFILES$profiles
-  file.prefix <- paste0(simu.path, "/output-", simu.name, ".sim", "/", simu.name, "_")
+  file.prefix <- paste0(simu.path, "/output-", simu.name, "/", simu.name, "_")
   files       <- paste0(file.prefix, profiles, ".txt" )
 
   ## Check for existence of all requested profiles and warn if profile does not exist
@@ -288,37 +297,41 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, max.s
   if(ncol(variables) > 0) names(variables) <- c("Subject", "SubjectId", "VariableName", "Units", "Description", "VariableClass")
 
   ## Read plot characteristics from .PLD file
-  pld.path <- paste0(simu.path, "/", simu.name, ".pld")
-  pld <- read_param_file(pld.path)
-  geometryOption      <- as.numeric(pld$PLOT$geometryOption$value)
-  spacingBetweenRows  <- as.numeric(pld$PLOT$spacingBetweenRows$value)
-  spacingWithinRows   <- as.numeric(pld$PLOT$spacingWithinRows$value)
-  plotWidth           <- as.numeric(pld$PLOT$plotWidth$value)
-  plotHeight          <- as.numeric(pld$PLOT$plotHeight$value)
-  northOrientation    <- as.numeric(pld$PLOT$northOrientation$value)
-  cellWidth           <- as.numeric(pld$PLOT$cellWidth$value)
-  soilDepth           <- sum(pld$LAYERS$layers$value[[1]]$thick)
-  waterTable          <- pld$SOIL$waterTable$value
+  if(read.inputs) {
+    tree.info <- read_tree_info(path, simu.name)
 
-  plot.area <- ifelse(geometryOption == 1, spacingBetweenRows * spacingWithinRows, plotWidth * plotHeight)
-  plot.info <- dplyr::tibble(SimulationName      = simu.name,
-                             plotWidth           = ifelse(geometryOption == 1, spacingBetweenRows, plotWidth),
-                             plotHeight          = ifelse(geometryOption == 1, spacingWithinRows,  plotHeight),
-                             plot.area           = plot.area,
-                             northOrientation    = northOrientation,
-                             cellWidth           = cellWidth,
-                             soilDepth           = soilDepth,
-                             waterTable          = waterTable)
+    pld.path <- list.files(simu.path, ".pld$", full.names = TRUE)
+    pld <- read_param_file(pld.path)
+    geometryOption      <- as.numeric(pld$PLOT$geometryOption$value)
+    spacingBetweenRows  <- as.numeric(pld$PLOT$spacingBetweenRows$value)
+    spacingWithinRows   <- as.numeric(pld$PLOT$spacingWithinRows$value)
+    plotWidth           <- as.numeric(pld$PLOT$plotWidth$value)
+    plotHeight          <- as.numeric(pld$PLOT$plotHeight$value)
+    northOrientation    <- as.numeric(pld$PLOT$northOrientation$value)
+    cellWidth           <- as.numeric(pld$PLOT$cellWidth$value)
+    soilDepth           <- sum(pld$LAYERS$layers$value[[1]]$thick)
+    waterTable          <- pld$SOIL$waterTable$value
+
+    plot.area <- ifelse(geometryOption == 1, spacingBetweenRows * spacingWithinRows, plotWidth * plotHeight)
+    plot.info <- dplyr::tibble(SimulationName      = simu.name,
+                               plotWidth           = ifelse(geometryOption == 1, spacingBetweenRows, plotWidth),
+                               plotHeight          = ifelse(geometryOption == 1, spacingWithinRows,  plotHeight),
+                               plot.area           = plot.area,
+                               northOrientation    = northOrientation,
+                               cellWidth           = cellWidth,
+                               soilDepth           = soilDepth,
+                               waterTable          = waterTable)
+  } else {
+    plot.info <- tree.info <- dplyr::tibble()
+  }
 
   ## Ensure crop names are characters in annual plot and plot
   clean_crop_name <- function(x) {
-    if("mainCropName" %in% names(x)) {
-      x$mainCropName <- as.character(x$mainCropName)
-      x$mainCropName[x$mainCropName == "0"]   <- NA
-    }
-    if("interCropName" %in% names(x)) {
-      x$interCropName <- as.character(x$interCropName)
-      x$interCropName[x$interCropName == "0"]   <- NA
+    for(i in c("mainCropName", "interCropName")) {
+      if(i %in% names(x)) {
+        x[[i]] <- as.character(x[[i]])
+        x[[i]][x[[i]] == "0"]   <- NA
+      }
     }
     return(x)
   }
@@ -335,7 +348,7 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, max.s
                  voxels     = dplyr::distinct(voxels.dv$data),
                  variables  = variables,
                  plot.info  = plot.info,
-                 tree.info  = read_tree_info(path, simu.name),
+                 tree.info  = tree.info,
                  exp.plan   = EXP.PLAN,
                  path       = dplyr::tibble(SimulationName = simu.name, path = simu.path))
 
@@ -401,7 +414,8 @@ read_table_hisafe <- function(file, ...) {
                               header           = TRUE,
                               sep              = "\t",
                               stringsAsFactors = FALSE,
-                              na.strings       = c("NA", "error!", "NaN"), # "error!" is output by HISAFE & causes table merge errors if left; "NaN" output causes plot problems
+                              # "error!" is output by HISAFE & causes table merge errors if left; "NaN" output causes plot problems
+                              na.strings       = c("NA", "error!", "NaN", "-9999"),
                               encoding         = "latin1", ...))
 }
 
@@ -433,8 +447,10 @@ read_profile <- function(profile, path, show.progress = TRUE, max.size = 3e8) {
 #' @param simu.name A character string of the simualation name.
 #' @importFrom dplyr %>%
 read_tree_info <- function(path, simu.name) {
-  sim <- read_param_file(paste0(clean_path(paste0(path, "/", simu.name, "/")), simu.name, ".sim"))
-  pld <- read_param_file(paste0(clean_path(paste0(path, "/", simu.name, "/")), simu.name, ".pld"))
+  sim.path <- list.files(clean_path(paste0(path, "/", simu.name, "/")), ".sim$", full.names = TRUE)
+  pld.path <- list.files(clean_path(paste0(path, "/", simu.name, "/")), ".pld$", full.names = TRUE)
+  sim <- read_param_file(sim.path)
+  pld <- read_param_file(pld.path)
   if(!pld$TREE_INITIALIZATION$tree.initialization$commented) {
     tree.info <- pld$TREE_INITIALIZATION$tree.initialization$value[[1]] %>%
       dplyr::mutate(x = treeX, y = treeY) %>%

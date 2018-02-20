@@ -4,14 +4,23 @@
 \alias{plot_hisafe_cells}
 \title{Tile plot of Hi-sAFe cells output variable}
 \usage{
-plot_hisafe_cells(hop, variable, dates, plot = TRUE)
+plot_hisafe_cells(hop, variable, dates, simu.names = "all", plot.x = "x",
+  trees = TRUE, canopies = TRUE, plot = TRUE)
 }
 \arguments{
 \item{hop}{An object of class hop.}
 
 \item{variable}{A character string of the name of the variable to color the tiles.}
 
-\item{dates}{A character vector containing the dates (yyyy-mm-dd) to include.}
+\item{dates}{A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates to include.}
+
+\item{simu.names}{A character string containing the SimulationNames to include. Use "all" to include all available values.}
+
+\item{plot.x}{Either "x" or "y", indicating which axis of the simulation scene should be plotted on the x-axis of the plot.}
+
+\item{trees}{Logical indicating if a point should be plotted at the location of each tree.}
+
+\item{canopies}{Logical indicating if an elipsoid should be plotted representing the size of each tree canopy.}
 
 \item{plot}{If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.}
 }

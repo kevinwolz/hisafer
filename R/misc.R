@@ -229,7 +229,7 @@ hisafe_profiles <- function(variable = "names") {
 #' Change SimulationNames in a hop object
 #' @description Changes SimulationNames in a hop object.
 #' @return Returns the provided hop object with names changed.
-#' @param hop A object of class "hop".
+#' @param hop An object of class "hop".
 #' @param old.names A character vector of the old SimulationNames to change.
 #' @param new.names A character vector of the new SimulationNames, in the same order as they apply to \code{old.names}.
 #' @export
@@ -257,26 +257,80 @@ hop_rename <- function(hop, old.names, new.names) {
   return(hop)
 }
 
-#' Filter a hop object by SimulationName
-#' @description Filters a hop object by SimulationName
+#' Filter a hop object by SimulationName, Date, and id
+#' @description Filters a hop object by SimulationName, Date, and id
 #' @return A hop object.
-#' @param hop A object of class hop or face.
+#' @param hop An object of class hop or face.
 #' @param simu.names A character vector of the SimulationNames to keep. If "all", no filtering occurs.
+#' @param date.min A character string of the minimum date to keep, in the format "YYYY-MM-DD".
+#' If NA, the minimum date in the output data is used. Only used if \code{dates} is \code{NULL}.
+#' @param date.max A character string of the maximum date to keep, in the format "YYYY-MM-DD".
+#' If NA, the maximum date in the output data is used. Only used if \code{dates} is \code{NULL}.
+#' @param dates A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates to keep.
+#' If \code{NULL}, then \code{date.max} and \code{date.min} are used instad.
 #' @export
 #' @family hisafe helper functions
 #' @examples
 #' \dontrun{
 #' newhop <- hop_filter(myhop, c("Sim_1", "Sim_2"))
 #' }
-hop_filter <- function(hop, simu.names) {
+hop_filter <- function(hop,
+                       simu.names = "all",
+                       tree.ids   = "all",
+                       date.min   = NA,
+                       date.max   = NA,
+                       dates      = NULL) {
   is_hop(hop, error = TRUE)
-  if(simu.names[1] == "all") return(hop)
-  if(!all(simu.names %in% hop$exp.plan$SimulationName)) stop("one or more values in simu.names is not present in hop", call. = FALSE)
+  if(!all(is.character(simu.names)))                                        stop("simu.names argument must be 'all' or a character vector",  call. = FALSE)
+  if(!(tree.ids[1] == "all" | all(is.numeric(tree.ids))))                   stop("tree.ids argument must be 'all' or a numeric vector",      call. = FALSE)
+  if(!(length(date.min) == 1 & (is.character(date.min) | is.na(date.min)))) stop("date.min argument must be a character vector of length 1", call. = FALSE)
+  if(!(length(date.max) == 1 & (is.character(date.max) | is.na(date.max)))) stop("date.max argument must be a character vector of length 1", call. = FALSE)
+  if(!(is.character(dates) | is.null(dates) | "Date" %in% class(dates)))    stop("dates argument must be a character or vector in the
+                                                                                 format YYYY-MM-DD or a vector of class Date",               call. = FALSE)
+  if(!is.null(dates) & (!is.na(date.min) | !is.na(date.min)))            warning("date.min and date.max are ignored if dates is not NULL", .immediate = TRUE)
 
-  profiles.to.check <- names(hop)[!(names(hop) %in% c("variables", "exp.path"))]
-  profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
-  for(i in profiles) { hop[[i]] <- dplyr::filter(hop[[i]], SimulationName %in% simu.names) }
-  if(length(simu.names) == 1) { class(hop) <- class(hop)[class(hop) != "hop-group"] }
+  ## SimulationName
+  if(simu.names[1] != "all") {
+    if(!all(simu.names %in% hop$exp.plan$SimulationName)) stop("one or more values in simu.names is not present in hop", call. = FALSE)
+    profiles.to.check <- names(hop)[!(names(hop) %in% c("variables", "exp.path"))]
+    profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
+    for(i in profiles) { hop[[i]] <- dplyr::filter(hop[[i]], SimulationName %in% simu.names) }
+    if(length(simu.names) == 1) { class(hop) <- class(hop)[class(hop) != "hop-group"] }
+  }
+
+  ## id
+  if(tree.ids[1] != "all") {
+    profiles.to.check <- c("annualtree", "trees", "tree.info")
+    profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, profile_check, hop = hop)]
+    for(i in profiles) {
+      if(!all(tree.ids %in% unique(hop[[i]]$id))) stop(paste0("one or more values of tree.id are not present in the ", i, " profile"), call. = FALSE)
+      hop[[i]] <- dplyr::filter(hop[[i]], id %in% tree.ids)
+    }
+  }
+
+  ## Date
+  profiles.to.check <- names(hop)[!(names(hop) %in% c("exp.plan", "variables", "exp.path", "tree.info", "plot.info", "path"))]
+  profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, profile_check, hop = hop)]
+
+  if(is.null(dates) & !is.na(date.min) & !is.na(date.max)) {
+    date.min <- lubridate::ymd(date.min)
+    date.max <- lubridate::ymd(date.max)
+
+    get_date_range <- function(profile, h) range(h[[profile]]$Date)
+    existing.ranges <- purrr::map(profiles, get_date_range, hop) %>%
+      do.call(what = "c")
+    if(is.na(date.min)) date.min <- min(existing.ranges)
+    if(is.na(date.max)) date.max <- max(existing.ranges)
+
+    for(i in profiles) { hop[[i]] <- dplyr::filter(hop[[i]], Date %in% seq(date.min, date.max, 1)) }
+  } else if(!is.null(dates)) {
+    dates <- lubridate::ymd(dates)
+    for(i in profiles) {
+      if(!all(dates %in% unique(hop[[i]]$Date))) stop(paste0("one or more values of dates are not present in the ", i, " profile"), call. = FALSE)
+      hop[[i]] <- dplyr::filter(hop[[i]], Date %in% dates)
+    }
+  }
+
   return(hop)
 }
 
@@ -328,52 +382,6 @@ hop_merge <- function(...) {
 
   class(merged_hop) <- c("hop-group", "hop", class(merged_hop))
   return(merged_hop)
-}
-
-#' Filter a hop object by date
-#' @description Filters a hop object by date.
-#' @return A hop object.
-#' @param hop A object of class hop or face.
-#' @param date.min A character string of the minimum date to keep, in the format "YYYY-MM-DD".
-#' If NA, the minimum date in the output data is used. Only used if \code{dates} is \code{NULL}.
-#' @param date.max A character string of the maximum date to keep, in the format "YYYY-MM-DD".
-#' If NA, the maximum date in the output data is used. Only used if \code{dates} is \code{NULL}.
-#' @param dates A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates to keep.
-#' If \code{NULL}, then \code{date.max} and \code{date.min} are used instad.
-#' @export
-#' @family hisafe helper functions
-#' @examples
-#' \dontrun{
-#' newhop <- hop_date_filter(myhop, NA, "2010-01-01")
-#' }
-hop_date_filter <- function(hop, date.min = NA, date.max = NA, dates = NULL) {
-  is_hop(hop, error = TRUE)
-  if(!(length(date.min) == 1 & (is.character(date.min) | is.na(date.min)))) stop("date.min argument must be a character vector of length 1",   call. = FALSE)
-  if(!(length(date.max) == 1 & (is.character(date.max) | is.na(date.max)))) stop("date.max argument must be a character vector of length 1",   call. = FALSE)
-  if(!(is.character(dates) | is.null(dates) | "Date" %in% class(dates)))    stop("dates argument must be a character or vector in the
-                                                                                 format YYYY-MM-DD or a vector of class Date",                 call. = FALSE)
-  if(!is.null(dates) & (!is.na(date.min) | !is.na(date.min)))            warning("date.min and date.max are ignored if dates is not NULL", .immediate = TRUE)
-
-  profiles.to.check <- names(hop)[!(names(hop) %in% c("exp.plan", "variables", "exp.path", "tree.info", "plot.info", "path"))]
-  profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
-
-  if(is.null(dates)) {
-    date.min <- lubridate::ymd(date.min)
-    date.max <- lubridate::ymd(date.max)
-
-    get_date_range <- function(profile, h) range(h[[profile]]$Date)
-    existing.ranges <- purrr::map(profiles, get_date_range, hop) %>%
-      do.call(what = "c")
-    if(is.na(date.min)) date.min <- min(existing.ranges)
-    if(is.na(date.max)) date.max <- max(existing.ranges)
-
-    for(i in profiles) { hop[[i]] <- dplyr::filter(hop[[i]], Date %in% seq(date.min, date.max, 1)) }
-  } else {
-    dates <- lubridate::ymd(dates)
-    for(i in profiles) { hop[[i]] <- dplyr::filter(hop[[i]], Date %in% dates) }
-  }
-
-  return(hop)
 }
 
 #' Check if an object is of class hip
@@ -465,8 +473,8 @@ profile_check <- function(hop, profiles, error = FALSE) {
 variable_check <- function(hop, profile, variables, error = FALSE) {
   is_hop(hop, error = TRUE)
   profile_check(hop, profile, error = TRUE)
-  if(!is.character(variables))                    stop("variable(s) argument must be a character vector", call. = FALSE)
-  if(!is.logical(error))                          stop("'error' argument must be a logical",              call. = FALSE)
+  if(!is.character(variables)) stop("variable(s) argument must be a character vector", call. = FALSE)
+  if(!is.logical(error))       stop("'error' argument must be a logical",              call. = FALSE)
 
   check <- purrr::map_lgl(variables, function(x) x %in% names(hop[[profile]]))
   not.found <- variables[!check]
@@ -487,7 +495,7 @@ variable_check <- function(hop, profile, variables, error = FALSE) {
 #' Shortcut to Hi-sAFe analysis
 #' @description Runs the various Hi-sAFe analysis functions from a single call.
 #' @return Invisibly returns \code{TRUE}.
-#' @param hop A object of class hop or face.
+#' @param hop An object of class hop or face.
 #' @param carbon Logical indicating if annual carbon plot should be made.
 #' @param light Logical indicating if annual light plot should be made.
 #' @param nitrogen Logical indicating if annual nitrogen plot should be made.
@@ -503,14 +511,14 @@ variable_check <- function(hop, profile, variables, error = FALSE) {
 #' analyze_hisafe(myhop)
 #' }
 analyze_hisafe <- function(hop,
-                           carbon          = TRUE,
-                           light           = TRUE,
-                           nitrogen        = TRUE,
-                           water           = TRUE,
-                           carbon.daily    = TRUE,
-                           light.daily     = TRUE,
-                           nitrogen.daily  = TRUE,
-                           water.daily     = TRUE) {
+                           carbon         = TRUE,
+                           light          = TRUE,
+                           nitrogen       = TRUE,
+                           water          = TRUE,
+                           carbon.daily   = TRUE,
+                           light.daily    = TRUE,
+                           nitrogen.daily = TRUE,
+                           water.daily    = TRUE) {
 
   is_hop(hop, error = TRUE)
   if(!all(is.logical(c(carbon, light, nitrogen, water, light.daily, nitrogen.daily, water.daily)))) {

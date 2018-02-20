@@ -34,10 +34,10 @@ plot_hisafe_cycle_annual <- function(hop,
   if(simu.names[1] == "all") simu.names <- unique(hop$exp.plan$SimulationName)
 
   if(!(cycle %in% c("carbon", "nitrogen", "water", "light")))                  stop("cycle argument must be one of: carbon, nitrogen, water, light", call. = FALSE)
-  if(!(all(is.character(simu.names)) | simu.names[1] == "all"))                stop("simu.names argument must be 'all' or a character vector",       call. = FALSE)
   if(!(length(year.lim) == 2 & (is.numeric(year.lim) | all(is.na(year.lim))))) stop("year.lim argument must be a numeric vector of length 2",        call. = FALSE)
   if(!is.logical(plot))                                                        stop("plot argument must be a logical",                               call. = FALSE)
-  if(!all(simu.names %in% hop$exp.plan$SimulationName))                        stop("one or more values in simu.names is not present in hop",        call. = FALSE)
+
+  hop <- hop_filter(hop = hop, simu.names = simu.names)
 
   if(cycle == "water") {
     plot.data  <- get_water_fluxes(hop)
@@ -76,7 +76,6 @@ plot_hisafe_cycle_annual <- function(hop,
 
   ## Filter & Summarize plot data
   plot.data <- plot.data %>%
-    dplyr::filter(SimulationName %in% simu.names) %>%
     dplyr::filter(Year >= year.lim[1], Year <= year.lim[2]) %>%
     dplyr::select(-Month, -Day, -Date, -JulianDay)
 
@@ -96,7 +95,7 @@ plot_hisafe_cycle_annual <- function(hop,
 
   ## Set faceting
   if("face" %in% class(hop)) {
-    EXP.PLAN <- dplyr::filter(hop$exp.plan, SimulationName %in% simu.names)
+    EXP.PLAN <- hop$exp.plan
     AF.sims <- sort(EXP.PLAN$SimulationName[!(EXP.PLAN$SimulationName %in% c("Monocrop", "Forestry"))])
     if(length(AF.sims) == 1) facet_simu <- facet_wrap(~SimulationName, nrow = 1) else facet_simu <- facet_wrap(~SimulationName)
     all.sims <- c("Monocrop", AF.sims, "Forestry")
@@ -177,7 +176,6 @@ plot_hisafe_cycle_daily <- function(hop,
   if(!all("plot" %in% names(hop)))                              stop("plot export profile required but not found",                    call. = FALSE)
   if(!(cycle %in% c("carbon", "nitrogen", "water", "light")))   stop("cycle argument must be one of: carbon, nitrogen, water, light", call. = FALSE)
   if(!(all(is.numeric(years))        | years[1]      == "all")) stop("years argument must be 'all' or a numeric vector",              call. = FALSE)
-  if(!(all(is.character(simu.names)) | simu.names[1] == "all")) stop("simu.names argument must be 'all' or a character vector",       call. = FALSE)
   if(!(length(doy.lim) == 2 & all(doy.lim %in% 1:366)))         stop("doy.lim argument must be of length 2 with values in 1:366",     call. = FALSE)
   if(!is.logical(plot))                                         stop("plot argument must be a logical",                               call. = FALSE)
 
@@ -186,7 +184,8 @@ plot_hisafe_cycle_daily <- function(hop,
   if(length(years) > 1 & length(simu.names) > 1) stop("cannot supply multiple simu.names and multiple years", call. = FALSE)
 
   if(!all(years %in% hop$plot$Year))                stop("one or more values in years is not present in the plot profile of hop",      call. = FALSE)
-  if(!all(simu.names %in% hop$plot$SimulationName)) stop("one or more values in simu.names is not present in the plot profile of hop", call. = FALSE)
+
+  hop <- hop_filter(hop = hop, simu.names = simu.names)
 
   if(cycle == "water") {
     plot.data   <- get_water_fluxes(hop) %>%
@@ -230,7 +229,6 @@ plot_hisafe_cycle_daily <- function(hop,
 
   ## Filter plot data & add (fake) date
   plot.data <- plot.data %>%
-    dplyr::filter(SimulationName %in% simu.names) %>%
     dplyr::filter(Year %in% years) %>%
     dplyr::filter(JulianDay >= doy.lim[1], JulianDay <= doy.lim[2]) %>%
     dplyr::mutate(date = lubridate::as_date(lubridate::parse_date_time(paste0("8000-", JulianDay), "%Y-%j")))

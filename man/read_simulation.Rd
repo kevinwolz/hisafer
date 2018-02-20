@@ -4,7 +4,8 @@
 \alias{read_simulation}
 \title{Read output from a single Hi-sAFe simulation}
 \usage{
-read_simulation(simu.name, hip, path, profiles, show.progress, max.size)
+read_simulation(simu.name, hip, path, profiles, show.progress, read.inputs,
+  max.size)
 }
 \arguments{
 \item{simu.name}{The \code{SimulationName} of the Hi-sAFe simulation to read. This must be the same as the name of the Hi-sAFe simulation folder.
@@ -22,6 +23,10 @@ If \code{hip} is not provided, then \code{path} is required. If both \code{hip} 
 If "all" the default, reads all supported Hi-sAFe output profiles. For currently supported profiles see: \code{\link{hisafe_profiles}}}
 
 \item{show.progress}{Logical indicating whether progress messsages should be printed to the console.}
+
+\item{read.inputs}{Logical indicating whether data should be read from the .PLD and .SIM files for the tree.info and plot.info data slots.
+Setting this to \code{FALSE} severly limits hisafer's plotting/analysis capacity.
+Should only be set to \code{FALSE} if input files are corrupted.}
 
 \item{max.size}{The maximum file size (in bytes) that should be read. Files larger than this value will be ignored, with a warning.}
 }

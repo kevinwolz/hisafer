@@ -45,6 +45,7 @@ diag_hisafe_monthcells(mydata)
 }
 \seealso{
 Other hisafe diagnostic fucntions: \code{\link{diag_hisafe_annualcrop}},
+  \code{\link{diag_hisafe_cells}},
   \code{\link{diag_hisafe_ts}},
   \code{\link{diag_hisafe_voxels}}
 }

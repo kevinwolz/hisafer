@@ -9,6 +9,10 @@
 #' @param simu.names A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.
 #' @param years A numeric vector of the years within \code{hop} to include. Use "all" to include all available values.
 #' @param tree.ids A numeric vector indicating a subset of tree ids to plot. Use "all" to include all available values.
+#' @param date.min A character string of the minimum date to keep, in the format "YYYY-MM-DD" or of class Date.
+#' If NA, the minimum date in the output data is used.
+#' @param date.max A character string of the maximum date to keep, in the format "YYYY-MM-DD" or of class Date.
+#' If NA, the maximum date in the output data is used.
 #' @param doy.lim A numeric vector of length two providing the \code{c(minimum, maximum)} of julian days to plot. Only applies if \code{profile} is a daily profile.
 #' @param color.palette A character string of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
 #' If \code{NA}, the default, then the default color palette is a color-blind-friendly color palette. The default supports up to 48 simulations.
@@ -44,7 +48,9 @@ plot_hisafe_ts <- function(hop,
                            simu.names       = "all",
                            years            = "all",
                            tree.ids         = "all",
-                           doy.lim          = c(1, 366),
+                           date.min         = NA,
+                           date.max         = NA,
+                           doy.lim          = c(1,365),
                            color.palette    = NA,
                            linetype.palette = NA,
                            aes.cols         = list(color = "SimulationName", linetype = "SimulationName"),
@@ -61,27 +67,27 @@ plot_hisafe_ts <- function(hop,
   variable_check(hop, profile, variable, error = TRUE)
   if(!(profile %in% c(annual.profiles, daily.profiles))) stop("supplied profile is not supported", call. = FALSE)
 
-  if(simu.names[1] == "all")                              simu.names <- unique(hop[[profile]]$SimulationName)
-  if(years[1]      == "all")                              years      <- unique(hop[[profile]]$Year)
-  if(tree.ids[1]   == "all" & profile %in% tree.profiles) tree.ids   <- unique(hop[[profile]]$id)
+  if(years[1]    == "all")                              years    <- unique(hop[[profile]]$Year)
+  if(tree.ids[1] == "all" & profile %in% tree.profiles) tree.ids <- unique(hop[[profile]]$id)
 
   if(length(variable) > 1)                                        stop("variable argument must be a character vector of length 1",  call. = FALSE)
-  if(!all(is.character(simu.names)))                              stop("simu.names argument must be 'all' or a character vector",   call. = FALSE)
   if(!all(is.numeric(years)))                                     stop("years argument must be 'all' or a numeric vector",          call. = FALSE)
-  if(!all(is.numeric(tree.ids)))                                  stop("tree.ids argument must be 'all' or a numeric vector",       call. = FALSE)
   if(!(length(doy.lim) == 2 & all(doy.lim %in% 1:366)))           stop("doy.lim argument must be of length 2 with values in 1:366", call. = FALSE)
   if(!(is.na(color.palette) | is.character(color.palette)))       stop("color.palette argument must be a character vector",         call. = FALSE)
   if(!(is.na(linetype.palette) | is.character(linetype.palette))) stop("linetype.palette argument must be a character vector",      call. = FALSE)
   if(!is.logical(facet.year))                                     stop("facet.year argument must be a logical",                     call. = FALSE)
   if(!is.logical(crop.points))                                    stop("crop.points argument must be a logical",                    call. = FALSE)
   if(!is.logical(plot))                                           stop("plot argument must be a logical",                           call. = FALSE)
-  variable_check(hop, profile, variable, error = TRUE)
+  variable_check(hop, profile, c(variable, aes.cols$color, aes.cols$linetype), error = TRUE)
 
-  if(!all(simu.names %in% unique(hop[[profile]]$SimulationName)))          stop(paste("not all values in simu.names are present in the", profile, "profile"), call. = FALSE)
-  if(!all(years      %in% unique(hop[[profile]]$Year)))                    stop(paste("not all values in years are present in the",      profile, "profile"), call. = FALSE)
-  if(profile %in% tree.profiles) if(!all(tree.ids %in% hop[[profile]]$id)) stop(paste("not all values in tree.id are present in the",    profile, "profile"), call. = FALSE)
-  if(!(aes.cols$color    %in% names(hop[[profile]])))                      stop(paste(aes.cols$color,    "is not a column name in the",  profile, "profile"), call. = FALSE)
-  if(!(aes.cols$linetype %in% names(hop[[profile]])))                      stop(paste(aes.cols$linetype, "is not a column name in the",  profile, "profile"), call. = FALSE)
+  if(!all(years %in% unique(hop[[profile]]$Year)))                stop(paste("not all values in years are present in the",  profile, "profile"),
+                                                                       call. = FALSE)
+
+  hop <- hop_filter(hop        = hop,
+                    simu.names = simu.names,
+                    tree.ids   = tree.ids,
+                    date.min   = date.min,
+                    date.max   = date.max)
 
   ## Create profile-specific x aesthetic, axis label, plot theme, and time.lim filter
   if(profile %in% annual.profiles){
@@ -91,7 +97,6 @@ plot_hisafe_ts <- function(hop,
     scale_x_ts  <- scale_x_date(date_labels = "%Y") # "%b-%Y"
     theme.extra <- geom_blank()
     plot.data  <- hop[[profile]] %>%
-      dplyr::filter(SimulationName %in% simu.names) %>%
       dplyr::filter(Year %in% years)
   } else {
     x.var       <- "fake.date"
@@ -110,9 +115,7 @@ plot_hisafe_ts <- function(hop,
       theme.extra <- geom_blank()
     }
     plot.data  <- hop[[profile]] %>%
-      dplyr::filter(SimulationName %in% simu.names) %>%
       dplyr::filter(Year %in% years) %>%
-      dplyr::filter(JulianDay >= doy.lim[1], JulianDay <= doy.lim[2]) %>%
       dplyr::mutate(fake.date = lubridate::ymd(paste0("8000-", Month, "-", Day)))
     yrs.to.remove <- unique(plot.data$Year)[table(plot.data$Year) == length(unique(plot.data$SimulationName))]
     plot.data <- dplyr::filter(plot.data, !(Year %in% yrs.to.remove))
@@ -121,7 +124,6 @@ plot_hisafe_ts <- function(hop,
   ## Filter/Facet by supplied tree.ids
   if(profile %in% tree.profiles) {
     plot.data <- plot.data %>%
-      dplyr::filter(id %in% tree.ids) %>%
       dplyr::mutate(id = paste("Tree", id))
     if(length(tree.ids) > 1) {
       facet <- facet_wrap(~id)
@@ -237,14 +239,17 @@ plot_hisafe_monthcells <- function(hop,
   if(length(variable) > 1)                                  stop("variable argument must be a character vector of length 1",              call. = FALSE)
   if(!(colfacet %in% c("Year", "Month", "SimulationName"))) stop("colfacet must be one of: Year, Month, SimulationName",                  call. = FALSE)
   if(!(rowfacet %in% c("Year", "Month", "SimulationName"))) stop("rowfacet must be one of: Year, Month, SimulationName",                  call. = FALSE)
-  if(!all(is.character(simu.names)))                        stop("simu.names argument must be 'all' or a character vector",               call. = FALSE)
   if(!is.numeric(years))                                    stop("years argument must be 'all' or a numeric vector",                      call. = FALSE)
   if(!all(months %in% 1:12))                                stop("months argument must be 'all' or a numeric vector with values in 1:12", call. = FALSE)
   if(!is.logical(trees))                                    stop("trees argument must be a logical",                                      call. = FALSE)
   if(!is.logical(canopies))                                 stop("canopies argument must be a logical",                                   call. = FALSE)
   if(!is.logical(plot))                                     stop("plot argument must be a logical",                                       call. = FALSE)
-  if(!all(simu.names %in% hop$monthCells$SimulationName))   stop("one or more values in simu.names is not present in the monthCells profile of hop", call. = FALSE)
   if(!all(months %in% hop$monthCells$Month))                stop("one or more values in months is not present in the monthCells profile of hop",     call. = FALSE)
+
+  hop <- hop_filter(hop = hop, simu.names = simu.names)
+
+  trees    <- trees    & nrow(hop$tree.info) > 0 & nrow(hop$plot.info) > 0
+  canopies <- canopies & nrow(hop$tree.info) > 0 & nrow(hop$plot.info) > 0
 
   ## Determine which variable is not part of faceting & trigger associated error
   vars <- c("SimulationName", "Year", "Month")
@@ -259,48 +264,16 @@ plot_hisafe_monthcells <- function(hop,
   ## Filter for provided simu.names, years & months
   plot.data <- hop$monthCells %>%
     dplyr::mutate(Year = Year - min(Year) + 1) %>% # Create 0+ year values
-    dplyr::filter(SimulationName %in% simu.names) %>%
-    dplyr::filter(Year %in% years) %>%
+    dplyr::filter(Year  %in% years) %>%
     dplyr::filter(Month %in% months)
 
   if(nrow(plot.data) == 0) return(FALSE)
 
+  ## Get tree locations & canopy diameters
   if(trees | canopies){
-    xy.centers <- plot.data %>%
-      dplyr::group_by(SimulationName) %>%
-      dplyr::summarize(x.center = median(x), y.center = median(y))
-
-    tree.simus <- dplyr::filter(hop$tree.info, SimulationName %in% simu.names)$SimulationName
-    n.trees    <- length(tree.simus)
-    years      <- years[years %in% (unique(hop$monthCells$Year) -  min(hop$monthCells$Year))]
-    months     <- months[months %in% unique(hop$monthCells$Month)]
-    combos     <- dplyr::as_tibble(expand.grid(SimulationName = tree.simus, Year = years, Month = months, stringsAsFactors = FALSE))
-    if(n.trees > 0) {
-      tree.data <- hop$tree.info %>%
-        dplyr::filter(SimulationName %in% simu.names) %>%
-        dplyr::left_join(combos, by = "SimulationName")
-    } else {
-      tree.data <- dplyr::as_tibble(expand.grid(SimulationName = simu.names, id = NA, species = NA, x = NA, y = NA, Year = years, Month = months)) %>%
-        dplyr::mutate_if(is.logical, as.numeric)
-    }
-
-    tree.data <- dplyr::left_join(tree.data, xy.centers, by = "SimulationName")
-
-    if(canopies) {
-      if(nrow(hop$trees) == 0) stop("not data found in trees profile, which is required if canopies = TRUE", call. = FALSE)
-      if(!all(c("crownRadiusInterRow", "crownRadiusTreeLine") %in% names(hop$trees))) {
-        stop("'crownRadiusInterRow' and 'crownRadiusTreeLine' are required in the trees profile if canopies = TRUE", call. = FALSE)
-      }
-
-      tree.data <- hop$trees %>%
-        dplyr::mutate(Year = Year - min(Year) + 1) %>% # Create 0+ year values
-        dplyr::filter(SimulationName %in% simu.names) %>%
-        dplyr::filter(Year  %in% years) %>%
-        dplyr::filter(Month %in% months) %>%
-        dplyr::filter(Day == 1) %>%
-        dplyr::select(SimulationName, Year, Month, id, crownRadiusInterRow, crownRadiusTreeLine) %>%
-        dplyr::left_join(tree.data, by = c("SimulationName", "Year", "Month", "id"))
-    }
+    tree.data <- hop$tree.info %>%
+      dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
+      dplyr::select(SimulationName, id, species, x, y, plotWidth, plotHeight, cellWidth)
 
     for(i in 1:nrow(tree.data)) {
       if(tree.data$x[i] == 0 & tree.data$y[i] == 0){
@@ -308,9 +281,21 @@ plot_hisafe_monthcells <- function(hop,
         tree.data$y[i] <- tree.data$y[i] + tree.data$y.center[i]
       } else {
         cellWidth <- max(diff(plot.data[plot.data$SimulationName == tree.data$SimulationName[i],]$x))
-        tree.data$x[i] <- tree.data$x[i] - cellWidth/2
-        tree.data$y[i] <- tree.data$y[i] - cellWidth/2
+        tree.data$x[i] <- tree.data$x[i] - cellWidth / 2
+        tree.data$y[i] <- tree.data$y[i] - cellWidth / 2
       }
+    }
+
+    if(canopies) {
+      profile_check(hop,  "trees", error = TRUE)
+      variable_check(hop, "trees", c("crownRadiusInterRow", "crownRadiusTreeLine"), error = TRUE)
+      tree.data <- hop$trees %>%
+        dplyr::mutate(Year = Year - min(Year) + 1) %>% # Create 0+ year values
+        dplyr::filter(Year  %in% years) %>%
+        dplyr::filter(Month %in% months) %>%
+        dplyr::filter(Day == 1) %>%
+        dplyr::select(SimulationName, Date, id, crownRadiusInterRow, crownRadiusTreeLine) %>%
+        dplyr::left_join(tree.data, by = c("SimulationName", "id"))
     }
   }
 
@@ -355,7 +340,7 @@ plot_hisafe_monthcells <- function(hop,
                                inherit.aes = FALSE,
                                na.rm       = TRUE)
     } else {
-      warning("The package 'ggforce' is required for drawing tree conopies by plot_hisafe_monthcells(). Please install it or set canopies = FALSE.",
+      warning("The package 'ggforce' is required for drawing tree conopies. Please install it or set canopies = FALSE.",
               immediate = TRUE)
     }
   }
@@ -403,59 +388,27 @@ plot_hisafe_annualcrop <- function(hop,
   profile_check(hop, "annualcrop", error = TRUE)
   variable_check(hop, "annualcrop", variable, error = TRUE)
 
-  if(simu.names[1] == "all") simu.names <- unique(hop$annualcrop$SimulationName)
-  if(years[1]      == "all") years      <- unique(hop$annualcrop$Year) -  min(hop$annualcrop$Year) else years <- years[years != 0]
+  if(years[1] == "all") years <- unique(hop$annualcrop$Year) - min(hop$annualcrop$Year) else years <- years[years != 0]
 
-  if(length(variable) > 1)                           stop("variable argument must be a character vector of length 1", call. = FALSE)
-  if(!all(is.character(simu.names)))                 stop("simu.names argument must be 'all' or a character vector",  call. = FALSE)
-  if(!is.numeric(years))                             stop("years argument must be 'all' or a numeric vector",         call. = FALSE)
-  if(!is.logical(trees))                             stop("trees argument must be a logical",                         call. = FALSE)
-  if(!is.logical(canopies))                          stop("canopies argument must be a logical",                      call. = FALSE)
-  if(!is.logical(plot))                              stop("plot argument must be a logical",                          call. = FALSE)
-  if(!all(simu.names %in% hop$annualcrop$SimulationName)) stop("one or more values in simu.names is not present in the annualcrop profile of hop", call. = FALSE)
+  if(length(variable) > 1)  stop("variable argument must be a character vector of length 1", call. = FALSE)
+  if(!is.numeric(years))    stop("years argument must be 'all' or a numeric vector",         call. = FALSE)
+  if(!is.logical(trees))    stop("trees argument must be a logical",                         call. = FALSE)
+  if(!is.logical(canopies)) stop("canopies argument must be a logical",                      call. = FALSE)
+  if(!is.logical(plot))     stop("plot argument must be a logical",                          call. = FALSE)
 
-  ## Filter for provided simu.names, years & months
+  hop <- hop_filter(hop = hop, simu.names = simu.names)
+
   plot.data <- hop$annualcrop %>%
     dplyr::mutate(Year = Year - min(Year) + 1) %>% # Create 0+ year values
-    dplyr::filter(SimulationName %in% simu.names) %>%
     dplyr::filter(Year %in% years)
 
   if(nrow(plot.data) == 0) return(FALSE)
 
   ## Get tree locations & canopy diameters
-  if(trees | canopies){
-    xy.centers <- plot.data %>%
-      dplyr::group_by(SimulationName) %>%
-      dplyr::summarize(x.center = median(x), y.center = median(y))
-
-    tree.simus <- dplyr::filter(hop$tree.info, SimulationName %in% simu.names)$SimulationName
-    n.trees    <- length(tree.simus)
-    years      <- years[years %in% (unique(hop$annualcrop$Year) -  min(hop$annualcrop$Year))]
-    combos     <- dplyr::as_tibble(expand.grid(SimulationName = tree.simus, Year = years, stringsAsFactors = FALSE))
-    if(n.trees > 0) {
-      tree.data <- hop$tree.info %>%
-        dplyr::filter(SimulationName %in% simu.names) %>%
-        dplyr::left_join(combos, by = "SimulationName")
-    } else {
-      tree.data <- dplyr::as_tibble(expand.grid(SimulationName = simu.names, id = NA, species = NA, x = NA, y = NA, Year = years)) %>%
-        dplyr::mutate_if(is.logical, as.numeric)
-    }
-
-    if(canopies) {
-      if(nrow(hop$trees) == 0) stop("not data found in trees profile, which is required if canopies = TRUE", call. = FALSE)
-      if(!all(c("crownRadiusInterRow", "crownRadiusTreeLine") %in% names(hop$trees))) {
-        stop("'crownRadiusInterRow' and 'crownRadiusTreeLine' are required in the trees profile if canopies = TRUE", call. = FALSE)
-      }
-
-      tree.data <- hop$trees %>%
-        dplyr::mutate(Year = Year - min(Year) + 1) %>% # Create 0+ year values
-        dplyr::filter(SimulationName %in% simu.names) %>%
-        dplyr::filter(Year %in% years) %>%
-        dplyr::filter(JulianDay == 183) %>%
-        dplyr::select(SimulationName, Year, id, crownRadiusInterRow, crownRadiusTreeLine) %>%
-        dplyr::left_join(tree.data, by = c("SimulationName", "Year", "id")) %>%
-        dplyr::left_join(xy.centers, by = "SimulationName")
-    }
+  if((trees | canopies) & nrow(hop$tree.info) > 0 & nrow(hop$plot.info) > 0){
+    tree.data <- hop$tree.info %>%
+      dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
+      dplyr::select(SimulationName, id, species, x, y, plotWidth, plotHeight, cellWidth)
 
     for(i in 1:nrow(tree.data)) {
       if(tree.data$x[i] == 0 & tree.data$y[i] == 0){
@@ -466,6 +419,17 @@ plot_hisafe_annualcrop <- function(hop,
         tree.data$x[i] <- tree.data$x[i] - cellWidth / 2
         tree.data$y[i] <- tree.data$y[i] - cellWidth / 2
       }
+    }
+
+    if(canopies) {
+      profile_check(hop,  "trees", error = TRUE)
+      variable_check(hop, "trees", c("crownRadiusInterRow", "crownRadiusTreeLine"), error = TRUE)
+      tree.data <- hop$trees %>%
+        dplyr::mutate(Year = Year - min(Year) + 1) %>% # Create 0+ year values
+        dplyr::filter(Year %in% years)  %>%
+        dplyr::filter(JulianDay == 183) %>%
+        dplyr::select(SimulationName, Date, id, crownRadiusInterRow, crownRadiusTreeLine) %>%
+        dplyr::left_join(tree.data, by = c("SimulationName", "id"))
     }
   }
 
@@ -510,7 +474,7 @@ plot_hisafe_annualcrop <- function(hop,
                                inherit.aes = FALSE,
                                na.rm       = TRUE)
     } else {
-      warning("The package 'ggforce' is required for drawing tree conopies by plot_hisafe_annualcrop(). Please install it or set canopies = FALSE.",
+      warning("The package 'ggforce' is required for drawing tree conopies. Please install it or set canopies = FALSE.",
               immediate = TRUE)
     }
   }
@@ -524,7 +488,11 @@ plot_hisafe_annualcrop <- function(hop,
 #' @return Returns a ggplot object.
 #' @param hop An object of class hop.
 #' @param variable A character string of the name of the variable to color the tiles.
-#' @param dates A character vector containing the dates (yyyy-mm-dd) to include.
+#' @param dates A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates to include.
+#' @param simu.names A character string containing the SimulationNames to include. Use "all" to include all available values.
+#' @param plot.x Either "x" or "y", indicating which axis of the simulation scene should be plotted on the x-axis of the plot.
+#' @param trees Logical indicating if a point should be plotted at the location of each tree.
+#' @param canopies Logical indicating if an elipsoid should be plotted representing the size of each tree canopy.
 #' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.
 #' @export
 #' @importFrom dplyr %>%
@@ -542,40 +510,85 @@ plot_hisafe_annualcrop <- function(hop,
 #' tile.plot
 #' ggsave_fitmax("tiled_relativeDirectParIncident.png", tile.plot)
 #' }
-plot_hisafe_cells <- function(hop, variable, dates, plot = TRUE) {
+plot_hisafe_cells <- function(hop,
+                              variable,
+                              dates,
+                              simu.names = "all",
+                              plot.x     = "x",
+                              trees      = TRUE,
+                              canopies   = TRUE,
+                              plot       = TRUE) {
 
   is_hop(hop, error = TRUE)
-  profile_check(hop, "cells", error = TRUE)
+  profile_check(hop,  "cells", error = TRUE)
   variable_check(hop, "cells", variable, error = TRUE)
 
-  if(length(variable) > 1) stop("variable argument must be a character vector of length 1", call. = FALSE)
-  if(!is.character(dates)) stop("dates argument must be a character vector",                call. = FALSE)
-  if(!is.logical(plot))    stop("plot argument must be a logical",                          call. = FALSE)
+  if(dates[1] == "all") dates <- unique(hop$cells$Date)
 
-  ## Filter for provided dates
-  plot.data <- hop$cells %>%
-    dplyr::filter(Date %in% lubridate::ymd(dates))
+  if(length(variable) > 1)                              stop("variable argument must be a character vector of length 1", call. = FALSE)
+  if(!(is.character(dates) | "Date" %in% class(dates))) stop("dates argument must be 'all' or a character vector
+                                                             in the format 'YYYY-MM-DD' or a vecotr of class Date",      call. = FALSE)
+  if(!is.logical(trees))                                stop("trees argument must be a logical",                         call. = FALSE)
+  if(!is.logical(canopies))                             stop("canopies argument must be a logical",                      call. = FALSE)
+  if(!is.logical(plot))                                 stop("plot argument must be a logical",                          call. = FALSE)
 
-  ## Find tree locations for each simulation
-  tree.locations <- plot.data %>%
-    dplyr::summarize(x = median(x), y = median(y))
+  hop <- hop_filter(hop = hop, simu.names = simu.names, dates = lubridate::ymd(dates))
+
+  plot.data <- hop$cells
+  if(nrow(plot.data) == 0) return(FALSE)
+
+  ## Get tree locations & canopy diameters
+  if((trees | canopies) & nrow(hop$tree.info) > 0 & nrow(hop$plot.info) > 0){
+    tree.data <- hop$tree.info %>%
+      dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
+      dplyr::select(SimulationName, id, species, x, y, plotWidth, plotHeight, cellWidth)
+
+    for(i in 1:nrow(tree.data)) {
+      if(tree.data$x[i] == 0 & tree.data$y[i] == 0){
+        tree.data$x[i] <- tree.data$x[i] + tree.data$x.center[i]
+        tree.data$y[i] <- tree.data$y[i] + tree.data$y.center[i]
+      } else {
+        cellWidth <- max(diff(plot.data[plot.data$SimulationName == tree.data$SimulationName[i],]$x))
+        tree.data$x[i] <- tree.data$x[i] - cellWidth / 2
+        tree.data$y[i] <- tree.data$y[i] - cellWidth / 2
+      }
+    }
+
+    if(canopies) {
+      profile_check(hop,  "trees", error = TRUE)
+      variable_check(hop, "trees", c("crownRadiusInterRow", "crownRadiusTreeLine"), error = TRUE)
+      tree.data <- hop$trees %>%
+        dplyr::select(SimulationName, Date, id, crownRadiusInterRow, crownRadiusTreeLine) %>%
+        dplyr::left_join(tree.data, by = c("SimulationName", "id"))
+    }
+  }
 
   ## Determine faceting & axis labels
+  title.lab <- variable
   if("hop-group" %in% class(hop) & length(dates) > 1){
-    facet_cells <- facet_grid(Date ~ SimulationName, switch = "both")
-    x.lab       <- "SimulationName"
-    y.lab       <- "Date"
-    title.lab   <- variable
+    facet_cells <- facet_grid(Date ~ SimulationName, switch = "y")
   } else if(length(dates) > 1) {
     facet_cells <- facet_wrap(~Date)
-    x.lab       <- ""
-    y.lab       <- "Date"
-    title.lab   <- variable
+  } else if("hop-group" %in% class(hop)) {
+    facet_cells <- facet_wrap(~SimulationName)
   } else {
     facet_cells <- geom_blank()
-    x.lab       <- ""
-    y.lab       <- ""
-    title.lab   <- paste0(variable, " (", lubridate::ymd(dates), ")")
+  }
+
+  ## Rotate scene if plot.x = "y"
+  x.lab       <- "X (m)"
+  y.lab       <- "Y (m)"
+  if(plot.x == "y") {
+    X <- plot.data$y
+    Y <- -plot.data$x
+    plot.data$x <- X
+    plot.data$y <- Y
+    X <- tree.data$y
+    Y <- -tree.data$x
+    tree.data$x <- X
+    tree.data$y <- Y
+    x.lab       <- "Y (m)"
+    y.lab       <- "-X (m)"
   }
 
   ## Create plot
@@ -587,8 +600,7 @@ plot_hisafe_cells <- function(hop, variable, dates, plot = TRUE) {
     scale_x_continuous(expand = c(0,0)) +
     scale_y_continuous(expand = c(0,0)) +
     facet_cells +
-    geom_tile(aes_string(fill = variable), na.rm = TRUE, color = "black") +
-    geom_point(data = tree.locations, fill = "black", color = "white", shape = 21) +
+    geom_tile(aes_string(fill = variable), na.rm = TRUE, color = "black") + # , linetype = cropType
     viridis::scale_fill_viridis(option = "magma") +
     guides(fill = guide_colourbar(barwidth    = 15,
                                   barheight   = 1.5,
@@ -596,6 +608,34 @@ plot_hisafe_cells <- function(hop, variable, dates, plot = TRUE) {
                                   nbin        = 100)) +
     coord_equal() +
     theme_hisafe_tile()
+
+  if(trees & nrow(hop$tree.info) > 0) {
+    plot.obj <- plot.obj +
+      geom_point(data  = tree.data,
+                 color = "green",
+                 size  = 2,
+                 na.rm = TRUE)
+  }
+
+  if(canopies & nrow(hop$tree.info) > 0) {
+    package.check <- requireNamespace("ggforce", quietly = TRUE)
+    if(package.check) {
+      plot.obj <- plot.obj +
+        ggforce::geom_ellipsis(data  = tree.data,
+                               color = "green",
+                               size  = 2,
+                               aes(x0    = x,
+                                   y0    = y,
+                                   a     = crownRadiusInterRow,
+                                   b     = crownRadiusTreeLine,
+                                   angle = 0),
+                               inherit.aes = FALSE,
+                               na.rm       = TRUE)
+    } else {
+      warning("The package 'ggforce' is required for drawing tree conopies. Please install it or set canopies = FALSE.",
+              immediate = TRUE)
+    }
+  }
 
   if(plot) return(plot.obj) else return(plot.data)
 }
@@ -650,6 +690,7 @@ plot_hisafe_voxels <- function(hop,
   profile_check(hop, "voxels", error = TRUE)
   variable_check(hop, "voxels", variable, error = TRUE)
 
+  if(nrow(hop$plot.info) == 0)                                               stop("plot.info is unavilable in hop and is required",           call. = FALSE)
   if(length(variable) > 1)                                                   stop("variable argument must be a character vector of length 1", call. = FALSE)
   if(!((is.na(date.min) | is.character(date.min)) & length(date.min) == 1))  stop("date.min must be a character vector of length 1",          call. = FALSE)
   if(!((is.na(date.max) | is.character(date.max)) & length(date.max) == 1))  stop("date.max must be a character vector of length 1",          call. = FALSE)

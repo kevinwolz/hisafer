@@ -2,20 +2,30 @@
 % Please edit documentation in R/misc.R
 \name{hop_filter}
 \alias{hop_filter}
-\title{Filter a hop object by SimulationName}
+\title{Filter a hop object by SimulationName, Date, and id}
 \usage{
-hop_filter(hop, simu.names)
+hop_filter(hop, simu.names = "all", tree.ids = "all", date.min = NA,
+  date.max = NA, dates = NULL)
 }
 \arguments{
-\item{hop}{A object of class hop or face.}
+\item{hop}{An object of class hop or face.}
 
 \item{simu.names}{A character vector of the SimulationNames to keep. If "all", no filtering occurs.}
+
+\item{date.min}{A character string of the minimum date to keep, in the format "YYYY-MM-DD".
+If NA, the minimum date in the output data is used. Only used if \code{dates} is \code{NULL}.}
+
+\item{date.max}{A character string of the maximum date to keep, in the format "YYYY-MM-DD".
+If NA, the maximum date in the output data is used. Only used if \code{dates} is \code{NULL}.}
+
+\item{dates}{A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates to keep.
+If \code{NULL}, then \code{date.max} and \code{date.min} are used instad.}
 }
 \value{
 A hop object.
 }
 \description{
-Filters a hop object by SimulationName
+Filters a hop object by SimulationName, Date, and id
 }
 \examples{
 \dontrun{
@@ -24,8 +34,7 @@ newhop <- hop_filter(myhop, c("Sim_1", "Sim_2"))
 }
 \seealso{
 Other hisafe helper functions: \code{\link{hip_params}},
-  \code{\link{hisafe_profiles}},
-  \code{\link{hop_date_filter}}, \code{\link{hop_merge}},
+  \code{\link{hisafe_profiles}}, \code{\link{hop_merge}},
   \code{\link{hop_params}}, \code{\link{hop_rename}},
   \code{\link{is_hip}}, \code{\link{is_hop}},
   \code{\link{profile_check}}, \code{\link{variable_check}}

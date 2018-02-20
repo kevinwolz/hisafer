@@ -9,7 +9,7 @@ analyze_hisafe(hop, carbon = TRUE, light = TRUE, nitrogen = TRUE,
   nitrogen.daily = TRUE, water.daily = TRUE)
 }
 \arguments{
-\item{hop}{A object of class hop or face.}
+\item{hop}{An object of class hop or face.}
 
 \item{carbon}{Logical indicating if annual carbon plot should be made.}
 

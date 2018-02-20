@@ -5,8 +5,8 @@
 \title{Read output from one or more Hi-sAFe simulations}
 \usage{
 read_hisafe(hip = NULL, path = NULL, simu.names = "all",
-  profiles = "all", show.progress = TRUE, max.size = 3e+08,
-  date.min = NA, date.max = NA, dates = NULL)
+  profiles = "all", show.progress = TRUE, read.inputs = TRUE,
+  max.size = 3e+08, date.min = NA, date.max = NA, dates = NULL)
 }
 \arguments{
 \item{hip}{An object of class "hip". To create a hip object see \code{\link{define_hisafe}}.
@@ -22,6 +22,10 @@ If \code{hip} is not provided, then \code{path} is required. If \code{hip} is pr
 #' If "all" the default, reads all supported Hi-sAFe output profiles. For currently supported profiles see: \code{\link{hisafe_profiles}}}
 
 \item{show.progress}{Logical indicating whether progress messsages should be printed to the console.}
+
+\item{read.inputs}{Logical indicating whether data should be read from the .PLD and .SIM files for the tree.info and plot.info data slots.
+Setting this to \code{FALSE} severly limits hisafer's plotting/analysis capacity.
+Should only be set to \code{FALSE} if input files are corrupted.}
 
 \item{max.size}{The maximum file size (in bytes) that should be read. Files larger than this value will be ignored, with a warning.}
 

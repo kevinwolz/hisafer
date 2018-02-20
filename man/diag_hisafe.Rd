@@ -6,10 +6,10 @@
 \usage{
 diag_hisafe(hop, annualtree = TRUE, annualplot = TRUE, trees = TRUE,
   plot = TRUE, climate = TRUE, annualcrop = TRUE, monthCells = TRUE,
-  voxels = TRUE, ...)
+  cells = TRUE, voxels = TRUE, ...)
 }
 \arguments{
-\item{hop}{A object of class hop or face.}
+\item{hop}{An object of class hop or face.}
 
 \item{annualtree}{Logical indicating if annualtree profile diagnostic plots should be made.}
 
