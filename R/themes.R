@@ -2,9 +2,10 @@
 #' @description The default ggplot2 theme for Hi-sAFe timeseries plots.
 #' @return A ggplot modifier object containing the theme.
 #' @param base_size A number indicating the base \code{ggplot} text size.
+#' @param ... Other arguments passed ggplot::theme.
 #' @export
 #' @import ggplot2
-theme_hisafe_ts <- function(base_size = 18) {
+theme_hisafe_ts <- function(base_size = 18, ...) {
   thm <- theme_bw(base_size = base_size) %+%
     theme(
       plot.margin       = unit(base_size * c(1,1,1,1), "points"),
@@ -27,17 +28,18 @@ theme_hisafe_ts <- function(base_size = 18) {
       legend.key        = element_blank(),
       legend.key.width  = unit(1.5, "cm"),
       #legend.text      = element_text(margin = margin(r = 24, unit = "pt")), # does not work; known ggplot bug
-      aspect.ratio      = 0.75
+      aspect.ratio      = 0.75, ...
     )
 }
 
 #' A \code{ggplot2} theme for Hi-sAFe monthCells tile plots
 #' @description The default ggplot2 theme for Hi-sAFe monthCells tile plots.
 #' @return A ggplot modifier object containing the theme.
-#' @param base_size A number indicating the base \code{ggplot} text size.
+#' @param base_size A number indicating the base \code{ggplot}
+#' @param ... Other arguments passed ggplot::theme.
 #' @export
 #' @import ggplot2
-theme_hisafe_tile <- function(base_size = 18) {
+theme_hisafe_tile <- function(base_size = 18, ...) {
   thm <- theme_bw(base_size = base_size) %+%
     theme(
       plot.margin      = unit(base_size * c(1,1,1,1), "points"),
@@ -52,6 +54,6 @@ theme_hisafe_tile <- function(base_size = 18) {
       axis.title.y     = element_text(vjust = 2),
       plot.title       = element_text(hjust = 0.5,
                                       margin = margin(b = (base_size * 1), unit = "points")),
-      legend.position  = "bottom"
+      legend.position  = "bottom", ...
     )
 }

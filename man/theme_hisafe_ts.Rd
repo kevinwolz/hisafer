@@ -4,10 +4,12 @@
 \alias{theme_hisafe_ts}
 \title{A \code{ggplot2} theme for Hi-sAFe timeseries plots}
 \usage{
-theme_hisafe_ts(base_size = 18)
+theme_hisafe_ts(base_size = 18, ...)
 }
 \arguments{
 \item{base_size}{A number indicating the base \code{ggplot} text size.}
+
+\item{...}{Other arguments passed ggplot::theme.}
 }
 \value{
 A ggplot modifier object containing the theme.

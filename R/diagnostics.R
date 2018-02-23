@@ -33,7 +33,7 @@ diag_hisafe_ts <- function(hop, profile, output.path = NULL, ...) {
   if(!(profile %in% supported.profiles))                  stop("supplied profile is not supported by plot_hisafe_ts()", call. = FALSE)
   if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character vector",       call. = FALSE)
 
-  ts.path <- clean_path(paste0(diag_output_path(hop, output.path), "/", profile, "/"))
+  ts.path <- clean_path(paste0(diag_output_path(hop, output.path), "/diagnostics/", profile, "/"))
   dir.create(ts.path, recursive = TRUE, showWarnings = FALSE)
 
   last.col  <- ifelse(grepl("tree", profile), "id", "stepNum")
@@ -85,7 +85,7 @@ diag_hisafe_monthcells <- function(hop,
   if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character vector",                          call. = FALSE)
   if(!all(schemes %in% allowed.schemes))                  stop("schemes argument must be one of: year.simname, month.simname, month.year", call. = FALSE)
 
-  monthcells.path <- clean_path(paste0(diag_output_path(hop, output.path), "/monthCells/"))
+  monthcells.path <- clean_path(paste0(diag_output_path(hop, output.path), "/diagnostics/monthCells/"))
   dir.create(monthcells.path, recursive = TRUE, showWarnings = FALSE)
 
   var.names <- vars_to_diag(hop, "monthCells", "y")
@@ -182,7 +182,7 @@ diag_hisafe_annualcrop <- function(hop,
   profile_check(hop, "annualcrop", error = TRUE)
   if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character vector", call. = FALSE)
 
-  annualcrop.path <- clean_path(paste0(diag_output_path(hop, output.path), "/annualcrop/"))
+  annualcrop.path <- clean_path(paste0(diag_output_path(hop, output.path), "/diagnostics/annualcrop/"))
   dir.create(annualcrop.path, recursive = TRUE, showWarnings = FALSE)
 
   var.names <- vars_to_diag(hop, "annualcrop", "y")
@@ -222,7 +222,7 @@ diag_hisafe_cells <- function(hop,
   profile_check(hop, "cells", error = TRUE)
   if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character vector", call. = FALSE)
 
-  cells.path <- clean_path(paste0(diag_output_path(hop, output.path), "/cells/"))
+  cells.path <- clean_path(paste0(diag_output_path(hop, output.path), "/diagnostics/cells/"))
   dir.create(cells.path, recursive = TRUE, showWarnings = FALSE)
 
   var.names <- vars_to_diag(hop, "cells", "y")
@@ -241,7 +241,7 @@ diag_hisafe_cells <- function(hop,
 #' data from more than one Hi-sAFe simulation, the plots will by faceted by SimulationName.
 #' @param hop An object of class "hop" or "face" containing output data from one or more Hi-sAFe simulations.
 #' @param output.path A character stting indicating the path to the directory where plots should be saved.
-#' Plots aresaved in a subdirectory within this directory named by \code{profile}.
+#' Plots are saved in a subdirectory within this directory named by \code{profile}.
 #' If no value is provided, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis/diagnostics".
 #' @param ... Other arguments passed to \code{\link{plot_hisafe_voxels}}.
 #' @export
@@ -264,7 +264,7 @@ diag_hisafe_voxels <- function(hop, output.path = NULL, ...) {
   profile_check(hop, "voxels", error = TRUE)
   if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character vector", call. = FALSE)
 
-  voxels.path <- clean_path(paste0(diag_output_path(hop, output.path), "/voxels/"))
+  voxels.path <- clean_path(paste0(diag_output_path(hop, output.path), "/diagnostics/voxels/"))
   dir.create(voxels.path, recursive = TRUE, showWarnings = FALSE)
 
   var.names <- vars_to_diag(hop, "voxels", "z")
@@ -353,9 +353,9 @@ diag_hisafe <- function(hop,
 #' @param output.path The output.path argument from a diagnostic function
 diag_output_path <- function(hop, output.path) {
   if(is.null(output.path) & "hop-group" %in% class(hop)) {
-    output.path <- clean_path(paste0(hop$exp.path, "/analysis/diagnostics"))
+    output.path <- clean_path(paste0(hop$exp.path, "/analysis"))
   } else if(is.null(output.path) & !("hop-group" %in% class(hop))){
-    output.path <- clean_path(paste0(hop$path$path, "/analysis/diagnostics"))
+    output.path <- clean_path(paste0(hop$path$path, "/analysis"))
   }
   return(output.path)
 }

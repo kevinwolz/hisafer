@@ -279,10 +279,6 @@ plot_hisafe_monthcells <- function(hop,
       if(tree.data$x[i] == 0 & tree.data$y[i] == 0){
         tree.data$x[i] <- tree.data$x[i] + tree.data$x.center[i]
         tree.data$y[i] <- tree.data$y[i] + tree.data$y.center[i]
-      } else {
-        cellWidth <- max(diff(plot.data[plot.data$SimulationName == tree.data$SimulationName[i],]$x))
-        tree.data$x[i] <- tree.data$x[i] - cellWidth / 2
-        tree.data$y[i] <- tree.data$y[i] - cellWidth / 2
       }
     }
 
@@ -308,7 +304,7 @@ plot_hisafe_monthcells <- function(hop,
     scale_x_continuous(expand = c(0,0)) +
     scale_y_continuous(expand = c(0,0)) +
     facet_grid(reformulate(colfacet, rowfacet), switch = "both") +
-    geom_tile(aes_string(fill = variable), na.rm = TRUE, color = "black") +
+    geom_raster(aes_string(fill = variable), na.rm = TRUE, hjust = 1, vjust = 1) +
     viridis::scale_fill_viridis(option = "magma") +
     guides(fill = guide_colourbar(barwidth    = 15,
                                   barheight   = 1.5,
@@ -414,10 +410,6 @@ plot_hisafe_annualcrop <- function(hop,
       if(tree.data$x[i] == 0 & tree.data$y[i] == 0){
         tree.data$x[i] <- tree.data$x[i] + tree.data$x.center[i]
         tree.data$y[i] <- tree.data$y[i] + tree.data$y.center[i]
-      } else {
-        cellWidth <- max(diff(plot.data[plot.data$SimulationName == tree.data$SimulationName[i],]$x))
-        tree.data$x[i] <- tree.data$x[i] - cellWidth / 2
-        tree.data$y[i] <- tree.data$y[i] - cellWidth / 2
       }
     }
 
@@ -433,7 +425,6 @@ plot_hisafe_annualcrop <- function(hop,
     }
   }
 
-  ## Create plot
   plot.obj <- ggplot(plot.data, aes(x = x, y = y)) +
     labs(x     = "SimulationName",
          y     = "Year",
@@ -442,7 +433,7 @@ plot_hisafe_annualcrop <- function(hop,
     scale_x_continuous(expand = c(0, 0)) +
     scale_y_continuous(expand = c(0, 0)) +
     facet_grid(Year ~ SimulationName, switch = "both") +
-    geom_tile(aes_string(fill = variable), na.rm = TRUE, color = "black") +
+    geom_raster(aes_string(fill = variable), na.rm = TRUE, hjust = 1, vjust = 1) +
     viridis::scale_fill_viridis(option = "magma") +
     guides(fill = guide_colourbar(barwidth    = 15,
                                   barheight   = 1.5,
@@ -489,11 +480,14 @@ plot_hisafe_annualcrop <- function(hop,
 #' @param hop An object of class hop.
 #' @param variable A character string of the name of the variable to color the tiles.
 #' @param dates A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates to include.
+#' @param rel.dates A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates from which to scale \code{variable}.
+#' In the plot, \code{variable} will be scaled to be between the minimum and maximum values of \code{variable} across these dates.
 #' @param simu.names A character string containing the SimulationNames to include. Use "all" to include all available values.
 #' @param plot.x Either "x" or "y", indicating which axis of the simulation scene should be plotted on the x-axis of the plot.
 #' @param trees Logical indicating if a point should be plotted at the location of each tree.
 #' @param canopies Logical indicating if an elipsoid should be plotted representing the size of each tree canopy.
 #' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.
+#' @param for.anim If \code{TRUE}, the plot formatting is simplified for use in animations.
 #' @export
 #' @importFrom dplyr %>%
 #' @import ggplot2
@@ -513,26 +507,35 @@ plot_hisafe_annualcrop <- function(hop,
 plot_hisafe_cells <- function(hop,
                               variable,
                               dates,
+                              rel.dates  = NULL,
                               simu.names = "all",
                               plot.x     = "x",
                               trees      = TRUE,
                               canopies   = TRUE,
-                              plot       = TRUE) {
+                              plot       = TRUE,
+                              for.anim   = FALSE) {
 
   is_hop(hop, error = TRUE)
   profile_check(hop,  "cells", error = TRUE)
   variable_check(hop, "cells", variable, error = TRUE)
 
-  if(dates[1] == "all") dates <- unique(hop$cells$Date)
+  if(length(variable) > 1)  stop("variable argument must be a character vector of length 1", call. = FALSE)
+  if(!is.logical(trees))    stop("trees argument must be a logical",                         call. = FALSE)
+  if(!is.logical(canopies)) stop("canopies argument must be a logical",                      call. = FALSE)
+  if(!is.logical(plot))     stop("plot argument must be a logical",                          call. = FALSE)
 
-  if(length(variable) > 1)                              stop("variable argument must be a character vector of length 1", call. = FALSE)
-  if(!(is.character(dates) | "Date" %in% class(dates))) stop("dates argument must be 'all' or a character vector
-                                                             in the format 'YYYY-MM-DD' or a vecotr of class Date",      call. = FALSE)
-  if(!is.logical(trees))                                stop("trees argument must be a logical",                         call. = FALSE)
-  if(!is.logical(canopies))                             stop("canopies argument must be a logical",                      call. = FALSE)
-  if(!is.logical(plot))                                 stop("plot argument must be a logical",                          call. = FALSE)
+  hop.full <- hop_filter(hop        = hop,
+                         simu.names = simu.names,
+                         dates      = rel.dates)
+  hop      <- hop_filter(hop        = hop,
+                         simu.names = simu.names,
+                         dates      = dates)
 
-  hop <- hop_filter(hop = hop, simu.names = simu.names, dates = lubridate::ymd(dates))
+  X.MIN <- Y.MIN <- 0
+  X.MAX <- Y.MAX <- max(hop$plot.info$plotWidth)
+
+  ## Extract variable range over rel.dates to set scale
+  value.range <- range(hop.full$cells[[variable]], na.rm = TRUE)
 
   plot.data <- hop$cells
   if(nrow(plot.data) == 0) return(FALSE)
@@ -547,10 +550,6 @@ plot_hisafe_cells <- function(hop,
       if(tree.data$x[i] == 0 & tree.data$y[i] == 0){
         tree.data$x[i] <- tree.data$x[i] + tree.data$x.center[i]
         tree.data$y[i] <- tree.data$y[i] + tree.data$y.center[i]
-      } else {
-        cellWidth <- max(diff(plot.data[plot.data$SimulationName == tree.data$SimulationName[i],]$x))
-        tree.data$x[i] <- tree.data$x[i] - cellWidth / 2
-        tree.data$y[i] <- tree.data$y[i] - cellWidth / 2
       }
     }
 
@@ -570,7 +569,11 @@ plot_hisafe_cells <- function(hop,
   } else if(length(dates) > 1) {
     facet_cells <- facet_wrap(~Date)
   } else if("hop-group" %in% class(hop)) {
-    facet_cells <- facet_wrap(~SimulationName)
+    if(for.anim) {
+      facet_cells <- facet_wrap(~SimulationName, nrow = 1, strip.position = "bottom")
+    } else {
+      facet_cells <- facet_wrap(~SimulationName)
+    }
   } else {
     facet_cells <- geom_blank()
   }
@@ -587,27 +590,64 @@ plot_hisafe_cells <- function(hop,
     Y <- -tree.data$x
     tree.data$x <- X
     tree.data$y <- Y
+    ir <- tree.data$crownRadiusInterRow
+    tl <- tree.data$crownRadiusTreeLine
+    tree.data$crownRadiusInterRow <- tl
+    tree.data$crownRadiusTreeLine <- ir
     x.lab       <- "Y (m)"
     y.lab       <- "-X (m)"
   }
 
-  ## Create plot
+  if(for.anim) {
+    ## Modify plot limits if tree crowns grow beyond edge of scene
+    tree.rad <- hop.full$trees %>%
+      dplyr::left_join(hop.full$tree.info, by = c("SimulationName", "id")) %>%
+      dplyr::group_by(SimulationName, id, x, y) %>%
+      dplyr::summarize(ir.radius.max = max(crownRadiusInterRow),
+                       tl.radius.max = max(crownRadiusTreeLine)) %>%
+      dplyr::mutate(ir.min = x - ir.radius.max,
+                    ir.max = x + ir.radius.max,
+                    tl.min = y + tl.radius.max,
+                    tl.max = y + tl.radius.max)
+    X.MIN <- min(X.MIN, min(tree.rad$ir.min))
+    X.MAX <- max(X.MAX, max(tree.rad$ir.max))
+    Y.MIN <- min(Y.MIN, min(tree.rad$tl.min))
+    Y.MAX <- max(Y.MAX, max(tree.rad$tl.max))
+
+    plot.labs <- labs(x = x.lab,
+                      y = y.lab)
+    plot.theme <- theme_bw(base_size = 18) +
+      theme(panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            axis.line        = element_blank(),
+            axis.text        = element_text(color = "black"),
+            axis.title.x     = element_text(vjust = -1, size = 30),
+            axis.title.y     = element_text(vjust = 2,  size = 30),
+            strip.background = element_blank(),
+            strip.text       = element_blank())
+    plot.guide <- guides(fill = FALSE)
+  } else {
+    plot.labs <- labs(x     = x.lab,
+                      y     = y.lab,
+                      title = title.lab)
+    plot.theme <- theme_hisafe_tile()
+    plot.guide <- guides(fill = guide_colourbar(title       = get_units(hop, "cells", variable),
+                                                barwidth    = 15,
+                                                barheight   = 1.5,
+                                                title.vjust = 0.8,
+                                                nbin        = 100))
+  }
+
   plot.obj <- ggplot(plot.data, aes(x = x, y = y)) +
-    labs(x     = x.lab,
-         y     = y.lab,
-         fill  = get_units(hop, "cells", variable),
-         title = title.lab) +
-    scale_x_continuous(expand = c(0,0)) +
-    scale_y_continuous(expand = c(0,0)) +
+    plot.labs +
+    scale_x_continuous(expand = c(0,0), limits = c(X.MIN, X.MAX)) +
+    scale_y_continuous(expand = c(0,0), limits = c(Y.MIN, Y.MAX)) +
     facet_cells +
-    geom_tile(aes_string(fill = variable), na.rm = TRUE, color = "black") + # , linetype = cropType
-    viridis::scale_fill_viridis(option = "magma") +
-    guides(fill = guide_colourbar(barwidth    = 15,
-                                  barheight   = 1.5,
-                                  title.vjust = 0.8,
-                                  nbin        = 100)) +
+    geom_raster(aes_string(fill = variable), na.rm = TRUE, hjust = 1, vjust = 1) +
+    viridis::scale_fill_viridis(option = "magma", limits = value.range) +
+    plot.guide +
     coord_equal() +
-    theme_hisafe_tile()
+    plot.theme
 
   if(trees & nrow(hop$tree.info) > 0) {
     plot.obj <- plot.obj +
@@ -651,6 +691,7 @@ plot_hisafe_cells <- function(hop,
 #' If \code{NA}, the default, than the minimum value in the voxels profile is used
 #' @param date.max A character vector containing the minimum date (yyyy-mm-dd) to include.
 #' If \code{NA}, the default, than the maximum value in the voxels profile is used
+#' @param simu.names A character string containing the SimulationNames to include. Use "all" to include all available values.
 #' @param x A numeric vector of the x values of the voxels to include. If \code{NA}, the default, then all x values are used.
 #' @param y A numeric vector of the y values of the voxels to include. If \code{NA}, the default, then all y values are used.
 #' @param z A numeric vector of the z values of the voxels to include. If \code{NA}, the default, then all z values are used.
@@ -679,6 +720,7 @@ plot_hisafe_voxels <- function(hop,
                                variable,
                                date.min     = NA,
                                date.max     = NA,
+                               simu.names   = "all",
                                X            = NA,
                                Y            = NA,
                                Z            = NA,
@@ -687,38 +729,33 @@ plot_hisafe_voxels <- function(hop,
                                plot         = TRUE) {
 
   is_hop(hop, error = TRUE)
-  profile_check(hop, "voxels", error = TRUE)
+  profile_check(hop,  "voxels", error = TRUE)
   variable_check(hop, "voxels", variable, error = TRUE)
 
-  if(nrow(hop$plot.info) == 0)                                               stop("plot.info is unavilable in hop and is required",           call. = FALSE)
-  if(length(variable) > 1)                                                   stop("variable argument must be a character vector of length 1", call. = FALSE)
-  if(!((is.na(date.min) | is.character(date.min)) & length(date.min) == 1))  stop("date.min must be a character vector of length 1",          call. = FALSE)
-  if(!((is.na(date.max) | is.character(date.max)) & length(date.max) == 1))  stop("date.max must be a character vector of length 1",          call. = FALSE)
-  if(!(all(is.na(X)) | is.numeric(X)))                                       stop("X must be numeric",                                        call. = FALSE)
-  if(!(all(is.na(Y)) | is.numeric(Y)))                                       stop("Y must be numeric",                                        call. = FALSE)
-  if(!(all(is.na(Z)) | is.numeric(Z)))                                       stop("Z must be numeric",                                        call. = FALSE)
-  if(!((summarize.by %in% c("x", "y", "z")) | is.na(summarize.by)))          stop("summarize.by must be one of 'x', 'y', or 'z'",             call. = FALSE)
-  if(!(all(is.na(vline.dates)) | is.character(vline.dates)))                 stop("vline.dates must be a character vector",                   call. = FALSE)
-  if(!is.logical(plot))                                                      stop("plot argument must be a logical",                          call. = FALSE)
-  if(length(unique(hop$plot.info$soilDepth)) > 1) warning("maximum soil depth is not consistent across all simluations within the hop",       call. = FALSE)
+  if(nrow(hop$plot.info) == 0)                                      stop("plot.info is unavilable in hop and is required",           call. = FALSE)
+  if(length(variable) > 1)                                          stop("variable argument must be a character vector of length 1", call. = FALSE)
+  if(!(all(is.na(X)) | is.numeric(X)))                              stop("X must be numeric",                                        call. = FALSE)
+  if(!(all(is.na(Y)) | is.numeric(Y)))                              stop("Y must be numeric",                                        call. = FALSE)
+  if(!(all(is.na(Z)) | is.numeric(Z)))                              stop("Z must be numeric",                                        call. = FALSE)
+  if(!((summarize.by %in% c("x", "y", "z")) | is.na(summarize.by))) stop("summarize.by must be one of 'x', 'y', or 'z'",             call. = FALSE)
+  if(!(all(is.na(vline.dates)) | is.character(vline.dates)))        stop("vline.dates must be a character vector",                   call. = FALSE)
+  if(!is.logical(plot))                                             stop("plot argument must be a logical",                          call. = FALSE)
+  if(length(unique(hop$plot.info$soilDepth)) > 1) warning("maximum soil depth is not consistent across all simluations within the hop", call. = FALSE)
 
-  ## Filter for provided dates & voxels
-  if(is.na(date.min)) date.min <- min(hop$voxels$Date)
-  if(is.na(date.max)) date.max <- max(hop$voxels$Date)
-  if(is.na(X))        X <-        unique(hop$voxels$x)
-  if(is.na(Y))        Y <-        unique(hop$voxels$y)
-  if(is.na(Z))        Z <-        unique(hop$voxels$z)
+  if(is.na(X)) X <- unique(hop$voxels$x)
+  if(is.na(Y)) Y <- unique(hop$voxels$y)
+  if(is.na(Z)) Z <- unique(hop$voxels$z)
   if(!all(X %in% unique(hop$voxels$x))) stop("one or more values of X are not present in the voxel profile", call. = FALSE)
   if(!all(Y %in% unique(hop$voxels$y))) stop("one or more values of Y are not present in the voxel profile", call. = FALSE)
   if(!all(Z %in% unique(hop$voxels$z))) stop("one or more values of Z are not present in the voxel profile", call. = FALSE)
 
+  hop <- hop_filter(simu.names = simu.names, date.min = date.min, date.max = date.max)
+
   plot.data <- hop$voxels %>%
     dplyr::select(SimulationName, Date, id, x, y, z, variable) %>%
-    dplyr::filter(Date  >=  lubridate::ymd(date.min),
-                  Date  <=  lubridate::ymd(date.max),
-                  x    %in% X,
-                  y    %in% Y,
-                  z    %in% Z)
+    dplyr::filter(x %in% X,
+                  y %in% Y,
+                  z %in% Z)
 
   ## Determine faceting & axis labels
   if(summarize.by %in% c("x", "y", "z")) {
@@ -742,7 +779,6 @@ plot_hisafe_voxels <- function(hop,
 
   plot.data[[summarize.by]] <- factor(plot.data[[summarize.by]])
 
-  ## Create plot
   plot.obj <- ggplot(plot.data, aes_string(x = "Date", y = variable, color = summarize.by, linetype = summarize.by, group = group.by)) +
     labs(x        = "Date",
          y        = paste0(variable, " (", get_units(hop, "voxels", variable), ")"),

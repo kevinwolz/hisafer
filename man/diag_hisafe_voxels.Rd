@@ -10,7 +10,7 @@ diag_hisafe_voxels(hop, output.path = NULL, ...)
 \item{hop}{An object of class "hop" or "face" containing output data from one or more Hi-sAFe simulations.}
 
 \item{output.path}{A character stting indicating the path to the directory where plots should be saved.
-Plots aresaved in a subdirectory within this directory named by \code{profile}.
+Plots are saved in a subdirectory within this directory named by \code{profile}.
 If no value is provided, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis/diagnostics".}
 
 \item{...}{Other arguments passed to \code{\link{plot_hisafe_voxels}}.}

@@ -83,8 +83,12 @@ read_hisafe <- function(hip           = NULL,
     } else if(simu.names[1] == "all" & !file.exists(exp.summary.file)){
       stop("simu.names argument can only be 'all' if hip is provided or if an experiment summary file is available in the experiment folder")
     } else if(simu.names[1] != "all" & file.exists(exp.summary.file)){
-      EXP.PLAN <- readr::read_csv(exp.summary.file, col_types = readr::cols()) %>%
-        dplyr::filter(SimulationName %in% simu.names)
+      EXP.PLAN <- readr::read_csv(exp.summary.file, col_types = readr::cols())
+      if(!all(simu.names %in% EXP.PLAN$SimulationName)) {
+        missing_simus <- simu.names[!(simu.names %in% EXP.PLAN$SimulationName)]
+        stop(paste("the following simulations do not exist in the experiment summary file:", paste(missing_simus, collapse = ", ")), call. = FALSE)
+      }
+      EXP.PLAN <- dplyr::filter(EXP.PLAN, SimulationName %in% simu.names)
       simu.names <- EXP.PLAN$SimulationName
     } else if(length(simu.names) == 1) {
       EXP.PLAN <- dplyr::tibble(SimulationName = simu.names)

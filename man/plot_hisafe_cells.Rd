@@ -4,8 +4,9 @@
 \alias{plot_hisafe_cells}
 \title{Tile plot of Hi-sAFe cells output variable}
 \usage{
-plot_hisafe_cells(hop, variable, dates, simu.names = "all", plot.x = "x",
-  trees = TRUE, canopies = TRUE, plot = TRUE)
+plot_hisafe_cells(hop, variable, dates, rel.dates = NULL,
+  simu.names = "all", plot.x = "x", trees = TRUE, canopies = TRUE,
+  plot = TRUE, for.anim = FALSE)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -13,6 +14,9 @@ plot_hisafe_cells(hop, variable, dates, simu.names = "all", plot.x = "x",
 \item{variable}{A character string of the name of the variable to color the tiles.}
 
 \item{dates}{A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates to include.}
+
+\item{rel.dates}{A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates from which to scale \code{variable}.
+In the plot, \code{variable} will be scaled to be between the minimum and maximum values of \code{variable} across these dates.}
 
 \item{simu.names}{A character string containing the SimulationNames to include. Use "all" to include all available values.}
 
@@ -23,6 +27,8 @@ plot_hisafe_cells(hop, variable, dates, simu.names = "all", plot.x = "x",
 \item{canopies}{Logical indicating if an elipsoid should be plotted representing the size of each tree canopy.}
 
 \item{plot}{If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.}
+
+\item{for.anim}{If \code{TRUE}, the plot formatting is simplified for use in animations.}
 }
 \value{
 Returns a ggplot object.

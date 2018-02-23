@@ -12,11 +12,11 @@ hop_filter(hop, simu.names = "all", tree.ids = "all", date.min = NA,
 
 \item{simu.names}{A character vector of the SimulationNames to keep. If "all", no filtering occurs.}
 
-\item{date.min}{A character string of the minimum date to keep, in the format "YYYY-MM-DD".
-If NA, the minimum date in the output data is used. Only used if \code{dates} is \code{NULL}.}
+\item{date.min}{A character string of the minimum date to keep, in the format "YYYY-MM-DD" or of class Date.
+If NA, the minimum date in \code{hop} is used. Only used if \code{dates} is \code{NULL}.}
 
-\item{date.max}{A character string of the maximum date to keep, in the format "YYYY-MM-DD".
-If NA, the maximum date in the output data is used. Only used if \code{dates} is \code{NULL}.}
+\item{date.max}{A character string of the maximum date to keep, in the format "YYYY-MM-DD" or of class Date.
+If NA, the maximum date in \code{hop} is used. Only used if \code{dates} is \code{NULL}.}
 
 \item{dates}{A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates to keep.
 If \code{NULL}, then \code{date.max} and \code{date.min} are used instad.}

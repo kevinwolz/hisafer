@@ -4,8 +4,9 @@
 \alias{plot_hisafe_voxels}
 \title{Tile plot of Hi-sAFe voxels output variable}
 \usage{
-plot_hisafe_voxels(hop, variable, date.min = NA, date.max = NA, X = NA,
-  Y = NA, Z = NA, summarize.by = "z", vline.dates = NA, plot = TRUE)
+plot_hisafe_voxels(hop, variable, date.min = NA, date.max = NA,
+  simu.names = "all", X = NA, Y = NA, Z = NA, summarize.by = "z",
+  vline.dates = NA, plot = TRUE)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -17,6 +18,8 @@ If \code{NA}, the default, than the minimum value in the voxels profile is used}
 
 \item{date.max}{A character vector containing the minimum date (yyyy-mm-dd) to include.
 If \code{NA}, the default, than the maximum value in the voxels profile is used}
+
+\item{simu.names}{A character string containing the SimulationNames to include. Use "all" to include all available values.}
 
 \item{summarize.by}{One of 'x', 'y', or 'z', indicating  an axis over which to average voxel values.
 If \code{NA}, the default, then now averaging is done and each voxel is plotted as its own line.}
