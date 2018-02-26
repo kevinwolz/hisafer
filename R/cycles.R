@@ -75,14 +75,15 @@ plot_hisafe_cycle_annual <- function(hop,
   if(is.na(year.lim[2])) year.lim[2] <- max(plot.data$Year)
 
   ## Filter & Summarize plot data
+  complete.yrs <- plot.data %>%
+    dplyr::group_by(SimulationName, Year) %>%
+    dplyr::summarize(n = n() >= 365)
+
   plot.data <- plot.data %>%
     dplyr::filter(Year >= year.lim[1], Year <= year.lim[2]) %>%
-    dplyr::select(-Month, -Day, -Date, -JulianDay)
-
-  incomplete.yrs <- unique(plot.data$Year)[table(dplyr::filter(plot.data, flux == unique(flux)[1])$Year) / length(unique(plot.data$SimulationName)) < 365]
-
-  plot.data <- plot.data %>%
-    dplyr::filter(!(Year %in% incomplete.yrs)) %>%
+    dplyr::select(-Month, -Day, -Date, -JulianDay) %>%
+    dplyr::left_join(complete.yrs, by = c("SimulationName", "Year")) %>%
+    dplyr::filter(n) %>%
     dplyr::group_by(SimulationName, Year, flux)
 
   if(cycle == "carbon") {
@@ -312,11 +313,11 @@ get_water_fluxes <- function(hop) {
       #irrigationInInterCrop      = irrigationInInterCrop      * interCropArea / (mainCropArea + interCropArea),
       #interceptedRainByMainCrop  = interceptedRainByMainCrop  * mainCropArea  / (mainCropArea + interCropArea),
       #interceptedRainByInterCrop = interceptedRainByInterCrop * interCropArea / (mainCropArea + interCropArea),
-                  irrigation   = -irrigationInMainCrop     + -irrigationInInterCrop,
-                  aquifer      = -waterFromSaturation +
-                                 -waterExtractedInSaturationByMainCrop + -waterExtractedInSaturationByInterCrop + -waterExtractedInSaturationByTrees,
-                  interception = interceptedRainByMainCrop + interceptedRainByInterCrop + interceptedRainByTrees,
-                  evaporation  = waterEvaporatedInMainCrop + waterEvaporatedInInterCrop) %>%
+      irrigation   = -irrigationInMainCrop     + -irrigationInInterCrop,
+      aquifer      = -waterFromSaturation +
+        -waterExtractedInSaturationByMainCrop + -waterExtractedInSaturationByInterCrop + -waterExtractedInSaturationByTrees,
+      interception = interceptedRainByMainCrop + interceptedRainByInterCrop + interceptedRainByTrees,
+      evaporation  = waterEvaporatedInMainCrop + waterEvaporatedInInterCrop) %>%
     dplyr::left_join(climate, by = c("SimulationName", "Year", "Date")) %>%
     dplyr::mutate(precipitation = -precipitation) %>%
     dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay,

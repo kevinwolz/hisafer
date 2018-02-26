@@ -9,7 +9,7 @@ visual_legend(hop, vars, cells.var, trees, crops, voxels, cells)
 \arguments{
 \item{hop}{An object of class hop.}
 
-\item{vars}{A list of variable names. See \link{\code{hisafe_slice}} for details.}
+\item{vars}{A list of variable names. See \code{\link{hisafe_slice}} for details.}
 
 \item{trees}{Logical indicating whether or not to include trees.}
 

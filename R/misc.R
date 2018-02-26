@@ -301,7 +301,7 @@ hop_filter <- function(hop,
   ## id
   if(tree.ids[1] != "all") {
     profiles.to.check <- c("annualtree", "trees", "tree.info")
-    profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, profile_check, hop = hop)]
+    profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
     for(i in profiles) {
       if(!all(tree.ids %in% unique(hop[[i]]$id))) stop(paste0("one or more values of tree.id are not present in the ", i, " profile"), call. = FALSE)
       hop[[i]] <- dplyr::filter(hop[[i]], id %in% tree.ids)
@@ -310,7 +310,7 @@ hop_filter <- function(hop,
 
   ## Date
   profiles.to.check <- names(hop)[!(names(hop) %in% c("exp.plan", "variables", "exp.path", "tree.info", "plot.info", "path"))]
-  profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, profile_check, hop = hop)]
+  profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
 
   if(is.null(dates) & !is.na(date.min) & !is.na(date.max)) {
     date.min <- lubridate::ymd(date.min)

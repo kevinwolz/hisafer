@@ -89,8 +89,10 @@ hisafe_slice <- function(hop,
 
   ## Remove all exp.plan variables from hop profiles so that there are no redudant columns when merged with tree.info or plot.info
   for(p in c("annualplot", "annualtree", "annualcrop", "plot", "trees", "cells", "voxels", "climate", "monthCells")) {
-    keep.cols <- c(1, which(names(hop[[p]]) == "Date"):ncol(hop[[p]]))
-    hop[[p]] <- dplyr::select(hop[[p]], names(hop[[p]])[keep.cols])
+    if(nrow(hop[[p]]) > 0) {
+      keep.cols <- c(1, which(names(hop[[p]]) == "Date"):ncol(hop[[p]]))
+      hop[[p]] <- dplyr::select(hop[[p]], names(hop[[p]])[keep.cols])
+    }
   }
 
   ## Switch x-y if plot.x == "y"
@@ -135,9 +137,6 @@ hisafe_slice <- function(hop,
                     tree.ids   = tree.ids,
                     dates      = date)
 
-  circle.offset     <- min(hop.full$plot.info$cellWidth) / 4
-  circle.max.radius <- min(circle.offset, min(diff(unique(hop.full$voxels$z)))) * 0.9 / 2
-  circle.max.border <- 0.25
   rect.min.border   <- 0.25
   rect.max.border   <- 1
   arrow.length      <- min(hop.full$plot.info$cellWidth) / 4
@@ -146,6 +145,9 @@ hisafe_slice <- function(hop,
   Y.MAX             <- max(hop.full$trees$height, na.rm = TRUE) + arrow.length
   if(is.na(max.soil.depth)) max.soil.depth <- max(hop.full$plot.info$soilDepth)
   if(voxels) {
+    circle.offset     <- min(hop.full$plot.info$cellWidth) / 4
+    circle.max.radius <- min(circle.offset, min(diff(unique(hop.full$voxels$z)))) * 0.9 / 2
+    circle.max.border <- 0.25
     if(is.na(max.soil.depth)){
       Y.MIN <- -max(hop.full$plot.info$soilDepth)
     } else {
@@ -166,10 +168,14 @@ hisafe_slice <- function(hop,
     hop$tree.info$tree.pruning <- hop$tree.info$root.pruning <- 0
     hop$tree.info$root.pruning.distance <- hop$tree.info$root.pruning.depth <- hop$tree.info$tree.pruning.prop <- hop$tree.info$tree.pruning.max.height <- 0
     for(i in 1:nrow(hop$tree.info)) {
-      hop$tree.info$tree.pruning.dates[[i]] <- lubridate::ymd(paste0(hop$tree.info$treePruningYears[[i]] - 1 +
-                                                                       hop$tree.info$simulationYearStart[i], "-01-01")) + hop$tree.info$treePruningDays[[i]] - 1
-      hop$tree.info$root.pruning.dates[[i]] <- lubridate::ymd(paste0(hop$tree.info$treeRootPruningYears[[i]] - 1 +
-                                                                       hop$tree.info$simulationYearStart[i], "-01-01")) + hop$tree.info$treeRootPruningDays[[i]] - 1
+      if(!is.na(hop$tree.info$treePruningYears[[i]][1])) {
+        hop$tree.info$tree.pruning.dates[[i]] <- lubridate::ymd(paste0(hop$tree.info$treePruningYears[[i]] - 1 +
+                                                                         hop$tree.info$simulationYearStart[i], "-01-01")) + hop$tree.info$treePruningDays[[i]] - 1
+      }
+      if(!is.na(hop$tree.info$treeRootPruningYears[[i]][1])) {
+        hop$tree.info$root.pruning.dates[[i]] <- lubridate::ymd(paste0(hop$tree.info$treeRootPruningYears[[i]] - 1 +
+                                                                         hop$tree.info$simulationYearStart[i], "-01-01")) + hop$tree.info$treeRootPruningDays[[i]] - 1
+      }
       hop$tree.info$tree.pruning[i]         <- as.numeric(date %in% hop$tree.info$tree.pruning.dates[[i]])
       if(hop$tree.info$tree.pruning[i] == 1) {
         prune.id <- which(hop$tree.info$tree.pruning.dates[[i]] == date)
@@ -548,52 +554,52 @@ hisafe_slice <- function(hop,
                     alpha = voxel.alpha)) +
       ## CENTER CIRCLE
       ggforce::geom_circle(data  = voxel.data,
-                  color = "black",
-                  fill  = "white",
-                  aes(x0    = x,
-                      y0    = -z,
-                      size  = voxel.C.border,
-                      r     = voxel.C.size)) +
+                           color = "black",
+                           fill  = "white",
+                           aes(x0    = x,
+                               y0    = -z,
+                               size  = voxel.C.border,
+                               r     = voxel.C.size)) +
       ggforce::geom_circle(data  = voxel.data,
-                  color = "black",
-                  fill  = "black",
-                  aes(x0    = x,
-                      y0    = -z,
-                      size  = voxel.C.border,
-                      r     = voxel.C.size,
-                      alpha = voxel.C.alpha)) +
+                           color = "black",
+                           fill  = "black",
+                           aes(x0    = x,
+                               y0    = -z,
+                               size  = voxel.C.border,
+                               r     = voxel.C.size,
+                               alpha = voxel.C.alpha)) +
       ## LEFT CIRCLE
       ggforce::geom_circle(data  = voxel.data,
-                  color = "blue",
-                  fill  = "white",
-                  aes(x0    = x - circle.offset,
-                      y0    = -z,
-                      size  = voxel.L.border,
-                      r     = voxel.L.size)) +
+                           color = "blue",
+                           fill  = "white",
+                           aes(x0    = x - circle.offset,
+                               y0    = -z,
+                               size  = voxel.L.border,
+                               r     = voxel.L.size)) +
       ggforce::geom_circle(data  = voxel.data,
-                  color = "blue",
-                  fill  = "blue",
-                  aes(x0    = x - circle.offset,
-                      y0    = -z,
-                      size  = voxel.L.border,
-                      r     = voxel.L.size,
-                      alpha = voxel.L.alpha)) +
+                           color = "blue",
+                           fill  = "blue",
+                           aes(x0    = x - circle.offset,
+                               y0    = -z,
+                               size  = voxel.L.border,
+                               r     = voxel.L.size,
+                               alpha = voxel.L.alpha)) +
       ## RIGHT CIRCLE
       ggforce::geom_circle(data  = voxel.data,
-                  color = "green",
-                  fill  = "white",
-                  aes(x0    = x + circle.offset,
-                      y0    = -z,
-                      size  = voxel.R.border,
-                      r     = voxel.R.size)) +
+                           color = "green",
+                           fill  = "white",
+                           aes(x0    = x + circle.offset,
+                               y0    = -z,
+                               size  = voxel.R.border,
+                               r     = voxel.R.size)) +
       ggforce::geom_circle(data  = voxel.data,
-                  color = "green",
-                  fill  = "green",
-                  aes(x0    = x + circle.offset,
-                      y0    = -z,
-                      size  = voxel.R.border,
-                      r     = voxel.R.size,
-                      alpha = voxel.R.alpha)) +
+                           color = "green",
+                           fill  = "green",
+                           aes(x0    = x + circle.offset,
+                               y0    = -z,
+                               size  = voxel.R.border,
+                               r     = voxel.R.size,
+                               alpha = voxel.R.alpha)) +
       ## WATER TABLE
       geom_segment(color    = "blue",
                    linetype = "longdash",
@@ -608,7 +614,7 @@ hisafe_slice <- function(hop,
 }
 
 #' Create daily plots combining hisafe_slice() & plot_hisafe_cells()
-#' @description Creates daily plots combining \link{\code{hisafe_slice}} & \link{\code{plot_hisafe_cells}} and writes them to an output directory.
+#' @description Creates daily plots combining \code{\link{hisafe_slice}} & \code{\link{plot_hisafe_cells}} and writes them to an output directory.
 #' Requires the gtable package.
 #' This function creates the raw materials (daily images) for animations/videos of Hi-sAFe simulations.
 #' @return Invisibly returns \code{output.path} so that this can be easily supplied to other functions to manipulate the images.
@@ -616,25 +622,27 @@ hisafe_slice <- function(hop,
 #' @param output.path A character stting indicating the path to the directory where plots should be saved.
 #' If no value is provided, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis/snapshots".
 #' @param file.prefix A character string of the prefix with which to name each plot file. File names will be this prefix appended with the date.
-#' @param cells.var A character string of the name of the variable to pass to \link{\code{plot_hisafe_cells}}.
+#' @param cells.var A character string of the name of the variable to pass to \code{\link{plot_hisafe_cells}}.
 #' @param date.min A character string of the minimum date to plot, in the format "YYYY-MM-DD" or of class Date.
 #' If NA, the minimum date in \code{hop} is used. Only used if \code{dates} is \code{NULL}.
 #' @param date.max A character string of the maximum date to plot, in the format "YYYY-MM-DD" or of class Date.
 #' If NA, the maximum date in \code{hop} is used. Only used if \code{dates} is \code{NULL}.
 #' @param dates A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates to plot.
 #' If \code{NULL}, then \code{date.max} and \code{date.min} are used instad.
+#' @param rel.dates A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates from which to scale all variables.
+#' In the plot, all variables will be scaled to be between their minimum and maximum values across these dates.
 #' @param simu.names A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.
 #' @param plot.x Either "x" or "y", indicating which axis of the Hi-sAFe scene should be plotted along the x-axis of the plot.
-#' This will be applied to the plots from both \link{\code{hisafe_slice}} and \link{\code{plot_hisafe_cells}}.
-#' @param slice A logical indicating whether the plot from \link{\code{hisafe_slice}} should be included.
-#' @param trees A logical indicating whether to plot trees via \link{\code{plot_hisafe_cells}}.
-#' @param crops A logical indicating whether to plot crops via \link{\code{plot_hisafe_cells}}.
-#' @param voxels A logical indicating whether to plot voxels via \link{\code{plot_hisafe_cells}}.
-#' @param cells A logical indicating whether the plot from \link{\code{plot_hisafe_cells}} should be included.
+#' This will be applied to the plots from both \code{\link{hisafe_slice}} and \code{\link{plot_hisafe_cells}}.
+#' @param slice A logical indicating whether the plot from \code{\link{hisafe_slice}} should be included.
+#' @param trees A logical indicating whether to plot trees via \code{\link{plot_hisafe_cells}}.
+#' @param crops A logical indicating whether to plot crops via \code{\link{plot_hisafe_cells}}.
+#' @param voxels A logical indicating whether to plot voxels via \code{\link{plot_hisafe_cells}}.
+#' @param cells A logical indicating whether the plot from \code{\link{plot_hisafe_cells}} should be included.
 #' @param device Graphical device to use for output files. See ggplot2::ggsave().
 #' @param dpi Resolution of output files. See ggplot2::ggsave().
-#' @param vars A list of variable names passed to \link{\code{hisafe_slice}}. See \link{\code{hisafe_slice}} for details.
-#' @param ... Other arguments passed to \link{\code{hisafe_slice}}.
+#' @param vars A list of variable names passed to \code{\link{hisafe_slice}}. See \code{\link{hisafe_slice}} for details.
+#' @param ... Other arguments passed to \code{\link{hisafe_slice}}.
 #' @export
 #' @importFrom dplyr %>%
 #' @import ggplot2
@@ -650,6 +658,7 @@ hisafe_snapshot <- function(hop,
                             date.min    = NA,
                             date.max    = NA,
                             dates       = NULL,
+                            rel.dates   = NULL,
                             simu.names  = "all",
                             plot.x      = "x",
                             slice       = TRUE,
@@ -702,7 +711,7 @@ hisafe_snapshot <- function(hop,
     if(slice) {
       slice.plot <- hisafe_slice(hop         = hop,
                                  date        = dates[i],
-                                 rel.dates   = dates,
+                                 rel.dates   = rel.dates,
                                  simu.names  = simu.names,
                                  trees       = trees,
                                  crops       = crops,
@@ -718,6 +727,7 @@ hisafe_snapshot <- function(hop,
       cells.plot <- plot_hisafe_cells(hop        = hop,
                                       variable   = cells.var,
                                       dates      = dates[i],
+                                      rel.dates  = rel.dates,
                                       simu.names = simu.names,
                                       plot.x     = plot.x,
                                       for.anim   = TRUE) +
@@ -746,7 +756,7 @@ hisafe_snapshot <- function(hop,
 #' @description Creates a legend for hisafe_visual().
 #' @return A ggplot object containing the legend.
 #' @param hop An object of class hop.
-#' @param vars A list of variable names. See \link{\code{hisafe_slice}} for details.
+#' @param vars A list of variable names. See \code{\link{hisafe_slice}} for details.
 #' @param trees Logical indicating whether or not to include trees.
 #' @param crops Logical indicating whether or not to include crops.
 #' @param voxels Logical indicating whether or not to include voxels.
@@ -956,13 +966,13 @@ visual_legend <- function(hop, vars, cells.var, trees, crops, voxels, cells) {
                        yend = -z - voxel.height / 2)) +
       ## CENTER CIRCLE
       ggforce::geom_circle(data  = voxel.data,
-                  color = "black",
-                  fill  = "black",
-                  size  = border.thickness,
-                  aes(x0    = x,
-                      y0    = -z - voxel.height / 2,
-                      r     = voxel.C.size,
-                      alpha = voxel.C.alpha)) +
+                           color = "black",
+                           fill  = "black",
+                           size  = border.thickness,
+                           aes(x0    = x,
+                               y0    = -z - voxel.height / 2,
+                               r     = voxel.C.size,
+                               alpha = voxel.C.alpha)) +
       geom_text(data  = voxel.data,
                 hjust = 0.5,
                 size  = text.size,
@@ -1012,13 +1022,13 @@ visual_legend <- function(hop, vars, cells.var, trees, crops, voxels, cells) {
                        yend = -z - voxel.height / 2 + 0.025)) +
       ## LEFT CIRCLE
       ggforce::geom_circle(data  = voxel.data,
-                  color = "blue",
-                  fill  = "blue",
-                  size  = border.thickness,
-                  aes(x0    = x - circle.offset,
-                      y0    = -z - voxel.height / 2,
-                      r     = voxel.L.size,
-                      alpha = voxel.L.alpha)) +
+                           color = "blue",
+                           fill  = "blue",
+                           size  = border.thickness,
+                           aes(x0    = x - circle.offset,
+                               y0    = -z - voxel.height / 2,
+                               r     = voxel.L.size,
+                               alpha = voxel.L.alpha)) +
       geom_text(data  = voxel.data,
                 hjust = 0.5,
                 size  = text.size,
@@ -1068,13 +1078,13 @@ visual_legend <- function(hop, vars, cells.var, trees, crops, voxels, cells) {
                        yend = -z - voxel.height / 2 + 0.025)) +
       ## RIGHT CIRCLE
       ggforce::geom_circle(data  = voxel.data,
-                  color = "green",
-                  fill  = "green",
-                  size  = border.thickness,
-                  aes(x0    = x + circle.offset,
-                      y0    = -z - voxel.height / 2,
-                      r     = voxel.R.size,
-                      alpha = voxel.R.alpha)) +
+                           color = "green",
+                           fill  = "green",
+                           size  = border.thickness,
+                           aes(x0    = x + circle.offset,
+                               y0    = -z - voxel.height / 2,
+                               r     = voxel.R.size,
+                               alpha = voxel.R.alpha)) +
       geom_text(data  = voxel.data,
                 hjust = 0.5,
                 size  = text.size,

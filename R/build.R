@@ -2,6 +2,7 @@
 #' @description Builds a Hi-sAFe simulation or experiment (a group of simulations) - creates the folder structure and input files.
 #' @return Invisibly returns a list containing the original hip object.
 #' @param hip An object of class "hip". To create a hip object see \code{\link{define_hisafe}}.
+#' @param plot.scene Logical indicating whether \code{\link{plot_hisafe_scene}} should be used to export plots of each scene during the build.
 #' @export
 #' @importFrom dplyr %>%
 #' @family hisafe build functions
@@ -19,7 +20,7 @@
 #' # Building the experiment folder structure & files:
 #' build_hisafe(myexp)
 #' }
-build_hisafe <- function(hip) {
+build_hisafe <- function(hip, plot.scene = TRUE) {
   is_hip(hip, error = TRUE)
 
   EXP.PLAN <- hip$exp.plan
@@ -62,10 +63,12 @@ build_hisafe <- function(hip) {
               profiles = hip$profiles,
               template = hip$template)
 
-  purrr::walk2(as.list(unique(EXP.PLAN$SimulationName)),
-               as.list(clean_path(paste0(hip$path, "/", EXP.PLAN$SimulationName))),
-               plot_hisafe_scene,
-               hip = hip)
+  if(plot.scene) {
+    purrr::walk2(as.list(unique(EXP.PLAN$SimulationName)),
+                 as.list(clean_path(paste0(hip$path, "/", EXP.PLAN$SimulationName))),
+                 plot_hisafe_scene,
+                 hip = hip)
+  }
 
   invisible(hip)
 }
