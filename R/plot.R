@@ -290,7 +290,7 @@ plot_hisafe_monthcells <- function(hop,
         dplyr::filter(Year  %in% years) %>%
         dplyr::filter(Month %in% months) %>%
         dplyr::filter(Day == 1) %>%
-        dplyr::select(SimulationName, Date, id, crownRadiusInterRow, crownRadiusTreeLine) %>%
+        dplyr::select(SimulationName, Date, Year, Month, Day, id, crownRadiusInterRow, crownRadiusTreeLine) %>%
         dplyr::left_join(tree.data, by = c("SimulationName", "id"))
     }
   }
@@ -532,7 +532,11 @@ plot_hisafe_cells <- function(hop,
                          dates      = dates)
 
   X.MIN <- Y.MIN <- 0
-  X.MAX <- Y.MAX <- max(hop$plot.info$plotWidth)
+  X.MAX <- max(hop$plot.info$plotWidth)
+  Y.MAX <- max(hop$plot.info$plotHeight)
+
+  plot.height <- Y.MAX - Y.MIN
+  plot.width  <- X.MAX - X.MIN
 
   ## Extract variable range over rel.dates to set scale
   value.range <- range(hop.full$cells[[variable]], na.rm = TRUE)
@@ -599,25 +603,38 @@ plot_hisafe_cells <- function(hop,
   }
 
   if(for.anim) {
-    ## Modify plot limits if tree crowns grow beyond edge of scene
-    tree.rad <- hop.full$trees %>%
-      dplyr::left_join(hop.full$tree.info, by = c("SimulationName", "id")) %>%
-      dplyr::group_by(SimulationName, id, x, y) %>%
-      dplyr::summarize(ir.radius.max = max(crownRadiusInterRow),
-                       tl.radius.max = max(crownRadiusTreeLine)) %>%
-      dplyr::mutate(ir.min = x - ir.radius.max,
-                    ir.max = x + ir.radius.max,
-                    tl.min = y + tl.radius.max,
-                    tl.max = y + tl.radius.max)
-    X.MIN <- min(X.MIN, min(tree.rad$ir.min))
-    X.MAX <- max(X.MAX, max(tree.rad$ir.max))
-    Y.MIN <- min(Y.MIN, min(tree.rad$tl.min))
-    Y.MAX <- max(Y.MAX, max(tree.rad$tl.max))
+    ## Add phantom trees if tree crowns grow beyond edge of scene
+    phantom.data.x <- tree.data %>%
+      dplyr::group_by(SimulationName, Date, id) %>%
+      dplyr::mutate(pos = (x - crownRadiusInterRow) < X.MIN) %>%
+      dplyr::mutate(neg = (x + crownRadiusInterRow) > X.MAX) %>%
+      dplyr::select(SimulationName, Date, id, pos, neg) %>%
+      tidyr::gather(key = "side", value = "phantom", pos, neg) %>%
+      dplyr::mutate(side = as.numeric(as.character(factor(side, levels = c("neg", "pos"), labels = c("-1", "1"))))) %>%
+      dplyr::filter(phantom) %>%
+      dplyr::left_join(tree.data, by = c("SimulationName", "Date", "id")) %>%
+      dplyr::mutate(x = x + plot.width * side) %>%
+      dplyr::select(-side, -phantom)
+
+    phantom.data.y <- tree.data %>%
+      dplyr::group_by(SimulationName, Date, id) %>%
+      dplyr::mutate(pos = (y - crownRadiusTreeLine) < Y.MIN) %>%
+      dplyr::mutate(neg = (y + crownRadiusTreeLine) > Y.MAX) %>%
+      dplyr::select(SimulationName, Date, id, pos, neg) %>%
+      tidyr::gather(key = "side", value = "phantom", pos, neg) %>%
+      dplyr::mutate(side = as.numeric(as.character(factor(side, levels = c("neg", "pos"), labels = c("-1", "1"))))) %>%
+      dplyr::filter(phantom) %>%
+      dplyr::left_join(tree.data, by = c("SimulationName", "Date", "id")) %>%
+      dplyr::mutate(y = y + plot.height * side) %>%
+      dplyr::select(-side, -phantom)
+
+    tree.data <- dplyr::bind_rows(tree.data, phantom.data.x, phantom.data.y)
 
     plot.labs <- labs(x = x.lab,
                       y = y.lab)
     plot.theme <- theme_bw(base_size = 18) +
-      theme(panel.grid.major = element_blank(),
+      theme(panel.spacing    = unit(2, "lines"),
+            panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
             axis.line        = element_blank(),
             axis.text        = element_text(color = "black"),
@@ -640,13 +657,13 @@ plot_hisafe_cells <- function(hop,
 
   plot.obj <- ggplot(plot.data, aes(x = x, y = y)) +
     plot.labs +
-    scale_x_continuous(expand = c(0,0), limits = c(X.MIN, X.MAX)) +
-    scale_y_continuous(expand = c(0,0), limits = c(Y.MIN, Y.MAX)) +
     facet_cells +
     geom_raster(aes_string(fill = variable), na.rm = TRUE, hjust = 1, vjust = 1) +
     viridis::scale_fill_viridis(option = "magma", limits = value.range) +
     plot.guide +
-    coord_equal() +
+    coord_equal(xlim   = c(X.MIN, X.MAX),
+                ylim   = c(Y.MIN, Y.MAX),
+                expand = FALSE) +
     plot.theme
 
   if(trees & nrow(hop$tree.info) > 0) {

@@ -157,10 +157,12 @@ hisafe_slice <- function(hop,
   } else {
     Y.MIN <- 0
   }
-  plot.height <- Y.MAX - Y.MIN
 
-  X.MIN <- SOIL.MIN <- 0
-  X.MAX <- SOIL.MAX <- max(hop$plot.info$plotWidth)
+  X.MIN <- 0
+  X.MAX <- max(hop$plot.info$plotWidth)
+
+  plot.height <- Y.MAX - Y.MIN
+  plot.width  <- X.MAX - X.MIN
 
   ## Pruning
   if(trees) {
@@ -192,12 +194,9 @@ hisafe_slice <- function(hop,
       }
     }
 
-    hop$trees$crown.alpha <- hop$trees[[vars$crown.alpha]]
-    hop$trees$trunk.alpha <- hop$trees[[vars$trunk.alpha]]
-    hop.full$trees$crown.alpha <- hop.full$trees[[vars$crown.alpha]]
-    hop.full$trees$trunk.alpha <- hop.full$trees[[vars$trunk.alpha]]
-
     tree.max <- hop.full$trees %>%
+      dplyr::mutate(crown.alpha = .[[vars$crown.alpha]]) %>%
+      dplyr::mutate(trunk.alpha = .[[vars$trunk.alpha]]) %>%
       dplyr::group_by(SimulationName, Year, id) %>%
       dplyr::summarize(crown.alpha.max = max(crown.alpha),
                        trunk.alpha.max = max(trunk.alpha))
@@ -210,6 +209,8 @@ hisafe_slice <- function(hop,
       dplyr::select(SimulationName, Date, id, trunk.growth, crown.growth, height.growth)
 
     tree.data <- hop$trees %>%
+      dplyr::mutate(crown.alpha = .[[vars$crown.alpha]]) %>%
+      dplyr::mutate(trunk.alpha = .[[vars$trunk.alpha]]) %>%
       dplyr::left_join(tree.max,      by = c("SimulationName", "Year", "id")) %>%
       dplyr::left_join(hop$tree.info, by = c("SimulationName", "id")) %>%
       dplyr::left_join(tree.growth,   by = c("SimulationName", "Date", "id")) %>%
@@ -246,50 +247,49 @@ hisafe_slice <- function(hop,
                                 x              = c(trunk.data$L.x, trunk.data$R.x, trunk.data$T.x),
                                 y              = c(trunk.data$L.y, trunk.data$R.y, trunk.data$T.y))
 
-    ## Modify X.MIN and X.MAX if tree crowns grow beyond edge of scene
-    tree.rad <- hop.full$trees %>%
-      dplyr::left_join(hop$tree.info, by = c("SimulationName", "id")) %>%
-      dplyr::group_by(SimulationName, id, x) %>%
-      dplyr::summarize(crown.radius.max = max(crownRadiusInterRow)) %>%
-      dplyr::mutate(rad.min = x - crown.radius.max) %>%
-      dplyr::mutate(rad.max = x + crown.radius.max)
-    X.MIN <- min(X.MIN, min(tree.rad$rad.min))
-    X.MAX <- max(X.MAX, max(tree.rad$rad.max))
+    ## Add phantom trees if tree crowns grow beyond edge of scene
+    phantom.data <- tree.data %>%
+      dplyr::group_by(SimulationName, Date, id) %>%
+      dplyr::mutate(pos = (tree.x - crown.radius) < X.MIN) %>%
+      dplyr::mutate(neg = (tree.x + crown.radius) > X.MAX) %>%
+      dplyr::select(SimulationName, Date, id, pos, neg) %>%
+      tidyr::gather(key = "side", value = "phantom", pos, neg) %>%
+      dplyr::mutate(side = as.numeric(as.character(factor(side, levels = c("neg", "pos"), labels = c("-1", "1"))))) %>%
+      dplyr::filter(phantom) %>%
+      dplyr::left_join(tree.data, by = c("SimulationName", "Date", "id")) %>%
+      dplyr::mutate(tree.x = tree.x + plot.width * side) %>%
+      dplyr::select(-side, -phantom)
+
+    tree.data <- dplyr::bind_rows(tree.data, phantom.data)
   }
 
   if(crops) {
     cell.border.palette <- rep(c("#999999", "#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7"), 2)
 
-    hop$cells$crop.alpha  <- hop$cells[[vars$crop.alpha]]
-    hop$cells$yield.alpha <- hop$cells[[vars$yield.alpha]]
-    hop.full$cells$crop.alpha  <- hop.full$cells[[vars$crop.alpha]]
-    hop.full$cells$yield.alpha <- hop.full$cells[[vars$yield.alpha]]
-    hop.full$cells$fert.level  <- hop.full$cells$nitrogenFertilisation
-
     cell <- hop$cells %>%
+      dplyr::mutate(crop.alpha  = .[[vars$crop.alpha]]) %>%
+      dplyr::mutate(yield.alpha = .[[vars$yield.alpha]]) %>%
       dplyr::filter(y %in% Y.cells) %>%
       dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
-      dplyr::mutate(cell.height    = (biomass - yield) / biomass * height) %>%
-      dplyr::mutate(yield.height   = yield / biomass * height) %>%
+      dplyr::mutate(cell.height    = nan_to_zero((biomass - yield) / biomass * height)) %>%
+      dplyr::mutate(yield.height   = nan_to_zero(yield / biomass * height)) %>%
       dplyr::mutate(cell.color     = as.numeric(factor(phenologicStage))) %>%
       dplyr::mutate(fert.level     = nitrogenFertilisation) %>%
-      dplyr::select(SimulationName, Year, Date, x, cellWidth, cell.height, cell.color, crop.alpha, yield.alpha, yield.height, fert.level)
-    cell$cell.height[is.nan(cell$cell.height)]   <- 0
-    cell$yield.height[is.nan(cell$yield.height)] <- 0
-
-    cell <- cell %>%
+      dplyr::select(SimulationName, Year, Date, x, cellWidth, cell.height, cell.color, crop.alpha, yield.alpha, yield.height, fert.level) %>%
       dplyr::group_by(SimulationName, Year, Date, x, cellWidth) %>%
-      dplyr::summarize(cell.height   = mean(cell.height),
-                       yield.height  = mean(yield.height),
-                       cell.color    = round(median(cell.color)),
-                       crop.alpha    = sum(crop.alpha),
-                       yield.alpha   = sum(yield.alpha),
-                       fert.level    = sum(fert.level)) %>%
-      dplyr::ungroup()
-    cell$cell.color <- factor(cell$cell.color, labels = cell.border.palette[1:length(unique(cell$cell.color))])
-
+      dplyr::summarize(cell.height  = mean(cell.height),
+                       yield.height = mean(yield.height),
+                       cell.color   = round(median(cell.color)),
+                       crop.alpha   = sum(crop.alpha),
+                       yield.alpha  = sum(yield.alpha),
+                       fert.level   = sum(fert.level)) %>%
+      dplyr::ungroup() %>%
+      dplyr::mutate(cell.color = factor(cell.color, labels = cell.border.palette[1:length(unique(cell.color))]))
 
     cell.max <- hop.full$cells %>%
+      dplyr::mutate(crop.alpha  = .[[vars$crop.alpha]]) %>%
+      dplyr::mutate(yield.alpha = .[[vars$yield.alpha]]) %>%
+      dplyr::mutate(fert.level  = nitrogenFertilisation) %>%
       dplyr::filter(y %in% Y.cells) %>%
       dplyr::group_by(SimulationName, Year, Date, x) %>%
       dplyr::summarize(crop.alpha  = sum(crop.alpha),
@@ -303,34 +303,21 @@ hisafe_slice <- function(hop,
 
     cell.data <- cell %>%
       dplyr::left_join(cell.max, by = c("SimulationName", "Year")) %>%
-      dplyr::mutate(crop.alpha  = crop.alpha  / crop.alpha.max) %>%
-      dplyr::mutate(yield.alpha = yield.alpha / yield.alpha.max) %>%
-      dplyr::mutate(fert.level  = fert.level  / fert.level.max)
-
-    cell.data$crop.alpha[is.nan(cell.data$crop.alpha)]   <- 0
-    cell.data$yield.alpha[is.nan(cell.data$yield.alpha)] <- 0
-    cell.data$fert.level[is.nan(cell.data$fert.level)]   <- 0
+      dplyr::mutate(crop.alpha  = nan_to_zero(crop.alpha  / crop.alpha.max)) %>%
+      dplyr::mutate(yield.alpha = nan_to_zero(yield.alpha / yield.alpha.max)) %>%
+      dplyr::mutate(fert.level  = nan_to_zero(fert.level  / fert.level.max))
   }
 
   if(voxels) {
-    hop$voxels$voxel.alpha   <- hop$voxels[[vars$voxel.alpha]]
-    hop$voxels$voxel.border  <- hop$voxels[[vars$voxel.border]]
-    hop$voxels$voxel.L.size  <- hop$voxels[[vars$voxel.L.size]]
-    hop$voxels$voxel.C.size  <- hop$voxels[[vars$voxel.C.size]]
-    hop$voxels$voxel.R.size  <- hop$voxels[[vars$voxel.R.size]]
-    hop$voxels$voxel.L.alpha <- hop$voxels[[vars$voxel.L.alpha]]
-    hop$voxels$voxel.C.alpha <- hop$voxels[[vars$voxel.C.alpha]]
-    hop$voxels$voxel.R.alpha <- hop$voxels[[vars$voxel.R.alpha]]
-    hop.full$voxels$voxel.alpha   <- hop.full$voxels[[vars$voxel.alpha]]
-    hop.full$voxels$voxel.border  <- hop.full$voxels[[vars$voxel.border]]
-    hop.full$voxels$voxel.L.size  <- hop.full$voxels[[vars$voxel.L.size]]
-    hop.full$voxels$voxel.C.size  <- hop.full$voxels[[vars$voxel.C.size]]
-    hop.full$voxels$voxel.R.size  <- hop.full$voxels[[vars$voxel.R.size]]
-    hop.full$voxels$voxel.L.alpha <- hop.full$voxels[[vars$voxel.L.alpha]]
-    hop.full$voxels$voxel.C.alpha <- hop.full$voxels[[vars$voxel.C.alpha]]
-    hop.full$voxels$voxel.R.alpha <- hop.full$voxels[[vars$voxel.R.alpha]]
-
     voxel <- hop$voxels %>%
+      dplyr::mutate(voxel.alpha   = .[[vars$voxel.alpha]])   %>%
+      dplyr::mutate(voxel.border  = .[[vars$voxel.border]])  %>%
+      dplyr::mutate(voxel.L.size  = .[[vars$voxel.L.size]])  %>%
+      dplyr::mutate(voxel.C.size  = .[[vars$voxel.C.size]])  %>%
+      dplyr::mutate(voxel.R.size  = .[[vars$voxel.R.size]])  %>%
+      dplyr::mutate(voxel.L.alpha = .[[vars$voxel.L.alpha]]) %>%
+      dplyr::mutate(voxel.C.alpha = .[[vars$voxel.C.alpha]]) %>%
+      dplyr::mutate(voxel.R.alpha = .[[vars$voxel.R.alpha]]) %>%
       dplyr::filter(y %in% Y.voxels) %>%
       dplyr::filter(z <= abs(max.soil.depth)) %>%
       dplyr::select(SimulationName, Year, Date, x, z, voxel.alpha, voxel.border,
@@ -341,6 +328,14 @@ hisafe_slice <- function(hop,
       dplyr::ungroup()
 
     voxel.max <- hop.full$voxels %>%
+      dplyr::mutate(voxel.alpha   = .[[vars$voxel.alpha]])   %>%
+      dplyr::mutate(voxel.border  = .[[vars$voxel.border]])  %>%
+      dplyr::mutate(voxel.L.size  = .[[vars$voxel.L.size]])  %>%
+      dplyr::mutate(voxel.C.size  = .[[vars$voxel.C.size]])  %>%
+      dplyr::mutate(voxel.R.size  = .[[vars$voxel.R.size]])  %>%
+      dplyr::mutate(voxel.L.alpha = .[[vars$voxel.L.alpha]]) %>%
+      dplyr::mutate(voxel.C.alpha = .[[vars$voxel.C.alpha]]) %>%
+      dplyr::mutate(voxel.R.alpha = .[[vars$voxel.R.alpha]]) %>%
       dplyr::filter(y %in% Y.voxels) %>%
       dplyr::filter(z <= abs(max.soil.depth)) %>%
       dplyr::group_by(SimulationName, Year, Date, x, z) %>%
@@ -378,29 +373,25 @@ hisafe_slice <- function(hop,
 
   climate.data <- hop$climate %>%
     dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
-    dplyr::mutate(precip.magnitude = precipitation / max(hop.full$climate$precipitation)) %>%
+    dplyr::mutate(precip.magnitude = nan_to_zero(precipitation / max(hop.full$climate$precipitation))) %>%
     dplyr::mutate(soilDepth        = -soilDepth) %>%
     dplyr::mutate(water.table      = as.numeric(waterTableDepth > soilDepth)) %>%
     dplyr::select(SimulationName, Year, Date, precip.magnitude, waterTableDepth, soilDepth, plotWidth, water.table)
-  climate.data$precip.magnitude[is.nan(climate.data$precip.magnitude)] <- 0
   climate.data$waterTableDepth[climate.data$waterTableDepth < climate.data$soilDepth] <- 0
 
   ## CREATE PLOT
   plot.obj <- ggplot(climate.data) +
     labs(x = x.lab, y = "Z (m)", title = date) +
-    scale_x_continuous(limits = c(X.MIN, X.MAX),
-                       breaks = seq(SOIL.MIN, SOIL.MAX, min(hop$plot.info$cellWidth)),
-                       expand = c(0, 0)) +
-    scale_y_continuous(limits = c(Y.MIN, Y.MAX),
-                       breaks = seq(ceiling(Y.MIN), floor(Y.MAX), 1),
-                       expand = c(0, 0)) +
     scale_alpha_identity() +
     scale_fill_identity()  +
     scale_color_identity() +
     scale_size_identity()  +
-    coord_equal() +
+    coord_equal(xlim   = c(X.MIN, X.MAX),
+                ylim   = c(Y.MIN, Y.MAX),
+                expand = FALSE) +
     theme_bw(base_size = 18) +
     theme(plot.margin      = unit(18 * c(1,1,1,1), "points"),
+          panel.spacing    = unit(2, "lines"),
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
           plot.title       = element_text(size = 30, hjust = 0.5),
@@ -681,7 +672,7 @@ hisafe_snapshot <- function(hop,
                                         voxel.C.alpha = "fineRootCost",
                                         voxel.R.alpha = "totalTreeNitrogenUptake"), ...) {
 
-  if(!requireNamespace(c("gtable"), quietly = TRUE)) stop("The package 'gtable' is required for hisafe_snapshot(). Please install and load them.", call. = FALSE)
+  if(!requireNamespace(c("gtable"), quietly = TRUE)) stop("The package 'gtable' is required for hisafe_snapshot(). Please install and load it.", call. = FALSE)
   is_hop(hop, error = TRUE)
   profile_check(hop, "trees", error = TRUE)
   if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character vector", call. = FALSE)
@@ -698,11 +689,7 @@ hisafe_snapshot <- function(hop,
 
   legend.plot <- visual_legend(hop       = hop,
                                vars      = vars,
-                               cells.var = cells.var,
-                               trees     = trees,
-                               crops     = crops,
-                               voxels    = voxels,
-                               cells     = cells)
+                               cells.var = cells.var)
   ggsave_fitmax(paste0(output.path, file.prefix, "_LEGEND.png"), legend.plot, dpi = 500)
 
   print(paste0("Creating visualizations for ", length(dates), " dates..."), quote = FALSE)
@@ -757,11 +744,9 @@ hisafe_snapshot <- function(hop,
 #' @return A ggplot object containing the legend.
 #' @param hop An object of class hop.
 #' @param vars A list of variable names. See \code{\link{hisafe_slice}} for details.
-#' @param trees Logical indicating whether or not to include trees.
-#' @param crops Logical indicating whether or not to include crops.
-#' @param voxels Logical indicating whether or not to include voxels.
+#' @param cells.var A character string of the name of the variable ploted by \code{\link{plot_hisafe_cells}}.
 #' @import ggplot2
-visual_legend <- function(hop, vars, cells.var, trees, crops, voxels, cells) {
+visual_legend <- function(hop, vars, cells.var) {
   text.size <- 2
   border.thickness  <- 0.5
   pointer.thickness <- border.thickness / 2
@@ -783,7 +768,7 @@ visual_legend <- function(hop, vars, cells.var, trees, crops, voxels, cells) {
                               yield.height = 0.15)
   voxel.data <- dplyr::tibble(voxel.border   = 0.5,
                               voxel.alpha    = 0.2,
-                              x              = 5,
+                              x              = 5.25,
                               z              = -0.75,
                               cellWidth      = 1,
                               voxel.height   = 0.25,
@@ -810,7 +795,7 @@ visual_legend <- function(hop, vars, cells.var, trees, crops, voxels, cells) {
     scale_size_identity() +
     coord_equal()
 
-  if(trees) {
+  ### TREES
     plot.obj <- plot.obj +
       ## TRUNK
       geom_polygon(data  = trunk.data,
@@ -843,9 +828,8 @@ visual_legend <- function(hop, vars, cells.var, trees, crops, voxels, cells) {
                 label = vars$trunk.alpha,
                 aes(x = tree.x,
                     y = tree.height / 4))
-  }
 
-  if(crops) {
+  ### CROPS
     plot.obj <- plot.obj +
       geom_rect(data = cell.data,
                 fill = "green",
@@ -924,11 +908,9 @@ visual_legend <- function(hop, vars, cells.var, trees, crops, voxels, cells) {
                        y    = cell.height / 2,
                        xend = x + cellWidth + 0.2,
                        yend = cell.height / 2))
-  }
 
-  if(voxels) {
+  ### VOXELS
     plot.obj <- plot.obj +
-      ## VOXELS
       geom_rect(data  = voxel.data,
                 color = "black",
                 fill  = "brown",
@@ -1176,9 +1158,8 @@ visual_legend <- function(hop, vars, cells.var, trees, crops, voxels, cells) {
                 label = "pruning",
                 y     = 1 + 0.12,
                 aes(x = x + x.width / 2))
-  }
 
-  if(cells) {
+### CELLS
     min.x <- 1.25
     max.x <- 1.5
     min.y <- 1
@@ -1226,7 +1207,6 @@ visual_legend <- function(hop, vars, cells.var, trees, crops, voxels, cells) {
                 hjust = 1,
                 size  = text.size,
                 label = "max")
-  }
 
   return(plot.obj)
 }

@@ -40,3 +40,8 @@ get_available_profiles <- function(template) {
   profiles <- gsub("\\.pro", "", list.files(clean_path(paste0(path, "/exportParameters")), pattern = "\\.pro"))
   return(profiles)
 }
+
+nan_to_zero <- function(x) {
+  x[is.nan(x)] <- 0
+  return(x)
+}

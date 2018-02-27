@@ -4,18 +4,14 @@
 \alias{visual_legend}
 \title{Create a legend for hisafe_visual()}
 \usage{
-visual_legend(hop, vars, cells.var, trees, crops, voxels, cells)
+visual_legend(hop, vars, cells.var)
 }
 \arguments{
 \item{hop}{An object of class hop.}
 
 \item{vars}{A list of variable names. See \code{\link{hisafe_slice}} for details.}
 
-\item{trees}{Logical indicating whether or not to include trees.}
-
-\item{crops}{Logical indicating whether or not to include crops.}
-
-\item{voxels}{Logical indicating whether or not to include voxels.}
+\item{cells.var}{A character string of the name of the variable ploted by \code{\link{plot_hisafe_cells}}.}
 }
 \value{
 A ggplot object containing the legend.

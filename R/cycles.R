@@ -174,7 +174,7 @@ plot_hisafe_cycle_daily <- function(hop,
                                     plot          = TRUE) {
 
   is_hop(hop, error = TRUE)
-  if(!all("plot" %in% names(hop)))                              stop("plot export profile required but not found",                    call. = FALSE)
+  profile_check(hop, "plot", error = TRUE)
   if(!(cycle %in% c("carbon", "nitrogen", "water", "light")))   stop("cycle argument must be one of: carbon, nitrogen, water, light", call. = FALSE)
   if(!(all(is.numeric(years))        | years[1]      == "all")) stop("years argument must be 'all' or a numeric vector",              call. = FALSE)
   if(!(length(doy.lim) == 2 & all(doy.lim %in% 1:366)))         stop("doy.lim argument must be of length 2 with values in 1:366",     call. = FALSE)
