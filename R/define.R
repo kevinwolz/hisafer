@@ -340,13 +340,6 @@ check_input_values <- function(hip, force) {
   treeThinningYears.error    <- less_than_comp("treeThinningYears",    "nbSimulations")
   treeRootPruningYears.error <- less_than_comp("treeRootPruningYears", "nbSimulations")
 
-  day_error_check <- function(x, y, z) all((x >= rep(y, length(x))) | (z > 1))
-  treePlantingDays.error <- ifelse(all(purrr::pmap_lgl(list(get_used("treePlantingDays"),
-                                                            get_used("simulationDayStart"),
-                                                            get_used("treePlantingYears")),
-                                                       day_error_check)),
-                                   "", paste0("-- treePlantingDays must be greater than or equal to simulationDayStart for trees planted in year 1"))
-
   ## nrow(tree_init) == nrow(root_init) Error
   tree.init <- get_used("tree.initialization")
   if(all(is.na(tree.init))) {
@@ -470,7 +463,7 @@ check_input_values <- function(hip, force) {
                   btwn.tree.error, within.tree.error, plot.width.error, plot.height.error,
                   treeCropDistance.error, treeRootPruningDistance.error,
                   tree.centered.error, tree.offscene.error,
-                  treePlantingYears.error, treePruningYears.error, treeThinningYears.error, treeRootPruningYears.error, treePlantingDays.error,
+                  treePlantingYears.error, treePruningYears.error, treeThinningYears.error, treeRootPruningYears.error,
                   tree.root.error, EP.error, nbTrees.error,
                   treePlanting.length.error, treePruning.length.error, treeThinning.length.error, rootPruning.length.error,
                   mainCrop.length.error, interCrop.length.error, simuNbrDays.length.error,
