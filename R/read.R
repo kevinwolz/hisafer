@@ -363,18 +363,14 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
 #' @description Reads in an example Hi-sAFe experiment. For more details see \code{\link{read_hisafe}}.
 #' @return An object of class "hop".
 #' @param profiles A character vector of the names of Hi-sAFe output profiles to read.
-#' "cells", and "voxels" profiles are not available in the example.
-#' @param show.progress Logical indicating whether progress messsages should be printed to the console.
+#' @param ... Other arguments passed to \code{\link{read_hisafe}}.
 #' @export
-read_hisafe_example <- function(profiles      = c("annualplot", "annualtree", "annualcrop", "plot", "trees", "climate", "monthCells"),
-                                show.progress = TRUE) {
+read_hisafe_example <- function(profiles = c("plot", "trees", "climate", "monthCells", "cells"), ...) {
 
   if(!all(is.character(profiles))) stop("profiles argument must be a character vector", call. = FALSE)
-  if(!is.logical(show.progress))   stop("show.progress argument must be a logical",     call. = FALSE)
 
-  hop <- read_hisafe(path          = clean_path(paste0(system.file("extdata", "example_output", package = "hisafer"), "/")),
-                     profiles      = profiles,
-                     show.progress = show.progress)
+  hop <- read_hisafe(path     = clean_path(paste0(system.file("extdata", "example_output", package = "hisafer"), "/")),
+                     profiles = profiles, ...)
   return(hop)
 }
 

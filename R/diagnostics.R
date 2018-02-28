@@ -296,12 +296,12 @@ diag_hisafe_voxels <- function(hop, output.path = NULL, ...) {
 #' diag_hisafe(myhop)
 #' }
 diag_hisafe <- function(hop,
-                        annualtree = TRUE,
-                        annualplot = TRUE,
+                        annualtree = FALSE,
+                        annualplot = FALSE,
                         trees      = TRUE,
                         plot       = TRUE,
                         climate    = TRUE,
-                        annualcrop = TRUE,
+                        annualcrop = FALSE,
                         monthCells = TRUE,
                         cells      = TRUE,
                         voxels     = TRUE, ...) {

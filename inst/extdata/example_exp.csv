@@ -1,4 +1,4 @@
-SimulationName,latitude,treeLineOrientation
+SimulationName,latitude,northOrientation
 Lat30_Orient0,30,0
 Lat60_Orient0,60,0
 Lat30_Orient90,30,90

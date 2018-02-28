@@ -98,35 +98,43 @@ hisafe_slice <- function(hop,
   ## Switch x-y if plot.x == "y"
   x.lab <- "X (m)"
   if(plot.x == "y") {
+    if(!crops)  stop("crops must be TRUE if plot.x = 'y'",  call. = FALSE)
     x.lab <- "Y (m)"
-    for(p in c("tree.info", "cells", "voxels")) {
-      X <- hop[[p]]$y
-      Y <- -hop[[p]]$x
-      hop[[p]]$x <- X
-      hop[[p]]$y <- Y
+    for(p in c("tree.info", "cells", "voxels")[c(TRUE, crops, voxels)]) {
+      xx <- hop[[p]]$y
+      yy <- hop[[p]]$x
+      hop[[p]]$x <- xx
+      hop[[p]]$y <- yy
     }
     ir <- hop$trees$crownRadiusInterRow
     tl <- hop$trees$crownRadiusTreeLine
     hop$trees$crownRadiusInterRow <- tl
     hop$trees$crownRadiusTreeLine <- ir
+    pw <- hop$plot.info$plotWidth
+    ph <- hop$plot.info$plotHeight
+    hop$plot.info$plotWidth  <- ph
+    hop$plot.info$plotHeight <- pw
   }
 
-  Ys <- dplyr::as_tibble(table(hop$cells$SimulationName, hop$cells$y))[, 1:2] %>%
-    dplyr::rename(SimulationName = Var1, y = Var2) %>%
-    dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
-    dplyr::mutate(y = as.numeric(y)) %>%
-    dplyr::mutate(cells.Y  = y) %>%
-    dplyr::mutate(voxels.Y = y + cellWidth / 2) %>%
-    dplyr::select(SimulationName, cells.Y, voxels.Y)
-  if(Y[1] == "all") {
-    Y <- Ys$cells.Y
-  } else {
-    if(!all(is.numeric(Y)))              stop("Y argument must be 'all' or a numeric vector",   call. = FALSE)
-    if(!all(Y %in% unique(hop$cells$y))) stop("one or more values of Y are not present in hop", call. = FALSE)
+  if(crops) {
+    Ys <- dplyr::as_tibble(table(hop$cells$SimulationName, hop$cells$y))[, 1:2] %>%
+      dplyr::rename(SimulationName = Var1, y = Var2) %>%
+      dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
+      dplyr::mutate(y        = as.numeric(y)) %>%
+      dplyr::mutate(cells.Y  = y) %>%
+      dplyr::mutate(voxels.Y = y + cellWidth / 2) %>%
+      dplyr::select(SimulationName, cells.Y, voxels.Y)
+    if(Y[1] == "all") {
+      Y <- Ys$cells.Y
+    } else {
+      if(!all(is.numeric(Y)))              stop("Y argument must be 'all' or a numeric vector",   call. = FALSE)
+      if(!all(Y %in% unique(hop$cells$y))) stop("one or more values of Y are not present in hop", call. = FALSE)
+    }
+    Ys <- dplyr::filter(Ys, cells.Y %in% Y)
+    Y.cells  <- unique(Ys$cells.Y)
   }
-  Ys <- dplyr::filter(Ys, cells.Y %in% Y)
-  Y.cells  <- unique(Ys$cells.Y)
-  Y.voxels <- unique(Ys$voxels.Y)
+
+  if(voxels) Y.voxels <- unique(Ys$voxels.Y)
 
   hop.full <- hop_filter(hop        = hop,
                          simu.names = simu.names,
@@ -213,6 +221,7 @@ hisafe_slice <- function(hop,
       dplyr::mutate(trunk.alpha = .[[vars$trunk.alpha]]) %>%
       dplyr::left_join(tree.max,      by = c("SimulationName", "Year", "id")) %>%
       dplyr::left_join(hop$tree.info, by = c("SimulationName", "id")) %>%
+      dplyr::left_join(hop$plot.info, by = c("SimulationName")) %>%
       dplyr::left_join(tree.growth,   by = c("SimulationName", "Date", "id")) %>%
       dplyr::mutate(crown.radius          = crownRadiusInterRow) %>%
       dplyr::mutate(crown.base.height     = crownBaseHeight) %>%
@@ -222,10 +231,12 @@ hisafe_slice <- function(hop,
       dplyr::mutate(crown.alpha           = crown.alpha / crown.alpha.max) %>%
       dplyr::mutate(trunk.alpha           = trunk.alpha / trunk.alpha.max) %>%
       dplyr::mutate(tree.x                = x) %>%
+      dplyr::mutate(crown.linetype        = "solid") %>% # for non-phantom trees
       dplyr::mutate(tree.pruning.height   = pmin(tree.height * tree.pruning.prop, tree.pruning.max.height)) %>%
-      dplyr::select(SimulationName, Date, id, crown.radius, crown.base.height, tree.height, trunk.radius,
+      dplyr::select(SimulationName, Date, id, plotWidth, plotHeight,
+                    crown.radius, crown.base.height, tree.height, trunk.radius,
                     crown.center.y, tree.x, trunk.growth, crown.growth, height.growth,
-                    crown.alpha, trunk.alpha,
+                    crown.alpha, trunk.alpha, crown.linetype,
                     tree.pruning, tree.pruning.height, root.pruning, root.pruning.depth, root.pruning.distance)
     tree.data$crown.alpha[is.nan(tree.data$crown.alpha)] <- 0 # for when the max value in a year is 0
     tree.data$trunk.alpha[is.nan(tree.data$trunk.alpha)] <- 0 # for when the max value in a year is 0
@@ -257,8 +268,9 @@ hisafe_slice <- function(hop,
       dplyr::mutate(side = as.numeric(as.character(factor(side, levels = c("neg", "pos"), labels = c("-1", "1"))))) %>%
       dplyr::filter(phantom) %>%
       dplyr::left_join(tree.data, by = c("SimulationName", "Date", "id")) %>%
-      dplyr::mutate(tree.x = tree.x + plot.width * side) %>%
-      dplyr::select(-side, -phantom)
+      dplyr::mutate(tree.x = tree.x + plotWidth * side) %>%
+      dplyr::select(-side, -phantom) %>%
+      dplyr::mutate(crown.linetype = "dotted") # for phantom trees
 
     tree.data <- dplyr::bind_rows(tree.data, phantom.data)
   }
@@ -383,9 +395,10 @@ hisafe_slice <- function(hop,
   plot.obj <- ggplot(climate.data) +
     labs(x = x.lab, y = "Z (m)", title = date) +
     scale_alpha_identity() +
-    scale_fill_identity()  +
+    scale_fill_identity() +
     scale_color_identity() +
-    scale_size_identity()  +
+    scale_size_identity() +
+    scale_linetype_identity() +
     coord_equal(xlim   = c(X.MIN, X.MAX),
                 ylim   = c(Y.MIN, Y.MAX),
                 expand = FALSE) +
@@ -459,12 +472,13 @@ hisafe_slice <- function(hop,
                              fill  = "green",
                              color = "dark green",
                              size  = 0.5,
-                             aes(alpha = crown.alpha,
-                                 x0    = tree.x,
-                                 y0    = crown.center.y,
-                                 b     = (tree.height - crown.base.height) / 2,
-                                 a     = crown.radius,
-                                 angle = 0)) +
+                             aes(alpha    = crown.alpha,
+                                 linetype = crown.linetype,
+                                 x0       = tree.x,
+                                 y0       = crown.center.y,
+                                 b        = (tree.height - crown.base.height) / 2,
+                                 a        = crown.radius,
+                                 angle    = 0)) +
       ## HEIGHT GROWTH
       geom_segment(data  = tree.data,
                    color = "black",
@@ -608,7 +622,7 @@ hisafe_slice <- function(hop,
 #' @description Creates daily plots combining \code{\link{hisafe_slice}} & \code{\link{plot_hisafe_cells}} and writes them to an output directory.
 #' Requires the gtable package.
 #' This function creates the raw materials (daily images) for animations/videos of Hi-sAFe simulations.
-#' @return Invisibly returns \code{output.path} so that this can be easily supplied to other functions to manipulate the images.
+#' @return Invisibly returns the final plot object that was created.
 #' @param hop An object of class hop.
 #' @param output.path A character stting indicating the path to the directory where plots should be saved.
 #' If no value is provided, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis/snapshots".
@@ -638,6 +652,7 @@ hisafe_slice <- function(hop,
 #' @importFrom dplyr %>%
 #' @import ggplot2
 #' @import gtable
+#' @import egg
 #' @family hisafe visualization functions
 #' @examples
 #' \dontrun{
@@ -671,6 +686,20 @@ hisafe_snapshot <- function(hop,
                                         voxel.L.alpha = "totalTreeWaterUptake",
                                         voxel.C.alpha = "fineRootCost",
                                         voxel.R.alpha = "totalTreeNitrogenUptake"), ...) {
+
+  #####################################################################
+  ##### MODIFY egg::gtable_frame #####
+  ## Once/if egg::gtable_frame is updated in the CRAN version of the package,
+  ## this can be removed as well as the @import egg in this function's documentation.
+  b <- body(gtable_frame)
+  b[6] <- parse(text = "if (fixed_ar) {
+    ar <- as.numeric(g$heights[tt[1]]) / as.numeric(g$widths[ll[1]])
+    height <- width * (ar / length(ll))
+    g$respect <- FALSE
+}")
+  body(gtable_frame) <- b
+  assignInNamespace("gtable_frame", gtable_frame, ns = 'egg')
+  #####################################################################
 
   if(!requireNamespace(c("gtable"), quietly = TRUE)) stop("The package 'gtable' is required for hisafe_snapshot(). Please install and load it.", call. = FALSE)
   is_hop(hop, error = TRUE)
@@ -722,21 +751,22 @@ hisafe_snapshot <- function(hop,
     }
 
     if(slice & cells) {
-      g1 <- ggplotGrob(slice.plot)
-      g2 <- ggplotGrob(cells.plot)
-      g  <- rbind(g1, g2, size = "first")
-      g$widths  <- grid::unit.pmax(g1$widths, g2$widths)
+      #g1 <- ggplotGrob(slice.plot)
+      #g2 <- ggplotGrob(cells.plot)
+      #plot.obj  <- rbind(g1, g2, size = "first")
+      #plot.obj$widths  <- grid::unit.pmax(g1$widths, g2$widths)
+      plot.obj <- egg::ggarrange(slice.plot, cells.plot, ncol = 1)
     } else if(slice & !cells) {
-      g <- slice.plot
+      plot.obj <- slice.plot
     } else if(!slice & cells) {
-      g <- cells.plot
+      plot.obj <- cells.plot
     }
 
-    ggsave_fitmax(paste0(output.path, file.prefix, "_", dates[i], ".", device), g, scale = 2, dpi = dpi)
+    ggsave_fitmax(paste0(output.path, file.prefix, "_", dates[i], ".", device), plot.obj, scale = 2, dpi = dpi)
     setTxtProgressBar(pb, i)
   }
 
-  invisible(output.path)
+  invisible(plot.obj)
 }
 
 #' Create a legend for hisafe_visual()
@@ -746,7 +776,21 @@ hisafe_snapshot <- function(hop,
 #' @param vars A list of variable names. See \code{\link{hisafe_slice}} for details.
 #' @param cells.var A character string of the name of the variable ploted by \code{\link{plot_hisafe_cells}}.
 #' @import ggplot2
-visual_legend <- function(hop, vars, cells.var) {
+#' @export
+visual_legend <- function(hop,
+                          vars = list(crown.alpha   = "leafArea",
+                                      trunk.alpha   = "carbonLabile",
+                                      crop.alpha    = "lai",
+                                      yield.alpha   = "eai",
+                                      voxel.alpha   = "totalTreeRootDensity",
+                                      voxel.border  = "cropRootDensity",
+                                      voxel.L.size  = "waterStock",
+                                      voxel.C.size  = "totalTreeCoarseRootBiomass",
+                                      voxel.R.size  = "mineralNitrogenStock",
+                                      voxel.L.alpha = "totalTreeWaterUptake",
+                                      voxel.C.alpha = "fineRootCost",
+                                      voxel.R.alpha = "totalTreeNitrogenUptake"),
+                          cells.var = "relativeTotalParIncident") {
   text.size <- 2
   border.thickness  <- 0.5
   pointer.thickness <- border.thickness / 2
@@ -796,417 +840,417 @@ visual_legend <- function(hop, vars, cells.var) {
     coord_equal()
 
   ### TREES
-    plot.obj <- plot.obj +
-      ## TRUNK
-      geom_polygon(data  = trunk.data,
-                   fill  = "brown",
-                   color = "brown",
-                   size  = 1,
-                   aes(alpha = trunk.alpha,
-                       x     = polygon.x,
-                       y     = polygon.y)) +
-      ## CROWN
-      ggforce::geom_ellipsis(data  = tree.data,
-                             fill  = "green",
-                             color = "green",
-                             size  = 1,
-                             aes(alpha = crown.alpha,
-                                 x0    = tree.x,
-                                 y0    = crown.center.y,
-                                 b     = (tree.height - crown.base.height) / 2,
-                                 a     = crown.radius,
-                                 angle = 0)) +
-      geom_text(data  = tree.data,
-                hjust = 0.5,
-                size  = text.size,
-                label = vars$crown.alpha,
-                aes(x = tree.x,
-                    y = crown.center.y)) +
-      geom_text(data  = tree.data,
-                hjust = 0.5,
-                size  = text.size,
-                label = vars$trunk.alpha,
-                aes(x = tree.x,
-                    y = tree.height / 4))
+  plot.obj <- plot.obj +
+    ## TRUNK
+    geom_polygon(data  = trunk.data,
+                 fill  = "brown",
+                 color = "brown",
+                 size  = 1,
+                 aes(alpha = trunk.alpha,
+                     x     = polygon.x,
+                     y     = polygon.y)) +
+    ## CROWN
+    ggforce::geom_ellipsis(data  = tree.data,
+                           fill  = "green",
+                           color = "green",
+                           size  = 1,
+                           aes(alpha = crown.alpha,
+                               x0    = tree.x,
+                               y0    = crown.center.y,
+                               b     = (tree.height - crown.base.height) / 2,
+                               a     = crown.radius,
+                               angle = 0)) +
+    geom_text(data  = tree.data,
+              hjust = 0.5,
+              size  = text.size,
+              label = vars$crown.alpha,
+              aes(x = tree.x,
+                  y = crown.center.y)) +
+    geom_text(data  = tree.data,
+              hjust = 0.5,
+              size  = text.size,
+              label = vars$trunk.alpha,
+              aes(x = tree.x,
+                  y = tree.height / 4))
 
   ### CROPS
-    plot.obj <- plot.obj +
-      geom_rect(data = cell.data,
-                fill = "green",
-                size = border.thickness,
-                aes(alpha    = crop.alpha,
-                    color    = cell.color,
-                    xmin     = x,
-                    xmax     = x + cellWidth,
-                    ymin     = 0,
-                    ymax     = cell.height)) +
-      geom_rect(data  = cell.data,
-                fill  = "black",
-                color = "black",
-                size  = border.thickness,
-                aes(alpha    = yield.alpha,
-                    xmin     = x,
-                    xmax     = x + cellWidth,
-                    ymin     = cell.height,
-                    ymax     = yield.height + cell.height)) +
-      geom_text(data  = cell.data,
-                hjust = 0.5,
-                size  = text.size,
-                label = vars$crop.alpha,
-                aes(x = x + cellWidth / 2,
-                    y = cell.height / 2)) +
-      geom_text(data  = cell.data,
-                hjust = 0.5,
-                size  = text.size,
-                label = vars$yield.alpha,
-                aes(x = x + cellWidth / 2,
-                    y = cell.height + (yield.height / 2))) +
-      geom_text(data  = cell.data,
-                hjust = 0,
-                size  = text.size,
-                label = "yield",
-                aes(x = x + cellWidth + 0.25,
-                    y = cell.height + (yield.height / 2))) +
-      geom_segment(data  = cell.data,
-                   color = "black",
-                   size  = pointer.thickness,
-                   aes(x    = x + cellWidth + 0.05,
-                       y    = cell.height + (yield.height / 2),
-                       xend = x + cellWidth + 0.2,
-                       yend = cell.height + (yield.height / 2))) +
-      geom_segment(data  = cell.data,
-                   color = "black",
-                   size  = pointer.thickness,
-                   aes(x    = x + cellWidth + 0.05,
-                       y    = cell.height,
-                       xend = x + cellWidth + 0.05,
-                       yend = cell.height + yield.height)) +
-      geom_segment(data  = cell.data,
-                   color = "black",
-                   size  = pointer.thickness,
-                   aes(x    = x + cellWidth + 0.05 + 0.025,
-                       y    = cell.height,
-                       xend = x + cellWidth + 0.05 - 0.025,
-                       yend = cell.height)) +
-      geom_segment(data  = cell.data,
-                   color = "black",
-                   size  = pointer.thickness,
-                   aes(x    = x + cellWidth + 0.05 + 0.025,
-                       y    = cell.height + yield.height,
-                       xend = x + cellWidth + 0.05 - 0.025,
-                       yend = cell.height + yield.height)) +
-      geom_text(data  = cell.data,
-                hjust = 0,
-                size  = text.size,
-                label = "phenological stage",
-                aes(x = x + cellWidth + 0.25,
-                    y = cell.height / 2)) +
-      geom_segment(data  = cell.data,
-                   color = "black",
-                   size  = pointer.thickness,
-                   aes(x    = x + cellWidth,
-                       y    = cell.height / 2,
-                       xend = x + cellWidth + 0.2,
-                       yend = cell.height / 2))
+  plot.obj <- plot.obj +
+    geom_rect(data = cell.data,
+              fill = "green",
+              size = border.thickness,
+              aes(alpha    = crop.alpha,
+                  color    = cell.color,
+                  xmin     = x,
+                  xmax     = x + cellWidth,
+                  ymin     = 0,
+                  ymax     = cell.height)) +
+    geom_rect(data  = cell.data,
+              fill  = "black",
+              color = "black",
+              size  = border.thickness,
+              aes(alpha    = yield.alpha,
+                  xmin     = x,
+                  xmax     = x + cellWidth,
+                  ymin     = cell.height,
+                  ymax     = yield.height + cell.height)) +
+    geom_text(data  = cell.data,
+              hjust = 0.5,
+              size  = text.size,
+              label = vars$crop.alpha,
+              aes(x = x + cellWidth / 2,
+                  y = cell.height / 2)) +
+    geom_text(data  = cell.data,
+              hjust = 0.5,
+              size  = text.size,
+              label = vars$yield.alpha,
+              aes(x = x + cellWidth / 2,
+                  y = cell.height + (yield.height / 2))) +
+    geom_text(data  = cell.data,
+              hjust = 0,
+              size  = text.size,
+              label = "yield",
+              aes(x = x + cellWidth + 0.25,
+                  y = cell.height + (yield.height / 2))) +
+    geom_segment(data  = cell.data,
+                 color = "black",
+                 size  = pointer.thickness,
+                 aes(x    = x + cellWidth + 0.05,
+                     y    = cell.height + (yield.height / 2),
+                     xend = x + cellWidth + 0.2,
+                     yend = cell.height + (yield.height / 2))) +
+    geom_segment(data  = cell.data,
+                 color = "black",
+                 size  = pointer.thickness,
+                 aes(x    = x + cellWidth + 0.05,
+                     y    = cell.height,
+                     xend = x + cellWidth + 0.05,
+                     yend = cell.height + yield.height)) +
+    geom_segment(data  = cell.data,
+                 color = "black",
+                 size  = pointer.thickness,
+                 aes(x    = x + cellWidth + 0.05 + 0.025,
+                     y    = cell.height,
+                     xend = x + cellWidth + 0.05 - 0.025,
+                     yend = cell.height)) +
+    geom_segment(data  = cell.data,
+                 color = "black",
+                 size  = pointer.thickness,
+                 aes(x    = x + cellWidth + 0.05 + 0.025,
+                     y    = cell.height + yield.height,
+                     xend = x + cellWidth + 0.05 - 0.025,
+                     yend = cell.height + yield.height)) +
+    geom_text(data  = cell.data,
+              hjust = 0,
+              size  = text.size,
+              label = "phenological stage",
+              aes(x = x + cellWidth + 0.25,
+                  y = cell.height / 2)) +
+    geom_segment(data  = cell.data,
+                 color = "black",
+                 size  = pointer.thickness,
+                 aes(x    = x + cellWidth,
+                     y    = cell.height / 2,
+                     xend = x + cellWidth + 0.2,
+                     yend = cell.height / 2))
 
   ### VOXELS
-    plot.obj <- plot.obj +
-      geom_rect(data  = voxel.data,
-                color = "black",
-                fill  = "brown",
-                size  = border.thickness,
-                aes(xmin = x - cellWidth,
-                    ymin = -z - voxel.height,
-                    xmax = x + cellWidth,
-                    ymax = -z,
-                    alpha = voxel.alpha)) +
-      geom_text(data  = voxel.data,
-                hjust = 0,
-                size  = text.size,
-                label = vars$voxel.alpha,
-                aes(x = x + cellWidth + 0.25,
-                    y = -z - voxel.height / 2)) +
-      geom_segment(data  = voxel.data,
-                   color = "black",
-                   size  = pointer.thickness,
-                   aes(x    = x + cellWidth * 0.8,
-                       y    = -z - 0.25 / 2,
-                       xend = x + cellWidth + 0.2,
-                       yend = -z - voxel.height / 2)) +
-      geom_text(data  = voxel.data,
-                hjust = 1,
-                size  = text.size,
-                label = vars$voxel.border,
-                aes(x = x - cellWidth - 0.25,
-                    y = -z - voxel.height / 2)) +
-      geom_segment(data  = voxel.data,
-                   color = "black",
-                   size  = pointer.thickness,
-                   aes(x    = x - cellWidth,
-                       y    = -z - voxel.height / 2,
-                       xend = x - cellWidth - 0.2,
-                       yend = -z - voxel.height / 2)) +
-      ## CENTER CIRCLE
-      ggforce::geom_circle(data  = voxel.data,
-                           color = "black",
-                           fill  = "black",
-                           size  = border.thickness,
-                           aes(x0    = x,
-                               y0    = -z - voxel.height / 2,
-                               r     = voxel.C.size,
-                               alpha = voxel.C.alpha)) +
-      geom_text(data  = voxel.data,
-                hjust = 0.5,
-                size  = text.size,
-                label = vars$voxel.C.alpha,
-                aes(x = x,
-                    y = -z - voxel.height / 2 + 0.5)) +
-      geom_segment(data  = voxel.data,
-                   color = "black",
-                   size  = pointer.thickness,
-                   aes(x    = x,
-                       y    = -z - voxel.height / 4,
-                       xend = x,
-                       yend =  -z - voxel.height / 2 + 0.4)) +
-      geom_text(data  = voxel.data,
-                hjust = 0.5,
-                size  = text.size,
-                label = vars$voxel.C.size,
-                aes(x = x,
-                    y = -z - voxel.height / 2 - 0.5)) +
-      geom_segment(data  = voxel.data,
-                   color = "black",
-                   size  = pointer.thickness,
-                   aes(x    = x,
-                       y    = -z - voxel.height / 2,
-                       xend = x,
-                       yend =  -z - voxel.height / 2 - 0.4)) +
-      geom_segment(data  = voxel.data,
-                   color = "black",
-                   size  = pointer.thickness,
-                   aes(x    = x - voxel.C.size * 1.1,
-                       y    = -z - voxel.height / 2,
-                       xend = x + voxel.C.size * 1.1,
-                       yend = -z - voxel.height / 2)) +
-      geom_segment(data  = voxel.data,
-                   color = "black",
-                   size  = pointer.thickness,
-                   aes(x    = x - voxel.C.size * 1.1,
-                       y    = -z - voxel.height / 2 - 0.025,
-                       xend = x - voxel.C.size * 1.1,
-                       yend = -z - voxel.height / 2 + 0.025)) +
-      geom_segment(data  = voxel.data,
-                   color = "black",
-                   size  = pointer.thickness,
-                   aes(x    = x + voxel.C.size * 1.1,
-                       y    = -z - voxel.height / 2 - 0.025,
-                       xend = x + voxel.C.size * 1.1,
-                       yend = -z - voxel.height / 2 + 0.025)) +
-      ## LEFT CIRCLE
-      ggforce::geom_circle(data  = voxel.data,
-                           color = "blue",
-                           fill  = "blue",
-                           size  = border.thickness,
-                           aes(x0    = x - circle.offset,
-                               y0    = -z - voxel.height / 2,
-                               r     = voxel.L.size,
-                               alpha = voxel.L.alpha)) +
-      geom_text(data  = voxel.data,
-                hjust = 0.5,
-                size  = text.size,
-                label = vars$voxel.L.alpha,
-                aes(x = x - circle.offset - 0.5,
-                    y = -z - voxel.height / 2 + 0.3))  +
-      geom_segment(data  = voxel.data,
-                   color = "black",
-                   size  = pointer.thickness,
-                   aes(x    = x - circle.offset,
-                       y    = -z - voxel.height / 4,
-                       xend = x - circle.offset - 0.5,
-                       yend =  -z - voxel.height / 2 + 0.2)) +
-      geom_text(data  = voxel.data,
-                hjust = 0.5,
-                size  = text.size,
-                label = vars$voxel.L.size,
-                aes(x = x - circle.offset - 0.5,
-                    y = -z - voxel.height / 2 - 0.3)) +
-      geom_segment(data  = voxel.data,
-                   color = "black",
-                   size  = pointer.thickness,
-                   aes(x    = x - circle.offset,
-                       y    = -z - voxel.height / 2,
-                       xend = x - circle.offset - 0.5,
-                       yend =  -z - voxel.height / 2 - 0.2)) +
-      geom_segment(data  = voxel.data,
-                   color = "black",
-                   size  = pointer.thickness,
-                   aes(x    = x - circle.offset - voxel.L.size * 1.1,
-                       y    = -z - voxel.height / 2,
-                       xend = x - circle.offset + voxel.L.size * 1.1,
-                       yend = -z - voxel.height / 2)) +
-      geom_segment(data  = voxel.data,
-                   color = "black",
-                   size  = pointer.thickness,
-                   aes(x    = x - circle.offset - voxel.L.size * 1.1,
-                       y    = -z - voxel.height / 2 - 0.025,
-                       xend = x - circle.offset - voxel.L.size * 1.1,
-                       yend = -z - voxel.height / 2 + 0.025)) +
-      geom_segment(data  = voxel.data,
-                   color = "black",
-                   size  = pointer.thickness,
-                   aes(x    = x - circle.offset + voxel.L.size * 1.1,
-                       y    = -z - voxel.height / 2 - 0.025,
-                       xend = x - circle.offset + voxel.L.size * 1.1,
-                       yend = -z - voxel.height / 2 + 0.025)) +
-      ## RIGHT CIRCLE
-      ggforce::geom_circle(data  = voxel.data,
-                           color = "green",
-                           fill  = "green",
-                           size  = border.thickness,
-                           aes(x0    = x + circle.offset,
-                               y0    = -z - voxel.height / 2,
-                               r     = voxel.R.size,
-                               alpha = voxel.R.alpha)) +
-      geom_text(data  = voxel.data,
-                hjust = 0.5,
-                size  = text.size,
-                label = vars$voxel.R.alpha,
-                aes(x = x + circle.offset + 0.5,
-                    y = -z - voxel.height / 2 + 0.3)) +
-      geom_segment(data  = voxel.data,
-                   color = "black",
-                   size  = pointer.thickness,
-                   aes(x    = x + circle.offset,
-                       y    = -z - voxel.height / 4,
-                       xend = x + circle.offset + 0.5,
-                       yend =  -z - voxel.height / 2 + 0.2)) +
-      geom_text(data  = voxel.data,
-                hjust = 0.5,
-                size  = text.size,
-                label = vars$voxel.R.size,
-                aes(x = x + circle.offset + 0.5,
-                    y = -z - voxel.height / 2 - 0.3)) +
-      geom_segment(data  = voxel.data,
-                   color = "black",
-                   size  = pointer.thickness,
-                   aes(x    = x + circle.offset,
-                       y    = -z - voxel.height / 2,
-                       xend = x + circle.offset + 0.5,
-                       yend =  -z - voxel.height / 2 - 0.2)) +
-      geom_segment(data  = voxel.data,
-                   color = "black",
-                   size  = pointer.thickness,
-                   aes(x    = x + circle.offset - voxel.R.size * 1.1,
-                       y    = -z - voxel.height / 2,
-                       xend = x + circle.offset + voxel.R.size * 1.1,
-                       yend = -z - voxel.height / 2)) +
-      geom_segment(data  = voxel.data,
-                   color = "black",
-                   size  = pointer.thickness,
-                   aes(x    = x + circle.offset - voxel.R.size * 1.1,
-                       y    = -z - voxel.height / 2 - 0.025,
-                       xend = x + circle.offset - voxel.R.size * 1.1,
-                       yend = -z - voxel.height / 2 + 0.025)) +
-      geom_segment(data  = voxel.data,
-                   color = "black",
-                   size  = pointer.thickness,
-                   aes(x    = x + circle.offset + voxel.R.size * 1.1,
-                       y    = -z - voxel.height / 2 - 0.025,
-                       xend = x + circle.offset + voxel.R.size * 1.1,
-                       yend = -z - voxel.height / 2 + 0.025)) +
-      ## LINES
-      geom_segment(data     = line.data,
-                   size     = border.thickness * 2,
-                   color    = "blue",
-                   linetype = "longdash",
-                   y        = 0.2,
-                   yend     = 0.2,
-                   aes(x    = x,
-                       xend = x + x.width)) +
-      geom_text(data  = line.data,
-                hjust = 0.5,
-                size  = text.size,
-                label = "water table",
-                y     = 0.2 + 0.12,
-                aes(x = x + x.width/2)) +
-      geom_segment(data     = line.data,
-                   size     = border.thickness * 2,
-                   color    = "green",
-                   arrow    = arrow(length = unit(5, "points")),
-                   linetype = "solid",
-                   y        = 0.6,
-                   yend     = 0.6,
-                   aes(x    = x,
-                       xend = x + x.width)) +
-      geom_text(data  = line.data,
-                hjust = 0.5,
-                size  = text.size,
-                label = "fertilization",
-                y     = 0.6 + 0.12,
-                aes(x = x + x.width/2)) +
-      geom_segment(data     = line.data,
-                   size     = border.thickness * 2,
-                   color    = "red",
-                   linetype = "solid",
-                   y        = 1,
-                   yend     = 1,
-                   aes(x    = x,
-                       xend = x + x.width)) +
-      geom_text(data  = line.data,
-                hjust = 0.5,
-                size  = text.size,
-                label = "pruning",
-                y     = 1 + 0.12,
-                aes(x = x + x.width / 2))
+  plot.obj <- plot.obj +
+    geom_rect(data  = voxel.data,
+              color = "black",
+              fill  = "brown",
+              size  = border.thickness,
+              aes(xmin = x - cellWidth,
+                  ymin = -z - voxel.height,
+                  xmax = x + cellWidth,
+                  ymax = -z,
+                  alpha = voxel.alpha)) +
+    geom_text(data  = voxel.data,
+              hjust = 0,
+              size  = text.size,
+              label = vars$voxel.alpha,
+              aes(x = x + cellWidth + 0.25,
+                  y = -z - voxel.height / 2)) +
+    geom_segment(data  = voxel.data,
+                 color = "black",
+                 size  = pointer.thickness,
+                 aes(x    = x + cellWidth * 0.8,
+                     y    = -z - 0.25 / 2,
+                     xend = x + cellWidth + 0.2,
+                     yend = -z - voxel.height / 2)) +
+    geom_text(data  = voxel.data,
+              hjust = 1,
+              size  = text.size,
+              label = vars$voxel.border,
+              aes(x = x - cellWidth - 0.25,
+                  y = -z - voxel.height / 2)) +
+    geom_segment(data  = voxel.data,
+                 color = "black",
+                 size  = pointer.thickness,
+                 aes(x    = x - cellWidth,
+                     y    = -z - voxel.height / 2,
+                     xend = x - cellWidth - 0.2,
+                     yend = -z - voxel.height / 2)) +
+    ## CENTER CIRCLE
+    ggforce::geom_circle(data  = voxel.data,
+                         color = "black",
+                         fill  = "black",
+                         size  = border.thickness,
+                         aes(x0    = x,
+                             y0    = -z - voxel.height / 2,
+                             r     = voxel.C.size,
+                             alpha = voxel.C.alpha)) +
+    geom_text(data  = voxel.data,
+              hjust = 0.5,
+              size  = text.size,
+              label = vars$voxel.C.alpha,
+              aes(x = x,
+                  y = -z - voxel.height / 2 + 0.5)) +
+    geom_segment(data  = voxel.data,
+                 color = "black",
+                 size  = pointer.thickness,
+                 aes(x    = x,
+                     y    = -z - voxel.height / 4,
+                     xend = x,
+                     yend =  -z - voxel.height / 2 + 0.4)) +
+    geom_text(data  = voxel.data,
+              hjust = 0.5,
+              size  = text.size,
+              label = vars$voxel.C.size,
+              aes(x = x,
+                  y = -z - voxel.height / 2 - 0.5)) +
+    geom_segment(data  = voxel.data,
+                 color = "black",
+                 size  = pointer.thickness,
+                 aes(x    = x,
+                     y    = -z - voxel.height / 2,
+                     xend = x,
+                     yend =  -z - voxel.height / 2 - 0.4)) +
+    geom_segment(data  = voxel.data,
+                 color = "black",
+                 size  = pointer.thickness,
+                 aes(x    = x - voxel.C.size * 1.1,
+                     y    = -z - voxel.height / 2,
+                     xend = x + voxel.C.size * 1.1,
+                     yend = -z - voxel.height / 2)) +
+    geom_segment(data  = voxel.data,
+                 color = "black",
+                 size  = pointer.thickness,
+                 aes(x    = x - voxel.C.size * 1.1,
+                     y    = -z - voxel.height / 2 - 0.025,
+                     xend = x - voxel.C.size * 1.1,
+                     yend = -z - voxel.height / 2 + 0.025)) +
+    geom_segment(data  = voxel.data,
+                 color = "black",
+                 size  = pointer.thickness,
+                 aes(x    = x + voxel.C.size * 1.1,
+                     y    = -z - voxel.height / 2 - 0.025,
+                     xend = x + voxel.C.size * 1.1,
+                     yend = -z - voxel.height / 2 + 0.025)) +
+    ## LEFT CIRCLE
+    ggforce::geom_circle(data  = voxel.data,
+                         color = "blue",
+                         fill  = "blue",
+                         size  = border.thickness,
+                         aes(x0    = x - circle.offset,
+                             y0    = -z - voxel.height / 2,
+                             r     = voxel.L.size,
+                             alpha = voxel.L.alpha)) +
+    geom_text(data  = voxel.data,
+              hjust = 0.5,
+              size  = text.size,
+              label = vars$voxel.L.alpha,
+              aes(x = x - circle.offset - 0.5,
+                  y = -z - voxel.height / 2 + 0.3))  +
+    geom_segment(data  = voxel.data,
+                 color = "black",
+                 size  = pointer.thickness,
+                 aes(x    = x - circle.offset,
+                     y    = -z - voxel.height / 4,
+                     xend = x - circle.offset - 0.5,
+                     yend =  -z - voxel.height / 2 + 0.2)) +
+    geom_text(data  = voxel.data,
+              hjust = 0.5,
+              size  = text.size,
+              label = vars$voxel.L.size,
+              aes(x = x - circle.offset - 0.5,
+                  y = -z - voxel.height / 2 - 0.3)) +
+    geom_segment(data  = voxel.data,
+                 color = "black",
+                 size  = pointer.thickness,
+                 aes(x    = x - circle.offset,
+                     y    = -z - voxel.height / 2,
+                     xend = x - circle.offset - 0.5,
+                     yend =  -z - voxel.height / 2 - 0.2)) +
+    geom_segment(data  = voxel.data,
+                 color = "black",
+                 size  = pointer.thickness,
+                 aes(x    = x - circle.offset - voxel.L.size * 1.1,
+                     y    = -z - voxel.height / 2,
+                     xend = x - circle.offset + voxel.L.size * 1.1,
+                     yend = -z - voxel.height / 2)) +
+    geom_segment(data  = voxel.data,
+                 color = "black",
+                 size  = pointer.thickness,
+                 aes(x    = x - circle.offset - voxel.L.size * 1.1,
+                     y    = -z - voxel.height / 2 - 0.025,
+                     xend = x - circle.offset - voxel.L.size * 1.1,
+                     yend = -z - voxel.height / 2 + 0.025)) +
+    geom_segment(data  = voxel.data,
+                 color = "black",
+                 size  = pointer.thickness,
+                 aes(x    = x - circle.offset + voxel.L.size * 1.1,
+                     y    = -z - voxel.height / 2 - 0.025,
+                     xend = x - circle.offset + voxel.L.size * 1.1,
+                     yend = -z - voxel.height / 2 + 0.025)) +
+    ## RIGHT CIRCLE
+    ggforce::geom_circle(data  = voxel.data,
+                         color = "green",
+                         fill  = "green",
+                         size  = border.thickness,
+                         aes(x0    = x + circle.offset,
+                             y0    = -z - voxel.height / 2,
+                             r     = voxel.R.size,
+                             alpha = voxel.R.alpha)) +
+    geom_text(data  = voxel.data,
+              hjust = 0.5,
+              size  = text.size,
+              label = vars$voxel.R.alpha,
+              aes(x = x + circle.offset + 0.5,
+                  y = -z - voxel.height / 2 + 0.3)) +
+    geom_segment(data  = voxel.data,
+                 color = "black",
+                 size  = pointer.thickness,
+                 aes(x    = x + circle.offset,
+                     y    = -z - voxel.height / 4,
+                     xend = x + circle.offset + 0.5,
+                     yend =  -z - voxel.height / 2 + 0.2)) +
+    geom_text(data  = voxel.data,
+              hjust = 0.5,
+              size  = text.size,
+              label = vars$voxel.R.size,
+              aes(x = x + circle.offset + 0.5,
+                  y = -z - voxel.height / 2 - 0.3)) +
+    geom_segment(data  = voxel.data,
+                 color = "black",
+                 size  = pointer.thickness,
+                 aes(x    = x + circle.offset,
+                     y    = -z - voxel.height / 2,
+                     xend = x + circle.offset + 0.5,
+                     yend =  -z - voxel.height / 2 - 0.2)) +
+    geom_segment(data  = voxel.data,
+                 color = "black",
+                 size  = pointer.thickness,
+                 aes(x    = x + circle.offset - voxel.R.size * 1.1,
+                     y    = -z - voxel.height / 2,
+                     xend = x + circle.offset + voxel.R.size * 1.1,
+                     yend = -z - voxel.height / 2)) +
+    geom_segment(data  = voxel.data,
+                 color = "black",
+                 size  = pointer.thickness,
+                 aes(x    = x + circle.offset - voxel.R.size * 1.1,
+                     y    = -z - voxel.height / 2 - 0.025,
+                     xend = x + circle.offset - voxel.R.size * 1.1,
+                     yend = -z - voxel.height / 2 + 0.025)) +
+    geom_segment(data  = voxel.data,
+                 color = "black",
+                 size  = pointer.thickness,
+                 aes(x    = x + circle.offset + voxel.R.size * 1.1,
+                     y    = -z - voxel.height / 2 - 0.025,
+                     xend = x + circle.offset + voxel.R.size * 1.1,
+                     yend = -z - voxel.height / 2 + 0.025)) +
+    ## LINES
+    geom_segment(data     = line.data,
+                 size     = border.thickness * 2,
+                 color    = "blue",
+                 linetype = "longdash",
+                 y        = 0.2,
+                 yend     = 0.2,
+                 aes(x    = x,
+                     xend = x + x.width)) +
+    geom_text(data  = line.data,
+              hjust = 0.5,
+              size  = text.size,
+              label = "water table",
+              y     = 0.2 + 0.12,
+              aes(x = x + x.width/2)) +
+    geom_segment(data     = line.data,
+                 size     = border.thickness * 2,
+                 color    = "green",
+                 arrow    = arrow(length = unit(5, "points")),
+                 linetype = "solid",
+                 y        = 0.6,
+                 yend     = 0.6,
+                 aes(x    = x,
+                     xend = x + x.width)) +
+    geom_text(data  = line.data,
+              hjust = 0.5,
+              size  = text.size,
+              label = "fertilization",
+              y     = 0.6 + 0.12,
+              aes(x = x + x.width/2)) +
+    geom_segment(data     = line.data,
+                 size     = border.thickness * 2,
+                 color    = "red",
+                 linetype = "solid",
+                 y        = 1,
+                 yend     = 1,
+                 aes(x    = x,
+                     xend = x + x.width)) +
+    geom_text(data  = line.data,
+              hjust = 0.5,
+              size  = text.size,
+              label = "pruning",
+              y     = 1 + 0.12,
+              aes(x = x + x.width / 2))
 
-### CELLS
-    min.x <- 1.25
-    max.x <- 1.5
-    min.y <- 1
-    max.y <- 1.25
-    min.f <- min(hop$cells[[cells.var]])
-    max.f <- max(hop$cells[[cells.var]])
+  ### CELLS
+  min.x <- 1.25
+  max.x <- 1.5
+  min.y <- 1
+  max.y <- 1.25
+  min.f <- min(hop$cells[[cells.var]])
+  max.f <- max(hop$cells[[cells.var]])
 
-    scale_ab <- function(x, a, b) (b - a) * (x - min(x)) / (max(x) - min(x)) + a
+  scale_ab <- function(x, a, b) (b - a) * (x - min(x)) / (max(x) - min(x)) + a
 
-    mini.cells <- dplyr::as_tibble(expand.grid(x = c(1, 2, 3, 4, 5),
-                                               y = c(1, 2, 3, 4, 5))) %>%
-      dplyr::mutate(f = c(3, 2, 3, 2, 3,
-                          2, 1, 1.25, 1, 2,
-                          3, 0.5, 0, 0.5, 3,
-                          2.5, 1.5, 1.75, 1.5, 2.5,
-                          3.75, 2.75, 3.75, 2.75, 3.75)) %>%
-      dplyr::mutate(x = scale_ab(x, min.x, max.x)) %>%
-      dplyr::mutate(y = scale_ab(y, min.y, max.y)) %>%
-      dplyr::mutate(f = scale_ab(f, min.f, max.f))
+  mini.cells <- dplyr::as_tibble(expand.grid(x = c(1, 2, 3, 4, 5),
+                                             y = c(1, 2, 3, 4, 5))) %>%
+    dplyr::mutate(f = c(3, 2, 3, 2, 3,
+                        2, 1, 1.25, 1, 2,
+                        3, 0.5, 0, 0.5, 3,
+                        2.5, 1.5, 1.75, 1.5, 2.5,
+                        3.75, 2.75, 3.75, 2.75, 3.75)) %>%
+    dplyr::mutate(x = scale_ab(x, min.x, max.x)) %>%
+    dplyr::mutate(y = scale_ab(y, min.y, max.y)) %>%
+    dplyr::mutate(f = scale_ab(f, min.f, max.f))
 
 
-    plot.obj <- plot.obj +
-      geom_raster(data = mini.cells, aes(x = x, y = y, fill = f)) +
-      viridis::scale_fill_viridis(option = "magma") +
-      guides(fill = guide_colourbar(title     = NULL,
-                                    barwidth  = 4,
-                                    direction = "horizontal",
-                                    barheight = 0.5,
-                                    nbin      = 100,
-                                    label     = FALSE,
-                                    ticks     = FALSE)) +
-      theme(legend.position = c(0.27, 0.78)) +
-      geom_text(aes(x = 1.65,
-                    y = 1.25),
-                hjust = 0,
-                size  = text.size,
-                label = cells.var) +
-      geom_text(aes(x = 1.65,
-                    y = 0.9),
-                hjust = 0,
-                size  = text.size,
-                label = "min") +
-      geom_text(aes(x = 2.8,
-                    y = 0.9),
-                hjust = 1,
-                size  = text.size,
-                label = "max")
+  plot.obj <- plot.obj +
+    geom_raster(data = mini.cells, aes(x = x, y = y, fill = f)) +
+    viridis::scale_fill_viridis(option = "magma") +
+    guides(fill = guide_colourbar(title     = NULL,
+                                  barwidth  = 4,
+                                  direction = "horizontal",
+                                  barheight = 0.5,
+                                  nbin      = 100,
+                                  label     = FALSE,
+                                  ticks     = FALSE)) +
+    theme(legend.position = c(0.27, 0.78)) +
+    geom_text(aes(x = 1.65,
+                  y = 1.25),
+              hjust = 0,
+              size  = text.size,
+              label = cells.var) +
+    geom_text(aes(x = 1.65,
+                  y = 0.9),
+              hjust = 0,
+              size  = text.size,
+              label = "min") +
+    geom_text(aes(x = 2.8,
+                  y = 0.9),
+              hjust = 1,
+              size  = text.size,
+              label = "max")
 
   return(plot.obj)
 }

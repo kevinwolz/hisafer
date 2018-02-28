@@ -4,8 +4,8 @@
 \alias{diag_hisafe}
 \title{Shortcut to Hi-sAFe diagnostics}
 \usage{
-diag_hisafe(hop, annualtree = TRUE, annualplot = TRUE, trees = TRUE,
-  plot = TRUE, climate = TRUE, annualcrop = TRUE, monthCells = TRUE,
+diag_hisafe(hop, annualtree = FALSE, annualplot = FALSE, trees = TRUE,
+  plot = TRUE, climate = TRUE, annualcrop = FALSE, monthCells = TRUE,
   cells = TRUE, voxels = TRUE, ...)
 }
 \arguments{

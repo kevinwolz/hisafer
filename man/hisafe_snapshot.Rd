@@ -62,7 +62,7 @@ This will be applied to the plots from both \code{\link{hisafe_slice}} and \code
 \item{...}{Other arguments passed to \code{\link{hisafe_slice}}.}
 }
 \value{
-Invisibly returns \code{output.path} so that this can be easily supplied to other functions to manipulate the images.
+Invisibly returns the final plot object that was created.
 }
 \description{
 Creates daily plots combining \code{\link{hisafe_slice}} & \code{\link{plot_hisafe_cells}} and writes them to an output directory.

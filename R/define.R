@@ -2,6 +2,7 @@
 #' @description Defines a Hi-sAFe experiment - the input parameters to one or more Hi-sAFe simulations.
 #' @details It is strongly recommended to name each simulation in your experiment. This can be done via the \code{SimulationName} parameter.
 #' If no names are provided, then generic names of "Sim_1", "Sim_2", etc. will be generated.
+#' The only additional input parameter that is available but not part of the input files is **weatherFile**, which specifies a path to a .WTH file to use.
 #' @return An object of class "hip". This is a list of 4 elements:
 #' \itemize{
 #'  \item{"exp.plan"}{ - A data frame (tibble) of manipulated Hi-sAFe input parameters, with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.}
@@ -30,7 +31,7 @@
 #' @param factorial If \code{FALSE}, the default, then supplied input values are recycled (i.e. such as for default behavior of \code{\link{data.frame}}).
 #' If \code{TRUE}, then a factorial experiment is created, in which an experiment is defined for each possible combination of supplied values.
 #' @param force Logical indicating wether the supplied values should be forced past the constraint checks. Use \code{TRUE} for development only.
-#' @param ... Any Hi-sAFe input parameter in the .sim, .pld, and .tree files can be passed.
+#' @param ... Any Hi-sAFe input parameter in the .SIM, .PLD, .TREE, and .PAR files can be passed.
 #' To display supported parameters, use \code{\link{hisafe_params}}. See below for further details.
 #' There are three methods for passing parameters to \code{define_hisafe}, one for each of the three types of parameters within the parameter files:
 #' \itemize{
@@ -65,11 +66,11 @@
 #'                                  treeLineOrientation = c(0,90))
 #' }
 define_hisafe <- function(path,
-                          exp.name = "experiment",
-                          profiles = "all",
-                          template = "agroforestry",
+                          exp.name  = "experiment",
+                          profiles  = "all",
+                          template  = "agroforestry",
                           factorial = FALSE,
-                          force = FALSE, ...) {
+                          force     = FALSE, ...) {
 
   path          <- R.utils::getAbsolutePath(path)
   param.list    <- list(...)

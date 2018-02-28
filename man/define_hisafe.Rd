@@ -34,7 +34,7 @@ If \code{TRUE}, then a factorial experiment is created, in which an experiment i
 
 \item{force}{Logical indicating wether the supplied values should be forced past the constraint checks. Use \code{TRUE} for development only.}
 
-\item{...}{Any Hi-sAFe input parameter in the .sim, .pld, and .tree files can be passed.
+\item{...}{Any Hi-sAFe input parameter in the .SIM, .PLD, .TREE, and .PAR files can be passed.
 To display supported parameters, use \code{\link{hisafe_params}}. See below for further details.
 There are three methods for passing parameters to \code{define_hisafe}, one for each of the three types of parameters within the parameter files:
 \itemize{
@@ -67,6 +67,7 @@ Defines a Hi-sAFe experiment - the input parameters to one or more Hi-sAFe simul
 \details{
 It is strongly recommended to name each simulation in your experiment. This can be done via the \code{SimulationName} parameter.
 If no names are provided, then generic names of "Sim_1", "Sim_2", etc. will be generated.
+The only additional input parameter that is available but not part of the input files is **weatherFile**, which specifies a path to a .WTH file to use.
 }
 \examples{
 \dontrun{

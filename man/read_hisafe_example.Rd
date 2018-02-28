@@ -4,14 +4,13 @@
 \alias{read_hisafe_example}
 \title{Read example Hi-sAFe experiment output}
 \usage{
-read_hisafe_example(profiles = c("annualplot", "annualtree", "annualcrop",
-  "plot", "trees", "climate", "monthCells"), show.progress = TRUE)
+read_hisafe_example(profiles = c("plot", "trees", "climate", "monthCells",
+  "cells"), ...)
 }
 \arguments{
-\item{profiles}{A character vector of the names of Hi-sAFe output profiles to read.
-"cells", and "voxels" profiles are not available in the example.}
+\item{profiles}{A character vector of the names of Hi-sAFe output profiles to read.}
 
-\item{show.progress}{Logical indicating whether progress messsages should be printed to the console.}
+\item{...}{Other arguments passed to \code{\link{read_hisafe}}.}
 }
 \value{
 An object of class "hop".

@@ -531,6 +531,28 @@ plot_hisafe_cells <- function(hop,
                          simu.names = simu.names,
                          dates      = dates)
 
+  ## Rotate scene if plot.x = "y"
+  x.lab <- "X (m)"
+  y.lab <- "Y (m)"
+  if(plot.x == "y") {
+    for(p in c("tree.info", "cells")) {
+      xx <- hop[[p]]$y
+      yy <- -hop[[p]]$x
+      hop[[p]]$x <- xx
+      hop[[p]]$y <- yy
+    }
+    ir <- hop$trees$crownRadiusInterRow
+    tl <- hop$trees$crownRadiusTreeLine
+    hop$trees$crownRadiusInterRow <- tl
+    hop$trees$crownRadiusTreeLine <- ir
+    pw <- hop$plot.info$plotWidth
+    ph <- hop$plot.info$plotHeight
+    hop$trees$plot.info$plotWidth  <- ph
+    hop$trees$plot.info$plotHeight <- pw
+    x.lab <- "Y (m)"
+    y.lab <- "-X (m)"
+  }
+
   X.MIN <- Y.MIN <- 0
   X.MAX <- max(hop$plot.info$plotWidth)
   Y.MAX <- max(hop$plot.info$plotHeight)
@@ -562,7 +584,8 @@ plot_hisafe_cells <- function(hop,
       variable_check(hop, "trees", c("crownRadiusInterRow", "crownRadiusTreeLine"), error = TRUE)
       tree.data <- hop$trees %>%
         dplyr::select(SimulationName, Date, id, crownRadiusInterRow, crownRadiusTreeLine) %>%
-        dplyr::left_join(tree.data, by = c("SimulationName", "id"))
+        dplyr::left_join(tree.data, by = c("SimulationName", "id")) %>%
+        dplyr::mutate(crown.linetype = "solid") # for non-phantom trees
     }
   }
 
@@ -582,26 +605,6 @@ plot_hisafe_cells <- function(hop,
     facet_cells <- geom_blank()
   }
 
-  ## Rotate scene if plot.x = "y"
-  x.lab       <- "X (m)"
-  y.lab       <- "Y (m)"
-  if(plot.x == "y") {
-    X <- plot.data$y
-    Y <- -plot.data$x
-    plot.data$x <- X
-    plot.data$y <- Y
-    X <- tree.data$y
-    Y <- -tree.data$x
-    tree.data$x <- X
-    tree.data$y <- Y
-    ir <- tree.data$crownRadiusInterRow
-    tl <- tree.data$crownRadiusTreeLine
-    tree.data$crownRadiusInterRow <- tl
-    tree.data$crownRadiusTreeLine <- ir
-    x.lab       <- "Y (m)"
-    y.lab       <- "-X (m)"
-  }
-
   if(for.anim) {
     ## Add phantom trees if tree crowns grow beyond edge of scene
     phantom.data.x <- tree.data %>%
@@ -613,8 +616,9 @@ plot_hisafe_cells <- function(hop,
       dplyr::mutate(side = as.numeric(as.character(factor(side, levels = c("neg", "pos"), labels = c("-1", "1"))))) %>%
       dplyr::filter(phantom) %>%
       dplyr::left_join(tree.data, by = c("SimulationName", "Date", "id")) %>%
-      dplyr::mutate(x = x + plot.width * side) %>%
-      dplyr::select(-side, -phantom)
+      dplyr::mutate(x = x + plotWidth * side) %>%
+      dplyr::select(-side, -phantom) %>%
+      dplyr::mutate(crown.linetype = "dotted") # for phantom trees
 
     phantom.data.y <- tree.data %>%
       dplyr::group_by(SimulationName, Date, id) %>%
@@ -625,8 +629,9 @@ plot_hisafe_cells <- function(hop,
       dplyr::mutate(side = as.numeric(as.character(factor(side, levels = c("neg", "pos"), labels = c("-1", "1"))))) %>%
       dplyr::filter(phantom) %>%
       dplyr::left_join(tree.data, by = c("SimulationName", "Date", "id")) %>%
-      dplyr::mutate(y = y + plot.height * side) %>%
-      dplyr::select(-side, -phantom)
+      dplyr::mutate(y = y + plotHeight * side) %>%
+      dplyr::select(-side, -phantom) %>%
+      dplyr::mutate(crown.linetype = "dotted") # for phantom trees
 
     tree.data <- dplyr::bind_rows(tree.data, phantom.data.x, phantom.data.y)
 
@@ -660,6 +665,7 @@ plot_hisafe_cells <- function(hop,
     facet_cells +
     geom_raster(aes_string(fill = variable), na.rm = TRUE, hjust = 1, vjust = 1) +
     viridis::scale_fill_viridis(option = "magma", limits = value.range) +
+    scale_linetype_identity() +
     plot.guide +
     coord_equal(xlim   = c(X.MIN, X.MAX),
                 ylim   = c(Y.MIN, Y.MAX),
@@ -681,11 +687,12 @@ plot_hisafe_cells <- function(hop,
         ggforce::geom_ellipsis(data  = tree.data,
                                color = "green",
                                size  = 2,
-                               aes(x0    = x,
-                                   y0    = y,
-                                   a     = crownRadiusInterRow,
-                                   b     = crownRadiusTreeLine,
-                                   angle = 0),
+                               aes(linetype = crown.linetype,
+                                   x0       = x,
+                                   y0       = y,
+                                   a        = crownRadiusInterRow,
+                                   b        = crownRadiusTreeLine,
+                                   angle    = 0),
                                inherit.aes = FALSE,
                                na.rm       = TRUE)
     } else {
