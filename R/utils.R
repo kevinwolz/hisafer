@@ -45,3 +45,21 @@ nan_to_zero <- function(x) {
   x[is.nan(x)] <- 0
   return(x)
 }
+
+swap_cols <- function(df, col1, col2) {
+  c1 <- df[[col1]]
+  c2 <- df[[col2]]
+  df[[col1]] <- c2
+  df[[col2]] <- c1
+  return(df)
+}
+
+is_logical <- function(x, error = TRUE) {
+  x.name <- deparse(substitute(x))
+  check  <- is.logical(x)
+  if(error) {
+    if(!check) stop(paste0(x.name, " argument must be a logical"), call. = FALSE)
+  } else {
+    return(check)
+  }
+}

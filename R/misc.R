@@ -268,6 +268,8 @@ hop_rename <- function(hop, old.names, new.names) {
 #' If NA, the maximum date in \code{hop} is used. Only used if \code{dates} is \code{NULL}.
 #' @param dates A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates to keep.
 #' If \code{NULL}, then \code{date.max} and \code{date.min} are used instad.
+#' @param strip.exp.plan Logical indicating whether or not to remove the exp.plan variables
+#' (which are appended by \code{\link{read_hisafe}}) from each profile in \code{hop}.
 #' @export
 #' @family hisafe helper functions
 #' @examples
@@ -275,11 +277,12 @@ hop_rename <- function(hop, old.names, new.names) {
 #' newhop <- hop_filter(myhop, c("Sim_1", "Sim_2"))
 #' }
 hop_filter <- function(hop,
-                       simu.names = "all",
-                       tree.ids   = "all",
-                       date.min   = NA,
-                       date.max   = NA,
-                       dates      = NULL) {
+                       simu.names     = "all",
+                       tree.ids       = "all",
+                       date.min       = NA,
+                       date.max       = NA,
+                       dates          = NULL,
+                       strip.exp.plan = FALSE) {
   is_hop(hop, error = TRUE)
   if(!all(is.character(simu.names)))                                        stop("simu.names argument must be 'all' or a character vector",  call. = FALSE)
   if(!(tree.ids[1] == "all" | all(is.numeric(tree.ids))))                   stop("tree.ids argument must be 'all' or a numeric vector",      call. = FALSE)
@@ -330,6 +333,16 @@ hop_filter <- function(hop,
         stop(paste0("one or more values of dates are not present in the ", i, " profile"), call. = FALSE)
       }
       hop[[i]] <- dplyr::filter(hop[[i]], Date %in% dates)
+    }
+  }
+
+  ## STRIP EXP PLAN VARS
+  if(strip.exp.plan) {
+    for(p in c("annualplot", "annualtree", "annualcrop", "plot", "trees", "cells", "voxels", "climate", "monthCells")) {
+      if(nrow(hop[[p]]) > 0) {
+        keep.cols <- c(1, which(names(hop[[p]]) == "Date"):ncol(hop[[p]]))
+        hop[[p]] <- dplyr::select(hop[[p]], names(hop[[p]])[keep.cols])
+      }
     }
   }
 
@@ -443,7 +456,7 @@ profile_check <- function(hop, profiles, error = FALSE) {
   is_hop(hop, error = TRUE)
   not.supported <- profiles[!(profiles %in% SUPPORTED.PROFILES$profiles)]
   if(length(not.supported) > 0) stop(paste("The following profiles are not supported profiles:", paste(not.supported, collapse = ", ")), call. = FALSE)
-  if(!is.logical(error))        stop("'error' argument must be a logical", call. = FALSE)
+  is_logical(x = error)
 
   check <- purrr::map_lgl(profiles, function(x) nrow(hop[[x]]) > 0)
   not.found <- profiles[!check]
@@ -476,7 +489,7 @@ variable_check <- function(hop, profile, variables, error = FALSE) {
   is_hop(hop, error = TRUE)
   profile_check(hop, profile, error = TRUE)
   if(!is.character(variables)) stop("variable(s) argument must be a character vector", call. = FALSE)
-  if(!is.logical(error))       stop("'error' argument must be a logical",              call. = FALSE)
+  is_logical(x = error)
 
   check <- purrr::map_lgl(variables, function(x) x %in% names(hop[[profile]]))
   not.found <- variables[!check]

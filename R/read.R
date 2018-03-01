@@ -62,7 +62,7 @@ read_hisafe <- function(hip           = NULL,
   if(is.null(hip) == is.null(path))                             stop("must provide hip or path, not both",                      call. = FALSE)
   if(!(all(is.character(simu.names)) | simu.names[1] == "all")) stop("simu.names argument must be 'all' or a character vector", call. = FALSE)
   if(!(all(is.character(profiles))   | profiles[1]   == "all")) stop("profiles argument must be 'all' or a character vector",   call. = FALSE)
-  if(!is.logical(show.progress))                                stop("show.progress argument must be a logical",                call. = FALSE)
+  is_logical(show.progress)
   if(!(is.numeric(max.size) & length(max.size) == 1))           stop("max.size argument must be a positive integer",            call. = FALSE)
   if(max.size %% 1 != 0 & max.size > 0)                         stop("max.size argument must be a positive integer",            call. = FALSE)
 

@@ -22,6 +22,7 @@
 #' }
 build_hisafe <- function(hip, plot.scene = TRUE) {
   is_hip(hip, error = TRUE)
+  is_logical(plot.scene)
 
   EXP.PLAN <- hip$exp.plan
   dir.create(hip$path, showWarnings = FALSE, recursive = TRUE)

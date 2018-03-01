@@ -5,7 +5,7 @@
 \title{Filter a hop object by SimulationName, Date, and id}
 \usage{
 hop_filter(hop, simu.names = "all", tree.ids = "all", date.min = NA,
-  date.max = NA, dates = NULL)
+  date.max = NA, dates = NULL, strip.exp.plan = FALSE)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
@@ -20,6 +20,9 @@ If NA, the maximum date in \code{hop} is used. Only used if \code{dates} is \cod
 
 \item{dates}{A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates to keep.
 If \code{NULL}, then \code{date.max} and \code{date.min} are used instad.}
+
+\item{strip.exp.plan}{Logical indicating whether or not to remove the exp.plan variables
+(which are appended by \code{\link{read_hisafe}}) from each profile in \code{hop}.}
 }
 \value{
 A hop object.

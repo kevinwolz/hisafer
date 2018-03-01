@@ -78,8 +78,8 @@ define_hisafe <- function(path,
   if(!(is.character(exp.name) & length(exp.name) == 1))     stop("exp.name argument must be a character vector of length 1", call. = FALSE)
   if(!(all(is.character(profiles)) | profiles[1] == "all")) stop("profiles argument must be 'all' or a character vector",    call. = FALSE)
   if(!(is.character(template) & length(template) == 1))     stop("template argument must be a character vector of length 1", call. = FALSE)
-  if(!is.logical(factorial))                                stop("factorial argument must be a logical",                     call. = FALSE)
-  if(!is.logical(force))                                    stop("force argument must be a logical",                         call. = FALSE)
+  is_logical(factorial)
+  is_logical(force)
 
   ## Get profile names and check that they are present in template directory
   available.profiles <- get_available_profiles(template)
@@ -161,7 +161,7 @@ define_hisafe_file <- function(file,
   if(!(all(is.character(profiles)) | profiles[1] == "all")) stop("profiles argument must be 'all' or a character vector",    call. = FALSE)
   if(!(is.character(template) & length(template) == 1))     stop("template argument must be a character vector of length 1", call. = FALSE)
   if(!dir.exists(template.path))                            stop("template directory does not exist",                        call. = FALSE)
-  if(!is.logical(force))                                    stop("force argument must be a logical",                         call. = FALSE)
+  is_logical(force)
 
   exp.plan <- dplyr::as_tibble(read.csv(file, header = TRUE, stringsAsFactors = FALSE))
 

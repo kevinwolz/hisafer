@@ -35,7 +35,7 @@ plot_hisafe_cycle_annual <- function(hop,
 
   if(!(cycle %in% c("carbon", "nitrogen", "water", "light")))                  stop("cycle argument must be one of: carbon, nitrogen, water, light", call. = FALSE)
   if(!(length(year.lim) == 2 & (is.numeric(year.lim) | all(is.na(year.lim))))) stop("year.lim argument must be a numeric vector of length 2",        call. = FALSE)
-  if(!is.logical(plot))                                                        stop("plot argument must be a logical",                               call. = FALSE)
+  is_logical(plot)
 
   hop <- hop_filter(hop = hop, simu.names = simu.names)
 
@@ -178,7 +178,7 @@ plot_hisafe_cycle_daily <- function(hop,
   if(!(cycle %in% c("carbon", "nitrogen", "water", "light")))   stop("cycle argument must be one of: carbon, nitrogen, water, light", call. = FALSE)
   if(!(all(is.numeric(years))        | years[1]      == "all")) stop("years argument must be 'all' or a numeric vector",              call. = FALSE)
   if(!(length(doy.lim) == 2 & all(doy.lim %in% 1:366)))         stop("doy.lim argument must be of length 2 with values in 1:366",     call. = FALSE)
-  if(!is.logical(plot))                                         stop("plot argument must be a logical",                               call. = FALSE)
+  is_logical(plot)
 
   if(simu.names[1] == "all") simu.names <- unique(hop$exp.plan$SimulationName)
   if(years[1]      == "all") years      <- unique(hop$plot$Year[which(hop$plot$SimulationName %in% simu.names)])

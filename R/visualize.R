@@ -63,9 +63,12 @@ hisafe_slice <- function(hop,
 
   if(!requireNamespace("ggforce", quietly = TRUE)) stop("The package 'ggforce' is required for hisafe_slice(). Please install and load it.", call. = FALSE)
   is_hop(hop, error = TRUE)
+  is_logical(trees)
+  is_logical(crops)
+  is_logical(voxels)
 
-  if(!is.logical(crops))  stop("crops argument must be a logical",  call. = FALSE)
-  if(!is.logical(voxels)) stop("voxels argument must be a logical", call. = FALSE)
+  crops  <- crops  & nrow(hop$cells) > 0
+  voxels <- voxels & nrow(hop$voxels) > 0
 
   date <- lubridate::ymd(date)
 
@@ -87,33 +90,13 @@ hisafe_slice <- function(hop,
     variable_check(hop, "voxels", voxel.vars, error = TRUE)
   }
 
-  ## Remove all exp.plan variables from hop profiles so that there are no redudant columns when merged with tree.info or plot.info
-  for(p in c("annualplot", "annualtree", "annualcrop", "plot", "trees", "cells", "voxels", "climate", "monthCells")) {
-    if(nrow(hop[[p]]) > 0) {
-      keep.cols <- c(1, which(names(hop[[p]]) == "Date"):ncol(hop[[p]]))
-      hop[[p]] <- dplyr::select(hop[[p]], names(hop[[p]])[keep.cols])
-    }
-  }
-
-  ## Switch x-y if plot.x == "y"
   x.lab <- "X (m)"
-  if(plot.x == "y") {
+  if(plot.x == "y") { # Switch x-y if plot.x == "y"
     if(!crops)  stop("crops must be TRUE if plot.x = 'y'",  call. = FALSE)
     x.lab <- "Y (m)"
-    for(p in c("tree.info", "cells", "voxels")[c(TRUE, crops, voxels)]) {
-      xx <- hop[[p]]$y
-      yy <- hop[[p]]$x
-      hop[[p]]$x <- xx
-      hop[[p]]$y <- yy
-    }
-    ir <- hop$trees$crownRadiusInterRow
-    tl <- hop$trees$crownRadiusTreeLine
-    hop$trees$crownRadiusInterRow <- tl
-    hop$trees$crownRadiusTreeLine <- ir
-    pw <- hop$plot.info$plotWidth
-    ph <- hop$plot.info$plotHeight
-    hop$plot.info$plotWidth  <- ph
-    hop$plot.info$plotHeight <- pw
+    for(p in c("tree.info", "cells", "voxels")[c(TRUE, crops, voxels)]) hop[[p]] <- swap_cols(hop[[p]], "x", "y")
+    hop$trees     <- swap_cols(hop$trees,     "crownRadiusInterRow", "crownRadiusTreeLine")
+    hop$plot.info <- swap_cols(hop$plot.info, "plotWidth",           "plotHeight")
   }
 
   if(crops) {
@@ -136,14 +119,16 @@ hisafe_slice <- function(hop,
 
   if(voxels) Y.voxels <- unique(Ys$voxels.Y)
 
-  hop.full <- hop_filter(hop        = hop,
-                         simu.names = simu.names,
-                         tree.ids   = tree.ids,
-                         dates      = rel.dates)
-  hop <- hop_filter(hop        = hop,
-                    simu.names = simu.names,
-                    tree.ids   = tree.ids,
-                    dates      = date)
+  hop.full <- hop_filter(hop            = hop,
+                         simu.names     = simu.names,
+                         tree.ids       = tree.ids,
+                         dates          = rel.dates,
+                         strip.exp.plan = TRUE)
+  hop <- hop_filter(hop            = hop,
+                    simu.names     = simu.names,
+                    tree.ids       = tree.ids,
+                    dates          = date,
+                    strip.exp.plan = TRUE)
 
   rect.min.border   <- 0.25
   rect.max.border   <- 1
@@ -172,7 +157,6 @@ hisafe_slice <- function(hop,
   plot.height <- Y.MAX - Y.MIN
   plot.width  <- X.MAX - X.MIN
 
-  ## Pruning
   if(trees) {
     hop$tree.info$tree.pruning.dates <- hop$tree.info$root.pruning.dates <- list(NA)
     hop$tree.info$tree.pruning <- hop$tree.info$root.pruning <- 0
@@ -228,8 +212,8 @@ hisafe_slice <- function(hop,
       dplyr::mutate(tree.height           = height) %>%
       dplyr::mutate(trunk.radius          = dbh / 2 / 100) %>%
       dplyr::mutate(crown.center.y        = crown.base.height + (tree.height - crown.base.height) / 2) %>%
-      dplyr::mutate(crown.alpha           = crown.alpha / crown.alpha.max) %>%
-      dplyr::mutate(trunk.alpha           = trunk.alpha / trunk.alpha.max) %>%
+      dplyr::mutate(crown.alpha           = nan_to_zero(crown.alpha / crown.alpha.max)) %>%
+      dplyr::mutate(trunk.alpha           = nan_to_zero(trunk.alpha / trunk.alpha.max)) %>%
       dplyr::mutate(tree.x                = x) %>%
       dplyr::mutate(crown.linetype        = "solid") %>% # for non-phantom trees
       dplyr::mutate(tree.pruning.height   = pmin(tree.height * tree.pruning.prop, tree.pruning.max.height)) %>%
@@ -238,13 +222,11 @@ hisafe_slice <- function(hop,
                     crown.center.y, tree.x, trunk.growth, crown.growth, height.growth,
                     crown.alpha, trunk.alpha, crown.linetype,
                     tree.pruning, tree.pruning.height, root.pruning, root.pruning.depth, root.pruning.distance)
-    tree.data$crown.alpha[is.nan(tree.data$crown.alpha)] <- 0 # for when the max value in a year is 0
-    tree.data$trunk.alpha[is.nan(tree.data$trunk.alpha)] <- 0 # for when the max value in a year is 0
 
     trunk.data <- tree.data %>%
       dplyr::select(SimulationName, Date, id, tree.x, tree.height, trunk.radius, trunk.alpha) %>%
-      dplyr::mutate(base.radius = (tree.height * trunk.radius) / (tree.height - 1.3)) %>%
-      dplyr::mutate(base.radius = pmax(0.01, base.radius)) %>% # for when the tree.height < 1.3m (height for dbh measurements), set base radius to 1cm
+      #dplyr::mutate(base.radius = (tree.height * trunk.radius) / (tree.height - 1.3)) %>%
+      dplyr::mutate(base.radius = trunk.radius) %>%
       dplyr::mutate(L.x = tree.x - base.radius) %>%
       dplyr::mutate(R.x = tree.x + base.radius) %>%
       dplyr::mutate(T.x = tree.x) %>%
@@ -261,8 +243,8 @@ hisafe_slice <- function(hop,
     ## Add phantom trees if tree crowns grow beyond edge of scene
     phantom.data <- tree.data %>%
       dplyr::group_by(SimulationName, Date, id) %>%
-      dplyr::mutate(pos = (tree.x - crown.radius) < X.MIN) %>%
-      dplyr::mutate(neg = (tree.x + crown.radius) > X.MAX) %>%
+      dplyr::mutate(pos = (tree.x - crown.radius) < 0) %>%
+      dplyr::mutate(neg = (tree.x + crown.radius) > plotWidth) %>%
       dplyr::select(SimulationName, Date, id, pos, neg) %>%
       tidyr::gather(key = "side", value = "phantom", pos, neg) %>%
       dplyr::mutate(side = as.numeric(as.character(factor(side, levels = c("neg", "pos"), labels = c("-1", "1"))))) %>%
@@ -390,6 +372,12 @@ hisafe_slice <- function(hop,
     dplyr::mutate(water.table      = as.numeric(waterTableDepth > soilDepth)) %>%
     dplyr::select(SimulationName, Year, Date, precip.magnitude, waterTableDepth, soilDepth, plotWidth, water.table)
   climate.data$waterTableDepth[climate.data$waterTableDepth < climate.data$soilDepth] <- 0
+
+  white.boxes <- build_white_boxes_slice(hop   = hop,
+                                         X.MIN = X.MIN,
+                                         X.MAX = X.MAX,
+                                         Y.MIN = Y.MIN,
+                                         Y.MAX = Y.MAX)
 
   ## CREATE PLOT
   plot.obj <- ggplot(climate.data) +
@@ -615,6 +603,16 @@ hisafe_slice <- function(hop,
                        yend = waterTableDepth))
   }
 
+  ## WHITE BOXES TO COVER PHANTOM TREES
+  plot.obj <- plot.obj +
+    geom_rect(data = white.boxes,
+              size = 0,
+              fill = "white",
+              aes(xmin = xmin,
+                  xmax = xmax,
+                  ymin = ymin,
+                  ymax = ymax))
+
   return(plot.obj)
 }
 
@@ -706,8 +704,8 @@ hisafe_snapshot <- function(hop,
   profile_check(hop, "trees", error = TRUE)
   if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character vector", call. = FALSE)
   if(!is.character(file.prefix))                          stop("file.prefix argument must be a character vector", call. = FALSE)
-  if(!is.logical(slice))                                  stop("slice argument must be a logical",                call. = FALSE)
-  if(!is.logical(cells))                                  stop("cells argument must be a logical",                call. = FALSE)
+  is_logical(slice)
+  is_logical(cells)
 
   output.path <- clean_path(paste0(diag_output_path(hop, output.path), "/snapshots/"))
   dir.create(output.path, recursive = TRUE, showWarnings = FALSE)
@@ -1254,6 +1252,36 @@ visual_legend <- function(hop,
 
   return(plot.obj)
 }
+
+#' Build white boxes to cover phantom trees
+#' @description Builds white boxes to cover phantom trees for \code{\link{hisafe_slice}}
+#' @param hop An object of class hop.
+#' @param X.MIN Lower x limit for plot.
+#' @param X.MAX Upper x limit for plot.
+#' @param Y.MIN Lower y limit for plot.
+#' @param Y.MAX Upper y limit for plot.
+build_white_boxes_slice <- function(hop, X.MIN, X.MAX, Y.MIN, Y.MAX) {
+  boxes <- hop$plot.info %>%
+    dplyr::select(SimulationName, plotWidth) %>%
+    dplyr::filter(plotWidth < max(plotWidth))
+
+  pos.box <- boxes %>%
+    dplyr::mutate(xmin = plotWidth,
+                  xmax = X.MAX,
+                  ymin = Y.MIN,
+                  ymax = Y.MAX)
+  neg.box <- boxes %>%
+    dplyr::mutate(xmin = X.MIN,
+                  xmax = 0,
+                  ymin = Y.MIN,
+                  ymax = Y.MAX)
+
+  white.boxes <- dplyr::bind_rows(pos.box, neg.box) %>%
+    dplyr::filter(SimulationName %in% boxes$SimulationName)
+
+  return(white.boxes)
+}
+
 
 # hisafe_animate <- function(path,
 #                            interval    = 10,
