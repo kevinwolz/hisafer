@@ -447,6 +447,8 @@ plot_hisafe_annualcrop <- function(hop,
 #' @param trees Logical indicating if a point should be plotted at the location of each tree.
 #' @param canopies Logical indicating if an elipsoid should be plotted representing the size of each tree canopy.
 #' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.
+#' @param mem.max An integer specifying the maximum number of days into the past to search
+#' for cell data when no data is available for a given date within \code{hop}.
 #' @param for.anim If \code{TRUE}, the plot formatting is simplified for use in animations.
 #' @export
 #' @importFrom dplyr %>%
@@ -473,6 +475,7 @@ plot_hisafe_cells <- function(hop,
                               trees      = TRUE,
                               canopies   = TRUE,
                               plot       = TRUE,
+                              max.mem    = 0,
                               for.anim   = FALSE) {
 
   is_hop(hop, error = TRUE)
@@ -494,6 +497,8 @@ plot_hisafe_cells <- function(hop,
                          simu.names     = simu.names,
                          dates          = dates,
                          strip.exp.plan = TRUE)
+
+  if(nrow(hop$cells) == 0) hop$cells <- add_historic_data(df = hop.full$cells, dates = dates, mem.max = mem.max)
 
   x.lab <- "X (m)"
   y.lab <- "Y (m)"
@@ -755,6 +760,7 @@ ggsave_fitmax <- function(filename,
                           maxheight = 7,
                           maxwidth  = maxheight,
                           units     = "in", ...) {
+  if(is.null(plot)) return(FALSE)
   dims = get_dims(ggobj     = plot,
                   maxheight = maxheight,
                   maxwidth  = maxwidth,
@@ -1084,6 +1090,8 @@ create_tree_data <- function(hop, trees, canopies, plot.x) {
         dplyr::mutate(crown.linetype = "solid") %>% # for non-phantom trees
         add_phantom_trees()
     }
+  } else {
+    tree.data <- dplyr::tibble()
   }
   return(tree.data)
 }

@@ -30,6 +30,8 @@
 #' @param trees A logical indicating whether or not to plot the trees in the scene.
 #' @param crops A logical indicating whether or not to plot the crops in the scene.
 #' @param voxels A logical indicating whether or not to plot the voxels in the scene.
+#' @param mem.max An integer specifying the maximum number of days into the past to search
+#' for crop/voxel data when no data is available for \code{date} within \code{hop}.
 #' @export
 #' @importFrom dplyr %>%
 #' @import ggplot2
@@ -57,18 +59,16 @@ hisafe_slice <- function(hop,
                                      voxel.L.alpha = "totalTreeWaterUptake",
                                      voxel.C.alpha = "fineRootCost",
                                      voxel.R.alpha = "totalTreeNitrogenUptake"),
-                         trees       = TRUE,
-                         crops       = TRUE,
-                         voxels      = TRUE) {
+                         trees   = TRUE,
+                         crops   = TRUE,
+                         voxels  = TRUE,
+                         mem.max = 0) {
 
   if(!requireNamespace("ggforce", quietly = TRUE)) stop("The package 'ggforce' is required for hisafe_slice(). Please install and load it.", call. = FALSE)
   is_hop(hop, error = TRUE)
   is_logical(trees)
   is_logical(crops)
   is_logical(voxels)
-
-  crops  <- crops  & nrow(hop$cells) > 0
-  voxels <- voxels & nrow(hop$voxels) > 0
 
   date <- lubridate::ymd(date)
 
@@ -117,18 +117,27 @@ hisafe_slice <- function(hop,
     Y.cells  <- unique(Ys$cells.Y)
   }
 
-  if(voxels) Y.voxels <- unique(Ys$voxels.Y)
-
   hop.full <- hop_filter(hop            = hop,
                          simu.names     = simu.names,
                          tree.ids       = tree.ids,
                          dates          = rel.dates,
                          strip.exp.plan = TRUE)
-  hop <- hop_filter(hop            = hop,
-                    simu.names     = simu.names,
-                    tree.ids       = tree.ids,
-                    dates          = date,
-                    strip.exp.plan = TRUE)
+
+  hop       <- hop_filter(hop            = hop,
+                          simu.names     = simu.names,
+                          tree.ids       = tree.ids,
+                          dates          = date,
+                          strip.exp.plan = TRUE)
+
+  crops  <- crops  & nrow(hop.full$cells) > 0
+  voxels <- voxels & nrow(hop.full$voxels) > 0
+
+  ## VOXEL & CELL MEMORY
+  if(voxels & nrow(hop$voxels) == 0) hop$voxels <- add_historic_data(df = hop.full$voxels, dates = date, mem.max = mem.max)
+  if(crops  & nrow(hop$cells)  == 0) hop$cells  <- add_historic_data(df = hop.full$cells,  dates = date, mem.max = mem.max)
+
+  crops  <- crops  & nrow(hop$voxels) > 0
+  voxels <- voxels & nrow(hop$voxels) > 0
 
   rect.min.border   <- 0.25
   rect.max.border   <- 1
@@ -136,17 +145,13 @@ hisafe_slice <- function(hop,
   arrow.type        <- arrow(length = unit(5, "points"))
   arrow.size        <- 1
   Y.MAX             <- max(hop.full$trees$height, na.rm = TRUE) + arrow.length
-  if(is.na(max.soil.depth)) max.soil.depth <- max(hop.full$plot.info$soilDepth)
   if(voxels) {
+    Y.voxels <- unique(Ys$voxels.Y)
     circle.offset     <- min(hop.full$plot.info$cellWidth) / 4
     circle.max.radius <- min(circle.offset, min(diff(unique(hop.full$voxels$z)))) * 0.9 / 2
     circle.max.border <- 0.25
-    if(is.na(max.soil.depth)){
-      Y.MIN <- -max(hop.full$plot.info$soilDepth)
-    } else {
-      deep.voxels <- unique(hop.full$voxels$z)[unique(hop.full$voxels$z) > abs(max.soil.depth)]
-      Y.MIN <- ifelse(length(deep.voxels) > 0, deep.voxels[1] + (deep.voxels[2] - deep.voxels[1]) / 2, -max(hop.full$plot.info$soilDepth))
-    }
+    if(is.na(max.soil.depth)) max.soil.depth <- max(hop.full$voxels$z) + min(diff(hop.full$voxels$z)[diff(hop.full$voxels$z) > 0]) # cannot use plot.info$soilDepth in case depths not exported
+    Y.MIN <- -max.soil.depth
   } else {
     Y.MIN <- 0
   }
@@ -154,13 +159,16 @@ hisafe_slice <- function(hop,
   X.MIN <- 0
   X.MAX <- max(hop$plot.info$plotWidth)
 
-  plot.height <- Y.MAX - Y.MIN
-  plot.width  <- X.MAX - X.MIN
-
   if(trees) {
-    hop$tree.info$tree.pruning.dates <- hop$tree.info$root.pruning.dates <- list(NA)
-    hop$tree.info$tree.pruning <- hop$tree.info$root.pruning <- 0
-    hop$tree.info$root.pruning.distance <- hop$tree.info$root.pruning.depth <- hop$tree.info$tree.pruning.prop <- hop$tree.info$tree.pruning.max.height <- 0
+    hop$tree.info <- hop$tree.info %>%
+      dplyr::mutate(tree.pruning.dates      = list(NA)) %>%
+      dplyr::mutate(root.pruning.dates      = list(NA)) %>%
+      dplyr::mutate(tree.pruning            = 0) %>%
+      dplyr::mutate(root.pruning            = 0) %>%
+      dplyr::mutate(root.pruning.distance   = 0) %>%
+      dplyr::mutate(root.pruning.depth      = 0) %>%
+      dplyr::mutate(tree.pruning.prop       = 0) %>%
+      dplyr::mutate(tree.pruning.max.height = 0)
     for(i in 1:nrow(hop$tree.info)) {
       if(!is.na(hop$tree.info$treePruningYears[[i]][1])) {
         hop$tree.info$tree.pruning.dates[[i]] <- lubridate::ymd(paste0(hop$tree.info$treePruningYears[[i]] - 1 +
@@ -642,6 +650,8 @@ hisafe_slice <- function(hop,
 #' @param crops A logical indicating whether to plot crops via \code{\link{plot_hisafe_cells}}.
 #' @param voxels A logical indicating whether to plot voxels via \code{\link{plot_hisafe_cells}}.
 #' @param cells A logical indicating whether the plot from \code{\link{plot_hisafe_cells}} should be included.
+#' @param mem.max An integer specifying the maximum number of days into the past to search
+#' for crop/cell/voxel data when no data is available for a given date within \code{hop}.
 #' @param device Graphical device to use for output files. See ggplot2::ggsave().
 #' @param dpi Resolution of output files. See ggplot2::ggsave().
 #' @param vars A list of variable names passed to \code{\link{hisafe_slice}}. See \code{\link{hisafe_slice}} for details.
@@ -670,6 +680,7 @@ hisafe_snapshot <- function(hop,
                             crops       = TRUE,
                             voxels      = TRUE,
                             cells       = TRUE,
+                            mem.max     = 10,
                             device      = "png",
                             dpi         = 250,
                             vars = list(crown.alpha   = "leafArea",
@@ -730,7 +741,8 @@ hisafe_snapshot <- function(hop,
                                  trees       = trees,
                                  crops       = crops,
                                  voxels      = voxels,
-                                 plot.x      = plot.x, ...) +
+                                 plot.x      = plot.x,
+                                 mem.max     = mem.max, ...) +
         theme(axis.title.x = element_blank(),
               axis.text.x  = element_blank(),
               axis.ticks.x = element_blank(),
@@ -744,6 +756,7 @@ hisafe_snapshot <- function(hop,
                                       rel.dates  = rel.dates,
                                       simu.names = simu.names,
                                       plot.x     = plot.x,
+                                      mem.max    = mem.max,
                                       for.anim   = TRUE) +
         theme(plot.margin  = margin(10,10,15,10))
     }
@@ -1282,6 +1295,28 @@ build_white_boxes_slice <- function(hop, X.MIN, X.MAX, Y.MIN, Y.MAX) {
   return(white.boxes)
 }
 
+#' Add historic data
+#' @description Adds historic data when cells/voxels data is missing for \code{\link{hisafe_slice}}
+#' @param df A hop profile tibble
+#' @param date date argument from \code{\link{hisafe_slice}}.
+#' @param mem.max mem.max argument from \code{\link{hisafe_slice}}.
+add_historic_data <- function(df, dates, mem.max) {
+  add_hist <- function(date, df, mem.max) {
+    df %>%
+      dplyr::filter(Date < date, Date >= date - mem.max) %>%
+      dplyr::group_by(SimulationName, Date) %>%
+      dplyr::summarize(n = n()) %>%
+      dplyr::filter(n > 0) %>%
+      dplyr::ungroup(Date) %>%
+      dplyr::group_by(SimulationName) %>%
+      dplyr::summarize(Date = max(Date)) %>%
+      dplyr::ungroup() %>%
+      dplyr::left_join(df, by = c("SimulationName", "Date")) %>%
+      dplyr::mutate(Date = date)
+  }
+  out <- purrr::map_df(dates, add_hist, df = df, mem.max = mem.max)
+  return(out)
+}
 
 # hisafe_animate <- function(path,
 #                            interval    = 10,

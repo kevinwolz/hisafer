@@ -8,13 +8,13 @@ hisafe_snapshot(hop, output.path = NULL, file.prefix = "HISAFE_Snapshot",
   cells.var = "relativeTotalParIncident", date.min = NA, date.max = NA,
   dates = NULL, rel.dates = NULL, simu.names = "all", plot.x = "x",
   slice = TRUE, trees = TRUE, crops = TRUE, voxels = TRUE,
-  cells = TRUE, device = "png", dpi = 250, vars = list(crown.alpha =
-  "leafArea", trunk.alpha = "carbonLabile", crop.alpha = "lai", yield.alpha =
-  "eai", voxel.alpha = "totalTreeRootDensity", voxel.border = "cropRootDensity",
-  voxel.L.size = "waterStock", voxel.C.size = "totalTreeCoarseRootBiomass",
-  voxel.R.size = "mineralNitrogenStock", voxel.L.alpha = "totalTreeWaterUptake",
-  voxel.C.alpha = "fineRootCost", voxel.R.alpha = "totalTreeNitrogenUptake"),
-  ...)
+  cells = TRUE, mem.max = 10, device = "png", dpi = 250,
+  vars = list(crown.alpha = "leafArea", trunk.alpha = "carbonLabile",
+  crop.alpha = "lai", yield.alpha = "eai", voxel.alpha = "totalTreeRootDensity",
+  voxel.border = "cropRootDensity", voxel.L.size = "waterStock", voxel.C.size =
+  "totalTreeCoarseRootBiomass", voxel.R.size = "mineralNitrogenStock",
+  voxel.L.alpha = "totalTreeWaterUptake", voxel.C.alpha = "fineRootCost",
+  voxel.R.alpha = "totalTreeNitrogenUptake"), ...)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -52,6 +52,9 @@ This will be applied to the plots from both \code{\link{hisafe_slice}} and \code
 \item{voxels}{A logical indicating whether to plot voxels via \code{\link{plot_hisafe_cells}}.}
 
 \item{cells}{A logical indicating whether the plot from \code{\link{plot_hisafe_cells}} should be included.}
+
+\item{mem.max}{An integer specifying the maximum number of days into the past to search
+for crop/cell/voxel data when no data is available for a given date within \code{hop}.}
 
 \item{device}{Graphical device to use for output files. See ggplot2::ggsave().}
 

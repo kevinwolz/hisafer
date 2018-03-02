@@ -262,6 +262,7 @@ hop_rename <- function(hop, old.names, new.names) {
 #' @return A hop object.
 #' @param hop An object of class hop or face.
 #' @param simu.names A character vector of the SimulationNames to keep. If "all", no filtering occurs.
+#' @param tree.ids A numeric vector of the tree ids to keep. If "all", no filtering occurs.
 #' @param date.min A character string of the minimum date to keep, in the format "YYYY-MM-DD" or of class Date.
 #' If NA, the minimum date in \code{hop} is used. Only used if \code{dates} is \code{NULL}.
 #' @param date.max A character string of the maximum date to keep, in the format "YYYY-MM-DD" or of class Date.
@@ -329,9 +330,6 @@ hop_filter <- function(hop,
   } else if(!is.null(dates)) {
     dates <- lubridate::ymd(dates)
     for(i in profiles) {
-      if(!all(dates %in% unique(hop[[i]]$Date)) & !grepl("annual|month", i)) {
-        stop(paste0("one or more values of dates are not present in the ", i, " profile"), call. = FALSE)
-      }
       hop[[i]] <- dplyr::filter(hop[[i]], Date %in% dates)
     }
   }

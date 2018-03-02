@@ -58,6 +58,7 @@ plot_hisafe_cycle_annual <- function(hop,
     if(is.null(color.palette)) color.palette <- c("#E69F00", "grey20", "#56B4E9", "#009E73")
 
   } else if(cycle == "carbon") {
+    if(!profile_check(hop, "trees")) return(NULL)
     plot.data  <- get_carbon_pools(hop) %>%
       dplyr::group_by(SimulationName, Year, Month, Day, Date, JulianDay, flux) %>%
       dplyr::summarize(value = sum(value)) %>% # sum all trees on scene
@@ -218,6 +219,7 @@ plot_hisafe_cycle_daily <- function(hop,
     y.lab       <- "Intercepted PAR (% of incident PAR)"
 
   } else if(cycle == "carbon") {
+    if(!profile_check(hop, "trees")) return(NULL)
     plot.data   <- get_carbon_pools(hop)
     if(is.null(color.palette)) color.palette <- c("#009E73","#999999", "#D55E00", "#E69F00", "#56B4E9", "#0072B2", "#F0E442", "#CC79A7")
     cycle.geom  <- geom_area(aes(fill = flux), na.rm = TRUE)

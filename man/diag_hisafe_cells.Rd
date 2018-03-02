@@ -5,7 +5,8 @@
 \title{Plot cells diagnostics of Hi-sAFe output}
 \usage{
 diag_hisafe_cells(hop, dates = unique(grep("-07-01",
-  as.character(hop$cells$Date), value = TRUE)), output.path = NULL, ...)
+  as.character(hop$cells$Date), value = TRUE))[seq(1, 40, 5)],
+  output.path = NULL, ...)
 }
 \arguments{
 \item{hop}{An object of class "hop" or "face" containing output data from one or more Hi-sAFe simulations.}

@@ -215,7 +215,7 @@ diag_hisafe_annualcrop <- function(hop,
 #' diag_hisafe_cells(mydata, "2000-07-01")
 #' }
 diag_hisafe_cells <- function(hop,
-                              dates       = unique(grep("-07-01", as.character(hop$cells$Date), value = TRUE)),
+                              dates       = unique(grep("-07-01", as.character(hop$cells$Date), value = TRUE))[seq(1, 40, 5)],
                               output.path = NULL, ...) {
 
   is_hop(hop, error = TRUE)
@@ -334,7 +334,7 @@ diag_hisafe <- function(hop,
   }
 
   if(cells & profile_check(hop, "cells")) {
-    cat("\n-- Plotting voxels diagnostics")
+    cat("\n-- Plotting cells diagnostics")
     diag_hisafe_cells(hop)
   }
 

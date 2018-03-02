@@ -12,6 +12,8 @@ hop_filter(hop, simu.names = "all", tree.ids = "all", date.min = NA,
 
 \item{simu.names}{A character vector of the SimulationNames to keep. If "all", no filtering occurs.}
 
+\item{tree.ids}{A numeric vector of the tree ids to keep. If "all", no filtering occurs.}
+
 \item{date.min}{A character string of the minimum date to keep, in the format "YYYY-MM-DD" or of class Date.
 If NA, the minimum date in \code{hop} is used. Only used if \code{dates} is \code{NULL}.}
 
