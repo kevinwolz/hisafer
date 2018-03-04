@@ -475,7 +475,7 @@ plot_hisafe_cells <- function(hop,
                               trees      = TRUE,
                               canopies   = TRUE,
                               plot       = TRUE,
-                              max.mem    = 0,
+                              mem.max    = 0,
                               for.anim   = FALSE) {
 
   is_hop(hop, error = TRUE)

@@ -27,6 +27,8 @@
 #'  \item{"voxel.C.alpha"}{ - transparency of the center circle within the voxel}
 #'  \item{"voxel.R.alpha"}{ - transparency of the right circle within the voxel}
 #' }
+#' All non-voxel aesthetics set by \code{vars} are relative to the maximum value in each simulation-year combination.
+#' All voxel aesthetics set by \code{vars} are relative to the maximum value in each simulation.
 #' @param trees A logical indicating whether or not to plot the trees in the scene.
 #' @param crops A logical indicating whether or not to plot the crops in the scene.
 #' @param voxels A logical indicating whether or not to plot the voxels in the scene.
@@ -233,7 +235,6 @@ hisafe_slice <- function(hop,
 
     trunk.data <- tree.data %>%
       dplyr::select(SimulationName, Date, id, tree.x, tree.height, trunk.radius, trunk.alpha) %>%
-      #dplyr::mutate(base.radius = (tree.height * trunk.radius) / (tree.height - 1.3)) %>%
       dplyr::mutate(base.radius = trunk.radius) %>%
       dplyr::mutate(L.x = tree.x - base.radius) %>%
       dplyr::mutate(R.x = tree.x + base.radius) %>%
@@ -350,6 +351,7 @@ hisafe_slice <- function(hop,
                        voxel.C.alpha = sum(voxel.C.alpha),
                        voxel.R.alpha = sum(voxel.R.alpha)) %>%
       dplyr::ungroup() %>%
+      dplyr::group_by(SimulationName) %>% # Year could be added to this
       dplyr::summarize(voxel.alpha.max   = max(voxel.alpha),
                        voxel.border.max  = max(voxel.border),
                        voxel.L.size.max  = max(voxel.L.size),
@@ -360,14 +362,15 @@ hisafe_slice <- function(hop,
                        voxel.R.alpha.max = max(voxel.R.alpha))
 
     voxel.data <- voxel %>%
-      dplyr::mutate(voxel.alpha    = voxel.alpha   / voxel.max$voxel.alpha.max)  %>%
-      dplyr::mutate(voxel.border   = voxel.border  / voxel.max$voxel.border.max * rect.max.border + rect.min.border) %>%
-      dplyr::mutate(voxel.L.size   = voxel.L.size  / voxel.max$voxel.L.size.max * circle.max.radius) %>%
-      dplyr::mutate(voxel.C.size   = voxel.C.size  / voxel.max$voxel.C.size.max * circle.max.radius) %>%
-      dplyr::mutate(voxel.R.size   = voxel.R.size  / voxel.max$voxel.R.size.max * circle.max.radius) %>%
-      dplyr::mutate(voxel.L.alpha  = voxel.L.alpha / voxel.max$voxel.L.alpha.max)  %>%
-      dplyr::mutate(voxel.C.alpha  = voxel.C.alpha / voxel.max$voxel.C.alpha.max)  %>%
-      dplyr::mutate(voxel.R.alpha  = voxel.R.alpha / voxel.max$voxel.R.alpha.max)  %>%
+      dplyr::left_join(voxel.max, by = c("SimulationName")) %>% # Year could be added to this
+      dplyr::mutate(voxel.alpha    = voxel.alpha   / voxel.alpha.max)  %>%
+      dplyr::mutate(voxel.border   = voxel.border  / voxel.border.max * rect.max.border + rect.min.border) %>%
+      dplyr::mutate(voxel.L.size   = voxel.L.size  / voxel.L.size.max * circle.max.radius) %>%
+      dplyr::mutate(voxel.C.size   = voxel.C.size  / voxel.C.size.max * circle.max.radius) %>%
+      dplyr::mutate(voxel.R.size   = voxel.R.size  / voxel.R.size.max * circle.max.radius) %>%
+      dplyr::mutate(voxel.L.alpha  = voxel.L.alpha / voxel.L.alpha.max)  %>%
+      dplyr::mutate(voxel.C.alpha  = voxel.C.alpha / voxel.C.alpha.max)  %>%
+      dplyr::mutate(voxel.R.alpha  = voxel.R.alpha / voxel.R.alpha.max)  %>%
       dplyr::mutate(voxel.L.border = circle.max.border * as.numeric(voxel.L.size > 0)) %>%
       dplyr::mutate(voxel.C.border = circle.max.border * as.numeric(voxel.C.size > 0)) %>%
       dplyr::mutate(voxel.R.border = circle.max.border * as.numeric(voxel.R.size > 0))
@@ -650,6 +653,7 @@ hisafe_slice <- function(hop,
 #' @param crops A logical indicating whether to plot crops via \code{\link{plot_hisafe_cells}}.
 #' @param voxels A logical indicating whether to plot voxels via \code{\link{plot_hisafe_cells}}.
 #' @param cells A logical indicating whether the plot from \code{\link{plot_hisafe_cells}} should be included.
+#' @param complete.only A logical indicating whether plots should only be created if ALL simulations have data for the desired crops/cells/voxels on \code{date}.
 #' @param mem.max An integer specifying the maximum number of days into the past to search
 #' for crop/cell/voxel data when no data is available for a given date within \code{hop}.
 #' @param device Graphical device to use for output files. See ggplot2::ggsave().
@@ -666,23 +670,24 @@ hisafe_slice <- function(hop,
 #' \dontrun{
 #' }
 hisafe_snapshot <- function(hop,
-                            output.path = NULL,
-                            file.prefix = "HISAFE_Snapshot",
-                            cells.var   = "relativeTotalParIncident",
-                            date.min    = NA,
-                            date.max    = NA,
-                            dates       = NULL,
-                            rel.dates   = NULL,
-                            simu.names  = "all",
-                            plot.x      = "x",
-                            slice       = TRUE,
-                            trees       = TRUE,
-                            crops       = TRUE,
-                            voxels      = TRUE,
-                            cells       = TRUE,
-                            mem.max     = 10,
-                            device      = "png",
-                            dpi         = 250,
+                            output.path   = NULL,
+                            file.prefix   = "HISAFE_Snapshot",
+                            cells.var     = "relativeTotalParIncident",
+                            date.min      = NA,
+                            date.max      = NA,
+                            dates         = NULL,
+                            rel.dates     = NULL,
+                            simu.names    = "all",
+                            plot.x        = "x",
+                            slice         = TRUE,
+                            trees         = TRUE,
+                            crops         = TRUE,
+                            voxels        = TRUE,
+                            cells         = TRUE,
+                            complete.only = FALSE,
+                            mem.max       = 10,
+                            device        = "png",
+                            dpi           = 250,
                             vars = list(crown.alpha   = "leafArea",
                                         trunk.alpha   = "carbonLabile",
                                         crop.alpha    = "lai",
@@ -725,11 +730,17 @@ hisafe_snapshot <- function(hop,
   if(is.na(date.max)) date.max <- max(hop$trees$Date)
   if(is.null(dates))  dates    <- seq(lubridate::ymd(date.min), lubridate::ymd(date.max), "day")
 
+  if(complete.only) {
+    if(cells | crops) dates <- extract_complete_dates(hop = hop, profile = "cells",  dates = dates)
+    if(voxels)        dates <- extract_complete_dates(hop = hop, profile = "voxels", dates = dates)
+  }
+
   legend.plot <- visual_legend(hop       = hop,
                                vars      = vars,
                                cells.var = cells.var)
   ggsave_fitmax(paste0(output.path, file.prefix, "_LEGEND.png"), legend.plot, dpi = 500)
 
+  if(length(dates) == 0) stop("date filtering resulted in no dates to plot", call. = FALSE)
   print(paste0("Creating visualizations for ", length(dates), " dates..."), quote = FALSE)
   pb <- txtProgressBar(min = 0, max = length(dates), initial = 0, style = 3)
   for(i in 1:length(dates)) {
@@ -762,10 +773,6 @@ hisafe_snapshot <- function(hop,
     }
 
     if(slice & cells) {
-      #g1 <- ggplotGrob(slice.plot)
-      #g2 <- ggplotGrob(cells.plot)
-      #plot.obj  <- rbind(g1, g2, size = "first")
-      #plot.obj$widths  <- grid::unit.pmax(g1$widths, g2$widths)
       plot.obj <- egg::ggarrange(slice.plot, cells.plot, ncol = 1)
     } else if(slice & !cells) {
       plot.obj <- slice.plot
@@ -1318,6 +1325,25 @@ add_historic_data <- function(df, dates, mem.max) {
   return(out)
 }
 
+#' Build white boxes to cover phantom trees
+#' @description Builds white boxes to cover phantom trees for \code{\link{hisafe_slice}}
+#' @param hop An object of class hop.
+#' @param profile Character string of the name of a hop profile.
+#' @param dates Character vector or Date vector of dates to check.
+extract_complete_dates <- function(hop, profile, dates) {
+  dates <- lubridate::ymd(dates)
+  complete.dates <- hop[[profile]] %>%
+    dplyr::group_by(SimulationName, Date) %>%
+    dplyr::summarize(n = n()) %>%
+    dplyr::mutate(n = as.numeric(n > 0)) %>%
+    dplyr::ungroup() %>%
+    dplyr::group_by(Date) %>%
+    dplyr::summarize(n = sum(n)) %>%
+    dplyr::filter(n == length(unique(hop[[profile]]$SimulationName))) %>%
+    .$Date
+  dates <- dates[dates %in% complete.dates]
+  return(dates)
+}
 # hisafe_animate <- function(path,
 #                            interval    = 10,
 #                            anim.format = "gif") {

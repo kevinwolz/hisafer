@@ -6,7 +6,7 @@
 \usage{
 plot_hisafe_cells(hop, variable, dates, rel.dates = NULL,
   simu.names = "all", plot.x = "x", trees = TRUE, canopies = TRUE,
-  plot = TRUE, max.mem = 0, for.anim = FALSE)
+  plot = TRUE, mem.max = 0, for.anim = FALSE)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -28,10 +28,10 @@ In the plot, \code{variable} will be scaled to be between the minimum and maximu
 
 \item{plot}{If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.}
 
-\item{for.anim}{If \code{TRUE}, the plot formatting is simplified for use in animations.}
-
 \item{mem.max}{An integer specifying the maximum number of days into the past to search
 for cell data when no data is available for a given date within \code{hop}.}
+
+\item{for.anim}{If \code{TRUE}, the plot formatting is simplified for use in animations.}
 }
 \value{
 Returns a ggplot object.
