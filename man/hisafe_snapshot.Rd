@@ -41,7 +41,8 @@ In the plot, all variables will be scaled to be between their minimum and maximu
 \item{simu.names}{A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.}
 
 \item{plot.x}{Either "x" or "y", indicating which axis of the Hi-sAFe scene should be plotted along the x-axis of the plot.
-This will be applied to the plots from both \code{\link{hisafe_slice}} and \code{\link{plot_hisafe_cells}}.}
+This will be applied to the plots from both \code{\link{hisafe_slice}} and \code{\link{plot_hisafe_cells}}.
+Setting to "xy" is only possible when \code{hop} contains or is filtered to a single simulation.}
 
 \item{slice}{A logical indicating whether the plot from \code{\link{hisafe_slice}} should be included.}
 

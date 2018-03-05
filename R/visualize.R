@@ -151,7 +151,7 @@ hisafe_slice <- function(hop,
     circle.offset     <- min(hop.full$plot.info$cellWidth) / 4
     circle.max.radius <- min(circle.offset, min(diff(unique(hop.full$voxels$z)))) * 0.9 / 2
     circle.max.border <- 0.25
-    if(is.na(max.soil.depth)) max.soil.depth <- max(hop.full$voxels$z) + min(diff(hop.full$voxels$z)[diff(hop.full$voxels$z) > 0]) # cannot use plot.info$soilDepth in case depths not exported
+    if(is.na(max.soil.depth)) max.soil.depth <- max(hop.full$voxels$z) + min(diff(hop.full$voxels$z)[diff(hop.full$voxels$z) > 0]) / 2 # cannot use plot.info$soilDepth in case depths not exported
     Y.MIN <- -max.soil.depth
   } else {
     Y.MIN <- 0
@@ -400,6 +400,8 @@ hisafe_slice <- function(hop,
     coord_equal(xlim   = c(X.MIN, X.MAX),
                 ylim   = c(Y.MIN, Y.MAX),
                 expand = FALSE) +
+    scale_x_continuous(sec.axis = sec_axis(~ ., labels = NULL)) +
+    scale_y_continuous(sec.axis = sec_axis(~ ., labels = NULL)) +
     theme_bw(base_size = 18) +
     theme(plot.margin      = unit(18 * c(1,1,1,1), "points"),
           panel.spacing    = unit(2, "lines"),
@@ -647,6 +649,7 @@ hisafe_slice <- function(hop,
 #' @param simu.names A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.
 #' @param plot.x Either "x" or "y", indicating which axis of the Hi-sAFe scene should be plotted along the x-axis of the plot.
 #' This will be applied to the plots from both \code{\link{hisafe_slice}} and \code{\link{plot_hisafe_cells}}.
+#' Setting to "xy" is only possible when \code{hop} contains or is filtered to a single simulation.
 #' @param slice A logical indicating whether the plot from \code{\link{hisafe_slice}} should be included.
 #' @param trees A logical indicating whether to plot trees via \code{\link{plot_hisafe_cells}}.
 #' @param crops A logical indicating whether to plot crops via \code{\link{plot_hisafe_cells}}.
@@ -722,8 +725,12 @@ hisafe_snapshot <- function(hop,
   is_logical(slice)
   is_logical(cells)
 
-  output.path <- clean_path(paste0(diag_output_path(hop, output.path), "/snapshots/"))
-  dir.create(output.path, recursive = TRUE, showWarnings = FALSE)
+  legend.path <- clean_path(paste0(diag_output_path(hop, output.path), "/snapshots/"))
+  image.path  <- paste0(legend.path, "snapshot_images/")
+  dir.create(image.path, recursive = TRUE, showWarnings = FALSE)
+
+  hop <- hop_filter(hop = hop, simu.names = simu.names)
+  if(plot.x == "xy" & length(unique(hop$trees$SimulationName)) > 1) stop("stereo = TRUE is only allowed when plotting a single simulation", call. = FALSE)
 
   if(is.na(date.min)) date.min <- min(hop$trees$Date)
   if(is.na(date.max)) date.max <- max(hop$trees$Date)
@@ -737,49 +744,98 @@ hisafe_snapshot <- function(hop,
   legend.plot <- visual_legend(hop       = hop,
                                vars      = vars,
                                cells.var = cells.var)
-  ggsave_fitmax(paste0(output.path, file.prefix, "_LEGEND.png"), legend.plot, dpi = 500)
+  ggsave_fitmax(paste0(legend.path, file.prefix, "_LEGEND.png"), legend.plot, dpi = 500)
 
   if(length(dates) == 0) stop("date filtering resulted in no dates to plot", call. = FALSE)
   print(paste0("Creating visualizations for ", length(dates), " dates..."), quote = FALSE)
   pb <- txtProgressBar(min = 0, max = length(dates), initial = 0, style = 3)
   for(i in 1:length(dates)) {
-    if(slice) {
-      slice.plot <- hisafe_slice(hop         = hop,
-                                 date        = dates[i],
-                                 rel.dates   = rel.dates,
-                                 simu.names  = simu.names,
-                                 trees       = trees,
-                                 crops       = crops,
-                                 voxels      = voxels,
-                                 plot.x      = plot.x,
-                                 mem.max     = mem.max, ...) +
+    if(plot.x == "xy") {
+      slice.plot.1 <- hisafe_slice(hop         = hop,
+                                   date        = dates[i],
+                                   rel.dates   = rel.dates,
+                                   simu.names  = simu.names,
+                                   trees       = trees,
+                                   crops       = crops,
+                                   voxels      = voxels,
+                                   plot.x      = "x",
+                                   mem.max     = mem.max, ...) +
         theme(axis.title.x = element_blank(),
               axis.text.x  = element_blank(),
-              axis.ticks.x = element_blank(),
-              plot.margin  = margin(5,5,0,10))
-    }
+              plot.margin  = margin(5,5,0,10),
+              plot.title   = element_text(size = 30, hjust = 0))
+      slice.plot.2 <- hisafe_slice(hop         = hop,
+                                   date        = dates[i],
+                                   rel.dates   = rel.dates,
+                                   simu.names  = simu.names,
+                                   trees       = trees,
+                                   crops       = crops,
+                                   voxels      = voxels,
+                                   plot.x      = "y",
+                                   mem.max     = mem.max, ...) +
+        theme(axis.title.x = element_blank(),
+              axis.title.y = element_blank(),
+              axis.text.x  = element_blank(),
+              axis.text.y  = element_blank(),
+              plot.margin  = margin(5,5,0,10),
+              plot.title   = element_blank())
 
-    if(cells) {
-      cells.plot <- plot_hisafe_cells(hop        = hop,
-                                      variable   = cells.var,
-                                      dates      = dates[i],
-                                      rel.dates  = rel.dates,
-                                      simu.names = simu.names,
-                                      plot.x     = plot.x,
-                                      mem.max    = mem.max,
-                                      for.anim   = TRUE) +
-        theme(plot.margin  = margin(10,10,15,10))
-    }
+      if(cells) {
+        cells.plot <- plot_hisafe_cells(hop        = hop,
+                                        variable   = cells.var,
+                                        dates      = dates[i],
+                                        rel.dates  = rel.dates,
+                                        simu.names = simu.names,
+                                        plot.x     = "x",
+                                        mem.max    = mem.max,
+                                        for.anim   = TRUE) +
+          theme(plot.margin  = margin(10,10,15,10),
+                axis.title.x = element_blank(),
+                axis.text.x  = element_blank())
+      }
+      if(cells) {
+        plot.obj <- egg::ggarrange(slice1, slice2, cells1, nrow = 2, draw = FALSE)
+      } else {
+        plot.obj <- egg::ggarrange(slice1, slice2, nrow = 1, draw = FALSE)
+      }
+    } else {
+      if(slice) {
+        slice.plot <- hisafe_slice(hop         = hop,
+                                   date        = dates[i],
+                                   rel.dates   = rel.dates,
+                                   simu.names  = simu.names,
+                                   trees       = trees,
+                                   crops       = crops,
+                                   voxels      = voxels,
+                                   plot.x      = plot.x,
+                                   mem.max     = mem.max, ...) +
+          theme(axis.title.x = element_blank(),
+                axis.text.x  = element_blank(),
+                axis.ticks.x = element_blank(),
+                plot.margin  = margin(5,5,0,10))
+      }
 
-    if(slice & cells) {
-      plot.obj <- egg::ggarrange(slice.plot, cells.plot, ncol = 1)
-    } else if(slice & !cells) {
-      plot.obj <- slice.plot
-    } else if(!slice & cells) {
-      plot.obj <- cells.plot
-    }
+      if(cells) {
+        cells.plot <- plot_hisafe_cells(hop        = hop,
+                                        variable   = cells.var,
+                                        dates      = dates[i],
+                                        rel.dates  = rel.dates,
+                                        simu.names = simu.names,
+                                        plot.x     = plot.x,
+                                        mem.max    = mem.max,
+                                        for.anim   = TRUE) +
+          theme(plot.margin  = margin(10,10,15,10))
+      }
 
-    ggsave_fitmax(paste0(output.path, file.prefix, "_", dates[i], ".", device), plot.obj, scale = 2, dpi = dpi)
+      if(slice & cells) {
+        plot.obj <- egg::ggarrange(slice.plot, cells.plot, ncol = 1, draw = FALSE)
+      } else if(slice & !cells) {
+        plot.obj <- slice.plot
+      } else if(!slice & cells) {
+        plot.obj <- cells.plot
+      }
+    }
+    ggsave_fitmax(paste0(image.path, file.prefix, "_", dates[i], ".", device), plot.obj, scale = 2, dpi = dpi)
     setTxtProgressBar(pb, i)
   }
 
@@ -1307,13 +1363,14 @@ build_white_boxes_slice <- function(hop, X.MIN, X.MAX, Y.MIN, Y.MAX) {
 #' @param date date argument from \code{\link{hisafe_slice}}.
 #' @param mem.max mem.max argument from \code{\link{hisafe_slice}}.
 add_historic_data <- function(df, dates, mem.max) {
+  dates <- lubridate::ymd(dates)
   add_hist <- function(date, df, mem.max) {
     df %>%
       dplyr::filter(Date < date, Date >= date - mem.max) %>%
       dplyr::group_by(SimulationName, Date) %>%
       dplyr::summarize(n = n()) %>%
       dplyr::filter(n > 0) %>%
-      dplyr::ungroup(Date) %>%
+      dplyr::ungroup() %>%
       dplyr::group_by(SimulationName) %>%
       dplyr::summarize(Date = max(Date)) %>%
       dplyr::ungroup() %>%

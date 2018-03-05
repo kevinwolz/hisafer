@@ -506,7 +506,7 @@ plot_hisafe_cells <- function(hop,
     for(p in c("tree.info", "cells")) hop[[p]] <- swap_cols(hop[[p]], "x", "y")
     hop$plot.info <- swap_cols(hop$plot.info, "plotWidth", "plotHeight")
     x.lab <- "Y (m)"
-    y.lab <- "-X (m)"
+    y.lab <- "X (m)"
   }
 
   X.MIN <- Y.MIN <- 0
@@ -585,6 +585,8 @@ plot_hisafe_cells <- function(hop,
     coord_equal(xlim   = c(X.MIN, X.MAX),
                 ylim   = c(Y.MIN, Y.MAX),
                 expand = FALSE) +
+    scale_x_continuous(sec.axis = sec_axis(~ ., labels = NULL)) +
+    scale_y_continuous(sec.axis = sec_axis(~ ., labels = NULL)) +
     plot.theme
 
   plot.obj <- plot.obj %>%
@@ -592,6 +594,11 @@ plot_hisafe_cells <- function(hop,
               white.boxes = white.boxes,
               trees       = trees,
               canopies    = canopies)
+
+  if(plot.x == "y") {
+    plot.obj <- plot.obj +
+      scale_y_continuous(breaks = 0:Y.MAX, labels = as.character(abs(Y.MAX - 0:Y.MAX)))
+  }
 
   if(plot) return(plot.obj) else return(plot.data)
 }

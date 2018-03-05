@@ -1,6 +1,6 @@
 ---
 title: "Introduction to hisafer"
-output: rmarkdown::html_vignette #pdf_document
+output: rmarkdown::pdf_document #html_vignette
 vignette: >
   %\VignetteIndexEntry{hisafer}
   %\VignetteEngine{knitr::rmarkdown}
