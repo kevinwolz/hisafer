@@ -27,8 +27,7 @@
 #'  \item{"voxel.C.alpha"}{ - transparency of the center circle within the voxel}
 #'  \item{"voxel.R.alpha"}{ - transparency of the right circle within the voxel}
 #' }
-#' All non-voxel aesthetics set by \code{vars} are relative to the maximum value in each simulation-year combination.
-#' All voxel aesthetics set by \code{vars} are relative to the maximum value in each simulation.
+#' All aesthetics set by \code{vars} are relative to the maximum value in each simulation-year combination.
 #' @param trees A logical indicating whether or not to plot the trees in the scene.
 #' @param crops A logical indicating whether or not to plot the crops in the scene.
 #' @param voxels A logical indicating whether or not to plot the voxels in the scene.
@@ -351,7 +350,7 @@ hisafe_slice <- function(hop,
                        voxel.C.alpha = sum(voxel.C.alpha),
                        voxel.R.alpha = sum(voxel.R.alpha)) %>%
       dplyr::ungroup() %>%
-      dplyr::group_by(SimulationName) %>% # Year could be added to this
+      dplyr::group_by(SimulationName, Year) %>%
       dplyr::summarize(voxel.alpha.max   = max(voxel.alpha),
                        voxel.border.max  = max(voxel.border),
                        voxel.L.size.max  = max(voxel.L.size),
@@ -362,7 +361,7 @@ hisafe_slice <- function(hop,
                        voxel.R.alpha.max = max(voxel.R.alpha))
 
     voxel.data <- voxel %>%
-      dplyr::left_join(voxel.max, by = c("SimulationName")) %>% # Year could be added to this
+      dplyr::left_join(voxel.max, by = c("SimulationName", "Year")) %>%
       dplyr::mutate(voxel.alpha    = voxel.alpha   / voxel.alpha.max)  %>%
       dplyr::mutate(voxel.border   = voxel.border  / voxel.border.max * rect.max.border + rect.min.border) %>%
       dplyr::mutate(voxel.L.size   = voxel.L.size  / voxel.L.size.max * circle.max.radius) %>%

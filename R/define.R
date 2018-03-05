@@ -31,6 +31,8 @@
 #' @param factorial If \code{FALSE}, the default, then supplied input values are recycled (i.e. such as for default behavior of \code{\link{data.frame}}).
 #' If \code{TRUE}, then a factorial experiment is created, in which an experiment is defined for each possible combination of supplied values.
 #' @param force Logical indicating wether the supplied values should be forced past the constraint checks. Use \code{TRUE} for development only.
+#' @param bulk.pass Any Hi-sAFe input parameter in the .SIM, .PLD, .TREE, and .PAR files can be passed here grouped as a list,
+#' just as can be passed to \code{...}. This facilitates sending the same list of arguments to multiple calls of \code{define_hisafe}.
 #' @param ... Any Hi-sAFe input parameter in the .SIM, .PLD, .TREE, and .PAR files can be passed.
 #' To display supported parameters, use \code{\link{hisafe_params}}. See below for further details.
 #' There are three methods for passing parameters to \code{define_hisafe}, one for each of the three types of parameters within the parameter files:
@@ -70,16 +72,19 @@ define_hisafe <- function(path,
                           profiles  = "all",
                           template  = "agroforestry",
                           factorial = FALSE,
-                          force     = FALSE, ...) {
-
-  path          <- R.utils::getAbsolutePath(path)
-  param.list    <- list(...)
+                          force     = FALSE,
+                          bulk.pass = NULL, ...) {
 
   if(!(is.character(exp.name) & length(exp.name) == 1))     stop("exp.name argument must be a character vector of length 1", call. = FALSE)
   if(!(all(is.character(profiles)) | profiles[1] == "all")) stop("profiles argument must be 'all' or a character vector",    call. = FALSE)
   if(!(is.character(template) & length(template) == 1))     stop("template argument must be a character vector of length 1", call. = FALSE)
+  if(!(is.null(bulk.pass) | is.list(bulk.pass)))            stop("bulk.pass argument must be a list",                        call. = FALSE)
   is_logical(factorial)
   is_logical(force)
+
+  path          <- R.utils::getAbsolutePath(path)
+  param.list    <- list(...)
+  if(!is.null(bulk.pass)) param.list <- c(param.list, bulk.pass)
 
   ## Get profile names and check that they are present in template directory
   available.profiles <- get_available_profiles(template)

@@ -49,8 +49,7 @@ Plot components include:
  \item{"voxel.C.alpha"}{ - transparency of the center circle within the voxel}
  \item{"voxel.R.alpha"}{ - transparency of the right circle within the voxel}
 }
-All non-voxel aesthetics set by \code{vars} are relative to the maximum value in each simulation-year combination.
-All voxel aesthetics set by \code{vars} are relative to the maximum value in each simulation.}
+All aesthetics set by \code{vars} are relative to the maximum value in each simulation-year combination.}
 
 \item{trees}{A logical indicating whether or not to plot the trees in the scene.}
 
