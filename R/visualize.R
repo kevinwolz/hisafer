@@ -82,14 +82,11 @@ hisafe_slice <- function(hop,
   if(nrow(hop$tree.info) == 0) stop("tree.info is unavilable in hop and is required", call. = FALSE)
   profile_check(hop,  "trees", error = TRUE)
   variable_check(hop, "trees", tree.vars, error = TRUE)
-  if(crops)  {
-    profile_check(hop,  "cells", error = TRUE)
-    variable_check(hop, "cells", cell.vars, error = TRUE)
-  }
-  if(voxels) {
-    profile_check(hop,  "voxels", error = TRUE)
-    variable_check(hop, "voxels", voxel.vars, error = TRUE)
-  }
+
+  crops  <- crops  & profile_check(hop,  "cells")
+  voxels <- voxels & profile_check(hop,  "voxels")
+  if(crops)  variable_check(hop, "cells",  cell.vars,  error = TRUE)
+  if(voxels) variable_check(hop, "voxels", voxel.vars, error = TRUE)
 
   x.lab <- "X (m)"
   if(plot.x == "y") { # Switch x-y if plot.x == "y"

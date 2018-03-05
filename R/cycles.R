@@ -224,8 +224,8 @@ plot_hisafe_cycle_daily <- function(hop,
     if(is.null(color.palette)) color.palette <- c("#009E73","#999999", "#D55E00", "#E69F00", "#56B4E9", "#0072B2", "#F0E442", "#CC79A7")
     cycle.geom  <- geom_area(aes(fill = flux), na.rm = TRUE)
     cycle.scale <- scale_fill_manual(values = color.palette)
-    pre.title <- "Tree Carbon Pools"
-    y.lab     <- "Tree C storage (Mg C ha-1)"
+    pre.title   <- "Tree Carbon Pools"
+    y.lab       <- "Tree C storage (Mg C ha-1)"
   }else {
     stop("cycle argument not supported. Use one of: carbon, nitrogen, water, light.", call. = FALSE)
   }
