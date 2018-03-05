@@ -225,7 +225,7 @@ plot_hisafe_cycle_daily <- function(hop,
     cycle.geom  <- geom_area(aes(fill = flux), na.rm = TRUE)
     cycle.scale <- scale_fill_manual(values = color.palette)
     pre.title <- "Tree Carbon Pools"
-    y.lab      <- "Tree C storage (Mg C ha-1)"
+    y.lab     <- "Tree C storage (Mg C ha-1)"
   }else {
     stop("cycle argument not supported. Use one of: carbon, nitrogen, water, light.", call. = FALSE)
   }
@@ -238,7 +238,7 @@ plot_hisafe_cycle_daily <- function(hop,
 
   ## Remove years with just one day
   yrs.to.remove <- unique(plot.data$Year)[table(plot.data$Year) == length(unique(plot.data$flux))]
-  plot.data <- filter(plot.data, !(Year %in% yrs.to.remove))
+  plot.data <- dplyr::filter(plot.data, !(Year %in% yrs.to.remove))
 
   ## Set faceting
   if(length(years) == 1) {
