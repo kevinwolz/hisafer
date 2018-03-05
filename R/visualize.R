@@ -734,11 +734,17 @@ hisafe_snapshot <- function(hop,
 
   if(is.na(date.min)) date.min <- min(hop$trees$Date)
   if(is.na(date.max)) date.max <- max(hop$trees$Date)
-  if(is.null(dates))  dates    <- seq(lubridate::ymd(date.min), lubridate::ymd(date.max), "day")
+  if(is.null(dates)) {
+    dates <- seq(lubridate::ymd(date.min), lubridate::ymd(date.max), "day")
+  } else {
+    dates <- lubridate::ymd(dates)
+    dates <- dates[dates %in% unique(hop$trees$Date)]
+  }
+
 
   if(complete.only) {
-    if(cells | crops) dates <- extract_complete_dates(hop = hop, profile = "cells",  dates = dates)
-    if(voxels)        dates <- extract_complete_dates(hop = hop, profile = "voxels", dates = dates)
+    if((cells | crops) & profile_check(hop, "cells")) dates <- extract_complete_dates(hop = hop, profile = "cells",  dates = dates)
+    if(voxels          & profile_check(hop, "voxels")) dates <- extract_complete_dates(hop = hop, profile = "voxels", dates = dates)
   }
 
   legend.plot <- visual_legend(hop       = hop,
