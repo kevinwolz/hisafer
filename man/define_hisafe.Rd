@@ -39,7 +39,7 @@ If \code{TRUE}, then a factorial experiment is created, in which an experiment i
 just as can be passed to \code{...}. This facilitates sending the same list of arguments to multiple calls of \code{define_hisafe}.}
 
 \item{...}{Any Hi-sAFe input parameter in the .SIM, .PLD, .TREE, and .PAR files can be passed.
-To display supported parameters, use \code{\link{hisafe_params}}. See below for further details.
+To display supported parameters, use \code{\link{hip_params}}. See below for further details.
 There are three methods for passing parameters to \code{define_hisafe}, one for each of the three types of parameters within the parameter files:
 \itemize{
  \item{individual numeric or character values}{ - For parameters that require a single value (most parameters),

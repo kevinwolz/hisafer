@@ -17,7 +17,7 @@
 #' @examples
 #' \dontrun{
 #' # To plot the simulated water cycle:
-#' water.plot <- plot_hisafe_cycle(myhop, "water")
+#' water.plot <- plot_hisafe_cycle_annual(myhop, "water")
 #'
 #' # Once you have the plot object, you can display it and save it:
 #' water.plot
@@ -289,7 +289,7 @@ plot_hisafe_cycle_daily <- function(hop,
 
 #' Get water fluxes from a hop object
 #' @description Get water fluxes from a hop object.
-#' Used within \code{\link{plot_hisafe_cycle}}, \code{\link{plot_hisafe_cycle_annual}}, \code{\link{plot_hisafe_cycle_daily}}
+#' Used within hisafe cycle functions.
 #' @return A tibble with extracted and calculated water fluxes.
 #' @param hop An object of class hop or face.
 #' @importFrom dplyr %>%
@@ -370,7 +370,7 @@ get_water_fluxes <- function(hop) {
 
 #' Get nitrogen fluxes from a hop object
 #' @description Get nitrogen fluxes from a hop object.
-#' Used within \code{\link{plot_hisafe_cycle}}, \code{\link{plot_hisafe_cycle_annual}}, \code{\link{plot_hisafe_cycle_daily}}
+#' Used within hisafe cycle functions.
 #' @return A tibble with extracted and calculated nitrogen fluxes.
 #' @param hop An object of class hop or face.
 #' @importFrom dplyr %>%
@@ -441,7 +441,7 @@ get_nitrogen_fluxes <- function(hop) {
 
 #' Get light fluxes from a hop object
 #' @description Get light fluxes from a hop object.
-#' Used within \code{\link{plot_hisafe_cycle}}, \code{\link{plot_hisafe_cycle_annual}}, \code{\link{plot_hisafe_cycle_daily}}
+#' Used within hisafe cycle functions.
 #' @return A tibble with extracted and calculated light fluxes.
 #' @param hop An object of class hop or face.
 #' @importFrom dplyr %>%
@@ -475,7 +475,7 @@ get_light_fluxes <- function(hop) {
 
 #' Get carbon pools from a hop object
 #' @description Get carbon pools from a hop object.
-#' Used within \code{\link{plot_hisafe_cycle}}, \code{\link{plot_hisafe_cycle_annual}}, \code{\link{plot_hisafe_cycle_daily}}
+#' Used within hisafe cycle functions.
 #' @return A tibble with extracted and calculated carbon pools.
 #' @param hop An object of class hop or face.
 #' @importFrom dplyr %>%

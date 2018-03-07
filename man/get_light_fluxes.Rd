@@ -14,5 +14,5 @@ A tibble with extracted and calculated light fluxes.
 }
 \description{
 Get light fluxes from a hop object.
-Used within \code{\link{plot_hisafe_cycle}}, \code{\link{plot_hisafe_cycle_annual}}, \code{\link{plot_hisafe_cycle_daily}}
+Used within hisafe cycle functions.
 }

@@ -34,7 +34,7 @@
 #' @param bulk.pass Any Hi-sAFe input parameter in the .SIM, .PLD, .TREE, and .PAR files can be passed here grouped as a list,
 #' just as can be passed to \code{...}. This facilitates sending the same list of arguments to multiple calls of \code{define_hisafe}.
 #' @param ... Any Hi-sAFe input parameter in the .SIM, .PLD, .TREE, and .PAR files can be passed.
-#' To display supported parameters, use \code{\link{hisafe_params}}. See below for further details.
+#' To display supported parameters, use \code{\link{hip_params}}. See below for further details.
 #' There are three methods for passing parameters to \code{define_hisafe}, one for each of the three types of parameters within the parameter files:
 #' \itemize{
 #'  \item{individual numeric or character values}{ - For parameters that require a single value (most parameters),
@@ -135,7 +135,7 @@ define_hisafe <- function(path,
 #' @return An object of class "hip". See \code{\link{define_hisafe}} for more details.
 #' @param file A character string of the path to a csv file.
 #' Each row in the file should represent a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
-#' For more information on supported parameters, use \code{\link{hisafe_params}}.
+#' For more information on supported parameters, use \code{\link{hip_params}}.
 #' @param path A character string of the path (relative or absolute) to the directory where the simulation/experiment is to be built.
 #' @param exp.name A character string of the name of the experiment folder. Only used if defining more than one simulation.
 #' @param profiles A character vector of Hi-sAFe export profiles to be exported by Hi-sAFe. If "all" (the default), then all supported profiles will be exported.

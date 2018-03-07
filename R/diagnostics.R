@@ -162,7 +162,7 @@ diag_hisafe_monthcells <- function(hop,
 #' @param output.path A character stting indicating the path to the directory where plots should be saved. Plots are
 #' saved in a subdirectory within this directory named /annualcrop
 #' If no value is provided, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis/diagnostics".
-#' @param ... Other arguments passed to \code{\link{plot_hisafe_annualplot}}.
+#' @param ... Other arguments passed to \code{\link{plot_hisafe_annualcrop}}.
 #' @export
 #' @importFrom dplyr %>%
 #' @family hisafe diagnostic fucntions

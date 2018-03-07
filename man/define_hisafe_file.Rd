@@ -10,7 +10,7 @@ define_hisafe_file(file, path, exp.name = "experiment", profiles = "all",
 \arguments{
 \item{file}{A character string of the path to a csv file.
 Each row in the file should represent a Hi-sAFe simulation and each column a Hi-sAFe input parameter.
-For more information on supported parameters, use \code{\link{hisafe_params}}.}
+For more information on supported parameters, use \code{\link{hip_params}}.}
 
 \item{path}{A character string of the path (relative or absolute) to the directory where the simulation/experiment is to be built.}
 

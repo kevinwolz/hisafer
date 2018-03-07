@@ -16,7 +16,7 @@ diag_hisafe_annualcrop(hop, years = seq(0, (max(hop$annualcrop$Year) -
 saved in a subdirectory within this directory named /annualcrop
 If no value is provided, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis/diagnostics".}
 
-\item{...}{Other arguments passed to \code{\link{plot_hisafe_annualplot}}.}
+\item{...}{Other arguments passed to \code{\link{plot_hisafe_annualcrop}}.}
 }
 \value{
 Invisibly returns a list of \code{ggplot} objects.

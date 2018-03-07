@@ -32,7 +32,7 @@ Plots an annual barchart of tree carbon pools, water fluxes, nitrogen fluxes, or
 \examples{
 \dontrun{
 # To plot the simulated water cycle:
-water.plot <- plot_hisafe_cycle(myhop, "water")
+water.plot <- plot_hisafe_cycle_annual(myhop, "water")
 
 # Once you have the plot object, you can display it and save it:
 water.plot
