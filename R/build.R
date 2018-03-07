@@ -32,7 +32,6 @@ build_hisafe <- function(hip, plot.scene = TRUE) {
   for(i in 1:nrow(EXP.PLAN)) {
     simu.path <- clean_path(paste0(hip$path, "/", EXP.PLAN$SimulationName[i]))
     if(dir.exists(simu.path)) stop(paste0("A simulation with the name <", EXP.PLAN$SimulationName[i], "> already exisits in this location."), call. = FALSE)
-    dir.create(simu.path, showWarnings = FALSE)
   }
 
   ## Write out experiment summary
