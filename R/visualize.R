@@ -131,7 +131,7 @@ hisafe_slice <- function(hop,
                          dates          = rel.dates,
                          strip.exp.plan = TRUE)
 
-  if(!(date %in% hop$trees)) stop("hop does not contain any data on the date specified", call. = FALSE)
+  if(!(date %in% hop$trees$Date)) stop("hop does not contain any data on the date specified", call. = FALSE)
   hop       <- hop_filter(hop            = hop,
                           simu.names     = simu.names,
                           tree.ids       = tree.ids,
