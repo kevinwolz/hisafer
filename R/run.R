@@ -77,15 +77,6 @@ run_hisafe <- function(hip         = NULL,
     if(length(simu.names) == 1)        stop("There is only 1 simulation to run. Parallel computing is not possible.", call. = FALSE)
     if(num.cores > length(simu.names)) stop("num.cores cannot be greater than length(simu.names)",                    call. = FALSE)
 
-    ## Check for packages required for parallel computing
-    parallel.packages <- c("foreach", "doParallel")
-    package.check <- purrr::map_lgl(parallel.packages, requireNamespace, quietly = TRUE)
-    if(any(!package.check)) {
-      missing.packages <- parallel.packages[!package.check]
-      stop(paste0("The following packages are needed for parallel computing with hisafer. Please install them.\n",
-                  paste(missing.packages, collapse = "\n")), call. = FALSE)
-    }
-
     if(is.null(num.cores)) num.cores <- min((parallel::detectCores() - 1), nrow(hip$exp.plan))
     if(num.cores > parallel::detectCores()) stop(paste("There are only", parallel::detectCores(), "detectable cores on this computer."), call. = FALSE)
     if(num.cores == 1) stop("There is only 1 detectable core on this computer. Parallel computing is not possible.", call. = FALSE)

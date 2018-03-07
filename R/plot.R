@@ -263,9 +263,10 @@ plot_hisafe_monthcells <- function(hop,
 
   ## Determine which variable is not part of faceting & trigger associated error
   vars <- c("SimulationName", "Year", "Month")
-  avail.vars <- list(simu.names, years, months)
-  var.lengths <- purrr::map_int(avail.vars, length) > 1
-  if(sum(var.lengths) > 2) stop("only two variables of (simu.names, years, months) can have length greater than one", call. = FALSE)
+  avail.vars <- list(SimulationName = simu.names, Year = years, Month = months)
+  var.to.check <- vars[!(vars %in% c(rowfacet, colfacet))]
+  var.too.long <- length(avail.vars[[var.to.check]]) > 1
+  if(var.too.long) stop("only the variables specfiiced by colfacet and rowfacet can have length greater than one", call. = FALSE)
   fixed <- which(!(vars %in% c(colfacet, rowfacet)))
   fixed.var <- ifelse(vars[fixed] == "SimulationName",
                       as.character(avail.vars[[fixed]]),

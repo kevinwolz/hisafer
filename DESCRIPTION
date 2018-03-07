@@ -20,8 +20,11 @@ Imports: ggplot2 (>= 2.2.1),
     viridis (>= 0.4.0),
     R.utils (>= 2.5.0),
     parallel (>= 3.4.1),
+    foreach (>= 1.4.3),
+    doParallel (>= 1.0.11),
     memuse (>= 4.0-0),
-    stringdist (>= 0.9.4.6)
+    stringdist (>= 0.9.4.6),
+    egg (>= 0.2.0)
 Remotes: thomasp85/ggforce
 License: GPL-3
 Encoding: UTF-8
@@ -29,8 +32,6 @@ LazyData: true
 RoxygenNote: 6.0.1
 Suggests: knitr,
     rmarkdown,
-    foreach (>= 1.4.3),
-    doParallel (>= 1.0.11),
     ggforce (>= 0.1.1),
     gtable (>= 0.2.0)
 VignetteBuilder: knitr

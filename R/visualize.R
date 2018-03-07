@@ -74,9 +74,11 @@ hisafe_slice <- function(hop,
   date <- lubridate::ymd(date)
 
   demanded.vars <- as.character(unlist(vars))
-  cell.vars  <- c(demanded.vars[grep("crop|yield",  names(vars))], "phenologicStage", "nitrogenFertilisation")
+  cell.vars  <- c(demanded.vars[grep("crop|yield",  names(vars))],
+                  "phenologicStage", "nitrogenFertilisation", "height", "biomass", "yield")
   voxel.vars <- demanded.vars[grep("voxel", names(vars))]
-  tree.vars  <- c(demanded.vars[!(demanded.vars %in% c(cell.vars, voxel.vars))], "crownRadiusInterRow", "crownBaseHeight")
+  tree.vars  <- c(demanded.vars[!(demanded.vars %in% c(cell.vars, voxel.vars))],
+                  "crownRadiusInterRow", "crownRadiusTreeLine", "crownBaseHeight", "dbh", "height")
 
   if(nrow(hop$plot.info) == 0) stop("plot.info is unavilable in hop and is required", call. = FALSE)
   if(nrow(hop$tree.info) == 0) stop("tree.info is unavilable in hop and is required", call. = FALSE)
@@ -142,7 +144,17 @@ hisafe_slice <- function(hop,
   arrow.length      <- min(hop.full$plot.info$cellWidth) / 4
   arrow.type        <- arrow(length = unit(5, "points"))
   arrow.size        <- 1
-  Y.MAX             <- max(hop.full$trees$height, na.rm = TRUE) + arrow.length
+
+  if(trees & crops) {
+    Y.MAX <- max(max(hop.full$trees$height), max(hop.full$cells$height), na.rm = TRUE) + arrow.length
+  } else if(trees) {
+    Y.MAX <- max(hop.full$trees$height, na.rm = TRUE) + arrow.length
+  } else if(crops) {
+    Y.MAX <- max(hop.full$cells$height, na.rm = TRUE) + arrow.length
+  } else {
+    Y.MAX <- 0
+  }
+
   if(voxels) {
     Y.voxels <- unique(Ys$voxels.Y)
     circle.offset     <- min(hop.full$plot.info$cellWidth) / 4
@@ -706,10 +718,10 @@ hisafe_snapshot <- function(hop,
   ## this can be removed as well as the @import egg in this function's documentation.
   b <- body(gtable_frame)
   b[6] <- parse(text = "if (fixed_ar) {
-    ar <- as.numeric(g$heights[tt[1]]) / as.numeric(g$widths[ll[1]])
-    height <- width * (ar / length(ll))
-    g$respect <- FALSE
-}")
+                ar <- as.numeric(g$heights[tt[1]]) / as.numeric(g$widths[ll[1]])
+                height <- width * (ar / length(ll))
+                g$respect <- FALSE
+                }")
   body(gtable_frame) <- b
   assignInNamespace("gtable_frame", gtable_frame, ns = 'egg')
   #####################################################################
