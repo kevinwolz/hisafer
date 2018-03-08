@@ -305,6 +305,11 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
     tree.info <- read_tree_info(path, simu.name)
 
     pld.path <- list.files(simu.path, ".pld$", full.names = TRUE)
+    if(length(pld.path) > 1) {
+      stop(paste("there is more than 1 PLD file present in the simulation directory of:", simu.name), call. = FALSE)
+    } else if(length(pld.path) == 0) {
+      stop(paste("there is no PLD file present in the simulation directory of:", simu.name, ". Set read.inputs to FALSE."), call. = FALSE)
+    }
     pld <- read_param_file(pld.path)
     geometryOption      <- as.numeric(pld$PLOT$geometryOption$value)
     spacingBetweenRows  <- as.numeric(pld$PLOT$spacingBetweenRows$value)
@@ -448,7 +453,9 @@ read_profile <- function(profile, path, show.progress = TRUE, max.size = 3e8) {
 #' @importFrom dplyr %>%
 read_tree_info <- function(path, simu.name) {
   sim.path <- list.files(clean_path(paste0(path, "/", simu.name, "/")), ".sim$", full.names = TRUE)
+  if(length(sim.path) > 1) stop(paste("there is more than 1 SIM file present in the simulation directory of:", simu.name), call. = FALSE)
   pld.path <- list.files(clean_path(paste0(path, "/", simu.name, "/")), ".pld$", full.names = TRUE)
+  if(length(pld.path) > 1) stop(paste("there is more than 1 PLD file present in the simulation directory of:", simu.name), call. = FALSE)
   sim <- read_param_file(sim.path)
   pld <- read_param_file(pld.path)
   if(!pld$TREE_INITIALIZATION$tree.initialization$commented) {
