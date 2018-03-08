@@ -31,6 +31,7 @@
 #' @param trees A logical indicating whether or not to plot the trees in the scene.
 #' @param crops A logical indicating whether or not to plot the crops in the scene.
 #' @param voxels A logical indicating whether or not to plot the voxels in the scene.
+#' @param climate A logical indicating whether or not to plot climate aspects (e.g. precipitation) in the scene.
 #' @param mem.max An integer specifying the maximum number of days into the past to search
 #' for crop/voxel data when no data is available for \code{date} within \code{hop}.
 #' @export
@@ -63,6 +64,7 @@ hisafe_slice <- function(hop,
                          trees   = TRUE,
                          crops   = TRUE,
                          voxels  = TRUE,
+                         climate = TRUE,
                          mem.max = 0) {
 
   if(!requireNamespace("ggforce", quietly = TRUE)) stop("The package 'ggforce' is required for hisafe_slice(). Please install and load it.", call. = FALSE)
@@ -88,11 +90,12 @@ hisafe_slice <- function(hop,
   profile_check(hop,  "trees", error = TRUE)
   variable_check(hop, "trees", tree.vars, error = TRUE)
 
-  crops  <- crops  & profile_check(hop,  "cells")
-  voxels <- voxels & profile_check(hop,  "voxels")
-  if(crops)  variable_check(hop, "cells",  cell.vars,  error = TRUE)
-  if(voxels) variable_check(hop, "voxels", voxel.vars, error = TRUE)
-
+  crops   <- crops   & profile_check(hop,  "cells")
+  voxels  <- voxels  & profile_check(hop,  "voxels")
+  climate <- climate & profile_check(hop,  "climate")
+  if(crops)   variable_check(hop, "cells",   cell.vars,       error = TRUE)
+  if(voxels)  variable_check(hop, "voxels",  voxel.vars,      error = TRUE)
+  if(climate) variable_check(hop, "climate", "precipitation", error = TRUE)
   if(any(is.na(unlist(vars)))) { # account for any NA vars specifications
     vars <- purrr::map(vars, function(x) tidyr::replace_na(x, "none"))
     for(i in c("trees", "cells", "voxels")[c(trees, crops, voxels)]) hop[[i]]$none <- as.numeric(NA)
@@ -138,8 +141,9 @@ hisafe_slice <- function(hop,
                           dates          = date,
                           strip.exp.plan = TRUE)
 
-  crops  <- crops  & nrow(hop.full$cells) > 0
-  voxels <- voxels & nrow(hop.full$voxels) > 0
+  crops   <- crops   & nrow(hop.full$cells)   > 0
+  voxels  <- voxels  & nrow(hop.full$voxels)  > 0
+  climate <- climate & nrow(hop.full$climate) > 0
 
   ## VOXEL & CELL MEMORY
   if(voxels & nrow(hop$voxels) == 0) hop$voxels <- add_historic_data(df = hop.full$voxels, dates = date, mem.max = mem.max)
@@ -393,13 +397,15 @@ hisafe_slice <- function(hop,
       dplyr::mutate(voxel.R.border = circle.max.border * as.numeric(voxel.R.size > 0))
   }
 
-  climate.data <- hop$climate %>%
-    dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
-    dplyr::mutate(precip.magnitude = nan_to_zero(precipitation / max(hop.full$climate$precipitation))) %>%
-    dplyr::mutate(soilDepth        = -soilDepth) %>%
-    dplyr::mutate(water.table      = as.numeric(waterTableDepth > soilDepth)) %>%
-    dplyr::select(SimulationName, Year, Date, precip.magnitude, waterTableDepth, soilDepth, plotWidth, water.table)
-  climate.data$waterTableDepth[climate.data$waterTableDepth < climate.data$soilDepth] <- 0
+  if(climate) {
+    climate.data <- hop$climate %>%
+      dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
+      dplyr::mutate(precip.magnitude = nan_to_zero(precipitation / max(hop.full$climate$precipitation))) %>%
+      dplyr::mutate(soilDepth        = -soilDepth) %>%
+      dplyr::mutate(water.table      = as.numeric(waterTableDepth > soilDepth)) %>%
+      dplyr::select(SimulationName, Year, Date, precip.magnitude, waterTableDepth, soilDepth, plotWidth, water.table)
+    climate.data$waterTableDepth[climate.data$waterTableDepth < climate.data$soilDepth] <- 0
+  }
 
   white.boxes <- build_white_boxes_slice(hop   = hop,
                                          X.MIN = X.MIN,
@@ -408,7 +414,7 @@ hisafe_slice <- function(hop,
                                          Y.MAX = Y.MAX)
 
   ## CREATE PLOT
-  plot.obj <- ggplot(climate.data) +
+  plot.obj <- ggplot() +
     labs(x = x.lab, y = "Z (m)", title = date) +
     scale_alpha_identity() +
     scale_fill_identity() +
@@ -433,16 +439,17 @@ hisafe_slice <- function(hop,
           strip.text       = element_text(size  = 30))
 
   ## PRECIPITATION
-  plot.obj <- plot.obj +
-    geom_rect(fill = "blue",
-              xmin = 0,
-              ymin = Y.MAX - arrow.length,
-              ymax = Y.MAX,
-              na.rm = TRUE,
-              aes(alpha = precip.magnitude,
-                  xmax  = plotWidth))
-
-  if("hop-group" %in% class(hop)) plot.obj <- plot.obj + facet_wrap(~SimulationName, nrow = 1)
+  if(climate) {
+    plot.obj <- plot.obj +
+      geom_rect(data = climate.data,
+                fill = "blue",
+                xmin = 0,
+                ymin = Y.MAX - arrow.length,
+                ymax = Y.MAX,
+                na.rm = TRUE,
+                aes(alpha = precip.magnitude,
+                    xmax  = plotWidth))
+  }
 
   if(crops) {
     plot.obj <- plot.obj +
@@ -655,6 +662,8 @@ hisafe_slice <- function(hop,
                        yend = waterTableDepth))
   }
 
+  if("hop-group" %in% class(hop)) plot.obj <- plot.obj + facet_wrap(~SimulationName, nrow = 1)
+
   ## WHITE BOXES TO COVER PHANTOM TREES
   plot.obj <- plot.obj +
     geom_rect(data = white.boxes,
@@ -784,7 +793,7 @@ hisafe_snapshot <- function(hop,
 
 
   if(complete.only) {
-    if((cells | crops) & profile_check(hop, "cells")) dates <- extract_complete_dates(hop = hop, profile = "cells",  dates = dates)
+    if((cells | crops) & profile_check(hop, "cells"))  dates <- extract_complete_dates(hop = hop, profile = "cells",  dates = dates)
     if(voxels          & profile_check(hop, "voxels")) dates <- extract_complete_dates(hop = hop, profile = "voxels", dates = dates)
   }
 
@@ -1452,7 +1461,7 @@ extract_complete_dates <- function(hop, profile, dates) {
 #                            anim.format = "gif") {
 #
 #   path <- clean_path(paste0(R.utils::getAbsolutePath(path), "/"))
-#   folder.name <- tail(strsplit(path, "/")[[1]], 1)
+#   folder.name <- basename(path)
 #   call <- paste0("convert -delay ", interval, " *.", " ", folder.name, ".", anim.format)
 #
 #   pre.wd <- getwd()

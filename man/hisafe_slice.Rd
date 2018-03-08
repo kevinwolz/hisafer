@@ -12,7 +12,7 @@ hisafe_slice(hop, date, simu.names = "all", tree.ids = "all",
   "totalTreeCoarseRootBiomass", voxel.R.size = "mineralNitrogenStock",
   voxel.L.alpha = "totalTreeWaterUptake", voxel.C.alpha = "fineRootCost",
   voxel.R.alpha = "totalTreeNitrogenUptake"), trees = TRUE, crops = TRUE,
-  voxels = TRUE, mem.max = 0)
+  voxels = TRUE, climate = TRUE, mem.max = 0)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -56,6 +56,8 @@ All aesthetics set by \code{vars} are relative to the maximum value in each simu
 \item{crops}{A logical indicating whether or not to plot the crops in the scene.}
 
 \item{voxels}{A logical indicating whether or not to plot the voxels in the scene.}
+
+\item{climate}{A logical indicating whether or not to plot climate aspects (e.g. precipitation) in the scene.}
 
 \item{mem.max}{An integer specifying the maximum number of days into the past to search
 for crop/voxel data when no data is available for \code{date} within \code{hop}.}

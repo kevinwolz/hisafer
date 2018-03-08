@@ -44,11 +44,9 @@ hisafe_info <- function(capsis.path) {
 #' copy_hisafe_template("agroforestry_default", "/Users/myname/Desktop/")
 #' }
 copy_hisafe_template <- function(template, destination, overwrite = TRUE, new.name = NULL) {
-  template.path           <- get_template_path(template)
-  template.subpath        <- get_template_subpath(template)
-  template.dir.components <- strsplit(template.path, "/")[[1]]
-  template.dir.components <- template.dir.components[template.dir.components != ""]
-  template.folder.name    <- tail(template.dir.components, 1)
+  template.path        <- get_template_path(template)
+  template.subpath     <- get_template_subpath(template)
+  template.folder.name <- basename(template.path)
   dum <- file.copy(template.path, destination, recursive = TRUE, overwrite = overwrite)
   dum <- file.copy(list.files(template.subpath, full.names = TRUE),
                    clean_path(paste0(destination, "/", template.folder.name)),
@@ -370,7 +368,7 @@ hop_merge <- function(...) {
     hops <- purrr::pmap(list(hop       = hops,
                              old.names = old.names,
                              new.names = purrr::map2(old.names, 1:length(old.names), make_names_unique)),
-                        simu_rename)
+                        hop_rename)
   }
 
   clear_elements <- function(x) {

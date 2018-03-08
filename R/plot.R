@@ -1,9 +1,12 @@
 #' Plot timeseries of Hi-sAFe output variable
 #' @description Plots a daily or annual timeseries of a single Hi-sAFe output variable.
 #' @return If \code{plot = TRUE}, returns a ggplot object, otherwise the data that would create the plot is returned.
-#' If the data contains two more tree ids, the plot will be faceted by tree id. Otherwise, if \code{facet.year = TRUE}, plots of daily profiles will be faceted by year.
+#' If the data contains two more tree ids, the plot will be faceted by tree id.
+#' Otherwise, if \code{facet.year = TRUE}, plots of daily profiles will be faceted by year.
+#' If more than one value is passed to \code{variable}, then one plot will be created for each variable and combined using \code{\link{cowplot::plot_grid}}.
 #' @param hop An object of class hop.
-#' @param variable A character string of the name of the variable to plot.
+#' @param variables A character vector of the names of the variables to plot.
+#' More than one variable name can be passed, but all variables must be from the same \code{profile}.
 #' @param profile A character string of the profile for which to plot a timeseries. If 'annualtree' or 'annualplot', annual timeseries are created.
 #' If 'trees', 'plot', or 'climate', daily timeseries are created.
 #' @param simu.names A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.
@@ -43,7 +46,7 @@
 #' ggplot2::ggsave("annual_carbonCoarseRoots.png", annual.plot)
 #' }
 plot_hisafe_ts <- function(hop,
-                           variable,
+                           variables,
                            profile,
                            simu.names       = "all",
                            years            = "all",
@@ -54,7 +57,7 @@ plot_hisafe_ts <- function(hop,
                            color.palette    = NA,
                            linetype.palette = NA,
                            aes.cols         = list(color = "SimulationName", linetype = "SimulationName"),
-                           facet.year       = TRUE,
+                           facet.year       = FALSE,
                            crop.points      = FALSE,
                            plot             = TRUE) {
 
@@ -64,13 +67,12 @@ plot_hisafe_ts <- function(hop,
 
   is_hop(hop, error = TRUE)
   profile_check(hop, profile, error = TRUE)
-  variable_check(hop, profile, variable, error = TRUE)
+  variable_check(hop, profile, variables, error = TRUE)
   if(!(profile %in% c(annual.profiles, daily.profiles))) stop("supplied profile is not supported", call. = FALSE)
 
   if(years[1]    == "all")                              years    <- unique(hop[[profile]]$Year)
   if(tree.ids[1] == "all" & profile %in% tree.profiles) tree.ids <- unique(hop[[profile]]$id)
 
-  if(length(variable) > 1)                                        stop("variable argument must be a character vector of length 1",  call. = FALSE)
   if(!all(is.numeric(years)))                                     stop("years argument must be 'all' or a numeric vector",          call. = FALSE)
   if(!(length(doy.lim) == 2 & all(doy.lim %in% 1:366)))           stop("doy.lim argument must be of length 2 with values in 1:366", call. = FALSE)
   if(!(is.na(color.palette) | is.character(color.palette)))       stop("color.palette argument must be a character vector",         call. = FALSE)
@@ -78,8 +80,8 @@ plot_hisafe_ts <- function(hop,
   is_logical(facet.year)
   is_logical(crop.points)
   is_logical(plot)
-  variable_check(hop, profile, c(variable, aes.cols$color, aes.cols$linetype), error = TRUE)
-
+  variable_check(hop, profile, c(variables, aes.cols$color, aes.cols$linetype), error = TRUE)
+  if(facet.year & length(variables) > 1)                          stop("facet.year can only be TRUE when plotting a single variable", call. = FALSE)
   if(!all(years %in% unique(hop[[profile]]$Year)))                stop(paste("not all values in years are present in the",  profile, "profile"),
                                                                        call. = FALSE)
 
@@ -149,29 +151,51 @@ plot_hisafe_ts <- function(hop,
   }
 
   ## Create plot
-  plot.obj <- ggplot(plot.data, aes_string(x        = x.var,
-                                           y        = variable,
-                                           color    = aes.cols$color,
-                                           linetype = aes.cols$linetype,
-                                           group    = "SimulationName")) +
-    labs(x        = x.label,
-         y        = paste0(variable, " (", get_units(hop, profile, variable), ")"),
-         title    = variable,
-         color    = ifelse(aes.cols$color    == "SimulationName", "", aes.cols$color),
-         linetype = ifelse(aes.cols$linetype == "SimulationName", "", aes.cols$linetype)) +
-    facet +
-    scale_x_ts +
-    scale_y_continuous(sec.axis = sec_axis(~ ., labels = NULL)) +
-    geom_line(size = 1, na.rm = TRUE) +
-    scale_color_manual(values = color.palette) +
-    scale_linetype +
-    theme_hisafe_ts() +
-    theme.extra
+  plot.obj <- list()
+  for(i in 1:length(variables)) {
+    plot.obj[[i]] <- ggplot(plot.data, aes_string(x        = x.var,
+                                                  y        = variables[i],
+                                                  color    = aes.cols$color,
+                                                  linetype = aes.cols$linetype,
+                                                  group    = "SimulationName")) +
+      labs(x        = x.label,
+           y        = paste0(variables[i], " (", get_units(hop, profile, variables[i]), ")"),
+           title    = ifelse(length(variables) == 1, variables[i], ""),
+           color    = ifelse(aes.cols$color    == "SimulationName", "", aes.cols$color),
+           linetype = ifelse(aes.cols$linetype == "SimulationName", "", aes.cols$linetype)) +
+      facet +
+      scale_x_ts +
+      scale_y_continuous(sec.axis = sec_axis(~ ., labels = NULL)) +
+      geom_line(size = 1, na.rm = TRUE) +
+      scale_color_manual(values = color.palette) +
+      scale_linetype +
+      theme_hisafe_ts(legend.title = element_blank()) +
+      theme.extra
 
-  if(crop.points & (profile %in% c("annualplot", "plot"))) {
-    plot.obj <- plot.obj +
-      geom_point(aes(shape = mainCropName), size = 2, na.rm = TRUE) +
-      guides(shape = guide_legend(title = "Main crop", title.hjust = 0.5))
+    if(length(variables) > 1) {
+      plot.obj[[i]] <- plot.obj[[i]] +
+        theme(plot.title      = element_blank())
+      if(i == 1) {
+        plot.obj[[i]] <- plot.obj[[i]] +
+          theme(legend.position      = c(0.01, 0.99),
+                legend.justification = c(0, 1))
+      } else {
+        plot.obj[[i]] <- plot.obj[[i]] +
+          theme(legend.position = "none")
+      }
+    }
+
+    if(crop.points & (profile %in% c("annualplot", "plot"))) {
+      plot.obj[[i]] <- plot.obj[[i]] +
+        geom_point(aes(shape = mainCropName), size = 2, na.rm = TRUE) +
+        guides(shape = guide_legend(title = "Main crop", title.hjust = 0.5))
+    }
+  }
+
+  if(length(plot.obj) > 1) {
+    plot.obj <- cowplot::plot_grid(plotlist = plot.obj)
+  } else {
+    plot.obj <- plot.obj[[1]]
   }
 
   if(plot) return(plot.obj) else return(plot.data)

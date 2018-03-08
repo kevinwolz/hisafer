@@ -76,7 +76,7 @@ read_hisafe <- function(hip           = NULL,
   } else {
     path <- R.utils::getAbsolutePath(path)
     if(!dir.exists(path)) stop("directory specified by path does not exist", call. = FALSE)
-    exp.summary.file <- clean_path(paste0(path, "/", tail(strsplit(path, "/")[[1]], n = 1), "_exp_summary.csv"))
+    exp.summary.file <- clean_path(paste0(path, "/", basename(path), "_exp_summary.csv"))
     if(simu.names[1] == "all" & file.exists(exp.summary.file)) {
       EXP.PLAN <- readr::read_csv(exp.summary.file, col_types = readr::cols())
       simu.names <- EXP.PLAN$SimulationName
@@ -235,9 +235,7 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
 
   ## Check for existence of all requested profiles and warn if profile does not exist
   if(!all(file.exists(files))) {
-    missing.profiles <- files[!file.exists(files)] %>%
-      strsplit("/") %>%
-      purrr::map_chr(tail, n = 1)
+    missing.profiles <- basename(files[!file.exists(files)])
     missing.profile.error <- paste(c("The following requested profiles do not exist:",
                                      paste0("      --", missing.profiles)),
                                    collapse = "\n")
@@ -397,7 +395,7 @@ read_hisafe_output_file <- function(profile){
   dat <- read_table_hisafe(profile, skip = end.of.var.list) %>%
     dplyr::filter(Year != 0)
   if(nrow(dat) == 0) {
-    profile.name <- tail(strsplit(profile, "/")[[1]], n = 1)
+    profile.name <- basename(profile)
     warning(paste0(profile.name, " exists but contains no data"), call. = FALSE)
   } else {
     dat <- dat %>%                                               # remove row with Year==0 at the start of every output profile

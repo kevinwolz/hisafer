@@ -13,7 +13,8 @@ plot_hisafe_ts(hop, variable, profile, simu.names = "all", years = "all",
 \arguments{
 \item{hop}{An object of class hop.}
 
-\item{variable}{A character string of the name of the variable to plot.}
+\item{variable}{A character vector of the names of the variables to plot.
+More than one variable name can be passed, but all variables must be from the same \code{profile}.}
 
 \item{profile}{A character string of the profile for which to plot a timeseries. If 'annualtree' or 'annualplot', annual timeseries are created.
 If 'trees', 'plot', or 'climate', daily timeseries are created.}
@@ -49,7 +50,9 @@ Only applies when \code{profile} is 'plot' or 'annualplot'.}
 }
 \value{
 If \code{plot = TRUE}, returns a ggplot object, otherwise the data that would create the plot is returned.
-If the data contains two more tree ids, the plot will be faceted by tree id. Otherwise, if \code{facet.year = TRUE}, plots of daily profiles will be faceted by year.
+If the data contains two more tree ids, the plot will be faceted by tree id.
+Otherwise, if \code{facet.year = TRUE}, plots of daily profiles will be faceted by year.
+If more than one value is passed to \code{variable}, then one plot will be created for each variable and combined using \code{\link{cowplot::plot_grid}}.
 }
 \description{
 Plots a daily or annual timeseries of a single Hi-sAFe output variable.

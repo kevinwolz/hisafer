@@ -27,7 +27,7 @@ build_hisafe <- function(hip, plot.scene = TRUE) {
   EXP.PLAN <- hip$exp.plan
   dir.create(hip$path, showWarnings = FALSE, recursive = TRUE)
 
-  if(nrow(EXP.PLAN) > 1) exp.name <- tail(strsplit(hip$path, split = "/", fixed = TRUE)[[1]], 1)
+  if(nrow(EXP.PLAN) > 1) exp.name <- basename(hip$path)
 
   for(i in 1:nrow(EXP.PLAN)) {
     simu.path <- clean_path(paste0(hip$path, "/", EXP.PLAN$SimulationName[i]))
