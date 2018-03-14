@@ -4,40 +4,35 @@
 \alias{layer_params}
 \title{Generate soil layer table for define_hisafe}
 \usage{
-layer_params(thick = c(0.4, 0.4, 0.6, 1, 7), sand = c(20.35, 16.8, 11.83,
-  18.76, 6.5), clay = c(20.15, 24.95, 25.97, 24.7, 32.35),
-  limeStone = c(45.7, 49.1, 47.1, 50.4, 52.1), organicMatter = c(2.42, 1.52,
-  1.86, 1.67, 3.25), partSizeSand = 290, stone = 0, stoneType = 6,
-  infiltrability = 50)
+layer_params(template, ...)
 }
 \arguments{
-\item{thick}{Parameter of Hi-sAFe soil layer table.}
+\item{template}{A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
+See \code{\link{define_hisafe}} for more details.}
 
-\item{sand}{Parameter of Hi-sAFe soil layer table.}
-
-\item{clay}{Parameter of Hi-sAFe soil layer table.}
-
-\item{limeStone}{Parameter of Hi-sAFe soil layer table.}
-
-\item{organicMatter}{Parameter of Hi-sAFe soil layer table.}
-
-\item{partSizeSand}{Parameter of Hi-sAFe soil layer table.}
-
-\item{stone}{Parameter of Hi-sAFe soil layer table.}
-
-\item{stoneType}{Parameter of Hi-sAFe soil layer table.}
-
-\item{infiltrability}{Parameter of Hi-sAFe soil layer table.}
+\item{...}{Any parameters of Hi-sAFe soil layer table:
+ \itemize{
+ \item{"thick"}{}
+ \item{"sand"}{}
+ \item{"clay"}{}
+ \item{"limeStone"}{}
+ \item{"organicMatter"}{}
+ \item{"partSizeSand"}{}
+ \item{"stone"}{}
+ \item{"stoneType"}{}
+ \item{"infiltrability"}{}
+}}
 }
 \value{
-A list containing one or more data frames (tibbles).
+A list containing a Hi-sAFE soil layer table.
 }
 \description{
 Generates a soil layer table suitable for passing to \code{\link{define_hisafe}}.
+Any passed parameters modify the table in the provided template.
 }
 \examples{
 \dontrun{
-layers <- layer_params()
+layers <- layer_params(template = "agroforestry", sand = 20)
 }
 }
 \seealso{

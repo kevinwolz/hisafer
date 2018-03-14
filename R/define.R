@@ -140,6 +140,7 @@ define_hisafe <- function(path,
 #' @param exp.name A character string of the name of the experiment folder. Only used if defining more than one simulation.
 #' @param profiles A character vector of Hi-sAFe export profiles to be exported by Hi-sAFe. If "all" (the default), then all supported profiles will be exported.
 #' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
+#' See \code{\link{define_hisafe}} for more details.
 #' @param force Logical indicating wether the supplied values should be forced past the constraint checks. Use \code{TRUE} for development only.
 #' See \code{\link{define_hisafe}} for more details.
 #' @export
@@ -570,38 +571,37 @@ check_type <- function(variable, exp.plan) {
 
 #' Generate root initialization table for define_hisafe
 #' @description Generates a root initialization table suitable for passing to \code{\link{define_hisafe}}.
-#' @return A list containing one or more data frames (tibbles).
-#' @param reps Number of times to repeats the rows of the defined table.
-#' @param shape Parameter of Hi-sAFe root initialization table.
-#' @param repartition Parameter of Hi-sAFe root initialization table.
-#' @param paramShape1 Parameter of Hi-sAFe root initialization table.
-#' @param paramShape2 Parameter of Hi-sAFe root initialization table.
-#' @param paramShape3 Parameter of Hi-sAFe root initialization table.
-#' @param amount Parameter of Hi-sAFe root initialization table.
+#' Any passed parameters modify the table in the provided template.
+#' @return A list containing a Hi-sAFE root initialization table.
+#' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
+#' See \code{\link{define_hisafe}} for more details.
+#' @param rep Number of times to repeats the rows of the defined table.
+#' @param ... Any parameters of Hi-sAFe root initialization table:
+#'  \itemize{
+#'  \item{"shape"}{}
+#'  \item{"repartition"}{}
+#'  \item{"paramShape1"}{}
+#'  \item{"paramShape2"}{}
+#'  \item{"paramShape3"}{}
+#'  \item{"amount"}{}
+#' }
 #' @export
 #' @family hisafe definition functions
 #' @examples
 #' \dontrun{
-#' root.init <- root_init_params()
+#' root.init <- root_init_params(template = "agroforestry", reps = 2, amount = 1)
 #' }
-root_init_params <- function(reps        = 1,
-                             shape       = 1,
-                             repartition = 3,
-                             paramShape1 = 0.75,
-                             paramShape2 = 0,
-                             paramShape3 = 0,
-                             amount      = 0.5) {
+root_init_params <- function(template, reps = 1, ...) {
+  supported <- c("shape", "repartition", "paramShape1", "paramShape2", "paramShape3", "amount")
+  temp <- modify_table(args           = list(...),
+                      supported.args = supported,
+                      character.args = NULL,
+                      numeric.args   = supported,
+                      positive.args  = supported,
+                      perc.args      = NULL,
+                      table.name     = "root.initialization",
+                      template       = template)
 
-  args <- list(reps, shape, repartition, paramShape1, paramShape2, paramShape3, amount)
-  if(!all(purrr::map_lgl(args, is.numeric) | purrr::map_lgl(args, function(x) all(is.na(x))))) stop("all arguments must be numeric")
-
-  temp <- dplyr::as_tibble(data.frame(name        = "RootInit",
-                                      shape       = shape,
-                                      repartition = repartition,
-                                      paramShape1 = paramShape1,
-                                      paramShape2 = paramShape2,
-                                      paramShape3 = paramShape3,
-                                      amount      = amount))
   out <- list(temp)
   if(reps > 1) {
     for(i in 2:reps) {
@@ -614,127 +614,162 @@ root_init_params <- function(reps        = 1,
 
 #' Generate tree initialization table for define_hisafe
 #' @description Generates a tree initialization table suitable for passing to \code{\link{define_hisafe}}.
-#' @return A list containing one or more data frames (tibbles).
-#' @param species Parameter of Hi-sAFe tree initialization table.
-#' @param age Parameter of Hi-sAFe tree initialization table.
-#' @param height Parameter of Hi-sAFe tree initialization table.
-#' @param crownBaseHeight Parameter of Hi-sAFe tree initialization table.
-#' @param truncatureRatio Parameter of Hi-sAFe tree initialization table.
-#' @param leafToFineRootsRatio Parameter of Hi-sAFe tree initialization table.
-#' @param crownRadius Parameter of Hi-sAFe tree initialization table.
-#' @param treeX Parameter of Hi-sAFe tree initialization table.
-#' @param treeY Parameter of Hi-sAFe tree initialization table.
+#' Any passed parameters modify the table in the provided template.
+#' @return A list containing a Hi-sAFE tree initialization table.
+#' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
+#' See \code{\link{define_hisafe}} for more details.
+#' @param ... Any parameters of Hi-sAFe tree initialization table:
+#'  \itemize{
+#'  \item{"species"}{}
+#'  \item{"age"}{}
+#'  \item{"height"}{}
+#'  \item{"crownBaseHeight"}{}
+#'  \item{"truncatureRatio"}{}
+#'  \item{"leafToFineRootsRatio"}{}
+#'  \item{"crownRadius"}{}
+#'  \item{"treeX"}{}
+#'  \item{"treeY"}{}
+#' }
 #' @export
 #' @family hisafe definition functions
 #' @examples
 #' \dontrun{
-#' tree.init <- tree_init_params()
+#' tree.init <- tree_init_params(template = "agroforestry, height = 2)
 #' }
-tree_init_params <- function(species               = "walnut-hybrid",
-                             age                   = 1,
-                             height                = 1,
-                             crownBaseHeight       = 0.5,
-                             truncatureRatio       = 0,
-                             leafToFineRootsRatio  = 0.5,
-                             crownRadius           = 0.25,
-                             treeX                 = 0,
-                             treeY                 = 0) {
-
-  args <- list(age, height, crownBaseHeight, truncatureRatio, leafToFineRootsRatio, crownRadius, treeX, treeY)
-  if(!all(purrr::map_lgl(args, is.numeric) | purrr::map_lgl(args, function(x) all(is.na(x))))) stop("all arguments except 'species' must be numeric")
-  if(!is.character(species))                 stop("species argument must be a character vector")
-
-  out <- dplyr::as_tibble(data.frame(name                  = "TreeInit",
-                                     species               = species,
-                                     age                   = age,
-                                     height                = height,
-                                     crownBaseHeight       = crownBaseHeight,
-                                     truncatureRatio       = truncatureRatio,
-                                     leafToFineRootsRatio  = leafToFineRootsRatio,
-                                     crownRadius           = crownRadius,
-                                     treeX                 = treeX,
-                                     treeY                 = treeY))
+tree_init_params <- function(template, ...) {
+  supported <- c("species", "age", "height", "crownBaseHeight", "truncatureRatio",
+                 "leafToFineRootsRatio", "crownRadius", "treeX", "treeY")
+  out <- modify_table(args           = list(...),
+                      supported.args = supported,
+                      character.args = "species",
+                      numeric.args   = supported[supported != "species"],
+                      positive.args  = supported[supported != "species"],
+                      perc.args      = NULL,
+                      table.name     = "tree.initialization",
+                      template       = template)
   return(list(out))
 }
 
 #' Generate soil layer initialization table for define_hisafe
 #' @description Generates a soil layer initialization table suitable for passing to \code{\link{define_hisafe}}.
-#' @return A list containing one or more data frames (tibbles).
-#' @param waterContent Parameter of Hi-sAFe soil layer initialization table.
-#' @param no3Concentration Parameter of Hi-sAFe soil layer initialization table.
-#' @param nh4concentration Parameter of Hi-sAFe soil layer initialization table.
+#' Any passed parameters modify the table in the provided template.
+#' @return A list containing a Hi-sAFE soil layer initialization table.
+#' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
+#' See \code{\link{define_hisafe}} for more details.
+#' @param ... Any parameters of Hi-sAFe soil layer initialization table:
+#'  \itemize{
+#'  \item{"waterContent"}{}
+#'  \item{"no3Concentration"}{}
+#'  \item{"nh4concentration"}{}
+#' }
 #' @export
+#' @importFrom dplyr %>%
 #' @family hisafe definition functions
 #' @examples
 #' \dontrun{
-#' layer.init <- layer_init_params()
+#' layer.init <- layer_init_params(template = "agroforestry", waterContent = 0.3)
 #' }
-layer_init_params <- function(waterContent     = c(0.2, 0.3, 0.3, 0.3, 0.3),
-                              no3Concentration = c(30, 14, 5, 2, 0),
-                              nh4concentration = 0) {
-
-  args <- list(waterContent, no3Concentration, nh4concentration)
-  if(!all(purrr::map_lgl(args, is.numeric) | purrr::map_lgl(args, function(x) all(is.na(x))))) stop("all arguments must be numeric")
-
-  out <- dplyr::as_tibble(data.frame(name             = "LayerInit",
-                                     waterContent     = waterContent,
-                                     no3Concentration = no3Concentration,
-                                     nh4concentration = nh4concentration))
-  out <- dplyr::mutate_all(out, function(x) format(x, nsmall = 1, trim = TRUE))
+layer_init_params <- function(template, ...) {
+  supported <- c("waterContent", "no3Concentration", "nh4concentration")
+  out <- modify_table(args           = list(...),
+                      supported.args = supported,
+                      numeric.args   = supported,
+                      character.args = NULL,
+                      positive.args  = supported,
+                      perc.args      = NULL,
+                      table.name     = "layer.initialization",
+                      template       = template) %>%
+    dplyr::mutate_all(function(x) format(x, nsmall = 1, trim = TRUE))
   return(list(out))
 }
 
 #' Generate soil layer table for define_hisafe
 #' @description Generates a soil layer table suitable for passing to \code{\link{define_hisafe}}.
-#' @return A list containing one or more data frames (tibbles).
-#' @param thick Parameter of Hi-sAFe soil layer table.
-#' @param sand Parameter of Hi-sAFe soil layer table.
-#' @param clay Parameter of Hi-sAFe soil layer table.
-#' @param limeStone Parameter of Hi-sAFe soil layer table.
-#' @param organicMatter Parameter of Hi-sAFe soil layer table.
-#' @param partSizeSand Parameter of Hi-sAFe soil layer table.
-#' @param stone Parameter of Hi-sAFe soil layer table.
-#' @param stoneType Parameter of Hi-sAFe soil layer table.
-#' @param infiltrability Parameter of Hi-sAFe soil layer table.
+#' Any passed parameters modify the table in the provided template.
+#' @return A list containing a Hi-sAFE soil layer table.
+#' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
+#' See \code{\link{define_hisafe}} for more details.
+#' @param ... Any parameters of Hi-sAFe soil layer table:
+#'  \itemize{
+#'  \item{"thick"}{}
+#'  \item{"sand"}{}
+#'  \item{"clay"}{}
+#'  \item{"limeStone"}{}
+#'  \item{"organicMatter"}{}
+#'  \item{"partSizeSand"}{}
+#'  \item{"stone"}{}
+#'  \item{"stoneType"}{}
+#'  \item{"infiltrability"}{}
+#' }
 #' @export
+#' @importFrom dplyr %>%
 #' @family hisafe definition functions
 #' @examples
 #' \dontrun{
-#' layers <- layer_params()
+#' layers <- layer_params(template = "agroforestry", sand = 20)
 #' }
-layer_params <- function(thick          = c(0.4, 0.4, 0.6, 1, 7),
-                         sand           = c(20.35, 16.80, 11.83, 18.76, 6.5),
-                         clay           = c(20.15, 24.95, 25.97, 24.70, 32.35),
-                         limeStone      = c(45.7, 49.1, 47.1, 50.4, 52.1),
-                         organicMatter  = c(2.42, 1.52, 1.86, 1.67, 3.25),
-                         partSizeSand   = 290,
-                         stone          = 0,
-                         stoneType      = 6,
-                         infiltrability = 50) {
-
-  args <- list(thick, sand, clay, limeStone, organicMatter, partSizeSand, stone, stoneType, infiltrability)
-  if(!all(purrr::map_lgl(args, is.numeric) | purrr::map_lgl(args, function(x) all(is.na(x))))) stop("all arguments must be numeric")
-  if(!all(is.numeric(thick)          & thick >= 0))                                   stop("thick must be greater than 0")
-  if(!all(is.numeric(sand)           & sand >= 0             & sand <= 100))          stop("sand must be between 1 and 100")
-  if(!all(is.numeric(clay)           & clay >= 0             & clay <= 100))          stop("clay must be between 1 and 100")
-  if(!all(is.numeric(limeStone)      & limeStone >= 0        & limeStone <= 100))     stop("limeStone must be 1 and 100")
-  if(!all(is.numeric(organicMatter)  & organicMatter >= 0    & organicMatter <= 100)) stop("organicMatter must be between 1 and 100")
-  if(!all(is.numeric(partSizeSand)   & partSizeSand >= 0))                            stop("partSizeSand must be greater than 0")
-  if(!all(is.numeric(stone)          & stone >= 0            & stone <= 100))         stop("stone must be between 0 and 100")
-  if(!all(stoneType %% 1 == 0        & stoneType >= 1        & stoneType <= 10))      stop("stoneType must be an integer between 1 and 10")
-  if(!all(is.numeric(infiltrability) & infiltrability >= 0))                          stop("infiltrability must be greater than 0")
-
-  out <- dplyr::as_tibble(data.frame(name           = "Layer",
-                                     thick          = thick,
-                                     sand           = sand,
-                                     clay           = clay,
-                                     limeStone      = limeStone,
-                                     organicMatter  = organicMatter,
-                                     partSizeSand   = partSizeSand,
-                                     stone          = stone,
-                                     stoneType      = stoneType,
-                                     infiltrability = infiltrability))
-  out <- dplyr::mutate_at(out, .vars = dplyr::vars(-stoneType), .funs = function(x) format(x, nsmall = 1, trim = TRUE))
-  out <- dplyr::mutate(out, stoneType = format(stoneType, nsmall = 0, trim = TRUE))
+layer_params <- function(template, ...) {
+  supported = c("thick", "sand", "clay", "limeStone", "organicMatter",
+                "partSizeSand", "stone", "stoneType", "infiltrability")
+  out <- modify_table(args           = list(...),
+                      supported.args = supported,
+                      numeric.args   = supported,
+                      character.args = NULL,
+                      positive.args  = c("thick", "partSizeSand", "stoneType", "infiltrability"),
+                      perc.args      = c("sand", "clay", "limeStone", "organicMatter", "stone"),
+                      table.name     = "layers",
+                      template       = template) %>%
+    dplyr::mutate_at(.vars = dplyr::vars(-stoneType), .funs = function(x) format(x, nsmall = 1, trim = TRUE)) %>%
+    dplyr::mutate(stoneType = format(stoneType, nsmall = 0, trim = TRUE))
   return(list(out))
+}
+
+#' Build tables for table param functions
+#' @description Builds tables for table param functions
+#' @return A data.frame (tibble) containing a Hi-sAFE soil layer table.
+#' @param args From table param function
+#' @param supported.args From table param function
+#' @param numeric.args From table param function
+#' @param character.args From table param function
+#' @param positive.args From table param function
+#' @param perc.args From table param function
+#' @param table.name From table param function
+#' @param template From table param function
+modify_table <- function(args, supported.args, numeric.args, character.args, positive.args, perc.args, table.name, template) {
+  unsupported.args <- names(args)[!(names(args) %in% supported.args)]
+  if(length(unsupported.args) > 0) {
+    stop(paste0("The following arguments are not supported: ", paste(unsupported.args, collapse = ", "),
+                "\nSupported arguments include: ", paste(supported.args, collapse = ", ")), call. = FALSE)
+  }
+
+  errors <- ""
+  for(i in numeric.args) {
+    if(i %in% names(args)) if(!is.numeric(args[[i]]))               errors <- c(errors, paste("--", i, "must be numeric"))
+  }
+  for(i in character.args) {
+    if(i %in% names(args)) if(!is.numeric(args[[i]]))               errors <- c(errors, paste("--", i, "must be character"))
+  }
+  for(i in positive.args) {
+    if(i %in% names(args)) if(any(args[[i]] < 0))                   errors <- c(errors, paste("--", i, "must be greater than or equal to 0"))
+  }
+  for(i in perc.args) {
+    if(i %in% names(args)) if(any(args[[i]] < 0 | args[[i]] > 100)) errors <- c(errors, paste("--", i, "must be between 0 and 100"))
+  }
+
+  error.starter <- "One or more arguments with incorrect values:"
+  errors <- paste(c(error.starter, errors[!(errors == "")]), collapse = "\n")
+  if(errors != error.starter) stop(errors, call. = FALSE)
+
+  TEMPLATE_PARAMS <- get_template_params(template)
+  PARAM_NAMES     <- get_param_names(TEMPLATE_PARAMS)
+  PARAM_DEFAULTS  <- get_param_vals(TEMPLATE_PARAMS, "value")
+
+  out <- PARAM_DEFAULTS[[table.name]][[1]]
+
+  for(arg in names(args)) {
+    if(length(out[[arg]]) %% length(args[[arg]]) != 0) stop(paste("Length of provided", arg, "values does not go evenly into template table"), call. = FALSE)
+    out[[arg]] <- args[[arg]]
+  }
+
+  return(out)
 }

@@ -4,25 +4,29 @@
 \alias{layer_init_params}
 \title{Generate soil layer initialization table for define_hisafe}
 \usage{
-layer_init_params(waterContent = c(0.2, 0.3, 0.3, 0.3, 0.3),
-  no3Concentration = c(30, 14, 5, 2, 0), nh4concentration = 0)
+layer_init_params(template, ...)
 }
 \arguments{
-\item{waterContent}{Parameter of Hi-sAFe soil layer initialization table.}
+\item{template}{A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
+See \code{\link{define_hisafe}} for more details.}
 
-\item{no3Concentration}{Parameter of Hi-sAFe soil layer initialization table.}
-
-\item{nh4concentration}{Parameter of Hi-sAFe soil layer initialization table.}
+\item{...}{Any parameters of Hi-sAFe soil layer initialization table:
+ \itemize{
+ \item{"waterContent"}{}
+ \item{"no3Concentration"}{}
+ \item{"nh4concentration"}{}
+}}
 }
 \value{
-A list containing one or more data frames (tibbles).
+A list containing a Hi-sAFE soil layer initialization table.
 }
 \description{
 Generates a soil layer initialization table suitable for passing to \code{\link{define_hisafe}}.
+Any passed parameters modify the table in the provided template.
 }
 \examples{
 \dontrun{
-layer.init <- layer_init_params()
+layer.init <- layer_init_params(template = "agroforestry", waterContent = 0.3)
 }
 }
 \seealso{

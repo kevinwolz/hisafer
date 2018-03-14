@@ -4,33 +4,34 @@
 \alias{root_init_params}
 \title{Generate root initialization table for define_hisafe}
 \usage{
-root_init_params(reps = 1, shape = 1, repartition = 3,
-  paramShape1 = 0.75, paramShape2 = 0, paramShape3 = 0, amount = 0.5)
+root_init_params(template, reps = 1, ...)
 }
 \arguments{
-\item{reps}{Number of times to repeats the rows of the defined table.}
+\item{template}{A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
+See \code{\link{define_hisafe}} for more details.}
 
-\item{shape}{Parameter of Hi-sAFe root initialization table.}
+\item{...}{Any parameters of Hi-sAFe root initialization table:
+ \itemize{
+ \item{"shape"}{}
+ \item{"repartition"}{}
+ \item{"paramShape1"}{}
+ \item{"paramShape2"}{}
+ \item{"paramShape3"}{}
+ \item{"amount"}{}
+}}
 
-\item{repartition}{Parameter of Hi-sAFe root initialization table.}
-
-\item{paramShape1}{Parameter of Hi-sAFe root initialization table.}
-
-\item{paramShape2}{Parameter of Hi-sAFe root initialization table.}
-
-\item{paramShape3}{Parameter of Hi-sAFe root initialization table.}
-
-\item{amount}{Parameter of Hi-sAFe root initialization table.}
+\item{rep}{Number of times to repeats the rows of the defined table.}
 }
 \value{
-A list containing one or more data frames (tibbles).
+A list containing a Hi-sAFE root initialization table.
 }
 \description{
 Generates a root initialization table suitable for passing to \code{\link{define_hisafe}}.
+Any passed parameters modify the table in the provided template.
 }
 \examples{
 \dontrun{
-root.init <- root_init_params()
+root.init <- root_init_params(template = "agroforestry", reps = 2, amount = 1)
 }
 }
 \seealso{

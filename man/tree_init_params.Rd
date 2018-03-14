@@ -4,39 +4,31 @@
 \alias{tree_init_params}
 \title{Generate tree initialization table for define_hisafe}
 \usage{
-tree_init_params(species = "walnut-hybrid", age = 1, height = 1,
-  crownBaseHeight = 0.5, truncatureRatio = 0, leafToFineRootsRatio = 0.5,
-  crownRadius = 0.25, treeX = 0, treeY = 0)
+tree_init_params(template, ...)
 }
 \arguments{
-\item{species}{Parameter of Hi-sAFe tree initialization table.}
+\item{template}{A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
+See \code{\link{define_hisafe}} for more details.}
 
-\item{age}{Parameter of Hi-sAFe tree initialization table.}
-
-\item{height}{Parameter of Hi-sAFe tree initialization table.}
-
-\item{crownBaseHeight}{Parameter of Hi-sAFe tree initialization table.}
-
-\item{truncatureRatio}{Parameter of Hi-sAFe tree initialization table.}
-
-\item{leafToFineRootsRatio}{Parameter of Hi-sAFe tree initialization table.}
-
-\item{crownRadius}{Parameter of Hi-sAFe tree initialization table.}
-
-\item{treeX}{Parameter of Hi-sAFe tree initialization table.}
-
-\item{treeY}{Parameter of Hi-sAFe tree initialization table.}
+\item{...}{Any parameters of Hi-sAFe tree initialization table:
+ \itemize{
+ \item{"species"}{}
+ \item{"age"}{}
+ \item{"height"}{}
+ \item{"crownBaseHeight"}{}
+ \item{"truncatureRatio"}{}
+ \item{"leafToFineRootsRatio"}{}
+ \item{"crownRadius"}{}
+ \item{"treeX"}{}
+ \item{"treeY"}{}
+}}
 }
 \value{
-A list containing one or more data frames (tibbles).
+A list containing a Hi-sAFE tree initialization table.
 }
 \description{
 Generates a tree initialization table suitable for passing to \code{\link{define_hisafe}}.
-}
-\examples{
-\dontrun{
-tree.init <- tree_init_params()
-}
+Any passed parameters modify the table in the provided template.
 }
 \seealso{
 Other hisafe definition functions: \code{\link{define_hisafe_file}},

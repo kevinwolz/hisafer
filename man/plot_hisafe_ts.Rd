@@ -4,16 +4,16 @@
 \alias{plot_hisafe_ts}
 \title{Plot timeseries of Hi-sAFe output variable}
 \usage{
-plot_hisafe_ts(hop, variable, profile, simu.names = "all", years = "all",
+plot_hisafe_ts(hop, variables, profile, simu.names = "all", years = "all",
   tree.ids = "all", date.min = NA, date.max = NA, doy.lim = c(1, 365),
   color.palette = NA, linetype.palette = NA, aes.cols = list(color =
-  "SimulationName", linetype = "SimulationName"), facet.year = TRUE,
+  "SimulationName", linetype = "SimulationName"), facet.year = FALSE,
   crop.points = FALSE, plot = TRUE)
 }
 \arguments{
 \item{hop}{An object of class hop.}
 
-\item{variable}{A character vector of the names of the variables to plot.
+\item{variables}{A character vector of the names of the variables to plot.
 More than one variable name can be passed, but all variables must be from the same \code{profile}.}
 
 \item{profile}{A character string of the profile for which to plot a timeseries. If 'annualtree' or 'annualplot', annual timeseries are created.
