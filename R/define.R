@@ -445,7 +445,6 @@ check_input_values <- function(hip, force) {
                        "-- treeCropDistance and weededAreaRadius can not both be greater than 0", "")
 
   ## Root Init Errors
-
   root.init.diam.error <- ifelse(any(unlist(get_init_vals("root.initialization", "paramShape1")) < (0.75 * unlist(purrr::map2(get_used_un("cellWidth"),
                                                                                                                               root.rows,
                                                                                                                               rep)))),
@@ -634,7 +633,7 @@ root_init_params <- function(template, reps = 1, ...) {
 #' @family hisafe definition functions
 #' @examples
 #' \dontrun{
-#' tree.init <- tree_init_params(template = "agroforestry, height = 2)
+#' tree.init <- tree_init_params(template = "agroforestry", height = 2)
 #' }
 tree_init_params <- function(template, ...) {
   supported <- c("species", "age", "height", "crownBaseHeight", "truncatureRatio",

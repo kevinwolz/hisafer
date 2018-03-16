@@ -20,7 +20,7 @@ read_param_file <- function(path) {
       next.header <- which(titles)[which(titles) > i][[1]]
       table.elements <- strsplit(remove_whitespace(sim[i:(next.header - 1)]), split = "\t")
     } else {
-      table.elements <- strsplit(sim[i], split = "\t")
+      table.elements <- strsplit(remove_whitespace(sim[i:length(sim)]), split = "\t")
     }
 
     clean_elements <- function(x, table.names) {

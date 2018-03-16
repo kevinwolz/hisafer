@@ -30,6 +30,11 @@ A list containing a Hi-sAFE tree initialization table.
 Generates a tree initialization table suitable for passing to \code{\link{define_hisafe}}.
 Any passed parameters modify the table in the provided template.
 }
+\examples{
+\dontrun{
+tree.init <- tree_init_params(template = "agroforestry", height = 2)
+}
+}
 \seealso{
 Other hisafe definition functions: \code{\link{define_hisafe_file}},
   \code{\link{define_hisafe}},
