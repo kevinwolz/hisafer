@@ -70,7 +70,7 @@ read_param_file <- function(path) {
       if(nrow(element.table.reduced) > 0) {
         toto <- list(list(value = list(element.table), commented = FALSE, range = NA, type = NA, accepted = NA))
       } else {
-        toto <- list(list(value = list(element.table), commented = TRUE, range = NA, type = NA, accepted = NA))
+        toto <- list(list(value = list(element.table), commented = TRUE,  range = NA, type = NA, accepted = NA))
       }
       names(toto) <- gsub("_", ".", names(tables)[names(tables) == tolower(list.title)])
       new.sim[[list.title]] <- c(new.sim[[list.title]], toto)

@@ -98,7 +98,7 @@ hisafe_slice <- function(hop,
   if(climate) variable_check(hop, "climate", "precipitation", error = TRUE)
   if(any(is.na(unlist(vars)))) { # account for any NA vars specifications
     vars <- purrr::map(vars, function(x) tidyr::replace_na(x, "none"))
-    for(i in c("trees", "cells", "voxels")[c(trees, crops, voxels)]) hop[[i]]$none <- as.numeric(NA)
+    for(i in c("trees", "cells", "voxels")[c(trees, crops, voxels)]) hop[[i]]$none <- NA_real_
   }
 
   x.lab <- "X (m)"

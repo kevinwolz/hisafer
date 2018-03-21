@@ -473,10 +473,10 @@ read_tree_info <- function(path, simu.name) {
         dplyr::mutate(treePruningDays      = sim$TREE_PRUNING$treePruningDays$value)
     } else {
       tree.info <- tree.info %>%
-        dplyr::mutate(treePruningYears     = list(as.numeric(NA))) %>%
-        dplyr::mutate(treePruningProp      = list(as.numeric(NA))) %>%
-        dplyr::mutate(treePruningMaxHeight = list(as.numeric(NA))) %>%
-        dplyr::mutate(treePruningDays      = list(as.numeric(NA)))
+        dplyr::mutate(treePruningYears     = list(NA_real_)) %>%
+        dplyr::mutate(treePruningProp      = list(NA_real_)) %>%
+        dplyr::mutate(treePruningMaxHeight = list(NA_real_)) %>%
+        dplyr::mutate(treePruningDays      = list(NA_real_))
     }
     if(!sim$TREE_ROOT_PRUNING$treeRootPruningYears$commented) {
       tree.info <- tree.info %>%
@@ -486,10 +486,10 @@ read_tree_info <- function(path, simu.name) {
         dplyr::mutate(treeRootPruningDepth    = sim$TREE_ROOT_PRUNING$treeRootPruningDepth$value)
     } else {
       tree.info <- tree.info %>%
-        dplyr::mutate(treeRootPruningYears    = list(as.numeric(NA))) %>%
-        dplyr::mutate(treeRootPruningDays     = list(as.numeric(NA))) %>%
-        dplyr::mutate(treeRootPruningDistance = list(as.numeric(NA))) %>%
-        dplyr::mutate(treeRootPruningDepth    = list(as.numeric(NA)))
+        dplyr::mutate(treeRootPruningYears    = list(NA_real_)) %>%
+        dplyr::mutate(treeRootPruningDays     = list(NA_real_)) %>%
+        dplyr::mutate(treeRootPruningDistance = list(NA_real_)) %>%
+        dplyr::mutate(treeRootPruningDepth    = list(NA_real_))
     }
   } else {
     tree.info <- dplyr::tibble()

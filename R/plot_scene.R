@@ -52,10 +52,7 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
       dplyr::select(species, x, y)
     num.trees <- nrow(tree.plot.data) #nbTrees is not an allowed entry to a hip object, but is rather modifying by build_hisafe based on nrow(tree.init.table)
   } else {
-    tree.plot.data <- tree_init_params("No trees", NA, NA, NA, NA, NA, NA, NA, NA)[[1]] %>%
-      dplyr::mutate_if(is.logical, as.numeric) %>%
-      dplyr::mutate(x = treeX, y = treeY) %>%
-      dplyr::select(species, x, y)
+    tree.plot.data <- dplyr::tibble(species = "No trees", x = NA_real_, y = NA_real_)
     num.trees <- 0
   }
   ## Calculate scene dimensions (cell size for plotting is always "1", but more/less cells added and labels adjusted based actual dimensions)
