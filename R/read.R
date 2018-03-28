@@ -253,24 +253,33 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
     out <- list()
   }
 
-  if("cellsDetail" %in% profiles) {
-    out$cells$data <- out$cells$data %>%
-      dplyr::left_join(out$cellsDetail$data , by = dplyr::vars(SimulationName:y))
-    out$cells$variables <- dplyr::bind_rows(out$cells$variables, out$cellsDetail$variables)
-    out$cellsDetail <- NULL
+  join_cells <- function(...){
+    dplyr::left_join(..., by = c("SimulationName", "Date", "Day", "Month", "Year" ,
+                                 "JulianDay", "stepNum", "cellId", "id", "x", "y"))
   }
-  if("voxelsDetail" %in% profiles) {
-    out$voxels$data <- out$voxels$data %>%
-      dplyr::left_join(out$voxelsDetail$data , by = dplyr::vars(SimulationName:z))
-    out$voxels$variables <- dplyr::bind_rows(out$voxels$variables, out$voxelsDetail$variables)
-    out$voxelsDetail <- NULL
+  cell.data <- list(out[["cells"]]$data,
+                    out[["cellsDetail"]]$data)
+  cell.vars <- list(out[["cells"]]$variables,
+                    out[["cellsDetail"]]$variables)
+  out[["cells"]]$data      <- Reduce(join_cells,       cell.data[!purrr::map_lgl(cell.data, is.null)])
+  out[["cells"]]$variables <- Reduce(dplyr::bind_rows, cell.vars[!purrr::map_lgl(cell.vars, is.null)])
+  out$cellsDetail <- NULL
+
+  join_voxels <- function(...){
+    dplyr::left_join(..., by = c("SimulationName", "Date", "Day", "Month", "Year" ,
+                                 "JulianDay", "stepNum", "cellId", "id", "x", "y", "z"))
   }
-  if("voxelsDebug" %in% profiles) {
-    out$voxels$data <- out$voxels$data %>%
-      dplyr::left_join(out$voxelsDebug$data , by = dplyr::vars(SimulationName:z))
-    out$voxels$variables <- dplyr::bind_rows(out$voxels$variables, out$voxelsDebug$variables)
-    out$voxelsDebug <- NULL
-  }
+  vox.data <- list(out[["voxels"]]$data,
+                   out[["voxelsDetail"]]$data,
+                   out[["voxelsDebug"]]$data,
+                   out[["voxelsOptim"]]$data)
+  vox.vars <- list(out[["voxels"]]$variables,
+                   out[["voxelsDetail"]]$variables,
+                   out[["voxelsDebug"]]$variables,
+                   out[["voxelsOptim"]]$variables)
+  out[["voxels"]]$data      <- Reduce(join_voxels,      vox.data[!purrr::map_lgl(vox.data, is.null)])
+  out[["voxels"]]$variables <- Reduce(dplyr::bind_rows, vox.vars[!purrr::map_lgl(vox.vars, is.null)])
+  out$voxelsDetail <- out$voxelsDebug <- out$voxelsOptim <- NULL
 
   get_prof <- function(out, prof) {
     if(is.null(out[[prof]])) {

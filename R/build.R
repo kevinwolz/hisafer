@@ -169,6 +169,7 @@ build_structure <- function(exp.plan, path, profiles, template) {
   sim.params.to.edit    <- params.to.edit[params.to.edit %in% PARAM_NAMES$sim]
   pld.params.to.edit    <- params.to.edit[params.to.edit %in% PARAM_NAMES$pld]
   tree.params.to.edit   <- params.to.edit[params.to.edit %in% PARAM_NAMES$tree]
+  crop.params.to.edit   <- params.to.edit[params.to.edit %in% PARAM_NAMES$crop]
   hisafe.params.to.edit <- params.to.edit[params.to.edit %in% PARAM_NAMES$hisafe]
   stics.params.to.edit  <- params.to.edit[params.to.edit %in% PARAM_NAMES$stics]
 
@@ -189,7 +190,7 @@ build_structure <- function(exp.plan, path, profiles, template) {
   write_param_file(sim.new, sim.path)
   dum <- file.rename(sim.path, paste0(simu.path, "/", exp.plan$SimulationName, ".sim"))
 
-  ## Edit tree file
+  ## Edit tree files
   tree.path <- list.files(paste0(simu.path, "/treeSpecies"), pattern = "\\.tree$", full.names = TRUE)
   for(i in tree.path) {
     tree <- read_param_file(i)
@@ -199,6 +200,18 @@ build_structure <- function(exp.plan, path, profiles, template) {
       tree.new <- tree
     }
     write_param_file(tree.new, i)
+  }
+
+  ## Edit crop files
+  crop.path <- list.files(paste0(simu.path, "/cropSpecies"), pattern = "\\.plt$", full.names = TRUE)
+  for(i in crop.path) {
+    crop <- read_param_file(i)
+    if(length(crop.params.to.edit > 0)) {
+      crop.new <- edit_param_file(crop, dplyr::select(exp.plan, crop.params.to.edit))
+    } else {
+      crop.new <- crop
+    }
+    write_param_file(crop.new, i)
   }
 
   ## Edit Hi-sAFe general parameters file

@@ -10,6 +10,7 @@
 #' If not provided, will default to one less than the total number of available cores.
 #' @param mem.spec The maximum memory use (Mb) permitted for an individual instance of Capsis/Hi-sAFe.
 #' If not provided, will default to the total memory divided by the number of cores.
+#' @param quietly Logical indicating whether status messages should printed to the console.
 #' @param capsis.path A character string of the path (relative or absolute) to the Capsis folder
 #' @export
 #' @importFrom foreach %dopar%
@@ -32,6 +33,7 @@ run_hisafe <- function(hip         = NULL,
                        parallel    = FALSE,
                        num.cores   = NULL,
                        mem.spec    = NULL,
+                       quietly     = FALSE,
                        capsis.path) {
 
   capsis.path <- R.utils::getAbsolutePath(capsis.path)
@@ -69,7 +71,7 @@ run_hisafe <- function(hip         = NULL,
   pre.wd <- getwd()
   setwd(capsis.path)
   setmem.call <- paste0("sh setmem.sh ", mem.spec)
-  dum <- system(setmem.call, wait = TRUE)
+  dum <- system(setmem.call, wait = TRUE, intern = quietly)
   setwd(pre.wd)
 
   ## Run
@@ -80,16 +82,16 @@ run_hisafe <- function(hip         = NULL,
     if(is.null(num.cores)) num.cores <- min((parallel::detectCores() - 1), nrow(hip$exp.plan))
     if(num.cores > parallel::detectCores()) stop(paste("There are only", parallel::detectCores(), "detectable cores on this computer."), call. = FALSE)
     if(num.cores == 1) stop("There is only 1 detectable core on this computer. Parallel computing is not possible.", call. = FALSE)
-    cat("\nInitializing", length(simu.names), "simulations on", num.cores, "cores")
+    if(!quietly) cat("\nInitializing", length(simu.names), "simulations on", num.cores, "cores")
     cl <- parallel::makeCluster(num.cores)
     doParallel::registerDoParallel(cl)
-    run.log <- foreach::foreach(i = simu.names, .inorder = FALSE) %dopar% call_hisafe(path = path, simu.name = i, capsis.path = capsis.path)
+    run.log <- foreach::foreach(i = simu.names, .inorder = FALSE) %dopar% call_hisafe(path = path, simu.name = i, capsis.path = capsis.path, quietly = quietly)
     doParallel::stopImplicitCluster()
   } else {
-    cat("\nInitializing", length(simu.names), "simulations on 1 core")
-    run.log <- foreach::foreach(i = simu.names) %do% call_hisafe(path = path, simu.name = i, capsis.path = capsis.path)
+    if(!quietly) cat("\nInitializing", length(simu.names), "simulations on 1 core")
+    run.log <- foreach::foreach(i = simu.names) %do% call_hisafe(path = path, simu.name = i, capsis.path = capsis.path, quietly = quietly)
   }
-  cat("\nAll simulations complete")
+  if(!quietly) cat("\nAll simulations complete")
   invisible(run.log)
 }
 
@@ -99,15 +101,16 @@ run_hisafe <- function(hip         = NULL,
 #' @param path A character string of the path to the folder containing the simulation folder. Required if \code{hip} is not provided.
 #' @param simu.name Name of the simulation to run. Required if \code{hip} is not provided.
 #' @param capsis.path A character string of the path to the Capsis folder
-call_hisafe <- function(path, simu.name, capsis.path) {
+#' @param quietly Logical indicating whether status messages should printed to the console.
+call_hisafe <- function(path, simu.name, capsis.path, quietly) {
 
   sim.path <- clean_path(paste0(path, "/", simu.name, "/"))
   if(!dir.exists(sim.path)) stop(paste("The simulation", simu.name, "does not exist."), call. = FALSE)
 
   simulationStartTime <- proc.time()[3]
-  out <- file(paste0(sim.path, "support/", simu.name, "_simulation_log.txt"), open="w")
+  out <- file(paste0(sim.path, "support/", simu.name, "_simulation_log.txt"), open = "w")
   cat("Beginning simulation:", simu.name, file = out)
-  cat("\nBeginning simulation:", simu.name)
+  if(!quietly) cat("\nBeginning simulation:", simu.name)
 
   ## Change working directory to Capsis directory
   pre.wd <- getwd()
@@ -123,7 +126,7 @@ call_hisafe <- function(path, simu.name, capsis.path) {
   simulationElapsedTime <- signif((proc.time()[3] - simulationStartTime)/60,3)
   done.message <- paste0("\nDone with Hi-sAFe simulation: ", simu.name, ". This took ", simulationElapsedTime, " minutes.")
   cat(done.message, file = out, append = TRUE)
-  cat(done.message)
+  if(!quietly) cat(done.message)
   close(out)
 
   ## Change working directory back to user's original directory

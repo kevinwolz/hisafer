@@ -4,7 +4,7 @@
 \alias{call_hisafe}
 \title{Calls Hi-sAFe from command line}
 \usage{
-call_hisafe(path, simu.name, capsis.path)
+call_hisafe(path, simu.name, capsis.path, quietly)
 }
 \arguments{
 \item{path}{A character string of the path to the folder containing the simulation folder. Required if \code{hip} is not provided.}
@@ -12,6 +12,8 @@ call_hisafe(path, simu.name, capsis.path)
 \item{simu.name}{Name of the simulation to run. Required if \code{hip} is not provided.}
 
 \item{capsis.path}{A character string of the path to the Capsis folder}
+
+\item{quietly}{Logical indicating whether status messages should printed to the console.}
 }
 \value{
 Invisibly returns a console log from simulation run.

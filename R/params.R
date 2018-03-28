@@ -42,6 +42,9 @@ read_param_file <- function(path) {
                  tree_initialization         = c("name", "species", "age", "height", "crownBaseHeight", "truncatureRatio",                      # .SIM
                                                  "leafToFineRootsRatio", "crownRadius", "treeX", "treeY"),
                  root_initialization         = c("name", "shape", "repartition", "paramShape1", "paramShape2", "paramShape3", "amount"),        # .SIM
+                 varieties                   = c("ID", "codevar", "stlevamf" ,"stamflax" ,"stlevdrp" ,"stflodrp", "stdrpdes", "pgrainmaxi",     # .PLT
+                                                 "adens", "croirac", "durvieF", "jvc", "sensiphot", "stlaxsen", "stsenlan", "nbgrmax",
+                                                 "stdrpmat", "afruitpot", "dureefruit"),
                  residue_incorporation_table = c("julres", "coderes", "P_qres", "P_Crespc", "P_CsurNres", "P_Nminres", "P_eaures"),             # .TEC
                  tillage_table               = c("jultrav", "profres", "proftrav"),                                                             # .TEC
                  irrigation_table            = c("julapl", "qte"),                                                                              # .TEC
@@ -205,9 +208,20 @@ get_template_params <- function(template) {
     template.tree <- avail.template.trees[1]
   }
 
+  ## Determine which crop species to use from within the template for the .plt params
+  avail.template.crops <- unlist(purrr::map(strsplit(list.files(clean_path(paste0(template.subpath, "/cropSpecies"))), split = ".", fixed = TRUE), 1))
+  if(length(avail.template.crops) == 1) {
+    template.crop <- avail.template.crops
+  } else if("durum-wheat" %in% avail.template.crops) {
+    template.crop <- "durum-wheat"
+  } else {
+    template.crop <- avail.template.crops[1]
+  }
+
   sim.file    <- clean_path(list.files(template.path, ".sim$", full.names = TRUE))
   pld.file    <- clean_path(list.files(template.path, ".pld$", full.names = TRUE))
   tree.file   <- list.files(paste0(template.subpath, "treeSpecies"), paste0(template.tree, ".tree"), full.names = TRUE)
+  crop.file   <- list.files(paste0(template.subpath, "cropSpecies"), paste0(template.crop, ".plt"),  full.names = TRUE)
   hisafe.file <- clean_path(paste0(template.subpath, "generalParameters/hisafe.par"))
   stics.file  <- clean_path(paste0(template.subpath, "generalParameters/stics.par"))
 
@@ -219,9 +233,10 @@ get_template_params <- function(template) {
   sim.params    <- read_param_file(sim.file)
   pld.params    <- read_param_file(pld.file)
   tree.params   <- read_param_file(tree.file)
+  crop.params   <- read_param_file(crop.file)
   hisafe.params <- read_param_file(hisafe.file)
   stics.params  <- read_param_file(stics.file)
-  return(list(sim = sim.params, pld = pld.params, tree = tree.params, hisafe = hisafe.params, stics = stics.params))
+  return(list(sim = sim.params, pld = pld.params, tree = tree.params, crop = crop.params, hisafe = hisafe.params, stics = stics.params))
 }
 
 #' Get names of template parameters
@@ -229,12 +244,13 @@ get_template_params <- function(template) {
 #' @return A list containing parameter names by file type.
 #' @param x A list containing all parameter values and constraints.
 get_param_names <- function(x) {
-  sim.names    <- unlist(purrr::map(x$sim,  names), use.names = FALSE)
-  pld.names    <- unlist(purrr::map(x$pld,  names), use.names = FALSE)
-  tree.names   <- unlist(purrr::map(x$tree, names), use.names = FALSE)
+  sim.names    <- unlist(purrr::map(x$sim,    names), use.names = FALSE)
+  pld.names    <- unlist(purrr::map(x$pld,    names), use.names = FALSE)
+  tree.names   <- unlist(purrr::map(x$tree,   names), use.names = FALSE)
+  crop.names   <- unlist(purrr::map(x$crop,   names), use.names = FALSE)
   hisafe.names <- unlist(purrr::map(x$hisafe, names), use.names = FALSE)
-  stics.names  <- unlist(purrr::map(x$stics, names), use.names = FALSE)
-  return(list(sim = sim.names, pld = pld.names, tree = tree.names, hisafe = hisafe.names, stics = stics.names))
+  stics.names  <- unlist(purrr::map(x$stics,  names), use.names = FALSE)
+  return(list(sim = sim.names, pld = pld.names, tree = tree.names, crop = crop.names, hisafe = hisafe.names, stics = stics.names))
 }
 
 #' Get values/constraints of template parameters
@@ -242,13 +258,14 @@ get_param_names <- function(x) {
 #' @return A list containing parameter values/constraints.
 #' @param x A list containing all parameter values and constraints.
 get_param_vals <- function(x, type) {
-  sim.vals <- pld.vals <- tree.vals <- hisafe.vals <- stics.vals <- list()
-  for(i in names(x$sim))    { sim.vals    <- c(sim.vals,    purrr::map(x$sim[[i]],    type)) }
-  for(i in names(x$pld))    { pld.vals    <- c(pld.vals,    purrr::map(x$pld[[i]],    type)) }
-  for(i in names(x$tree))   { tree.vals   <- c(tree.vals,   purrr::map(x$tree[[i]],   type)) }
-  for(i in names(x$hisafe)) { hisafe.vals <- c(hisafe.vals, purrr::map(x$hisafe[[i]], type)) }
-  for(i in names(x$stics))  { stics.vals  <- c(stics.vals,  purrr::map(x$stics[[i]],  type)) }
-  return(c(sim.vals, pld.vals, tree.vals, hisafe.vals, stics.vals))
+  sim.vals <- pld.vals <- tree.vals <- crop.vals <- hisafe.vals <- stics.vals <- list()
+  for(i in names(x$sim))    sim.vals    <- c(sim.vals,    purrr::map(x$sim[[i]],    type))
+  for(i in names(x$pld))    pld.vals    <- c(pld.vals,    purrr::map(x$pld[[i]],    type))
+  for(i in names(x$tree))   tree.vals   <- c(tree.vals,   purrr::map(x$tree[[i]],   type))
+  for(i in names(x$crop))   crop.vals   <- c(crop.vals,   purrr::map(x$crop[[i]],   type))
+  for(i in names(x$hisafe)) hisafe.vals <- c(hisafe.vals, purrr::map(x$hisafe[[i]], type))
+  for(i in names(x$stics))  stics.vals  <- c(stics.vals,  purrr::map(x$stics[[i]],  type))
+  return(c(sim.vals, pld.vals, tree.vals, crop.vals, hisafe.vals, stics.vals))
 }
 
 #' Complies list of parameters actually used

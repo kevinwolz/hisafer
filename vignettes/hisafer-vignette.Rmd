@@ -195,7 +195,7 @@ hip <- define_hisafe(path      = "./simulations",
 hip$exp.plan$mainCropSpecies
 ```
 
-So far we have only tried to edit Hi-sAFe parameters in the .SIM and .PLD files. `define_hisafe()` can also be used to edit parameters in the .TREE file. You must be careful, though, if your simluations have more than one tree, as any .TREE parameters passed to `define_hisafe()` will be applied to **all** .TREE files. Let's define a simple simulation where we edit `lueMax` in the .TREE file:
+So far we have only tried to edit Hi-sAFe parameters in the .SIM and .PLD files. `define_hisafe()` can also be used to edit parameters in the .TREE and .PLT files. You must be careful, though, if your simluations have more than one tree species or more than one crop species, as any .TREE or .PLT parameters passed to `define_hisafe()` will be applied to **all** .TREE and .PLT files. Let's define a simple simulation where we edit `lueMax` in the .TREE file:
 ```{r}
 hip <- define_hisafe(path      = "./simulations",
                      profiles  = c("plot", "trees", "climate", "monthCells", "cells", "voxels"),

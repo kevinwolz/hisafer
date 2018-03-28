@@ -5,7 +5,8 @@
 \title{Run one or more Hi-sAFe simulations}
 \usage{
 run_hisafe(hip = NULL, path = NULL, simu.names = "all",
-  parallel = FALSE, num.cores = NULL, mem.spec = NULL, capsis.path)
+  parallel = FALSE, num.cores = NULL, mem.spec = NULL, quietly = FALSE,
+  capsis.path)
 }
 \arguments{
 \item{hip}{An object of class "hip". Required if \code{path} is not provided.}
@@ -22,6 +23,8 @@ If not provided, will default to one less than the total number of available cor
 
 \item{mem.spec}{The maximum memory use (Mb) permitted for an individual instance of Capsis/Hi-sAFe.
 If not provided, will default to the total memory divided by the number of cores.}
+
+\item{quietly}{Logical indicating whether status messages should printed to the console.}
 
 \item{capsis.path}{A character string of the path (relative or absolute) to the Capsis folder}
 }
