@@ -5,7 +5,7 @@
 \title{Run one or more Hi-sAFe simulations}
 \usage{
 run_hisafe(hip = NULL, path = NULL, simu.names = "all",
-  parallel = FALSE, num.cores = NULL, mem.spec = NULL, quietly = FALSE,
+  parallel = FALSE, num.cores = NULL, mem.spec = TRUE, quietly = FALSE,
   capsis.path)
 }
 \arguments{
@@ -21,8 +21,9 @@ Required if \code{hip} is not provided.}
 \item{num.cores}{Numbers of cores to use in parallel computing.
 If not provided, will default to one less than the total number of available cores.}
 
-\item{mem.spec}{The maximum memory use (Mb) permitted for an individual instance of Capsis/Hi-sAFe.
-If not provided, will default to the total memory divided by the number of cores.}
+\item{mem.spec}{An integer indicating the maximum memory use (Mb) permitted for an individual instance of Capsis/Hi-sAFe.
+If \code{TRUE}, will default to the system's total memory divided by the number of cores.
+If \code{FALSE}, a memory specification will not be made, and Capsis/Hi-sAFe will run with defaults.}
 
 \item{quietly}{Logical indicating whether status messages should printed to the console.}
 

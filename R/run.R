@@ -8,8 +8,9 @@
 #' @param parallel Logical, should parallel computing be used.
 #' @param num.cores Numbers of cores to use in parallel computing.
 #' If not provided, will default to one less than the total number of available cores.
-#' @param mem.spec The maximum memory use (Mb) permitted for an individual instance of Capsis/Hi-sAFe.
-#' If not provided, will default to the total memory divided by the number of cores.
+#' @param mem.spec An integer indicating the maximum memory use (Mb) permitted for an individual instance of Capsis/Hi-sAFe.
+#' If \code{TRUE}, will default to the system's total memory divided by the number of cores.
+#' If \code{FALSE}, a memory specification will not be made, and Capsis/Hi-sAFe will run with defaults.
 #' @param quietly Logical indicating whether status messages should printed to the console.
 #' @param capsis.path A character string of the path (relative or absolute) to the Capsis folder
 #' @export
@@ -32,7 +33,7 @@ run_hisafe <- function(hip         = NULL,
                        simu.names  = "all",
                        parallel    = FALSE,
                        num.cores   = NULL,
-                       mem.spec    = NULL,
+                       mem.spec    = TRUE,
                        quietly     = FALSE,
                        capsis.path) {
 
@@ -49,7 +50,7 @@ run_hisafe <- function(hip         = NULL,
     if(!(is.numeric(num.cores) & length(num.cores) == 1))       stop("num.cores argument must be a positive integer",                call. = FALSE)
     if(num.cores %% 1 != 0 & num.cores > 0)                     stop("num.cores argument must be a positive integer",                call. = FALSE)
   }
-  if(!((is.numeric(mem.spec) & length(mem.spec) == 1) | is.null(mem.spec)))    stop("mem.spec argument must be a positive integer",  call. = FALSE)
+  if(!((is.numeric(mem.spec) & length(mem.spec) == 1) | is.logical(mem.spec))) stop("mem.spec argument must logical or a positive integer", call. = FALSE)
 
   ## Determine path and simu.names to run
   if(is.null(path)) {
@@ -67,12 +68,14 @@ run_hisafe <- function(hip         = NULL,
   }
 
   ## Set allowed memory
-  if(is.null(mem.spec)) mem.spec <- memuse::Sys.meminfo()$totalram@size * 1024 / parallel::detectCores()
-  pre.wd <- getwd()
-  setwd(capsis.path)
-  setmem.call <- paste0("sh setmem.sh ", mem.spec)
-  dum <- system(setmem.call, wait = TRUE, intern = quietly)
-  setwd(pre.wd)
+  if(mem.spec) { # TRUE or non-zero
+    if(isTRUE(mem.spec)) mem.spec <- memuse::Sys.meminfo()$totalram@size * 1024 / parallel::detectCores()
+    pre.wd <- getwd()
+    setwd(capsis.path)
+    setmem.call <- paste0("sh setmem.sh ", mem.spec)
+    dum <- system(setmem.call, wait = TRUE, intern = quietly)
+    setwd(pre.wd)
+  }
 
   ## Run
   if(parallel) {
