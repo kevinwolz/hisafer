@@ -12,7 +12,7 @@ hisafe_slice(hop, date, simu.names = "all", tree.ids = "all",
   "totalTreeCoarseRootBiomass", voxel.R.size = "mineralNitrogenStock",
   voxel.L.alpha = "totalTreeWaterUptake", voxel.C.alpha = "fineRootCost",
   voxel.R.alpha = "totalTreeNitrogenUptake"), trees = TRUE, crops = TRUE,
-  voxels = TRUE, climate = TRUE, mem.max = 0)
+  voxels = TRUE, climate = TRUE, mem.max = 0, plot.rows = 1)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -61,6 +61,8 @@ All aesthetics set by \code{vars} are relative to the maximum value in each simu
 
 \item{mem.max}{An integer specifying the maximum number of days into the past to search
 for crop/voxel data when no data is available for \code{date} within \code{hop}.}
+
+\item{plot.rows}{An integer specifying \code{nrow} passed to \code{ggplot2::facet_wrap}.}
 }
 \value{
 A ggplot object.

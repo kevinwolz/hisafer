@@ -34,6 +34,7 @@
 #' @param climate A logical indicating whether or not to plot climate aspects (e.g. precipitation) in the scene.
 #' @param mem.max An integer specifying the maximum number of days into the past to search
 #' for crop/voxel data when no data is available for \code{date} within \code{hop}.
+#' @param plot.rows An integer specifying \code{nrow} passed to \code{ggplot2::facet_wrap}.
 #' @export
 #' @importFrom dplyr %>%
 #' @import ggplot2
@@ -61,11 +62,12 @@ hisafe_slice <- function(hop,
                                      voxel.L.alpha = "totalTreeWaterUptake",
                                      voxel.C.alpha = "fineRootCost",
                                      voxel.R.alpha = "totalTreeNitrogenUptake"),
-                         trees   = TRUE,
-                         crops   = TRUE,
-                         voxels  = TRUE,
-                         climate = TRUE,
-                         mem.max = 0) {
+                         trees     = TRUE,
+                         crops     = TRUE,
+                         voxels    = TRUE,
+                         climate   = TRUE,
+                         mem.max   = 0,
+                         plot.rows = 1) {
 
   if(!requireNamespace("ggforce", quietly = TRUE)) stop("The package 'ggforce' is required for hisafe_slice(). Please install and load it.", call. = FALSE)
   is_hop(hop, error = TRUE)
@@ -95,7 +97,7 @@ hisafe_slice <- function(hop,
   climate <- climate & profile_check(hop,  "climate")
   if(crops)   variable_check(hop, "cells",   cell.vars,       error = TRUE)
   if(voxels)  variable_check(hop, "voxels",  voxel.vars,      error = TRUE)
-  if(climate) variable_check(hop, "climate", "precipitation", error = TRUE)
+  if(climate) variable_check(hop, "climate", c("precipitation", "waterTableDepth"), error = TRUE)
   if(any(is.na(unlist(vars)))) { # account for any NA vars specifications
     vars <- purrr::map(vars, function(x) tidyr::replace_na(x, "none"))
     for(i in c("trees", "cells", "voxels")[c(trees, crops, voxels)]) hop[[i]]$none <- NA_real_
@@ -650,8 +652,12 @@ hisafe_slice <- function(hop,
                                y0    = -z,
                                size  = voxel.R.border,
                                r     = voxel.R.size,
-                               alpha = voxel.R.alpha)) +
-      ## WATER TABLE
+                               alpha = voxel.R.alpha))
+  }
+
+  if(climate & voxels) {
+    ## WATER TABLE
+    plot.obj <- plot.obj +
       geom_segment(color    = "blue",
                    linetype = "longdash",
                    x        = 0,
@@ -662,7 +668,7 @@ hisafe_slice <- function(hop,
                        yend = waterTableDepth))
   }
 
-  if("hop-group" %in% class(hop)) plot.obj <- plot.obj + facet_wrap(~SimulationName, nrow = 1)
+  if("hop-group" %in% class(hop)) plot.obj <- plot.obj + facet_wrap(~SimulationName, nrow = plot.rows)
 
   ## WHITE BOXES TO COVER PHANTOM TREES
   plot.obj <- plot.obj +
@@ -811,6 +817,7 @@ hisafe_snapshot <- function(hop,
                                    date        = dates[i],
                                    rel.dates   = rel.dates,
                                    simu.names  = simu.names,
+                                   vars        = vars,
                                    trees       = trees,
                                    crops       = crops,
                                    voxels      = voxels,
@@ -824,6 +831,7 @@ hisafe_snapshot <- function(hop,
                                    date        = dates[i],
                                    rel.dates   = rel.dates,
                                    simu.names  = simu.names,
+                                   vars        = vars,
                                    trees       = trees,
                                    crops       = crops,
                                    voxels      = voxels,
@@ -860,6 +868,7 @@ hisafe_snapshot <- function(hop,
                                    date        = dates[i],
                                    rel.dates   = rel.dates,
                                    simu.names  = simu.names,
+                                   vars        = vars,
                                    trees       = trees,
                                    crops       = crops,
                                    voxels      = voxels,
