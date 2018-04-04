@@ -72,7 +72,11 @@ run_hisafe <- function(hip         = NULL,
     if(isTRUE(mem.spec)) mem.spec <- memuse::Sys.meminfo()$totalram@size * 1024 / parallel::detectCores()
     pre.wd <- getwd()
     setwd(capsis.path)
-    setmem.call <- paste0("sh setmem.sh ", mem.spec)
+    if(.Platform$OS.type == "windows") {
+      setmem.call <- paste0("setmem ", mem.spec)
+    } else {
+      setmem.call <- paste0("sh setmem.sh ", mem.spec)
+    }
     dum <- system(setmem.call, wait = TRUE, intern = quietly)
     setwd(pre.wd)
   }
@@ -120,7 +124,11 @@ call_hisafe <- function(path, simu.name, capsis.path, quietly) {
   setwd(capsis.path)
 
   ## Run Hi-sAFe
-  call <- paste0("sh capsis.sh -p script safe.pgms.ScriptGen ", sim.path, simu.name, ".sim")
+  if(.Platform$OS.type == "windows") {
+    call <- paste0("capsis -p script safe.pgms.ScriptGen ", sim.path, simu.name, ".sim")
+  } else {
+    call <- paste0("sh capsis.sh -p script safe.pgms.ScriptGen ", sim.path, simu.name, ".sim")
+  }
   hisafe.log <- system(call, wait = TRUE, intern = TRUE)
 
   ## Save log & print elapsed time
