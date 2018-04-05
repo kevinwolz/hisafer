@@ -15,3 +15,4 @@ A list containing parameter names by file type.
 \description{
 Get names of all template parameters
 }
+\keyword{internal}

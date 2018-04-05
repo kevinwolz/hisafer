@@ -858,6 +858,7 @@ ggsave_fitmax <- function(filename,
 #' plot(a)
 #' dev.off()
 #' }
+#' @keywords internal
 get_dims <- function(ggobj,
                      maxheight,
                      maxwidth = maxheight,
@@ -962,6 +963,7 @@ get_dims <- function(ggobj,
 #' @param hop An object of class hop.
 #' @param profile A characgter string of the profile that \code{variable} is from.
 #' @param variable A character string of the name of the variable to get units for.
+#' @keywords internal
 get_units <- function(hop, profile, variable) {
   var.unit <- hop$variables %>%
     dplyr::filter(VariableClass == profile, VariableName == variable) %>%
@@ -977,6 +979,7 @@ get_units <- function(hop, profile, variable) {
 #' @param X.MAX Upper x limit for plot.
 #' @param Y.MIN Lower y limit for plot.
 #' @param Y.MAX Upper y limit for plot.
+#' @keywords internal
 build_white_boxes_tile <- function(hop, X.MIN, X.MAX, Y.MIN, Y.MAX) {
   boxes <- hop$plot.info %>%
     dplyr::select(SimulationName, plotWidth, plotHeight) %>%
@@ -1016,6 +1019,7 @@ build_white_boxes_tile <- function(hop, X.MIN, X.MAX, Y.MIN, Y.MAX) {
 #' @param white.boxes White box data
 #' @param trees Logical for whether or not to plot trees
 #' @param canopies Logical for whether or not to plot canopies
+#' @keywords internal
 add_trees <- function(plot.obj, tree.data, white.boxes, trees, canopies) {
   if(trees & nrow(tree.data) > 0) {
     plot.obj <- plot.obj +
@@ -1061,6 +1065,7 @@ add_trees <- function(plot.obj, tree.data, white.boxes, trees, canopies) {
 #' Add phantom trees
 #' @description Determines and appends phantom trees to tree data for hisafe tile plots
 #' @param tree.data Tree data
+#' @keywords internal
 add_phantom_trees <- function(tree.data) {
   phantom.data.x <- tree.data %>%
     dplyr::group_by(SimulationName, Date, Year, Month, Day, id) %>%
@@ -1099,6 +1104,7 @@ add_phantom_trees <- function(tree.data) {
 #' @param trees Logical for whether or not to plot trees
 #' @param canopies Logical for whether or not to plot canopies
 #' @param plot.x The plot.x argument from the tile plot function
+#' @keywords internal
 create_tree_data <- function(hop, trees, canopies, plot.x) {
   if((trees | canopies) & nrow(hop$tree.info) > 0 & nrow(hop$plot.info) > 0){
     tree.data <- hop$tree.info %>%
@@ -1132,6 +1138,7 @@ create_tree_data <- function(hop, trees, canopies, plot.x) {
 #' @description Generates tree data for hisafe tile plots
 #' @param hop An object of class hop.
 #' @param profile Character string of the profile to pull
+#' @keywords internal
 create_tile_data <- function(hop, profile) {
   plot.data <- hop[[profile]] %>%
     dplyr::left_join(dplyr::select(hop$plot.info, SimulationName, cellWidth), by = "SimulationName") %>%

@@ -18,3 +18,4 @@ create_tree_data(hop, trees, canopies, plot.x)
 \description{
 Generates tree data for hisafe tile plots
 }
+\keyword{internal}

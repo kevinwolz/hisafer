@@ -5,6 +5,7 @@
 #' @param path A character string of the path to the file to read.
 #' @importFrom dplyr %>%
 #' @family hisafe param functions
+#' @keywords internal
 read_param_file <- function(path) {
   sim <- scan(file = path, what = "character", encoding = "latin1", sep = "\n", quiet = TRUE)
 
@@ -116,6 +117,7 @@ read_param_file <- function(path) {
 #' @param.list A list containing all parameter values and constraints.
 #' @param path A character string of the path to the file to read.
 #' @family hisafe param functions
+#' @keywords internal
 write_param_file <- function(param.list, path) {
   sim.out <- character(0)
   for(i in 1:length(param.list)){ # headings
@@ -160,6 +162,7 @@ write_param_file <- function(param.list, path) {
 #' @param param.list A list containing all parameter values and constraints.
 #' @param exp.plan A exp.plan element of a hip object.
 #' @family hisafe param functions
+#' @keywords internal
 edit_param_file <- function(param.list, exp.plan) {
   for(i in names(exp.plan)){
     param.list <- edit_param_element(param.list, i, exp.plan[[i]])
@@ -175,6 +178,7 @@ edit_param_file <- function(param.list, exp.plan) {
 #' @param variable A character string of the name of the variable to edit.
 #' @param value A numeric vector of the value to apply to the variable.
 #' @family hisafe param functions
+#' @keywords internal
 edit_param_element <- function(param.list, variable, value) {
   success <- FALSE
   headers <- names(param.list)
@@ -194,6 +198,7 @@ edit_param_element <- function(param.list, variable, value) {
 #' @return A list containing all parameter values and constraints.
 #' @param template A character string of the path to the Hi-sAFe directory structure/files to use as a template
 #' (or one of the strings signaling a default template)
+#' @keywords internal
 get_template_params <- function(template) {
   template.path    <- get_template_path(template)
   template.subpath <- get_template_subpath(template)
@@ -255,6 +260,7 @@ get_template_params <- function(template) {
 #' @description Get names of all template parameters
 #' @return A list containing parameter names by file type.
 #' @param x A list containing all parameter values and constraints.
+#' @keywords internal
 get_param_names <- function(x) {
   sim.names    <- unlist(purrr::map(x$sim,    names), use.names = FALSE)
   pld.names    <- unlist(purrr::map(x$pld,    names), use.names = FALSE)
@@ -270,6 +276,7 @@ get_param_names <- function(x) {
 #' @description Gets values/constraints of all template parameters
 #' @return A list containing parameter values/constraints.
 #' @param x A list containing all parameter values and constraints.
+#' @keywords internal
 get_param_vals <- function(x, type) {
   sim.vals <- pld.vals <- tree.vals <- crop.vals <- tec.vals <- hisafe.vals <- stics.vals <- list()
   for(i in names(x$sim))    sim.vals    <- c(sim.vals,    purrr::map(x$sim[[i]],    type))
@@ -286,6 +293,7 @@ get_param_vals <- function(x, type) {
 #' @description Compiles list of the parameters actually used (i.e. the default or the defined)
 #' @return List of used parameter values
 #' @param hip A "hip" object containing only a single simulation
+#' @keywords internal
 get_used_params <- function(hip) {
   get_used_param <- function(variable, exp.plan, template.defaults, template.commented){
     n.sims <- nrow(exp.plan)

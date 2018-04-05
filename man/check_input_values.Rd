@@ -19,3 +19,4 @@ Checks the validity of all defined inputs against Hi-sAFe model constraints
 and constraints found in the template file comments. Errors are generated if issues are found.
 Used within \code{\link{define_hisafe}} and \code{\link{define_hisafe_file}}.
 }
+\keyword{internal}

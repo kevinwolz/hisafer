@@ -16,3 +16,4 @@ A tibble with extracted and calculated water fluxes.
 Get water fluxes from a hop object.
 Used within hisafe cycle functions.
 }
+\keyword{internal}

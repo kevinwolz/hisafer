@@ -17,3 +17,4 @@ A data frame (tibble) containing tree id, species, x, y, and pruning/root prunin
 \description{
 Reads tree information from a Hi-sAFe pld file. Used by \code{\link{read_simulation}}.
 }
+\keyword{internal}

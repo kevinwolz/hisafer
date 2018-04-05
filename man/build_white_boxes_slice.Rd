@@ -20,3 +20,4 @@ build_white_boxes_slice(hop, X.MIN, X.MAX, Y.MIN, Y.MAX)
 \description{
 Builds white boxes to cover phantom trees for \code{\link{hisafe_slice}}
 }
+\keyword{internal}

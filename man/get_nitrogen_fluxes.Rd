@@ -16,3 +16,4 @@ A tibble with extracted and calculated nitrogen fluxes.
 Get nitrogen fluxes from a hop object.
 Used within hisafe cycle functions.
 }
+\keyword{internal}

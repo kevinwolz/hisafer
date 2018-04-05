@@ -18,3 +18,4 @@ An error message or empty character stirng.
 Checks validity of Hi-sAFe inputs against accepted numeric types (continuous, integer) found in the package param_defs.txt file
 Used within \code{\link{check_input_values}}.
 }
+\keyword{internal}

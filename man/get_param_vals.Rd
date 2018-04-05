@@ -15,3 +15,4 @@ A list containing parameter values/constraints.
 \description{
 Gets values/constraints of all template parameters
 }
+\keyword{internal}

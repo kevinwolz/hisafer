@@ -16,3 +16,4 @@ A tibble with extracted and calculated light fluxes.
 Get light fluxes from a hop object.
 Used within hisafe cycle functions.
 }
+\keyword{internal}

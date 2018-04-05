@@ -20,3 +20,4 @@ add_trees(plot.obj, tree.data, white.boxes, trees, canopies)
 \description{
 Adds trees & canopies to hisafe tile plots
 }
+\keyword{internal}

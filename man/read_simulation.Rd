@@ -52,3 +52,4 @@ An object of class "hop". This is a list of 15 data frames (tibbles):
 \description{
 Reads the designated output profiles from a single Hi-sAFe simulation. Called from within \code{\link{read_hisafe}}.
 }
+\keyword{internal}

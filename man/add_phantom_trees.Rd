@@ -12,3 +12,4 @@ add_phantom_trees(tree.data)
 \description{
 Determines and appends phantom trees to tree data for hisafe tile plots
 }
+\keyword{internal}

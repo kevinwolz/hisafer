@@ -121,6 +121,7 @@ create_face <- function(agroforestry, forestry, monocrop, face.path) {
 #' @return Returns the modified hop object
 #' @param hop An object of class "hop" to augment
 #' @param system A character string of the system name to use
+#' @keywords internal
 augment_with_system <- function(hop, system) {
   profiles.to.check <- names(hop)[!(names(hop) %in% c("variables", "exp.path"))]
   profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]

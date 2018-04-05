@@ -21,3 +21,4 @@ Invisibly returns a console log from simulation run.
 \description{
 Calls Hi-sAFe from command line to run a simulation.
 }
+\keyword{internal}

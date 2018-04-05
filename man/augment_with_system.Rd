@@ -17,3 +17,4 @@ Returns the modified hop object
 \description{
 Adds a "System" column to all hop elements
 }
+\keyword{internal}

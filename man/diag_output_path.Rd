@@ -17,3 +17,4 @@ The output path
 \description{
 Determines diagnostic output path
 }
+\keyword{internal}

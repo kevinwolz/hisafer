@@ -57,8 +57,9 @@ build_cluster_script <- function(hip         = NULL,
   # write_script(clean_path(paste0("sh capsis.sh -p script safe.pgms.ScriptGen ", cluster.path, "/", simu.names, "/", simu.names, ".sim", collapse = "\n")))
 
   for(i in simu.names) {
-    cluster.script <- clean_path(paste0(script.path, "/", i, ".sh"))
-    dum <- file.create(cluster.script, showWarnings = FALSE)
+    cluster.script <- file(description = clean_path(paste0(script.path, "/", i, ".sh")),
+                           open        = "wb",
+                           encoding    = "UTF-8")
     cat("", file = cluster.script, sep = "", append = FALSE)
     write_script("#!/bin/sh")
     write_script(paste0("#SBATCH -n ", num.cores))
@@ -71,15 +72,18 @@ build_cluster_script <- function(hip         = NULL,
     write_script("cd /nfs/work/hisafe/Capsis4")
     write_script(clean_path(paste0("sh capsis.sh -p script safe.pgms.ScriptGen ", cluster.path, "/", i, "/", i, ".sim", collapse = "\n")))
   }
+  close(cluster.script)
 
-  job.script <- clean_path(paste0(script.path, "/job.sh"))
-  dum <- file.create(job.script, showWarnings = FALSE)
+  job.script <- file(description = clean_path(paste0(script.path, "/job.sh")),
+                     open        = "wb",
+                     encoding    = "UTF-8")
   cat("#!/bin/sh", file = job.script, sep = "\n")
   purrr::map(paste0("sbatch ", simu.names, ".sh"),
              cat,
              file   = job.script,
              sep    = "\n",
              append = TRUE)
+  close(job.script)
 
   invisible(TRUE)
 }

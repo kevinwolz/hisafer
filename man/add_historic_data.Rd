@@ -16,3 +16,4 @@ add_historic_data(df, dates, mem.max)
 \description{
 Adds historic data when cells/voxels data is missing for \code{\link{hisafe_slice}}
 }
+\keyword{internal}

@@ -208,6 +208,7 @@ read_hisafe <- function(hip           = NULL,
 #' If "all" the default, reads all supported Hi-sAFe output profiles. For currently supported profiles see: \code{\link{hisafe_profiles}}
 #' @param show.progress Logical indicating whether progress messsages should be printed to the console.
 #' @param max.size The maximum file size (in bytes) that should be read. Files larger than this value will be ignored, with a warning.
+#' @keywords internal
 read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.inputs, max.size) {
 
   is_hip(hip, error = TRUE)
@@ -391,6 +392,7 @@ read_hisafe_example <- function(profiles = c("plot", "trees", "climate", "monthC
 #' @return An list of two data frames (tibbles): \code{data} contains the data from the profile; \code{variables} contains the variable descriptions.
 #' @param profile A character string of the path to the profile to be read.
 #' @importFrom dplyr %>%
+#' @keywords internal
 read_hisafe_output_file <- function(profile){
 
   ## Read raw text & find break between description & data
@@ -420,6 +422,7 @@ read_hisafe_output_file <- function(profile){
 #' @return A data frame.
 #' @param file A character string of the path to the file to be read.
 #' @param ... Any other arguements passed to \code{read.table}
+#' @keywords internal
 read_table_hisafe <- function(file, ...) {
   # using read.table rather readr::read_table because read_table is not working
   dplyr::as_tibble(read.table(file,
@@ -437,6 +440,7 @@ read_table_hisafe <- function(file, ...) {
 #' @param profile A character string of the profile name.
 #' @param path A character string of the path to the folder containing the profiles.
 #' @param show.progress Logical indicating whether progress messsages should be printed to the console.
+#' @keywords internal
 read_profile <- function(profile, path, show.progress = TRUE, max.size = 3e8) {
   file <- paste0(path, profile, ".txt")
   if(show.progress) cat(paste0("\n   -- reading:  ", profile, collapse = ", "))
@@ -458,6 +462,7 @@ read_profile <- function(profile, path, show.progress = TRUE, max.size = 3e8) {
 #' @param path A character string of the path to the directory containing the simulation folder.
 #' @param simu.name A character string of the simualation name.
 #' @importFrom dplyr %>%
+#' @keywords internal
 read_tree_info <- function(path, simu.name) {
   sim.path <- list.files(clean_path(paste0(path, "/", simu.name, "/")), ".sim$", full.names = TRUE)
   if(length(sim.path) > 1) stop(paste("there is more than 1 SIM file present in the simulation directory of:", simu.name), call. = FALSE)

@@ -16,3 +16,4 @@ A tibble with extracted and calculated carbon pools.
 Get carbon pools from a hop object.
 Used within hisafe cycle functions.
 }
+\keyword{internal}

@@ -15,3 +15,4 @@ An list of two data frames (tibbles): \code{data} contains the data from the pro
 \description{
 Reads the designated output profiles from a single Hi-sAFe simulation.
 }
+\keyword{internal}

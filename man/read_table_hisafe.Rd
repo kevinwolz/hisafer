@@ -17,3 +17,4 @@ A data frame.
 \description{
 Customized read.table call to read from a Hi-sAFe output profile.
 }
+\keyword{internal}

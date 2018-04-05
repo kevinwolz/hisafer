@@ -19,3 +19,4 @@ A list containing the profile data and the profile variable definitions.
 \description{
 Wrapper for read_hisafe_output_file.
 }
+\keyword{internal}

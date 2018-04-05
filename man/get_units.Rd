@@ -16,3 +16,4 @@ get_units(hop, profile, variable)
 \description{
 Extracts variable units from a hop object. Use within all hisafe plot functions.
 }
+\keyword{internal}

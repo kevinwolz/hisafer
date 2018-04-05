@@ -81,6 +81,7 @@ build_hisafe <- function(hip, plot.scene = TRUE) {
 #' @param profiles A character vector of export profiles the simulation to export.
 #' @param template A character string of the path to the Hi-sAFe directory structure/files to use as a template
 #' (or one of the strings signaling a default template)
+#' @keywords internal
 build_structure <- function(exp.plan, path, profiles, template) {
 
   TEMPLATE_PARAMS <- get_template_params(template)

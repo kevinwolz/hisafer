@@ -293,6 +293,7 @@ plot_hisafe_cycle_daily <- function(hop,
 #' @return A tibble with extracted and calculated water fluxes.
 #' @param hop An object of class hop or face.
 #' @importFrom dplyr %>%
+#' @keywords internal
 get_water_fluxes <- function(hop) {
   profile_check(hop, c("plot", "climate"), error = TRUE)
   # variable_check(hop, "plot",
@@ -374,6 +375,7 @@ get_water_fluxes <- function(hop) {
 #' @return A tibble with extracted and calculated nitrogen fluxes.
 #' @param hop An object of class hop or face.
 #' @importFrom dplyr %>%
+#' @keywords internal
 get_nitrogen_fluxes <- function(hop) {
   profile_check(hop, "plot", error = TRUE)
   # variable_check(hop, "plot",
@@ -445,6 +447,7 @@ get_nitrogen_fluxes <- function(hop) {
 #' @return A tibble with extracted and calculated light fluxes.
 #' @param hop An object of class hop or face.
 #' @importFrom dplyr %>%
+#' @keywords internal
 get_light_fluxes <- function(hop) {
   profile_check(hop, "plot", error = TRUE)
   variable_check(hop, "plot",
@@ -479,6 +482,7 @@ get_light_fluxes <- function(hop) {
 #' @return A tibble with extracted and calculated carbon pools.
 #' @param hop An object of class hop or face.
 #' @importFrom dplyr %>%
+#' @keywords internal
 get_carbon_pools <- function(hop) {
   profile_check(hop, "trees", error = TRUE)
   variable_check(hop, "trees",

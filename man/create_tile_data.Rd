@@ -14,3 +14,4 @@ create_tile_data(hop, profile)
 \description{
 Generates tree data for hisafe tile plots
 }
+\keyword{internal}

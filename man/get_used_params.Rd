@@ -15,3 +15,4 @@ List of used parameter values
 \description{
 Compiles list of the parameters actually used (i.e. the default or the defined)
 }
+\keyword{internal}

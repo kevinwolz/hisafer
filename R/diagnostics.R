@@ -351,6 +351,7 @@ diag_hisafe <- function(hop,
 #' @return The output path
 #' @param hop An object of class hop or face
 #' @param output.path The output.path argument from a diagnostic function
+#' @keywords internal
 diag_output_path <- function(hop, output.path) {
   if(is.null(output.path) & "hop-group" %in% class(hop)) {
     output.path <- clean_path(paste0(hop$exp.path, "/analysis"))
@@ -366,6 +367,7 @@ diag_output_path <- function(hop, output.path) {
 #' @param hop An object of class hop or face
 #' @param profile A character string of the profile
 #' @param last.call A character string of the name of the variable which is the last "header" variable added by Hi-sAFe
+#' @keywords internal
 vars_to_diag <- function(hop, profile, last.col) {
   hop[[profile]] <- hop[[profile]] %>%
     dplyr::select_if(is.numeric) %>%

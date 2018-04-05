@@ -19,3 +19,4 @@ A character vector of the names of variables to plot
 \description{
 Determines diagnostic variables to plot
 }
+\keyword{internal}

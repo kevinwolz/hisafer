@@ -109,6 +109,7 @@ run_hisafe <- function(hip         = NULL,
 #' @param simu.name Name of the simulation to run. Required if \code{hip} is not provided.
 #' @param capsis.path A character string of the path to the Capsis folder
 #' @param quietly Logical indicating whether status messages should printed to the console.
+#' @keywords internal
 call_hisafe <- function(path, simu.name, capsis.path, quietly) {
 
   sim.path <- clean_path(paste0(path, "/", simu.name, "/"))

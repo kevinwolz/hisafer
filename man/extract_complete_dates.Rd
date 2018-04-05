@@ -16,3 +16,4 @@ extract_complete_dates(hop, profile, dates)
 \description{
 Builds white boxes to cover phantom trees for \code{\link{hisafe_slice}}
 }
+\keyword{internal}

@@ -22,3 +22,4 @@ Invisibly returns a list containing the original hip object and supplied path.
 \description{
 Does the heavy lifting for \code{\link{build_hisafe}}.
 }
+\keyword{internal}

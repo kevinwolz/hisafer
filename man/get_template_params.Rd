@@ -16,3 +16,4 @@ A list containing all parameter values and constraints.
 \description{
 Reads all template parameter values and constraints
 }
+\keyword{internal}

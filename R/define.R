@@ -202,6 +202,7 @@ define_hisafe_file <- function(file,
 #' @return Produces errors if issues are found. Otherwise, invisibly returns \code{TRUE}.
 #' @param hip An object of class "hip".
 #' @param force Logical indicating wether the supplied values should be forced past the constraint checks. Use \code{TRUE} for development only.
+#' @keywords internal
 check_input_values <- function(hip, force) {
 
   if(force) {
@@ -488,6 +489,7 @@ check_input_values <- function(hip, force) {
 #' @return An error message or empty character stirng.
 #' @param variable A character string of the name of the variable to check.
 #' @param exp.plan The exp.plan of a "hip" object.
+#' @keywords internal
 check_accepted <- function(variable, exp.plan) {
   exp.plan <- dplyr::mutate_all(exp.plan, as.list)
   if(variable %in% INPUT.DEFS$name) {
@@ -511,6 +513,7 @@ check_accepted <- function(variable, exp.plan) {
 #' @return An error message or empty character stirng.
 #' @param variable A character string of the name of the variable to check.
 #' @param exp.plan The exp.plan of a "hip" object.
+#' @keywords internal
 check_range <- function(variable, exp.plan) {
   exp.plan <- dplyr::mutate_all(exp.plan, as.list)
   if(variable %in% INPUT.DEFS$name) {
@@ -540,6 +543,7 @@ check_range <- function(variable, exp.plan) {
 #' @return An error message or empty character stirng.
 #' @param variable A character string of the name of the variable to check.
 #' @param exp.plan The exp.plan of a "hip" object.
+#' @keywords internal
 check_type <- function(variable, exp.plan) {
   exp.plan <- dplyr::mutate_all(exp.plan, as.list)
   if(variable %in% INPUT.DEFS$name) {
@@ -735,6 +739,7 @@ layer_params <- function(template, ...) {
 #' @param perc.args From table param function
 #' @param table.name From table param function
 #' @param template From table param function
+#' @keywords internal
 modify_table <- function(args, supported.args, numeric.args, character.args, positive.args, perc.args, table.name, template) {
   unsupported.args <- names(args)[!(names(args) %in% supported.args)]
   if(length(unsupported.args) > 0) {

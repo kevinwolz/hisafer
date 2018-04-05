@@ -1400,6 +1400,7 @@ visual_legend <- function(hop,
 #' @param X.MAX Upper x limit for plot.
 #' @param Y.MIN Lower y limit for plot.
 #' @param Y.MAX Upper y limit for plot.
+#' @keywords internal
 build_white_boxes_slice <- function(hop, X.MIN, X.MAX, Y.MIN, Y.MAX) {
   boxes <- hop$plot.info %>%
     dplyr::select(SimulationName, plotWidth) %>%
@@ -1427,6 +1428,7 @@ build_white_boxes_slice <- function(hop, X.MIN, X.MAX, Y.MIN, Y.MAX) {
 #' @param df A hop profile tibble
 #' @param date date argument from \code{\link{hisafe_slice}}.
 #' @param mem.max mem.max argument from \code{\link{hisafe_slice}}.
+#' @keywords internal
 add_historic_data <- function(df, dates, mem.max) {
   dates <- lubridate::ymd(dates)
   add_hist <- function(date, df, mem.max) {
@@ -1451,6 +1453,7 @@ add_historic_data <- function(df, dates, mem.max) {
 #' @param hop An object of class hop.
 #' @param profile Character string of the name of a hop profile.
 #' @param dates Character vector or Date vector of dates to check.
+#' @keywords internal
 extract_complete_dates <- function(hop, profile, dates) {
   dates <- lubridate::ymd(dates)
   complete.dates <- hop[[profile]] %>%
