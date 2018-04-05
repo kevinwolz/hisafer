@@ -33,8 +33,8 @@
 #' @param force Logical indicating wether the supplied values should be forced past the constraint checks. Use \code{TRUE} for development only.
 #' @param bulk.pass Any Hi-sAFe input parameter in the .SIM, .PLD, .TREE, and .PAR files can be passed here grouped as a list,
 #' just as can be passed to \code{...}. This facilitates sending the same list of arguments to multiple calls of \code{define_hisafe}.
-#' @param ... Any Hi-sAFe input parameter in the .SIM, .PLD, .TREE, .PLT, and .PAR files can be passed.
-#' Parameters in .TREE or .PLT files will be applied to **all** .TREE and .PLT files in each simulation.
+#' @param ... Any Hi-sAFe input parameter in the .SIM, .PLD, .TREE, .PLT, .TEC, and .PAR files can be passed.
+#' Parameters in .TREE, .PLT, and .TEC files will be applied to **all** .TREE, .PLT, and .TEC files in each simulation.
 #' To display supported parameters, use \code{\link{hip_params}}. See below for further details.
 #' There are three methods for passing parameters to \code{define_hisafe}, one for each of the three types of parameters within the parameter files:
 #' \itemize{

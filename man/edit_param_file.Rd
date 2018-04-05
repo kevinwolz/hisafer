@@ -2,7 +2,7 @@
 % Please edit documentation in R/params.R
 \name{edit_param_file}
 \alias{edit_param_file}
-\title{Edits sim, pld, and tree files}
+\title{Edits parameter files}
 \usage{
 edit_param_file(param.list, exp.plan)
 }

@@ -153,7 +153,7 @@ write_param_file <- function(param.list, path) {
   invisible(TRUE)
 }
 
-#' Edits sim, pld, and tree files
+#' Edits parameter files
 #' @description Edits parameter files using the exp.plan of a hip object
 #' Used within \code{\link{build_structure}}.
 #' @return A edited list containing all parameter values and constraints.
@@ -218,10 +218,21 @@ get_template_params <- function(template) {
     template.crop <- avail.template.crops[1]
   }
 
+  ## Determine which crop species to use from within the template for the .tec params
+  avail.template.crops <- unlist(purrr::map(strsplit(list.files(clean_path(paste0(template.subpath, "/cropInterventions"))), split = ".", fixed = TRUE), 1))
+  if(length(avail.template.crops) == 1) {
+    template.crop <- avail.template.crops
+  } else if("durum-wheat" %in% avail.template.crops) {
+    template.crop <- "durum-wheat"
+  } else {
+    template.crop <- avail.template.crops[1]
+  }
+
   sim.file    <- clean_path(list.files(template.path, ".sim$", full.names = TRUE))
   pld.file    <- clean_path(list.files(template.path, ".pld$", full.names = TRUE))
-  tree.file   <- list.files(paste0(template.subpath, "treeSpecies"), paste0(template.tree, ".tree"), full.names = TRUE)
-  crop.file   <- list.files(paste0(template.subpath, "cropSpecies"), paste0(template.crop, ".plt"),  full.names = TRUE)
+  tree.file   <- list.files(paste0(template.subpath, "treeSpecies"),       paste0(template.tree, ".tree"), full.names = TRUE)
+  crop.file   <- list.files(paste0(template.subpath, "cropSpecies"),       paste0(template.crop, ".plt"),  full.names = TRUE)
+  tec.file    <- list.files(paste0(template.subpath, "cropInterventions"), paste0(template.crop, ".tec"),  full.names = TRUE)
   hisafe.file <- clean_path(paste0(template.subpath, "generalParameters/hisafe.par"))
   stics.file  <- clean_path(paste0(template.subpath, "generalParameters/stics.par"))
 
@@ -234,9 +245,10 @@ get_template_params <- function(template) {
   pld.params    <- read_param_file(pld.file)
   tree.params   <- read_param_file(tree.file)
   crop.params   <- read_param_file(crop.file)
+  tec.params    <- read_param_file(tec.file)
   hisafe.params <- read_param_file(hisafe.file)
   stics.params  <- read_param_file(stics.file)
-  return(list(sim = sim.params, pld = pld.params, tree = tree.params, crop = crop.params, hisafe = hisafe.params, stics = stics.params))
+  return(list(sim = sim.params, pld = pld.params, tree = tree.params, crop = crop.params, tec = tec.params, hisafe = hisafe.params, stics = stics.params))
 }
 
 #' Get names of template parameters
@@ -248,9 +260,10 @@ get_param_names <- function(x) {
   pld.names    <- unlist(purrr::map(x$pld,    names), use.names = FALSE)
   tree.names   <- unlist(purrr::map(x$tree,   names), use.names = FALSE)
   crop.names   <- unlist(purrr::map(x$crop,   names), use.names = FALSE)
+  tec.names    <- unlist(purrr::map(x$tec,   names),  use.names = FALSE)
   hisafe.names <- unlist(purrr::map(x$hisafe, names), use.names = FALSE)
   stics.names  <- unlist(purrr::map(x$stics,  names), use.names = FALSE)
-  return(list(sim = sim.names, pld = pld.names, tree = tree.names, crop = crop.names, hisafe = hisafe.names, stics = stics.names))
+  return(list(sim = sim.names, pld = pld.names, tree = tree.names, crop = crop.names, tec = tec.names, hisafe = hisafe.names, stics = stics.names))
 }
 
 #' Get values/constraints of template parameters
@@ -258,14 +271,15 @@ get_param_names <- function(x) {
 #' @return A list containing parameter values/constraints.
 #' @param x A list containing all parameter values and constraints.
 get_param_vals <- function(x, type) {
-  sim.vals <- pld.vals <- tree.vals <- crop.vals <- hisafe.vals <- stics.vals <- list()
+  sim.vals <- pld.vals <- tree.vals <- crop.vals <- tec.vals <- hisafe.vals <- stics.vals <- list()
   for(i in names(x$sim))    sim.vals    <- c(sim.vals,    purrr::map(x$sim[[i]],    type))
   for(i in names(x$pld))    pld.vals    <- c(pld.vals,    purrr::map(x$pld[[i]],    type))
   for(i in names(x$tree))   tree.vals   <- c(tree.vals,   purrr::map(x$tree[[i]],   type))
   for(i in names(x$crop))   crop.vals   <- c(crop.vals,   purrr::map(x$crop[[i]],   type))
+  for(i in names(x$tec))    tec.vals    <- c(tec.vals,    purrr::map(x$tec[[i]],    type))
   for(i in names(x$hisafe)) hisafe.vals <- c(hisafe.vals, purrr::map(x$hisafe[[i]], type))
   for(i in names(x$stics))  stics.vals  <- c(stics.vals,  purrr::map(x$stics[[i]],  type))
-  return(c(sim.vals, pld.vals, tree.vals, crop.vals, hisafe.vals, stics.vals))
+  return(c(sim.vals, pld.vals, tree.vals, crop.vals, tec.vals, hisafe.vals, stics.vals))
 }
 
 #' Complies list of parameters actually used

@@ -170,6 +170,7 @@ build_structure <- function(exp.plan, path, profiles, template) {
   pld.params.to.edit    <- params.to.edit[params.to.edit %in% PARAM_NAMES$pld]
   tree.params.to.edit   <- params.to.edit[params.to.edit %in% PARAM_NAMES$tree]
   crop.params.to.edit   <- params.to.edit[params.to.edit %in% PARAM_NAMES$crop]
+  tec.params.to.edit    <- params.to.edit[params.to.edit %in% PARAM_NAMES$tec]
   hisafe.params.to.edit <- params.to.edit[params.to.edit %in% PARAM_NAMES$hisafe]
   stics.params.to.edit  <- params.to.edit[params.to.edit %in% PARAM_NAMES$stics]
 
@@ -212,6 +213,18 @@ build_structure <- function(exp.plan, path, profiles, template) {
       crop.new <- crop
     }
     write_param_file(crop.new, i)
+  }
+
+  ## Edit tec files
+  tec.path <- list.files(paste0(simu.path, "/cropInterventions"), pattern = "\\.tec$", full.names = TRUE)
+  for(i in tec.path) {
+    tec <- read_param_file(i)
+    if(length(tec.params.to.edit > 0)) {
+      tec.new <- edit_param_file(tec, dplyr::select(exp.plan, tec.params.to.edit))
+    } else {
+      tec.new <- tec
+    }
+    write_param_file(tec.new, i)
   }
 
   ## Edit Hi-sAFe general parameters file
