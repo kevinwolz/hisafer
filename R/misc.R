@@ -126,8 +126,10 @@ hip_params <- function(variable = "names", search = FALSE, template = "agrofores
     for(i in 1:length(variable)){
       if(search) {
         var.def <- dplyr::filter(INPUT.DEFS, stringr::str_detect(tolower(name), variable[i]))
-        if(nrow(var.def) == 0) cat("\n\n  --", paste(variable[i], "was not detected in any Hi-sAFe input parameter names"))
-        next
+        if(nrow(var.def) == 0) {
+          cat("\n\n  --", paste(variable[i], "was not detected in any Hi-sAFe input parameter names"))
+          next
+        }
       } else {
         var.def <- dplyr::filter(INPUT.DEFS, name == variable[i])
       }
@@ -195,8 +197,10 @@ hop_params <- function(variable = "names", search = FALSE) {
     for(i in 1:length(variable)){
       if(search) {
         var.def <- dplyr::filter(OUTPUT.DEFS, stringr::str_detect(tolower(name), variable[i]))
-        if(nrow(var.def) == 0) cat("\n\n  --", paste(variable[i], "was not detected in any Hi-sAFe input parameter names"))
-        next
+        if(nrow(var.def) == 0) {
+          cat("\n\n  --", paste(variable[i], "was not detected in any Hi-sAFe input parameter names"))
+          next
+        }
       } else {
         var.def <- dplyr::filter(OUTPUT.DEFS, name == variable[i])
       }
