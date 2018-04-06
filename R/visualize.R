@@ -8,8 +8,8 @@
 #' @param plot.x Either "x" or "y", indicating which axis of the Hi-sAFe scene should be plotted along the x-axis of the plot.
 #' @param Y A numeric vector indicating a subset of cell locations to include when summarizing cell/voxel data.
 #' If \code{plot.x} is "x", then this refers to the y coordinates of cells. If \code{plot.x} is "y", then this refers to the x coordinates of cells.
-#' @param rel.dates A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates from which to scale \code{variable}.
-#' In the plot, \code{variable} will be scaled to be between the minimum and maximum values of \code{variable} across these dates.
+#' @param rel.dates A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates from which to scale all aesthetics set by \code{vars}.
+#' In the plot, all aesthetics set by \code{vars} will be scaled to be between the minimum and maximum values across these dates.
 #' @param max.soil.depth The maximum depth for which to plot voxel data. To reduce confusion, this value can be supplied as positive or negative.
 #' @param vars A list of variable names specifying which simulated variables in \code{hop} should be represented by various plot components.
 #' Plot components include:
@@ -27,7 +27,13 @@
 #'  \item{"voxel.C.alpha"}{ - transparency of the center circle within the voxel}
 #'  \item{"voxel.R.alpha"}{ - transparency of the right circle within the voxel}
 #' }
-#' All aesthetics set by \code{vars} are relative to the maximum value in each simulation-year combination.
+#' @param tree.rel.vars A character string indicating how to group data to determine the maximum value by which to scale tree aesthetics set by \code{vars}.
+#' This can include any combination of "s" for simulation, "y" for year, and "t" for tree.
+#' For example, "sy" would scale all aesthetics set by \code{vars} to the maximum value of each variable in each simulation-year combination.
+#' Passing an empyt string ("") means that all tree aesthetics set by \code{vars} will be scaled to maximum value across all simulations, years, and trees.
+#' Values can include upper case and/or lower case letters.
+#' @param crop.rel.vars Same as \code{tree.rel.vars} but for crop aesthetics set by \code{vars}. Doesn't include "t".
+#' @param voxel.rel.vars Same as \code{tree.rel.vars} but for voxel aesthetics set by \code{vars}. Doesn't include "t".
 #' @param trees A logical indicating whether or not to plot the trees in the scene.
 #' @param crops A logical indicating whether or not to plot the crops in the scene.
 #' @param voxels A logical indicating whether or not to plot the voxels in the scene.
@@ -62,12 +68,15 @@ hisafe_slice <- function(hop,
                                      voxel.L.alpha = "totalTreeWaterUptake",
                                      voxel.C.alpha = "fineRootCost",
                                      voxel.R.alpha = "totalTreeNitrogenUptake"),
-                         trees     = TRUE,
-                         crops     = TRUE,
-                         voxels    = TRUE,
-                         climate   = TRUE,
-                         mem.max   = 0,
-                         plot.rows = 1) {
+                         tree.rel.vars  = "SYT",
+                         crop.rel.vars  = "SY",
+                         voxel.rel.vars = "SY",
+                         trees          = TRUE,
+                         crops          = TRUE,
+                         voxels         = TRUE,
+                         climate        = TRUE,
+                         mem.max        = 0,
+                         plot.rows      = 1) {
 
   if(!requireNamespace("ggforce", quietly = TRUE)) stop("The package 'ggforce' is required for hisafe_slice(). Please install and load it.", call. = FALSE)
   is_hop(hop, error = TRUE)
@@ -184,6 +193,14 @@ hisafe_slice <- function(hop,
   X.MIN <- 0
   X.MAX <- max(hop$plot.info$plotWidth)
 
+  ## AESTHETIC GROUPING/RELAITVE VARIABLES
+  tree.grouping.strings  <- c("SimulationName", "Year", "id")[c(grepl("s|S", tree.rel.vars), grepl("y|Y", tree.rel.vars), grepl("t|T", tree.rel.vars))]
+  crop.grouping.strings  <- c("SimulationName", "Year")[c(grepl("s|S", crop.rel.vars),  grepl("y|Y", crop.rel.vars))]
+  voxel.grouping.strings <- c("SimulationName", "Year")[c(grepl("s|S", voxel.rel.vars), grepl("y|Y", voxel.rel.vars))]
+  tree.grouping.symbols  <- rlang::parse_quosures(paste(tree.grouping.strings,  collapse = ";"))
+  crop.grouping.symbols  <- rlang::parse_quosures(paste(crop.grouping.strings,  collapse = ";"))
+  voxel.grouping.symbols <- rlang::parse_quosures(paste(voxel.grouping.strings, collapse = ";"))
+
   if(trees) {
     hop$tree.info <- hop$tree.info %>%
       dplyr::mutate(tree.pruning.dates      = list(NA)) %>%
@@ -222,7 +239,7 @@ hisafe_slice <- function(hop,
     tree.max <- hop.full$trees %>%
       dplyr::mutate(crown.alpha = .[[vars$crown.alpha]]) %>%
       dplyr::mutate(trunk.alpha = .[[vars$trunk.alpha]]) %>%
-      dplyr::group_by(SimulationName, Year, id) %>%
+      dplyr::group_by(!!!tree.grouping.symbols) %>%
       dplyr::summarize(crown.alpha.max = max(crown.alpha),
                        trunk.alpha.max = max(trunk.alpha))
 
@@ -236,7 +253,7 @@ hisafe_slice <- function(hop,
     tree.data <- hop$trees %>%
       dplyr::mutate(crown.alpha = .[[vars$crown.alpha]]) %>%
       dplyr::mutate(trunk.alpha = .[[vars$trunk.alpha]]) %>%
-      dplyr::left_join(tree.max,      by = c("SimulationName", "Year", "id")) %>%
+      dplyr::left_join(tree.max,      by = tree.grouping.strings) %>%
       dplyr::left_join(hop$tree.info, by = c("SimulationName", "id")) %>%
       dplyr::left_join(hop$plot.info, by = c("SimulationName")) %>%
       dplyr::left_join(tree.growth,   by = c("SimulationName", "Date", "id")) %>%
@@ -322,13 +339,13 @@ hisafe_slice <- function(hop,
                        yield.alpha = sum(yield.alpha),
                        fert.level  = sum(fert.level)) %>%
       dplyr::ungroup() %>%
-      dplyr::group_by(SimulationName, Year) %>%
+      dplyr::group_by(!!!crop.grouping.symbols) %>%
       dplyr::summarize(crop.alpha.max  = max(crop.alpha),
                        yield.alpha.max = max(yield.alpha),
                        fert.level.max  = max(fert.level))
 
     cell.data <- cell %>%
-      dplyr::left_join(cell.max, by = c("SimulationName", "Year")) %>%
+      dplyr::left_join(cell.max, by = crop.grouping.strings) %>%
       dplyr::mutate(crop.alpha  = nan_to_zero(crop.alpha  / crop.alpha.max)) %>%
       dplyr::mutate(yield.alpha = nan_to_zero(yield.alpha / yield.alpha.max)) %>%
       dplyr::mutate(fert.level  = nan_to_zero(fert.level  / fert.level.max))
@@ -374,7 +391,7 @@ hisafe_slice <- function(hop,
                        voxel.C.alpha = sum(voxel.C.alpha),
                        voxel.R.alpha = sum(voxel.R.alpha)) %>%
       dplyr::ungroup() %>%
-      dplyr::group_by(SimulationName, Year) %>%
+      dplyr::group_by(!!!voxel.grouping.symbols) %>%
       dplyr::summarize(voxel.alpha.max   = max(voxel.alpha),
                        voxel.border.max  = max(voxel.border),
                        voxel.L.size.max  = max(voxel.L.size),
@@ -385,7 +402,7 @@ hisafe_slice <- function(hop,
                        voxel.R.alpha.max = max(voxel.R.alpha))
 
     voxel.data <- voxel %>%
-      dplyr::left_join(voxel.max, by = c("SimulationName", "Year")) %>%
+      dplyr::left_join(voxel.max, by = voxel.grouping.strings) %>%
       dplyr::mutate(voxel.alpha    = voxel.alpha   / voxel.alpha.max)  %>%
       dplyr::mutate(voxel.border   = voxel.border  / voxel.border.max * rect.max.border + rect.min.border) %>%
       dplyr::mutate(voxel.L.size   = voxel.L.size  / voxel.L.size.max * circle.max.radius) %>%

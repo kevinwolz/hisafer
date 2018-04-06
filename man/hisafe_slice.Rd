@@ -11,8 +11,10 @@ hisafe_slice(hop, date, simu.names = "all", tree.ids = "all",
   voxel.border = "cropRootDensity", voxel.L.size = "waterStock", voxel.C.size =
   "totalTreeCoarseRootBiomass", voxel.R.size = "mineralNitrogenStock",
   voxel.L.alpha = "totalTreeWaterUptake", voxel.C.alpha = "fineRootCost",
-  voxel.R.alpha = "totalTreeNitrogenUptake"), trees = TRUE, crops = TRUE,
-  voxels = TRUE, climate = TRUE, mem.max = 0, plot.rows = 1)
+  voxel.R.alpha = "totalTreeNitrogenUptake"), tree.rel.vars = "SYT",
+  crop.rel.vars = "SY", voxel.rel.vars = "SY", trees = TRUE,
+  crops = TRUE, voxels = TRUE, climate = TRUE, mem.max = 0,
+  plot.rows = 1)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -28,8 +30,8 @@ hisafe_slice(hop, date, simu.names = "all", tree.ids = "all",
 \item{Y}{A numeric vector indicating a subset of cell locations to include when summarizing cell/voxel data.
 If \code{plot.x} is "x", then this refers to the y coordinates of cells. If \code{plot.x} is "y", then this refers to the x coordinates of cells.}
 
-\item{rel.dates}{A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates from which to scale \code{variable}.
-In the plot, \code{variable} will be scaled to be between the minimum and maximum values of \code{variable} across these dates.}
+\item{rel.dates}{A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates from which to scale all aesthetics set by \code{vars}.
+In the plot, all aesthetics set by \code{vars} will be scaled to be between the minimum and maximum values across these dates.}
 
 \item{max.soil.depth}{The maximum depth for which to plot voxel data. To reduce confusion, this value can be supplied as positive or negative.}
 
@@ -48,8 +50,17 @@ Plot components include:
  \item{"voxel.L.alpha"}{ - transparency of the left circle within the voxel}
  \item{"voxel.C.alpha"}{ - transparency of the center circle within the voxel}
  \item{"voxel.R.alpha"}{ - transparency of the right circle within the voxel}
-}
-All aesthetics set by \code{vars} are relative to the maximum value in each simulation-year combination.}
+}}
+
+\item{tree.rel.vars}{A character string indicating how to group data to determine the maximum value by which to scale tree aesthetics set by \code{vars}.
+This can include any combination of "s" for simulation, "y" for year, and "t" for tree.
+For example, "sy" would scale all aesthetics set by \code{vars} to the maximum value of each variable in each simulation-year combination.
+Passing an empyt string ("") means that all tree aesthetics set by \code{vars} will be scaled to maximum value across all simulations, years, and trees.
+Values can include upper case and/or lower case letters.}
+
+\item{crop.rel.vars}{Same as \code{tree.rel.vars} but for crop aesthetics set by \code{vars}. Doesn't include "t".}
+
+\item{voxel.rel.vars}{Same as \code{tree.rel.vars} but for voxel aesthetics set by \code{vars}. Doesn't include "t".}
 
 \item{trees}{A logical indicating whether or not to plot the trees in the scene.}
 
