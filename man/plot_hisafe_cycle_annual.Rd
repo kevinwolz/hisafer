@@ -4,8 +4,8 @@
 \alias{plot_hisafe_cycle_annual}
 \title{Plot annual barchart of  major cycles}
 \usage{
-plot_hisafe_cycle_annual(hop, cycle, simu.names = "all", year.lim = c(NA,
-  NA), color.palette = NULL, plot = TRUE)
+plot_hisafe_cycle_annual(hop, cycle, simu.names = "all", tree.ids = "all",
+  year.lim = c(NA, NA), color.palette = NULL, plot = TRUE)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
@@ -13,6 +13,9 @@ plot_hisafe_cycle_annual(hop, cycle, simu.names = "all", year.lim = c(NA,
 \item{cycle}{One of "carbon", "nitrogen", "water", or "light".}
 
 \item{simu.names}{A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.}
+
+\item{tree.ids}{A numeric vector indicating a subset of tree ids to plot. Use "all" to include all available values.
+This only applies when \code{cycle} is "carbon".}
 
 \item{year.lim}{A numeric vector of length two providing the \code{c(minimum, maximum)} of calendar years to plot.
 If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.}

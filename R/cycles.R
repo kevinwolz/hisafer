@@ -5,6 +5,8 @@
 #' @param hop An object of class hop or face.
 #' @param cycle One of "carbon", "nitrogen", "water", or "light".
 #' @param simu.names A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.
+#' @param tree.ids A numeric vector indicating a subset of tree ids to plot. Use "all" to include all available values.
+#' This only applies when \code{cycle} is "carbon".
 #' @param year.lim A numeric vector of length two providing the \code{c(minimum, maximum)} of calendar years to plot.
 #' If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.
 #' @param color.palette A character stirng of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
@@ -26,6 +28,7 @@
 plot_hisafe_cycle_annual <- function(hop,
                                      cycle,
                                      simu.names    = "all",
+                                     tree.ids      = "all",
                                      year.lim      = c(NA, NA),
                                      color.palette = NULL,
                                      plot          = TRUE) {
@@ -37,7 +40,7 @@ plot_hisafe_cycle_annual <- function(hop,
   if(!(length(year.lim) == 2 & (is.numeric(year.lim) | all(is.na(year.lim))))) stop("year.lim argument must be a numeric vector of length 2",        call. = FALSE)
   is_logical(plot)
 
-  hop <- hop_filter(hop = hop, simu.names = simu.names)
+  hop <- hop_filter(hop = hop, simu.names = simu.names, tree.ids = tree.ids)
 
   if(cycle == "water") {
     plot.data  <- get_water_fluxes(hop)
@@ -149,6 +152,8 @@ plot_hisafe_cycle_annual <- function(hop,
 #' Use "all" to include all available values.
 #' @param simu.names A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.
 #' If more than one value is supplied to \code{years}, then a single value must be suppied to \code{simu.names}.
+#' @param tree.ids A numeric vector indicating a subset of tree ids to plot. Use "all" to include all available values.
+#' This only applies when \code{cycle} is "carbon".
 #' @param doy.lim A numeric vector of length two providing the \code{c(minimum, maximum)} of julian days to plot.
 #' @param color.palette A character stirng of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
 #' If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette.
@@ -170,6 +175,7 @@ plot_hisafe_cycle_daily <- function(hop,
                                     cycle,
                                     years,
                                     simu.names    = "all",
+                                    tree.ids      = "all",
                                     doy.lim       = c(1, 366),
                                     color.palette = NULL,
                                     plot          = TRUE) {
@@ -187,7 +193,7 @@ plot_hisafe_cycle_daily <- function(hop,
 
   if(!all(years %in% hop$plot$Year))                stop("one or more values in years is not present in the plot profile of hop",      call. = FALSE)
 
-  hop <- hop_filter(hop = hop, simu.names = simu.names)
+  hop <- hop_filter(hop = hop, simu.names = simu.names, tree.ids = tree.ids)
 
   if(cycle == "water") {
     plot.data   <- get_water_fluxes(hop) %>%
@@ -283,7 +289,7 @@ plot_hisafe_cycle_daily <- function(hop,
     dplyr::mutate_if(is.numeric, abs)
 
   #ggsave_fitmax("/Users/kevinwolz/Desktop/nitrogen_daily.png", plot.obj, scale = 2)
-  if(plot) return(plot.obj) else return(out.data)
+  if(plot) return(plot.obj) else return(dplyr::select(out.data, -date))
 }
 
 
@@ -492,6 +498,10 @@ get_carbon_pools <- function(hop) {
     replace(is.na(.), 0) %>%
     dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay, id,
                   carbonFoliage, carbonBranches, carbonCoarseRoots, carbonFineRoots, carbonLabile, carbonStem, carbonStump) %>%
+    dplyr::select(-id) %>%
+    dplyr::group_by(SimulationName, Year, Month, Day, Date, JulianDay) %>%
+    dplyr::summarize_all(sum) %>%
+    dplyr::ungroup() %>%
     dplyr::mutate(carbonStump       = -carbonStump) %>%
     dplyr::mutate(carbonCoarseRoots = -carbonCoarseRoots) %>%
     dplyr::mutate(carbonFineRoots   = -carbonFineRoots) %>%
@@ -513,6 +523,7 @@ get_carbon_pools <- function(hop) {
                                            "Stump"))) %>%
     dplyr::mutate(value = value / 1e3) %>% # convert from kg C tree-1 to Mg C tree-1
     dplyr::left_join(dplyr::select(hop$plot.info, SimulationName, plot.area), by = "SimulationName") %>%
-    dplyr::mutate(value = value / (plot.area / 10000)) # convert from Mg C tree-1 to Mg C ha-1
+    dplyr::mutate(value = value / (plot.area / 10000)) %>% # convert from Mg C tree-1 to Mg C ha-1
+    dplyr::select(-plot.area)
   return(out)
 }

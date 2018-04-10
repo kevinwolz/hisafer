@@ -5,7 +5,8 @@
 \title{Plot daily timeseries of major cycles}
 \usage{
 plot_hisafe_cycle_daily(hop, cycle, years, simu.names = "all",
-  doy.lim = c(1, 366), color.palette = NULL, plot = TRUE)
+  tree.ids = "all", doy.lim = c(1, 366), color.palette = NULL,
+  plot = TRUE)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
@@ -18,6 +19,9 @@ Use "all" to include all available values.}
 
 \item{simu.names}{A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.
 If more than one value is supplied to \code{years}, then a single value must be suppied to \code{simu.names}.}
+
+\item{tree.ids}{A numeric vector indicating a subset of tree ids to plot. Use "all" to include all available values.
+This only applies when \code{cycle} is "carbon".}
 
 \item{doy.lim}{A numeric vector of length two providing the \code{c(minimum, maximum)} of julian days to plot.}
 
