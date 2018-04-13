@@ -217,14 +217,13 @@ hop_params <- function(variable = "names", search = FALSE) {
 
 #' Display supported Hi-sAFe output profiles
 #' @description Displays supported Hi-sAFe output profiles and standard output frequency.
-#' @return Invisibly returns a data frame containing the profiles names and output frequency.
 #' @export
 #' @family hisafe helper functions
 #' @examples
 #' \dontrun{
 #' hisafe_profiles()
 #' }
-hisafe_profiles <- function(variable = "names") {
+hisafe_profiles <- function() {
   print(as.data.frame(SUPPORTED.PROFILES), row.names = FALSE)
 }
 

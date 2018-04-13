@@ -4,12 +4,14 @@
 \alias{build_hisafe}
 \title{Builds a Hi-sAFe simulation or experiment}
 \usage{
-build_hisafe(hip, plot.scene = TRUE)
+build_hisafe(hip, plot.scene = TRUE, summary.files = TRUE)
 }
 \arguments{
 \item{hip}{An object of class "hip". To create a hip object see \code{\link{define_hisafe}}.}
 
 \item{plot.scene}{Logical indicating whether \code{\link{plot_hisafe_scene}} should be used to export plots of each scene during the build.}
+
+\item{summary.files}{Logical indicating whether or not to write out summary .CSV files about the experiment and each simulation during the build.}
 }
 \value{
 Invisibly returns a list containing the original hip object.

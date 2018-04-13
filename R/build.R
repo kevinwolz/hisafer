@@ -3,6 +3,7 @@
 #' @return Invisibly returns a list containing the original hip object.
 #' @param hip An object of class "hip". To create a hip object see \code{\link{define_hisafe}}.
 #' @param plot.scene Logical indicating whether \code{\link{plot_hisafe_scene}} should be used to export plots of each scene during the build.
+#' @param summary.files Logical indicating whether or not to write out summary .CSV files about the experiment and each simulation during the build.
 #' @export
 #' @importFrom dplyr %>%
 #' @family hisafe build functions
@@ -20,7 +21,9 @@
 #' # Building the experiment folder structure & files:
 #' build_hisafe(myexp)
 #' }
-build_hisafe <- function(hip, plot.scene = TRUE) {
+build_hisafe <- function(hip,
+                         plot.scene    = TRUE,
+                         summary.files = TRUE) {
   is_hip(hip, error = TRUE)
   is_logical(plot.scene)
 
@@ -37,7 +40,7 @@ build_hisafe <- function(hip, plot.scene = TRUE) {
   ## Write out experiment summary
   paste_together  <- function(x) unlist(purrr::map(x, paste, collapse = ";"))
   exp.plan.to.write <- dplyr::mutate_if(EXP.PLAN, is.list, paste_together)
-  if(nrow(EXP.PLAN) > 1) readr::write_csv(exp.plan.to.write, clean_path(paste0(hip$path, "/", exp.name, "_exp_summary.csv")))
+  if(summary.files & nrow(EXP.PLAN) > 1) readr::write_csv(exp.plan.to.write, clean_path(paste0(hip$path, "/", exp.name, "_exp_summary.csv")))
 
   ## build folder tree & input files for each simulation in experiment
   create_tibble <- function(x) {
@@ -59,9 +62,11 @@ build_hisafe <- function(hip, plot.scene = TRUE) {
 
   purrr::walk(hip.list,
               build_structure,
-              path     = hip$path,
-              profiles = hip$profiles,
-              template = hip$template)
+              path          = hip$path,
+              profiles      = hip$profiles,
+              template      = hip$template,
+              plot.scene    = plot.scene,
+              summary.files = summary.files)
 
   if(plot.scene) {
     purrr::walk2(as.list(unique(EXP.PLAN$SimulationName)),
@@ -82,7 +87,7 @@ build_hisafe <- function(hip, plot.scene = TRUE) {
 #' @param template A character string of the path to the Hi-sAFe directory structure/files to use as a template
 #' (or one of the strings signaling a default template)
 #' @keywords internal
-build_structure <- function(exp.plan, path, profiles, template) {
+build_structure <- function(exp.plan, path, profiles, template, plot.scene, summary.files) {
 
   TEMPLATE_PARAMS <- get_template_params(template)
   PARAM_NAMES     <- get_param_names(TEMPLATE_PARAMS)
@@ -93,12 +98,12 @@ build_structure <- function(exp.plan, path, profiles, template) {
   ## Any newly built files below will overwrite these files
   copy_hisafe_template(template, path, overwrite = TRUE, new.name = exp.plan$SimulationName)
   simu.path <- clean_path(paste0(path, "/", exp.plan$SimulationName))
-  dir.create(paste0(simu.path, "/support"), showWarnings = FALSE)
+  if(plot.scene | summary.files) dir.create(paste0(simu.path, "/support"), showWarnings = FALSE)
 
   ## Write out simulation summary
   paste_together  <- function(x) unlist(purrr::map(x, paste, collapse = ";"))
   exp.plan.to.write <- dplyr::mutate_if(exp.plan, is.list, paste_together)
-  readr::write_csv(exp.plan.to.write, clean_path(paste0(simu.path, "/support/", exp.plan$SimulationName, "_simulation_summary.csv")))
+  if(summary.files) readr::write_csv(exp.plan.to.write, clean_path(paste0(simu.path, "/support/", exp.plan$SimulationName, "_simulation_summary.csv")))
 
   ## Move weather file if one was provided
   if("weatherFile" %in% names(exp.plan)) {

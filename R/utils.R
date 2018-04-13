@@ -2,10 +2,10 @@
 ## There is no better way to do this until a better way to describe export profiles and frequenceies in Hi-sAFe is determined.
 SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("annualplot", "annualtree", "annualcrop",
                                                  "plot", "trees", "cells", "cellsDetail",
-                                                 "voxels", "voxelsDetail", "voxelsDebug", "voxelsOptim", "climate", "monthCells"),
+                                                 "voxels", "voxelsDetail", "voxelsDebug", "voxelsOptim", "climate", "monthCells", "annualDBH"),
                                     freqs    = c(365,          365,          365,
                                                  1,      1,       1,        1,
-                                                 1,        1,               1,             1,            1,          30))
+                                                 1,        1,               1,             1,            1,          30,           365))
 
 INPUT.DEFS  <- readr::read_delim(system.file("extdata", "input_defs.txt",  package = "hisafer"), "\t", col_types = readr::cols())
 OUTPUT.DEFS <- dplyr::arrange(readr::read_delim(system.file("extdata", "output_defs.txt", package = "hisafer"), "\t", col_types = readr::cols()), profile, name)

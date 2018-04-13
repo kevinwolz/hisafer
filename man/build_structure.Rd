@@ -4,7 +4,7 @@
 \alias{build_structure}
 \title{Builds the structure of a Hi-sAFe simulation}
 \usage{
-build_structure(exp.plan, path, profiles, template)
+build_structure(exp.plan, path, profiles, template, plot.scene, summary.files)
 }
 \arguments{
 \item{exp.plan}{The exp.plan element of a "hip" object, containing a single row.}

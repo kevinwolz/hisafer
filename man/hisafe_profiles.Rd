@@ -4,10 +4,7 @@
 \alias{hisafe_profiles}
 \title{Display supported Hi-sAFe output profiles}
 \usage{
-hisafe_profiles(variable = "names")
-}
-\value{
-Invisibly returns a data frame containing the profiles names and output frequency.
+hisafe_profiles()
 }
 \description{
 Displays supported Hi-sAFe output profiles and standard output frequency.

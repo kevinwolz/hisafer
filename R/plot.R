@@ -9,6 +9,7 @@
 #' More than one variable name can be passed, but all variables must be from the same \code{profile}.
 #' @param profile A character string of the profile for which to plot a timeseries. If 'annualtree' or 'annualplot', annual timeseries are created.
 #' If 'trees', 'plot', or 'climate', daily timeseries are created.
+#' @param cumulative Logical indicating wheter \code{variables} should be cumulated before plotting.
 #' @param simu.names A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.
 #' @param years A numeric vector of the years within \code{hop} to include. Use "all" to include all available values.
 #' @param tree.ids A numeric vector indicating a subset of tree ids to plot. Use "all" to include all available values.
@@ -48,6 +49,7 @@
 plot_hisafe_ts <- function(hop,
                            variables,
                            profile,
+                           cumulative       = FALSE,
                            simu.names       = "all",
                            years            = "all",
                            tree.ids         = "all",
@@ -77,6 +79,7 @@ plot_hisafe_ts <- function(hop,
   if(!(length(doy.lim) == 2 & all(doy.lim %in% 1:366)))           stop("doy.lim argument must be of length 2 with values in 1:366", call. = FALSE)
   if(!(is.na(color.palette) | is.character(color.palette)))       stop("color.palette argument must be a character vector",         call. = FALSE)
   if(!(is.na(linetype.palette) | is.character(linetype.palette))) stop("linetype.palette argument must be a character vector",      call. = FALSE)
+  is_logical(cumulative)
   is_logical(facet.year)
   is_logical(crop.points)
   is_logical(plot)
@@ -148,6 +151,16 @@ plot_hisafe_ts <- function(hop,
     scale_linetype <- scale_linetype_manual(values = linetype.palette)
   } else {
     scale_linetype <- scale_linetype_discrete()
+  }
+
+
+  ## Group for cumulation
+  if(cumulative) {
+    cum.group.strings <- c("SimulationName", "id"[profile == "trees"], "Year"[facet.year])
+    cum.group.symbols <- rlang::parse_quosures(paste(cum.group.strings, collapse = ";"))
+    plot.data <- plot.data %>%
+      dplyr::group_by(!!!cum.group.symbols) %>%
+      dplyr::mutate_at(variables, cumsum)
   }
 
   ## Create plot
