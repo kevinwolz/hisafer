@@ -224,7 +224,9 @@ hop_params <- function(variable = "names", search = FALSE) {
 #' hisafe_profiles()
 #' }
 hisafe_profiles <- function() {
-  print(as.data.frame(SUPPORTED.PROFILES), row.names = FALSE)
+  private.profiles <- c("voxelsDebug", "voxelsOptim", "annualDBH")
+  public.profiles  <- dplyr::filter(SUPPORTED.PROFILES, !(profiles %in% private.profiles))
+  print(as.data.frame(public.profiles), row.names = FALSE)
 }
 
 #' Change SimulationNames in a hop object

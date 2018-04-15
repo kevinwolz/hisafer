@@ -2,12 +2,15 @@
 % Please edit documentation in R/build.R
 \name{build_hisafe}
 \alias{build_hisafe}
-\title{Builds a Hi-sAFe simulation or experiment}
+\title{Build a Hi-sAFe simulation or experiment}
 \usage{
-build_hisafe(hip, plot.scene = TRUE, summary.files = TRUE)
+build_hisafe(hip, files = "all", plot.scene = TRUE, summary.files = TRUE)
 }
 \arguments{
 \item{hip}{An object of class "hip". To create a hip object see \code{\link{define_hisafe}}.}
+
+\item{files}{A character string of file types indicating which simulation files to build. Use "all" to write all required simulation files.
+Otherwise, select one or more of "sim", "pld", "wth", "tree", "plt", "tec", "par", and "pro".}
 
 \item{plot.scene}{Logical indicating whether \code{\link{plot_hisafe_scene}} should be used to export plots of each scene during the build.}
 

@@ -5,7 +5,21 @@ SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("annualplot", "annualtree", "an
                                                  "voxels", "voxelsDetail", "voxelsDebug", "voxelsOptim", "climate", "monthCells", "annualDBH"),
                                     freqs    = c(365,          365,          365,
                                                  1,      1,       1,        1,
-                                                 1,        1,               1,             1,            1,          30,           365))
+                                                 1,        1,               1,             1,            1,          30,           365),
+                                    description = c("annual plot-level data",
+                                                    "annual data for each tree in the scene",
+                                                    "annual data for each cell in the scene",
+                                                    "daily plot-level data",
+                                                    "daily data for each tree in the scene",
+                                                    "daily data for each cell in the scene (core variables)",
+                                                    "daily data for each cell in the scene (supplemental variables)",
+                                                    "daily data for each voxel in the scene (core variables)",
+                                                    "daily data for each voxel in the scene (supplemental variables)",
+                                                    "daily data for each voxel in the scene (debugging variables)",
+                                                    "daily data for each voxel in the scene (water module optimization variables)",
+                                                    "daily climate data",
+                                                    "monthly data for each cell in the scene",
+                                                    "only data for annual DBH of each tree"))
 
 INPUT.DEFS  <- readr::read_delim(system.file("extdata", "input_defs.txt",  package = "hisafer"), "\t", col_types = readr::cols())
 OUTPUT.DEFS <- dplyr::arrange(readr::read_delim(system.file("extdata", "output_defs.txt", package = "hisafer"), "\t", col_types = readr::cols()), profile, name)

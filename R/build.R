@@ -1,7 +1,9 @@
-#' Builds a Hi-sAFe simulation or experiment
+#' Build a Hi-sAFe simulation or experiment
 #' @description Builds a Hi-sAFe simulation or experiment (a group of simulations) - creates the folder structure and input files.
 #' @return Invisibly returns a list containing the original hip object.
 #' @param hip An object of class "hip". To create a hip object see \code{\link{define_hisafe}}.
+#' @param files A character string of file types indicating which simulation files to build. Use "all" to write all required simulation files.
+#' Otherwise, select one or more of "sim", "pld", "wth", "tree", "plt", "tec", "par", and "pro".
 #' @param plot.scene Logical indicating whether \code{\link{plot_hisafe_scene}} should be used to export plots of each scene during the build.
 #' @param summary.files Logical indicating whether or not to write out summary .CSV files about the experiment and each simulation during the build.
 #' @export
@@ -22,10 +24,16 @@
 #' build_hisafe(myexp)
 #' }
 build_hisafe <- function(hip,
+                         files         = "all",
                          plot.scene    = TRUE,
                          summary.files = TRUE) {
   is_hip(hip, error = TRUE)
   is_logical(plot.scene)
+
+  allowed.files <- c("sim", "pld", "wth", "tree", "plt", "tec", "par", "pro")
+  if(files[1] == "all") files <- allowed.files
+  if(!all(files %in% allowed.files)) stop(paste0("files argument must be 'all' or one or more of ",
+                                                 paste(allowed.files, collapse = ", ")), call. = FALSE)
 
   EXP.PLAN <- hip$exp.plan
   dir.create(hip$path, showWarnings = FALSE, recursive = TRUE)
@@ -65,6 +73,7 @@ build_hisafe <- function(hip,
               path          = hip$path,
               profiles      = hip$profiles,
               template      = hip$template,
+              files         = files,
               plot.scene    = plot.scene,
               summary.files = summary.files)
 
@@ -86,8 +95,12 @@ build_hisafe <- function(hip,
 #' @param profiles A character vector of export profiles the simulation to export.
 #' @param template A character string of the path to the Hi-sAFe directory structure/files to use as a template
 #' (or one of the strings signaling a default template)
+#' @param files A character string of file types indicating which simulation files to build. Use "all" to write all required simulation files.
+#' Otherwise, select one or more of "sim", "pld", "wth", "tree", "plt", "tec", "par", and "pro".
+#' @param plot.scene Logical indicating whether \code{\link{plot_hisafe_scene}} should be used to export plots of each scene during the build.
+#' @param summary.files Logical indicating whether or not to write out summary .CSV files about the experiment and each simulation during the build.
 #' @keywords internal
-build_structure <- function(exp.plan, path, profiles, template, plot.scene, summary.files) {
+build_structure <- function(exp.plan, path, profiles, template, files, plot.scene, summary.files) {
 
   TEMPLATE_PARAMS <- get_template_params(template)
   PARAM_NAMES     <- get_param_names(TEMPLATE_PARAMS)
@@ -244,6 +257,13 @@ build_structure <- function(exp.plan, path, profiles, template, plot.scene, summ
   stics      <- read_param_file(stics.path)
   stics.new  <- edit_param_file(stics, dplyr::select(exp.plan, stics.params.to.edit))
   write_param_file(stics.new, stics.path)
+
+  ## Delete files that are not desired
+  remove_files <- function(x, y) if(!(x %in% files)) unlink(paste0(simu.path, y), recursive = TRUE)
+  file.names     <- c("sim", "pld", "wth", "tree", "plt", "tec", "par", "pro")
+  file.locations <- c("/*.sim", "/*.pld", "/*.wth", "/treeSpecies", "/cropSpecies",
+                      "/cropInterventions", "/generalParameters", "/exportParameters")
+  purrr::map2(file.names, file.locations, remove_files)
 
   invisible(TRUE)
 }
