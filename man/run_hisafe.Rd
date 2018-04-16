@@ -4,9 +4,9 @@
 \alias{run_hisafe}
 \title{Run one or more Hi-sAFe simulations}
 \usage{
-run_hisafe(hip = NULL, path = NULL, simu.names = "all",
+run_hisafe(hip = NULL, path = NULL, simu.names = "all", capsis.path,
   parallel = FALSE, num.cores = NULL, mem.spec = TRUE, quietly = FALSE,
-  capsis.path)
+  launch.call = "ScriptGen", default.folder = "")
 }
 \arguments{
 \item{hip}{An object of class "hip". Required if \code{path} is not provided.}
@@ -15,6 +15,8 @@ run_hisafe(hip = NULL, path = NULL, simu.names = "all",
 Required if \code{hip} is not provided.}
 
 \item{simu.names}{Names of the simulations to run. If "all", the default, then all simulations are run.}
+
+\item{capsis.path}{A character string of the path (relative or absolute) to the Capsis folder}
 
 \item{parallel}{Logical, should parallel computing be used.}
 
@@ -26,8 +28,6 @@ If \code{TRUE}, will default to the system's total memory divided by the number 
 If \code{FALSE}, a memory specification will not be made, and Capsis/Hi-sAFe will run with defaults.}
 
 \item{quietly}{Logical indicating whether status messages should printed to the console.}
-
-\item{capsis.path}{A character string of the path (relative or absolute) to the Capsis folder}
 }
 \value{
 Invisibly returns a list of console logs from simulation runs.

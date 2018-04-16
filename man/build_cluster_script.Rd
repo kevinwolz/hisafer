@@ -5,7 +5,8 @@
 \title{Builds a cluster shell script}
 \usage{
 build_cluster_script(hip = NULL, simu.names = NULL, script.path = NULL,
-  cluster.path, email, num.cores = 1)
+  launch.call = "ScriptGen", default.folder = "", cluster.path,
+  email = NULL, num.cores = 1)
 }
 \arguments{
 \item{simu.names}{A character vector of the names of the simulations to create the script for.
@@ -13,9 +14,13 @@ This must match the names of .SIM files as well as the names of the folders that
 
 \item{script.path}{A character string of the local path for where to create the cluster script file.}
 
+\item{launch.call}{The name of the safe lanuch script to use (one of 'ScriptGen' or 'ScriptCalib')}
+
+\item{default.folder}{The folder in safe/data/SimSettings to use for parameter files that are not found in the simulation folder.}
+
 \item{cluster.path}{A character string of the path on the cluster where the simulation folder is located.}
 
-\item{email}{A character string of the email address to notify with cluster job updates.}
+\item{email}{A character string of the email address to notify with cluster job updates. Use \code{NULL} for no email generation.}
 
 \item{num.cores}{The number of cores to request from the cluster.}
 }

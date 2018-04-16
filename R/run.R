@@ -5,6 +5,7 @@
 #' @param path A character string of the path (relative or absolute) to the directory containing the simulation folders.
 #' Required if \code{hip} is not provided.
 #' @param simu.names Names of the simulations to run. If "all", the default, then all simulations are run.
+#' @param capsis.path A character string of the path (relative or absolute) to the Capsis folder
 #' @param parallel Logical, should parallel computing be used.
 #' @param num.cores Numbers of cores to use in parallel computing.
 #' If not provided, will default to one less than the total number of available cores.
@@ -12,7 +13,6 @@
 #' If \code{TRUE}, will default to the system's total memory divided by the number of cores.
 #' If \code{FALSE}, a memory specification will not be made, and Capsis/Hi-sAFe will run with defaults.
 #' @param quietly Logical indicating whether status messages should printed to the console.
-#' @param capsis.path A character string of the path (relative or absolute) to the Capsis folder
 #' @export
 #' @importFrom foreach %dopar%
 #' @importFrom foreach %do%
@@ -28,14 +28,16 @@
 #' # the simulations can all be run:
 #' run_hisafe(myexp)
 #' }
-run_hisafe <- function(hip         = NULL,
-                       path        = NULL,
-                       simu.names  = "all",
-                       parallel    = FALSE,
-                       num.cores   = NULL,
-                       mem.spec    = TRUE,
-                       quietly     = FALSE,
-                       capsis.path) {
+run_hisafe <- function(hip            = NULL,
+                       path           = NULL,
+                       simu.names     = "all",
+                       capsis.path,
+                       parallel       = FALSE,
+                       num.cores      = NULL,
+                       mem.spec       = TRUE,
+                       quietly        = FALSE,
+                       launch.call    = "ScriptGen",
+                       default.folder = "") {
 
   capsis.path <- R.utils::getAbsolutePath(capsis.path)
   if(!is.null(path)) path <- R.utils::getAbsolutePath(path)
@@ -51,6 +53,8 @@ run_hisafe <- function(hip         = NULL,
     if(num.cores %% 1 != 0 & num.cores > 0)                     stop("num.cores argument must be a positive integer",                call. = FALSE)
   }
   if(!((is.numeric(mem.spec) & length(mem.spec) == 1) | is.logical(mem.spec))) stop("mem.spec argument must logical or a positive integer", call. = FALSE)
+  if(!(is.character(launch.call)    & length(launch.call)    == 1)) stop("launch.call argument must be a character vector of length 1",    call. = FALSE)
+  if(!(is.character(default.folder) & length(default.folder) == 1)) stop("default.folder argument must be a character vector of length 1", call. = FALSE)
 
   ## Determine path and simu.names to run
   if(is.null(path)) {
@@ -92,11 +96,21 @@ run_hisafe <- function(hip         = NULL,
     if(!quietly) cat("\nInitializing", length(simu.names), "simulations on", num.cores, "cores")
     cl <- parallel::makeCluster(num.cores)
     doParallel::registerDoParallel(cl)
-    run.log <- foreach::foreach(i = simu.names, .inorder = FALSE) %dopar% call_hisafe(path = path, simu.name = i, capsis.path = capsis.path, quietly = quietly)
+    run.log <- foreach::foreach(i = simu.names, .inorder = FALSE) %dopar% call_hisafe(path           = path,
+                                                                                      simu.name      = i,
+                                                                                      capsis.path    = capsis.path,
+                                                                                      launch.call    = launch.call,
+                                                                                      default.folder = default.folder,
+                                                                                      quietly        = quietly)
     doParallel::stopImplicitCluster()
   } else {
     if(!quietly) cat("\nInitializing", length(simu.names), "simulations on 1 core")
-    run.log <- foreach::foreach(i = simu.names) %do% call_hisafe(path = path, simu.name = i, capsis.path = capsis.path, quietly = quietly)
+    run.log <- foreach::foreach(i = simu.names) %do% call_hisafe(path           = path,
+                                                                 simu.name      = i,
+                                                                 capsis.path    = capsis.path,
+                                                                 launch.call    = launch.call,
+                                                                 default.folder = default.folder,
+                                                                 quietly        = quietly)
   }
   if(!quietly) cat("\nAll simulations complete")
   invisible(run.log)
@@ -110,10 +124,12 @@ run_hisafe <- function(hip         = NULL,
 #' @param capsis.path A character string of the path to the Capsis folder
 #' @param quietly Logical indicating whether status messages should printed to the console.
 #' @keywords internal
-call_hisafe <- function(path, simu.name, capsis.path, quietly) {
+call_hisafe <- function(path, simu.name, capsis.path, launch.call, default.folder, quietly) {
 
   sim.path <- clean_path(paste0(path, "/", simu.name, "/"))
   if(!dir.exists(sim.path)) stop(paste("The simulation", simu.name, "does not exist."), call. = FALSE)
+
+  if(default.folder != "") default.folder <- paste0(" ", default.folder)
 
   simulationStartTime <- proc.time()[3]
   out <- file(paste0(sim.path, "support/", simu.name, "_simulation_log.txt"), open = "w")
@@ -126,9 +142,9 @@ call_hisafe <- function(path, simu.name, capsis.path, quietly) {
 
   ## Run Hi-sAFe
   if(.Platform$OS.type == "windows") {
-    call <- paste0("capsis -p script safe.pgms.ScriptGen ", sim.path, simu.name, ".sim")
+    call <- paste0("capsis -p script safe.pgms.",       launch.call, " ", sim.path, simu.name, ".sim", default.folder)
   } else {
-    call <- paste0("sh capsis.sh -p script safe.pgms.ScriptGen ", sim.path, simu.name, ".sim")
+    call <- paste0("sh capsis.sh -p script safe.pgms.", launch.call, " ", sim.path, simu.name, ".sim", default.folder)
   }
   hisafe.log <- system(call, wait = TRUE, intern = TRUE)
 
