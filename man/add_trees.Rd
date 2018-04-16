@@ -4,12 +4,10 @@
 \alias{add_trees}
 \title{Add trees & canopies to hisafe tile plots}
 \usage{
-add_trees(plot.obj, tree.data, white.boxes, trees, canopies)
+add_trees(plot.obj, tree.data, trees, canopies)
 }
 \arguments{
 \item{tree.data}{Tree data}
-
-\item{white.boxes}{White box data}
 
 \item{trees}{Logical for whether or not to plot trees}
 

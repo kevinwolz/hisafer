@@ -321,12 +321,6 @@ plot_hisafe_monthcells <- function(hop,
                                 canopies = canopies,
                                 plot.x   = plot.x)
 
-  white.boxes <- build_white_boxes_tile(hop   = hop,
-                                        X.MIN = X.MIN,
-                                        X.MAX = X.MAX,
-                                        Y.MIN = Y.MIN,
-                                        Y.MAX = Y.MAX)
-
   plot.obj <- ggplot(plot.data) +
     labs(x     = colfacet,
          y     = rowfacet,
@@ -351,7 +345,6 @@ plot_hisafe_monthcells <- function(hop,
 
   plot.obj <- plot.obj %>%
     add_trees(tree.data   = tree.data,
-              white.boxes = white.boxes,
               trees       = trees,
               canopies    = canopies)
 
@@ -432,12 +425,6 @@ plot_hisafe_annualcrop <- function(hop,
                                 canopies = canopies,
                                 plot.x   = plot.x)
 
-  white.boxes <- build_white_boxes_tile(hop   = hop,
-                                        X.MIN = X.MIN,
-                                        X.MAX = X.MAX,
-                                        Y.MIN = Y.MIN,
-                                        Y.MAX = Y.MAX)
-
   plot.obj <- ggplot(plot.data) +
     labs(x     = "SimulationName",
          y     = "Year",
@@ -464,7 +451,6 @@ plot_hisafe_annualcrop <- function(hop,
 
   plot.obj <- plot.obj %>%
     add_trees(tree.data   = tree.data,
-              white.boxes = white.boxes,
               trees       = trees,
               canopies    = canopies)
 
@@ -562,12 +548,6 @@ plot_hisafe_cells <- function(hop,
                                 canopies = canopies,
                                 plot.x   = plot.x)
 
-  white.boxes <- build_white_boxes_tile(hop   = hop,
-                                        X.MIN = X.MIN,
-                                        X.MAX = X.MAX,
-                                        Y.MIN = Y.MIN,
-                                        Y.MAX = Y.MAX)
-
   ## Determine faceting & axis labels
   title.lab <- variable
   if("hop-group" %in% class(hop) & length(dates) > 1){
@@ -629,7 +609,6 @@ plot_hisafe_cells <- function(hop,
 
   plot.obj <- plot.obj %>%
     add_trees(tree.data   = tree.data,
-              white.boxes = white.boxes,
               trees       = trees,
               canopies    = canopies)
 
@@ -985,55 +964,14 @@ get_units <- function(hop, profile, variable) {
   return(var.unit)
 }
 
-#' Build white boxes to cover phantom trees
-#' @description Builds white boxes to cover phantom trees for hisafe tile plot functions
-#' @param hop An object of class hop.
-#' @param X.MIN Lower x limit for plot.
-#' @param X.MAX Upper x limit for plot.
-#' @param Y.MIN Lower y limit for plot.
-#' @param Y.MAX Upper y limit for plot.
-#' @keywords internal
-build_white_boxes_tile <- function(hop, X.MIN, X.MAX, Y.MIN, Y.MAX) {
-  boxes <- hop$plot.info %>%
-    dplyr::select(SimulationName, plotWidth, plotHeight) %>%
-    dplyr::filter(plotWidth < max(plotWidth) | plotHeight < max(plotHeight))
-
-  y.pos.box <- boxes %>%
-    dplyr::mutate(xmin = X.MIN,
-                  xmax = X.MAX,
-                  ymin = plotHeight,
-                  ymax = Y.MAX)
-  y.neg.box <- boxes %>%
-    dplyr::mutate(xmin = X.MIN,
-                  xmax = X.MAX,
-                  ymin = Y.MIN,
-                  ymax = 0)
-  x.pos.box <- boxes %>%
-    dplyr::mutate(xmin = plotWidth,
-                  xmax = X.MAX,
-                  ymin = Y.MIN,
-                  ymax = Y.MAX)
-  x.neg.box <- boxes %>%
-    dplyr::mutate(xmin = X.MIN,
-                  xmax = 0,
-                  ymin = Y.MIN,
-                  ymax = Y.MAX)
-
-  white.boxes <- dplyr::bind_rows(y.pos.box, y.neg.box, x.pos.box, x.neg.box) %>%
-    dplyr::filter(SimulationName %in% boxes$SimulationName)
-
-  return(white.boxes)
-}
-
 #' Add trees & canopies to hisafe tile plots
 #' @description Adds trees & canopies to hisafe tile plots
 #' @param hop An object of class hop.
 #' @param tree.data Tree data
-#' @param white.boxes White box data
 #' @param trees Logical for whether or not to plot trees
 #' @param canopies Logical for whether or not to plot canopies
 #' @keywords internal
-add_trees <- function(plot.obj, tree.data, white.boxes, trees, canopies) {
+add_trees <- function(plot.obj, tree.data, trees, canopies) {
   if(trees & nrow(tree.data) > 0) {
     plot.obj <- plot.obj +
       geom_point(data  = tree.data,
@@ -1058,14 +996,7 @@ add_trees <- function(plot.obj, tree.data, white.boxes, trees, canopies) {
                                    b        = crownRadiusTreeLine,
                                    angle    = 0),
                                inherit.aes = FALSE,
-                               na.rm       = TRUE) +
-        geom_rect(data = white.boxes,
-                  size = 0,
-                  fill = "white",
-                  aes(xmin = xmin,
-                      xmax = xmax,
-                      ymin = ymin,
-                      ymax = ymax))
+                               na.rm       = TRUE)
     } else {
       warning("The package 'ggforce' is required for drawing tree conopies. Please install it or set canopies = FALSE.",
               immediate = TRUE)

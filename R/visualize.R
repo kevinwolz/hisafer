@@ -10,6 +10,8 @@
 #' If \code{plot.x} is "x", then this refers to the y coordinates of cells. If \code{plot.x} is "y", then this refers to the x coordinates of cells.
 #' @param rel.dates A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates from which to scale all aesthetics set by \code{vars}.
 #' In the plot, all aesthetics set by \code{vars} will be scaled to be between the minimum and maximum values across these dates.
+#' @param height.dates A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates from which the plot height should be determined
+#' from the maximum height of trees and crops in this range.
 #' @param max.soil.depth The maximum depth for which to plot voxel data. To reduce confusion, this value can be supplied as positive or negative.
 #' @param vars A list of variable names specifying which simulated variables in \code{hop} should be represented by various plot components.
 #' Plot components include:
@@ -55,6 +57,7 @@ hisafe_slice <- function(hop,
                          plot.x         = "x",
                          Y              = "all",
                          rel.dates      = NULL,
+                         height.dates   = date,
                          max.soil.depth = NA,
                          vars = list(crown.alpha   = "leafArea",
                                      trunk.alpha   = "carbonLabile",
@@ -83,6 +86,7 @@ hisafe_slice <- function(hop,
   is_logical(trees)
   is_logical(crops)
   is_logical(voxels)
+  if(!(Y[1] == "all" | all(is.numeric(Y)))) stop("Y argument must be 'all' or a numeric vector", call. = FALSE)
 
   date <- lubridate::ymd(date)
 
@@ -122,21 +126,24 @@ hisafe_slice <- function(hop,
   }
 
   if(crops) {
-    Ys <- dplyr::as_tibble(table(hop$cells$SimulationName, hop$cells$y))[, 1:2] %>%
+    cell.Ys <- dplyr::as_tibble(table(hop$cells$SimulationName, hop$cells$y))[, 1:2] %>%
       dplyr::rename(SimulationName = Var1, y = Var2) %>%
       dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
-      dplyr::mutate(y        = as.numeric(y)) %>%
-      dplyr::mutate(cells.Y  = y) %>%
-      dplyr::mutate(voxels.Y = y + cellWidth / 2) %>%
-      dplyr::select(SimulationName, cells.Y, voxels.Y)
-    if(Y[1] == "all") {
-      Y <- Ys$cells.Y
-    } else {
-      if(!all(is.numeric(Y)))              stop("Y argument must be 'all' or a numeric vector",   call. = FALSE)
-      if(!all(Y %in% unique(hop$cells$y))) stop("one or more values of Y are not present in hop", call. = FALSE)
-    }
-    Ys <- dplyr::filter(Ys, cells.Y %in% Y)
-    Y.cells  <- unique(Ys$cells.Y)
+      dplyr::mutate(cells.Y = as.numeric(y)) %>%
+      dplyr::select(SimulationName, cells.Y)
+    if(Y[1] == "all") Yc <- cell.Ys$cells.Y else Yc <- Y
+    if(!all(Yc %in% cell.Ys$cells.Y)) stop("one or more values of Y are not present in hop", call. = FALSE)
+  }
+
+  if(voxels) {
+    voxel.Ys <- dplyr::as_tibble(table(hop$voxels$SimulationName, hop$voxels$y))[, 1:2] %>%
+      dplyr::rename(SimulationName = Var1, y = Var2) %>%
+      dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
+      dplyr::mutate(voxels.Y     = as.numeric(y)) %>%
+      dplyr::mutate(voxels.Y.mod = voxels.Y - cellWidth / 2) %>%
+      dplyr::select(SimulationName, voxels.Y, voxels.Y.mod)
+    if(Y[1] == "all") Yv <- voxel.Ys$voxels.Y else Yv <- unique(dplyr::filter(voxel.Ys, voxels.Y.mod %in% Y)$voxels.Y)
+    if(!all(Yv %in% voxel.Ys$voxels.Y)) stop("one or more values of Y are not present in hop", call. = FALSE)
   }
 
   hop.full <- hop_filter(hop            = hop,
@@ -144,6 +151,12 @@ hisafe_slice <- function(hop,
                          tree.ids       = tree.ids,
                          dates          = rel.dates,
                          strip.exp.plan = TRUE)
+
+  hop.height <- hop_filter(hop            = hop,
+                           simu.names     = simu.names,
+                           tree.ids       = tree.ids,
+                           dates          = height.dates,
+                           strip.exp.plan = TRUE)
 
   if(!(date %in% hop$trees$Date)) stop("hop does not contain any data on the date specified", call. = FALSE)
   hop       <- hop_filter(hop            = hop,
@@ -163,24 +176,23 @@ hisafe_slice <- function(hop,
   crops  <- crops  & nrow(hop$voxels) > 0
   voxels <- voxels & nrow(hop$voxels) > 0
 
-  rect.min.border   <- 0.25
-  rect.max.border   <- 1
-  arrow.length      <- min(hop.full$plot.info$cellWidth) / 4
-  arrow.type        <- arrow(length = unit(5, "points"))
-  arrow.size        <- 1
+  rect.min.border <- 0.25
+  rect.max.border <- 1
+  arrow.length    <- min(hop.full$plot.info$cellWidth) / 4
+  arrow.type      <- ggplot2::arrow(length = unit(5, "points"))
+  arrow.size      <- 1
 
   if(trees & crops) {
-    Y.MAX <- max(max(hop.full$trees$height), max(hop.full$cells$height), na.rm = TRUE) + arrow.length
+    Y.MAX <- max(max(hop.height$trees$height), max(hop.height$cells$height), na.rm = TRUE) + arrow.length
   } else if(trees) {
-    Y.MAX <- max(hop.full$trees$height, na.rm = TRUE) + arrow.length
+    Y.MAX <- max(hop.height$trees$height, na.rm = TRUE) + arrow.length
   } else if(crops) {
-    Y.MAX <- max(hop.full$cells$height, na.rm = TRUE) + arrow.length
+    Y.MAX <- max(hop.height$cells$height, na.rm = TRUE) + arrow.length
   } else {
     Y.MAX <- 0
   }
 
   if(voxels) {
-    Y.voxels <- unique(Ys$voxels.Y)
     circle.offset     <- min(hop.full$plot.info$cellWidth) / 4
     circle.max.radius <- min(circle.offset, min(diff(unique(hop.full$voxels$z)))) * 0.9 / 2
     circle.max.border <- 0.25
@@ -312,7 +324,7 @@ hisafe_slice <- function(hop,
     cell <- hop$cells %>%
       dplyr::mutate(crop.alpha  = .[[vars$crop.alpha]]) %>%
       dplyr::mutate(yield.alpha = .[[vars$yield.alpha]]) %>%
-      dplyr::filter(y %in% Y.cells) %>%
+      dplyr::filter(y %in% Yc) %>%
       dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
       dplyr::mutate(cell.height    = nan_to_zero((biomass - yield) / biomass * height)) %>%
       dplyr::mutate(yield.height   = nan_to_zero(yield / biomass * height)) %>%
@@ -333,7 +345,7 @@ hisafe_slice <- function(hop,
       dplyr::mutate(crop.alpha  = .[[vars$crop.alpha]]) %>%
       dplyr::mutate(yield.alpha = .[[vars$yield.alpha]]) %>%
       dplyr::mutate(fert.level  = nitrogenFertilisation) %>%
-      dplyr::filter(y %in% Y.cells) %>%
+      dplyr::filter(y %in% Yc) %>%
       dplyr::group_by(SimulationName, Year, Date, x) %>%
       dplyr::summarize(crop.alpha  = sum(crop.alpha),
                        yield.alpha = sum(yield.alpha),
@@ -361,7 +373,7 @@ hisafe_slice <- function(hop,
       dplyr::mutate(voxel.L.alpha = .[[vars$voxel.L.alpha]]) %>%
       dplyr::mutate(voxel.C.alpha = .[[vars$voxel.C.alpha]]) %>%
       dplyr::mutate(voxel.R.alpha = .[[vars$voxel.R.alpha]]) %>%
-      dplyr::filter(y %in% Y.voxels) %>%
+      dplyr::filter(y %in% Yv) %>%
       dplyr::filter(z <= abs(max.soil.depth)) %>%
       dplyr::select(SimulationName, Year, Date, x, z, voxel.alpha, voxel.border,
                     voxel.L.size, voxel.C.size, voxel.R.size,
@@ -379,7 +391,7 @@ hisafe_slice <- function(hop,
       dplyr::mutate(voxel.L.alpha = .[[vars$voxel.L.alpha]]) %>%
       dplyr::mutate(voxel.C.alpha = .[[vars$voxel.C.alpha]]) %>%
       dplyr::mutate(voxel.R.alpha = .[[vars$voxel.R.alpha]]) %>%
-      dplyr::filter(y %in% Y.voxels) %>%
+      dplyr::filter(y %in% Yv) %>%
       dplyr::filter(z <= abs(max.soil.depth)) %>%
       dplyr::group_by(SimulationName, Year, Date, x, z) %>%
       dplyr::summarize(voxel.alpha   = sum(voxel.alpha),
@@ -425,12 +437,6 @@ hisafe_slice <- function(hop,
       dplyr::select(SimulationName, Year, Date, precip.magnitude, waterTableDepth, soilDepth, plotWidth, water.table)
     climate.data$waterTableDepth[climate.data$waterTableDepth < climate.data$soilDepth] <- 0
   }
-
-  white.boxes <- build_white_boxes_slice(hop   = hop,
-                                         X.MIN = X.MIN,
-                                         X.MAX = X.MAX,
-                                         Y.MIN = Y.MIN,
-                                         Y.MAX = Y.MAX)
 
   ## CREATE PLOT
   plot.obj <- ggplot() +
@@ -675,7 +681,8 @@ hisafe_slice <- function(hop,
   if(climate & voxels) {
     ## WATER TABLE
     plot.obj <- plot.obj +
-      geom_segment(color    = "blue",
+      geom_segment(data     = climate.data,
+                   color    = "blue",
                    linetype = "longdash",
                    x        = 0,
                    na.rm = TRUE,
@@ -686,17 +693,6 @@ hisafe_slice <- function(hop,
   }
 
   if("hop-group" %in% class(hop)) plot.obj <- plot.obj + facet_wrap(~SimulationName, nrow = plot.rows)
-
-  ## WHITE BOXES TO COVER PHANTOM TREES
-  plot.obj <- plot.obj +
-    geom_rect(data = white.boxes,
-              size = 0,
-              fill = "white",
-              na.rm = TRUE,
-              aes(xmin = xmin,
-                  xmax = xmax,
-                  ymin = ymin,
-                  ymax = ymax))
 
   return(plot.obj)
 }
@@ -830,30 +826,32 @@ hisafe_snapshot <- function(hop,
   pb <- txtProgressBar(min = 0, max = length(dates), initial = 0, style = 3)
   for(i in 1:length(dates)) {
     if(plot.x == "xy") {
-      slice.plot.1 <- hisafe_slice(hop         = hop,
-                                   date        = dates[i],
-                                   rel.dates   = rel.dates,
-                                   simu.names  = simu.names,
-                                   vars        = vars,
-                                   trees       = trees,
-                                   crops       = crops,
-                                   voxels      = voxels,
-                                   plot.x      = "x",
-                                   mem.max     = mem.max, ...) +
+      slice.plot.1 <- hisafe_slice(hop          = hop,
+                                   date         = dates[i],
+                                   rel.dates    = rel.dates,
+                                   height.dates = rel.dates,
+                                   simu.names   = simu.names,
+                                   vars         = vars,
+                                   trees        = trees,
+                                   crops        = crops,
+                                   voxels       = voxels,
+                                   plot.x       = "x",
+                                   mem.max      = mem.max, ...) +
         theme(axis.title.x = element_blank(),
               axis.text.x  = element_blank(),
               plot.margin  = margin(5,5,0,10),
               plot.title   = element_text(size = 30, hjust = 0))
-      slice.plot.2 <- hisafe_slice(hop         = hop,
-                                   date        = dates[i],
-                                   rel.dates   = rel.dates,
-                                   simu.names  = simu.names,
-                                   vars        = vars,
-                                   trees       = trees,
-                                   crops       = crops,
-                                   voxels      = voxels,
-                                   plot.x      = "y",
-                                   mem.max     = mem.max, ...) +
+      slice.plot.2 <- hisafe_slice(hop          = hop,
+                                   date         = dates[i],
+                                   rel.dates    = rel.dates,
+                                   height.dates = rel.dates,
+                                   simu.names   = simu.names,
+                                   vars         = vars,
+                                   trees        = trees,
+                                   crops        = crops,
+                                   voxels       = voxels,
+                                   plot.x       = "y",
+                                   mem.max      = mem.max, ...) +
         theme(axis.title.x = element_blank(),
               axis.title.y = element_blank(),
               axis.text.x  = element_blank(),
@@ -881,16 +879,17 @@ hisafe_snapshot <- function(hop,
       }
     } else {
       if(slice) {
-        slice.plot <- hisafe_slice(hop         = hop,
-                                   date        = dates[i],
-                                   rel.dates   = rel.dates,
-                                   simu.names  = simu.names,
-                                   vars        = vars,
-                                   trees       = trees,
-                                   crops       = crops,
-                                   voxels      = voxels,
-                                   plot.x      = plot.x,
-                                   mem.max     = mem.max, ...) +
+        slice.plot <- hisafe_slice(hop          = hop,
+                                   date         = dates[i],
+                                   rel.dates    = rel.dates,
+                                   height.dates = rel.dates,
+                                   simu.names   = simu.names,
+                                   vars         = vars,
+                                   trees        = trees,
+                                   crops        = crops,
+                                   voxels       = voxels,
+                                   plot.x       = plot.x,
+                                   mem.max      = mem.max, ...) +
           theme(axis.title.x = element_blank(),
                 axis.text.x  = element_blank(),
                 axis.ticks.x = element_blank(),
@@ -898,14 +897,14 @@ hisafe_snapshot <- function(hop,
       }
 
       if(cells) {
-        cells.plot <- plot_hisafe_cells(hop        = hop,
-                                        variable   = cells.var,
-                                        dates      = dates[i],
-                                        rel.dates  = rel.dates,
-                                        simu.names = simu.names,
-                                        plot.x     = plot.x,
-                                        mem.max    = mem.max,
-                                        for.anim   = TRUE) +
+        cells.plot <- plot_hisafe_cells(hop          = hop,
+                                        variable     = cells.var,
+                                        dates        = dates[i],
+                                        rel.dates    = rel.dates,
+                                        simu.names   = simu.names,
+                                        plot.x       = plot.x,
+                                        mem.max      = mem.max,
+                                        for.anim     = TRUE) +
           theme(plot.margin  = margin(10,10,15,10))
       }
 
@@ -1331,7 +1330,7 @@ visual_legend <- function(hop,
     geom_segment(data     = line.data,
                  size     = border.thickness * 2,
                  color    = "green",
-                 arrow    = arrow(length = unit(5, "points")),
+                 arrow    = ggplot2::arrow(length = unit(5, "points")),
                  linetype = "solid",
                  y        = 0.6,
                  yend     = 0.6,
@@ -1408,36 +1407,6 @@ visual_legend <- function(hop,
               label = "max")
 
   return(plot.obj)
-}
-
-#' Build white boxes to cover phantom trees
-#' @description Builds white boxes to cover phantom trees for \code{\link{hisafe_slice}}
-#' @param hop An object of class hop.
-#' @param X.MIN Lower x limit for plot.
-#' @param X.MAX Upper x limit for plot.
-#' @param Y.MIN Lower y limit for plot.
-#' @param Y.MAX Upper y limit for plot.
-#' @keywords internal
-build_white_boxes_slice <- function(hop, X.MIN, X.MAX, Y.MIN, Y.MAX) {
-  boxes <- hop$plot.info %>%
-    dplyr::select(SimulationName, plotWidth) %>%
-    dplyr::filter(plotWidth < max(plotWidth))
-
-  pos.box <- boxes %>%
-    dplyr::mutate(xmin = plotWidth,
-                  xmax = X.MAX,
-                  ymin = Y.MIN,
-                  ymax = Y.MAX)
-  neg.box <- boxes %>%
-    dplyr::mutate(xmin = X.MIN,
-                  xmax = 0,
-                  ymin = Y.MIN,
-                  ymax = Y.MAX)
-
-  white.boxes <- dplyr::bind_rows(pos.box, neg.box) %>%
-    dplyr::filter(SimulationName %in% boxes$SimulationName)
-
-  return(white.boxes)
 }
 
 #' Add historic data

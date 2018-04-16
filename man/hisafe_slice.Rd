@@ -5,16 +5,16 @@
 \title{Plot a "sliced" profile of the simulated Hi-sAFe scene}
 \usage{
 hisafe_slice(hop, date, simu.names = "all", tree.ids = "all",
-  plot.x = "x", Y = "all", rel.dates = NULL, max.soil.depth = NA,
-  vars = list(crown.alpha = "leafArea", trunk.alpha = "carbonLabile",
-  crop.alpha = "lai", yield.alpha = "eai", voxel.alpha = "totalTreeRootDensity",
-  voxel.border = "cropRootDensity", voxel.L.size = "waterStock", voxel.C.size =
-  "totalTreeCoarseRootBiomass", voxel.R.size = "mineralNitrogenStock",
-  voxel.L.alpha = "totalTreeWaterUptake", voxel.C.alpha = "fineRootCost",
-  voxel.R.alpha = "totalTreeNitrogenUptake"), tree.rel.vars = "SYT",
-  crop.rel.vars = "SY", voxel.rel.vars = "SY", trees = TRUE,
-  crops = TRUE, voxels = TRUE, climate = TRUE, mem.max = 0,
-  plot.rows = 1)
+  plot.x = "x", Y = "all", rel.dates = NULL, height.dates = date,
+  max.soil.depth = NA, vars = list(crown.alpha = "leafArea", trunk.alpha =
+  "carbonLabile", crop.alpha = "lai", yield.alpha = "eai", voxel.alpha =
+  "totalTreeRootDensity", voxel.border = "cropRootDensity", voxel.L.size =
+  "waterStock", voxel.C.size = "totalTreeCoarseRootBiomass", voxel.R.size =
+  "mineralNitrogenStock", voxel.L.alpha = "totalTreeWaterUptake", voxel.C.alpha
+  = "fineRootCost", voxel.R.alpha = "totalTreeNitrogenUptake"),
+  tree.rel.vars = "SYT", crop.rel.vars = "SY", voxel.rel.vars = "SY",
+  trees = TRUE, crops = TRUE, voxels = TRUE, climate = TRUE,
+  mem.max = 0, plot.rows = 1)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -32,6 +32,9 @@ If \code{plot.x} is "x", then this refers to the y coordinates of cells. If \cod
 
 \item{rel.dates}{A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates from which to scale all aesthetics set by \code{vars}.
 In the plot, all aesthetics set by \code{vars} will be scaled to be between the minimum and maximum values across these dates.}
+
+\item{height.dates}{A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates from which the plot height should be determined
+from the maximum height of trees and crops in this range.}
 
 \item{max.soil.depth}{The maximum depth for which to plot voxel data. To reduce confusion, this value can be supplied as positive or negative.}
 
