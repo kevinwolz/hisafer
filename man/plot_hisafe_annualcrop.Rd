@@ -5,8 +5,7 @@
 \title{Tile plot of Hi-sAFe annualplot output variable}
 \usage{
 plot_hisafe_annualcrop(hop, variable = "yieldMax", simu.names = "all",
-  years = seq(0, 40, 5), plot.x = "x", trees = TRUE, canopies = TRUE,
-  plot = TRUE)
+  years, plot.x = "x", trees = TRUE, canopies = TRUE, plot = TRUE)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -15,7 +14,7 @@ plot_hisafe_annualcrop(hop, variable = "yieldMax", simu.names = "all",
 
 \item{simu.names}{A character string containing the SimulationNames to include. Use "all" to include all available values.}
 
-\item{years}{A numeric vector containing the years (after planting) to include. Use "all" to include all available values.}
+\item{years}{A numeric vector of the years within \code{hop} to include. Use "all" to include all available values.}
 
 \item{plot.x}{Either "x" or "y", indicating which axis of the simulation scene should be plotted on the x-axis of the plot.}
 

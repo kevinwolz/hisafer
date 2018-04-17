@@ -359,7 +359,7 @@ plot_hisafe_monthcells <- function(hop,
 #' @param hop An object of class hop.
 #' @param variable A character string of the name of the variable to color the tiles.
 #' @param simu.names A character string containing the SimulationNames to include. Use "all" to include all available values.
-#' @param years A numeric vector containing the years (after planting) to include. Use "all" to include all available values.
+#' @param years A numeric vector of the years within \code{hop} to include. Use "all" to include all available values.
 #' @param trees Logical indicating if a point should be plotted at the location of each tree.
 #' @param plot.x Either "x" or "y", indicating which axis of the simulation scene should be plotted on the x-axis of the plot.
 #' @param canopies Logical indicating if an elipsoid should be plotted representing the size of each tree canopy.
@@ -383,7 +383,7 @@ plot_hisafe_monthcells <- function(hop,
 plot_hisafe_annualcrop <- function(hop,
                                    variable   = "yieldMax",
                                    simu.names = "all",
-                                   years      = seq(0, 40, 5),
+                                   years,
                                    plot.x     = "x",
                                    trees      = TRUE,
                                    canopies   = TRUE,
@@ -393,7 +393,7 @@ plot_hisafe_annualcrop <- function(hop,
   profile_check(hop, "annualcrop", error = TRUE)
   variable_check(hop, "annualcrop", variable, error = TRUE)
 
-  if(years[1] == "all") years <- unique(hop$annualcrop$Year) - min(hop$annualcrop$Year) else years <- years[years != 0]
+  if(years[1] == "all") years <- unique(hop$annualcrop$Year)
 
   if(length(variable) > 1)       stop("variable argument must be a character vector of length 1", call. = FALSE)
   if(!is.numeric(years))         stop("years argument must be 'all' or a numeric vector",         call. = FALSE)
