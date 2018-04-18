@@ -1360,53 +1360,54 @@ visual_legend <- function(hop,
               aes(x = x + x.width / 2))
 
   ### CELLS
-  min.x <- 1.25
-  max.x <- 1.5
-  min.y <- 1
-  max.y <- 1.25
-  min.f <- min(hop$cells[[cells.var]])
-  max.f <- max(hop$cells[[cells.var]])
+  if(profile_check(hop, "cells")) {
+    min.x <- 1.25
+    max.x <- 1.5
+    min.y <- 1
+    max.y <- 1.25
+    min.f <- min(hop$cells[[cells.var]])
+    max.f <- max(hop$cells[[cells.var]])
 
-  scale_ab <- function(x, a, b) (b - a) * (x - min(x)) / (max(x) - min(x)) + a
+    scale_ab <- function(x, a, b) (b - a) * (x - min(x)) / (max(x) - min(x)) + a
 
-  mini.cells <- dplyr::as_tibble(expand.grid(x = c(1, 2, 3, 4, 5),
-                                             y = c(1, 2, 3, 4, 5))) %>%
-    dplyr::mutate(f = c(3, 2, 3, 2, 3,
-                        2, 1, 1.25, 1, 2,
-                        3, 0.5, 0, 0.5, 3,
-                        2.5, 1.5, 1.75, 1.5, 2.5,
-                        3.75, 2.75, 3.75, 2.75, 3.75)) %>%
-    dplyr::mutate(x = scale_ab(x, min.x, max.x)) %>%
-    dplyr::mutate(y = scale_ab(y, min.y, max.y)) %>%
-    dplyr::mutate(f = scale_ab(f, min.f, max.f))
+    mini.cells <- dplyr::as_tibble(expand.grid(x = c(1, 2, 3, 4, 5),
+                                               y = c(1, 2, 3, 4, 5))) %>%
+      dplyr::mutate(f = c(3, 2, 3, 2, 3,
+                          2, 1, 1.25, 1, 2,
+                          3, 0.5, 0, 0.5, 3,
+                          2.5, 1.5, 1.75, 1.5, 2.5,
+                          3.75, 2.75, 3.75, 2.75, 3.75)) %>%
+      dplyr::mutate(x = scale_ab(x, min.x, max.x)) %>%
+      dplyr::mutate(y = scale_ab(y, min.y, max.y)) %>%
+      dplyr::mutate(f = scale_ab(f, min.f, max.f))
 
-
-  plot.obj <- plot.obj +
-    geom_raster(data = mini.cells, aes(x = x, y = y, fill = f)) +
-    viridis::scale_fill_viridis(option = "magma") +
-    guides(fill = guide_colourbar(title     = NULL,
-                                  barwidth  = 4,
-                                  direction = "horizontal",
-                                  barheight = 0.5,
-                                  nbin      = 100,
-                                  label     = FALSE,
-                                  ticks     = FALSE)) +
-    theme(legend.position = c(0.27, 0.78)) +
-    geom_text(aes(x = 1.65,
-                  y = 1.25),
-              hjust = 0,
-              size  = text.size,
-              label = cells.var) +
-    geom_text(aes(x = 1.65,
-                  y = 0.9),
-              hjust = 0,
-              size  = text.size,
-              label = "min") +
-    geom_text(aes(x = 2.8,
-                  y = 0.9),
-              hjust = 1,
-              size  = text.size,
-              label = "max")
+    plot.obj <- plot.obj +
+      geom_raster(data = mini.cells, aes(x = x, y = y, fill = f)) +
+      viridis::scale_fill_viridis(option = "magma") +
+      guides(fill = guide_colourbar(title     = NULL,
+                                    barwidth  = 4,
+                                    direction = "horizontal",
+                                    barheight = 0.5,
+                                    nbin      = 100,
+                                    label     = FALSE,
+                                    ticks     = FALSE)) +
+      theme(legend.position = c(0.27, 0.78)) +
+      geom_text(aes(x = 1.65,
+                    y = 1.25),
+                hjust = 0,
+                size  = text.size,
+                label = cells.var) +
+      geom_text(aes(x = 1.65,
+                    y = 0.9),
+                hjust = 0,
+                size  = text.size,
+                label = "min") +
+      geom_text(aes(x = 2.8,
+                    y = 0.9),
+                hjust = 1,
+                size  = text.size,
+                label = "max")
+  }
 
   return(plot.obj)
 }
