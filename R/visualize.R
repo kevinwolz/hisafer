@@ -105,11 +105,11 @@ hisafe_slice <- function(hop,
   profile_check(hop,  "trees", error = TRUE)
   variable_check(hop, "trees", tree.vars, error = TRUE)
 
-  crops   <- crops   & profile_check(hop,  "cells")
-  voxels  <- voxels  & profile_check(hop,  "voxels")
-  climate <- climate & profile_check(hop,  "climate")
-  if(crops)   variable_check(hop, "cells",   cell.vars,       error = TRUE)
-  if(voxels)  variable_check(hop, "voxels",  voxel.vars,      error = TRUE)
+  crops   <- crops   & profile_check(hop, "cells")
+  voxels  <- voxels  & profile_check(hop, "voxels")
+  climate <- climate & profile_check(hop, "climate")
+  if(crops)   variable_check(hop, "cells",  cell.vars,  error = TRUE)
+  if(voxels)  variable_check(hop, "voxels", voxel.vars, error = TRUE)
   if(climate) variable_check(hop, "climate", c("precipitation", "waterTableDepth"), error = TRUE)
   if(any(is.na(unlist(vars)))) { # account for any NA vars specifications
     vars <- purrr::map(vars, function(x) tidyr::replace_na(x, "none"))
@@ -793,6 +793,8 @@ hisafe_snapshot <- function(hop,
   if(!is.character(file.prefix))                          stop("file.prefix argument must be a character vector", call. = FALSE)
   is_logical(slice)
   is_logical(cells)
+
+  cells <- cells & profile_check(hop, "cells")
 
   legend.path <- clean_path(paste0(diag_output_path(hop, output.path), "/snapshots/"))
   image.path  <- paste0(legend.path, "snapshot_images/")
