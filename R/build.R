@@ -109,6 +109,7 @@ build_structure <- function(exp.plan, path, profiles, template, files, plot.scen
 
   ## Copy over folder structure & template files from Hi-sAFe template path
   ## Any newly built files below will overwrite these files
+  if(path == dirname(template)) stop("cannot build simulations within the same folder as template directory", call. = FALSE)
   copy_hisafe_template(template, path, overwrite = TRUE, new.name = exp.plan$SimulationName)
   simu.path <- clean_path(paste0(path, "/", exp.plan$SimulationName))
   if(plot.scene | summary.files) dir.create(paste0(simu.path, "/support"), showWarnings = FALSE)

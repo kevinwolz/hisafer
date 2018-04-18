@@ -12,10 +12,12 @@ copy_hisafe_template(template, destination, overwrite = TRUE,
 (or one of the strings signaling a default template)
 See \code{\link{define_hisafe}} for more details on available default templates.}
 
+\item{destination}{A character string of the path to where the template folder should be copied.}
+
+\item{overwrite}{A logical indicating whether or not to allow overwriting of an existing folder.}
+
 \item{new.name}{A character string of the a name for the newly copied folder.
 If \code{NULL}, the default, then the name will remain the same as the original template folder.}
-
-\item{path}{A character string of the path to where the template folder should be copied.}
 }
 \value{
 Invisibly returns a logical vector indicating if the attempted fily copy succeeded.
