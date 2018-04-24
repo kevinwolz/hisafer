@@ -56,7 +56,7 @@ ggsave_fitmax("tiled_waterAvailable.png", tile.plot)
 }
 }
 \seealso{
-Other hisafe plot functions: \code{\link{plot_hisafe_annualcrop}},
+Other hisafe plot functions: \code{\link{plot_hisafe_annualcells}},
   \code{\link{plot_hisafe_cells}},
   \code{\link{plot_hisafe_monthcells}},
   \code{\link{plot_hisafe_scene}},

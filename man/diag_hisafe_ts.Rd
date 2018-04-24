@@ -9,7 +9,7 @@ diag_hisafe_ts(hop, profile, output.path = NULL, ...)
 \arguments{
 \item{hop}{An object of class "hop" or "face" containing output data from one or more Hi-sAFe simulations.}
 
-\item{profile}{The profile for which to plot a timeseries. If 'annualtree' or 'annualplot', annual timeseries are created.
+\item{profile}{The profile for which to plot a timeseries. If 'annualTrees' or 'annualPlot', annual timeseries are created.
 If 'trees', 'plot', or 'climate', daily timeseries are created.}
 
 \item{output.path}{A character stting indicating the path to the directory where plots should be saved.
@@ -32,15 +32,15 @@ All plots are saved as png files to a specifified output path.
 # After reading in Hi-sAFe simulation data via:
 mydata <- read_hisafe(path = "mydir", simu.names = "MySimulation")
 
-# You can create an annual timeseries of every annualtree variable:
-diag_hisafe_ts(mydata, "annualtree")
+# You can create an annual timeseries of every annualTrees variable:
+diag_hisafe_ts(mydata, "annualTrees")
 
 # For daily timeseries of the trees profile instead:
 diag_hisafe_ts(mydata, "trees")
 }
 }
 \seealso{
-Other hisafe diagnostic fucntions: \code{\link{diag_hisafe_annualcrop}},
+Other hisafe diagnostic fucntions: \code{\link{diag_hisafe_annualcells}},
   \code{\link{diag_hisafe_cells}},
   \code{\link{diag_hisafe_monthcells}},
   \code{\link{diag_hisafe_voxels}}

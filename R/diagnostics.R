@@ -5,7 +5,7 @@
 #' data from more than one Hi-sAFe simulation, the plots will contain multiple lines, colored and labeled by SimulationName.
 #' If the data contains two more tree ids, the plots will be faceted by tree id.
 #' @param hop An object of class "hop" or "face" containing output data from one or more Hi-sAFe simulations.
-#' @param profile The profile for which to plot a timeseries. If 'annualtree' or 'annualplot', annual timeseries are created.
+#' @param profile The profile for which to plot a timeseries. If 'annualTrees' or 'annualPlot', annual timeseries are created.
 #' If 'trees', 'plot', or 'climate', daily timeseries are created.
 #' @param output.path A character stting indicating the path to the directory where plots should be saved.
 #' Plots aresaved in a subdirectory within this directory named by \code{profile}.
@@ -19,15 +19,15 @@
 #' # After reading in Hi-sAFe simulation data via:
 #' mydata <- read_hisafe(path = "mydir", simu.names = "MySimulation")
 #'
-#' # You can create an annual timeseries of every annualtree variable:
-#' diag_hisafe_ts(mydata, "annualtree")
+#' # You can create an annual timeseries of every annualTrees variable:
+#' diag_hisafe_ts(mydata, "annualTrees")
 #'
 #' # For daily timeseries of the trees profile instead:
 #' diag_hisafe_ts(mydata, "trees")
 #' }
 diag_hisafe_ts <- function(hop, profile, output.path = NULL, ...) {
 
-  supported.profiles <- c("annualtree", "annualplot", "trees", "plot", "climate")
+  supported.profiles <- c("annualTrees", "annualPlot", "trees", "plot", "climate")
   is_hop(hop, error = TRUE)
   profile_check(hop, profile, error = TRUE)
   if(!(profile %in% supported.profiles))                  stop("supplied profile is not supported by plot_hisafe_ts()", call. = FALSE)
@@ -153,16 +153,16 @@ diag_hisafe_monthcells <- function(hop,
   invisible(list(year.simname = plot.list1, month.simname = plot.list2, month.year = plot.list3.tog))
 }
 
-#' Plot annualcrop diagnostics of Hi-sAFe output
-#' @description Creates a tile plot of every Hi-sAFe annualcrop output variable, with one plot for every 5 simulation years.
+#' Plot annualCells diagnostics of Hi-sAFe output
+#' @description Creates a tile plot of every Hi-sAFe annualCells output variable, with one plot for every 5 simulation years.
 #' All plots are saved as png files to a specifified output path.
 #' @return Invisibly returns a list of \code{ggplot} objects.
 #' @param hop An object of class "hop" or "face" containing output data from one or more Hi-sAFe simulations.
 #' @param years A numeric vector containing the years (after planting) to include. Use "all" to include all available values.
 #' @param output.path A character stting indicating the path to the directory where plots should be saved. Plots are
-#' saved in a subdirectory within this directory named /annualcrop
+#' saved in a subdirectory within this directory named /annualCells
 #' If no value is provided, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis/diagnostics".
-#' @param ... Other arguments passed to \code{\link{plot_hisafe_annualcrop}}.
+#' @param ... Other arguments passed to \code{\link{plot_hisafe_annualcells}}.
 #' @export
 #' @importFrom dplyr %>%
 #' @family hisafe diagnostic fucntions
@@ -171,25 +171,25 @@ diag_hisafe_monthcells <- function(hop,
 #' # After reading in Hi-sAFe simulation data via:
 #' mydata <- read_hisafe(path = "mydir", simu.names = "MySimulation")
 #'
-#' # You can create tile plots of every annualcrop variable:
-#' diag_hisafe_annualcrop(mydata)
+#' # You can create tile plots of every annualCells variable:
+#' diag_hisafe_annualcells(mydata)
 #' }
-diag_hisafe_annualcrop <- function(hop,
-                                   years       = seq(0, (max(hop$annualcrop$Year) - min(hop$annualcrop$Year)), 5),
+diag_hisafe_annualcells <- function(hop,
+                                   years       = seq(0, (max(hop$annualCells$Year) - min(hop$annualCells$Year)), 5),
                                    output.path = NULL, ...) {
 
   is_hop(hop, error = TRUE)
-  profile_check(hop, "annualcrop", error = TRUE)
+  profile_check(hop, "annualCells", error = TRUE)
   if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character vector", call. = FALSE)
 
-  annualcrop.path <- clean_path(paste0(diag_output_path(hop, output.path), "/diagnostics/annualcrop/"))
-  dir.create(annualcrop.path, recursive = TRUE, showWarnings = FALSE)
+  annualcells.path <- clean_path(paste0(diag_output_path(hop, output.path), "/diagnostics/annualCells/"))
+  dir.create(annualcells.path, recursive = TRUE, showWarnings = FALSE)
 
-  var.names <- vars_to_diag(hop, "annualcrop", "y")
-  plot.list <- purrr::map(var.names, plot_hisafe_annualcrop, hop = hop, years = years, ...)
+  var.names <- vars_to_diag(hop, "annualCells", "y")
+  plot.list <- purrr::map(var.names, plot_hisafe_annualcells, hop = hop, years = years, ...)
 
-  file.names <- paste0("annualcrop_", var.names, ".png")
-  purrr::pwalk(list(file.names, plot.list), ggsave_fitmax, path = annualcrop.path, scale = 2)
+  file.names <- paste0("annualCells_", var.names, ".png")
+  purrr::pwalk(list(file.names, plot.list), ggsave_fitmax, path = annualcells.path, scale = 2)
 
   invisible(plot.list)
 }
@@ -200,7 +200,7 @@ diag_hisafe_annualcrop <- function(hop,
 #' @param hop An object of class "hop" or "face" containing output data from one or more Hi-sAFe simulations.
 #' @param dates A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates to include.
 #' @param output.path A character stting indicating the path to the directory where plots should be saved. Plots are
-#' saved in a subdirectory within this directory named /annualcrop
+#' saved in a subdirectory within this directory named /annualCells
 #' If no value is provided, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis/diagnostics".
 #' @param ... Other arguments passed to \code{\link{plot_hisafe_cells}}.
 #' @export
@@ -211,7 +211,7 @@ diag_hisafe_annualcrop <- function(hop,
 #' # After reading in Hi-sAFe simulation data via:
 #' mydata <- read_hisafe(path = "mydir", simu.names = "MySimulation")
 #'
-#' # You can create tile plots of every annualcrop variable:
+#' # You can create tile plots of every annualCells variable:
 #' diag_hisafe_cells(mydata, "2000-07-01")
 #' }
 diag_hisafe_cells <- function(hop,
@@ -280,12 +280,12 @@ diag_hisafe_voxels <- function(hop, output.path = NULL, ...) {
 #' @description Runs the various Hi-sAFe diagnostic functions from a single call.
 #' @return Invisibly returns \code{TRUE}.
 #' @param hop An object of class hop or face.
-#' @param annualtree Logical indicating if annualtree profile diagnostic plots should be made.
-#' @param annualplot Logical indicating if annualplot profile diagnostic plots should be made.
+#' @param annualTrees Logical indicating if annualTrees profile diagnostic plots should be made.
+#' @param annualPlot Logical indicating if annualPlot profile diagnostic plots should be made.
 #' @param trees Logical indicating if trees profile diagnostic plots should be made.
 #' @param plot Logical indicating if plot profile diagnostic plots should be made.
 #' @param climate Logical indicating if climate profile diagnostic plots should be made.
-#' @param annualcrop Logical indicating if annualcrop profile diagnostic plots should be made.
+#' @param annualCells Logical indicating if annualCells profile diagnostic plots should be made.
 #' @param monthCells Logical indicating if monthCells profile diagnostic plots should be made.
 #' @param voxels Logical indicating if voxels profile diagnostic plots should be made.
 #' @param ... Other arguments passed to \code{\link{plot_hisafe_ts}}.
@@ -296,24 +296,24 @@ diag_hisafe_voxels <- function(hop, output.path = NULL, ...) {
 #' diag_hisafe(myhop)
 #' }
 diag_hisafe <- function(hop,
-                        annualtree = FALSE,
-                        annualplot = FALSE,
-                        trees      = TRUE,
-                        plot       = TRUE,
-                        climate    = TRUE,
-                        annualcrop = FALSE,
-                        monthCells = TRUE,
-                        cells      = TRUE,
-                        voxels     = TRUE, ...) {
+                        annualTrees = FALSE,
+                        annualPlot  = FALSE,
+                        trees       = TRUE,
+                        plot        = TRUE,
+                        climate     = TRUE,
+                        annualCells = FALSE,
+                        monthCells  = TRUE,
+                        cells       = TRUE,
+                        voxels      = TRUE, ...) {
 
   is_hop(hop, error = TRUE)
-  if(!all(is.logical(c(annualtree, annualplot, trees, plot, climate, annualcrop, monthCells, cells, voxels)))) {
+  if(!all(is.logical(c(annualTrees, annualPlot, trees, plot, climate, annualCells, monthCells, cells, voxels)))) {
     stop("all arguments except for hop must be logicals", call. = FALSE)
   }
 
   profiles.to.check <- names(hop)[!(names(hop) %in% c("variables", "plot.info", "tree.info", "exp.plan", "path", "exp.path"))]
   profiles.avail <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
-  profiles.todo  <- c("annualtree", "annualplot", "trees", "plot", "climate")[c(annualtree, annualplot, trees, plot, climate)]
+  profiles.todo  <- c("annualTrees", "annualPlot", "trees", "plot", "climate")[c(annualTrees, annualPlot, trees, plot, climate)]
   profiles.todo  <- profiles.avail[profiles.avail %in% profiles.todo]
 
   if(length(profiles.todo) >= 1) {
@@ -323,9 +323,9 @@ diag_hisafe <- function(hop,
     }
   }
 
-  if(annualcrop & profile_check(hop, "annualcrop")) {
-    cat("\n-- Plotting annualcrop diagnostics")
-    diag_hisafe_annualcrop(hop)
+  if(annualCells & profile_check(hop, "annualCells")) {
+    cat("\n-- Plotting annualCells diagnostics")
+    diag_hisafe_annualcells(hop)
   }
 
   if(monthCells & profile_check(hop, "monthCells")) {

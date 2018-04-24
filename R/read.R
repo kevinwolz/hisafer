@@ -2,9 +2,9 @@
 #' @description Reads the designated output profiles from one or more Hi-sAFe simulations
 #' @return An object of class "hop". This is a list of 16 data frames (tibbles):
 #' \itemize{
-#'  \item{annualtree}
-#'  \item{annualcrop}
-#'  \item{annualplot}
+#'  \item{annualTrees}
+#'  \item{annualCells}
+#'  \item{annualPlot}
 #'  \item{trees}
 #'  \item{plot}
 #'  \item{climate}
@@ -45,7 +45,7 @@
 #' myexp <- read_hisafe(myhip)
 #'
 #' # If only the annual tree data is required:
-#' mytreeexp <- read_hisafe(myhip, profiles = "annualtree")
+#' mytreeexp <- read_hisafe(myhip, profiles = "annualTrees")
 #' }
 read_hisafe <- function(hip           = NULL,
                         path          = NULL,
@@ -133,9 +133,9 @@ read_hisafe <- function(hip           = NULL,
     return(x)
   }
 
-  data$annualtree  <- data_tidy(data$annualtree)
-  data$annualcrop  <- data_tidy(data$annualcrop)
-  data$annualplot  <- data_tidy(data$annualplot)
+  data$annualTrees  <- data_tidy(data$annualTrees)
+  data$annualCells  <- data_tidy(data$annualCells)
+  data$annualPlot  <- data_tidy(data$annualPlot)
   data$trees       <- data_tidy(data$trees)
   data$plot        <- data_tidy(data$plot)
   data$climate     <- data_tidy(data$climate)
@@ -147,7 +147,7 @@ read_hisafe <- function(hip           = NULL,
 
   ## Warn if lengths of all simulations are not equal
   if(length(simu.names) > 1) {
-    profiles.to.check <- c("annualplot", "annualtree", "annualcrop", "plot", "trees", "cells", "voxels", "climate", "monthCells")
+    profiles.to.check <- c("annualPlot", "annualTrees", "annualCells", "plot", "trees", "cells", "voxels", "climate", "monthCells")
     year.summary <- data[[as.numeric(which.max(purrr::map_int(data[names(data) %in% profiles.to.check], nrow)))]] %>%
       dplyr::group_by(SimulationName) %>%
       dplyr::summarize(n = dplyr::n_distinct(Year) - 1) %>%
@@ -178,9 +178,9 @@ read_hisafe <- function(hip           = NULL,
 #' @description Reads the designated output profiles from a single Hi-sAFe simulation. Called from within \code{\link{read_hisafe}}.
 #' @return An object of class "hop". This is a list of 15 data frames (tibbles):
 #' \itemize{
-#'  \item{annualtree}
-#'  \item{annualcrop}
-#'  \item{annualplot}
+#'  \item{annualTrees}
+#'  \item{annualCells}
+#'  \item{annualPlot}
 #'  \item{trees}
 #'  \item{plot}
 #'  \item{climate}
@@ -291,18 +291,18 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
     return(dv)
   }
 
-  annualtree.dv <- get_prof(out, "annualtree")
-  annualcrop.dv <- get_prof(out, "annualcrop")
-  annualplot.dv <- get_prof(out, "annualplot")
-  trees.dv      <- get_prof(out, "trees")
-  plot.dv       <- get_prof(out, "plot")
-  climate.dv    <- get_prof(out, "climate")
-  monthCells.dv <- get_prof(out, "monthCells")
-  cells.dv      <- get_prof(out, "cells")
-  voxels.dv     <- get_prof(out, "voxels")
+  annualtree.dv  <- get_prof(out, "annualTrees")
+  annualcells.dv <- get_prof(out, "annualCells")
+  annualplot.dv  <- get_prof(out, "annualPlot")
+  trees.dv       <- get_prof(out, "trees")
+  plot.dv        <- get_prof(out, "plot")
+  climate.dv     <- get_prof(out, "climate")
+  monthCells.dv  <- get_prof(out, "monthCells")
+  cells.dv       <- get_prof(out, "cells")
+  voxels.dv      <- get_prof(out, "voxels")
 
   ## Combine variables into one tibble, remove duplicates, rename col headers in English
-  vars.to.pull <- list(annualtree.dv, annualcrop.dv, annualplot.dv, trees.dv, plot.dv, climate.dv, monthCells.dv, cells.dv, voxels.dv)
+  vars.to.pull <- list(annualtree.dv, annualcells.dv, annualplot.dv, trees.dv, plot.dv, climate.dv, monthCells.dv, cells.dv, voxels.dv)
   variables <- purrr::map(vars.to.pull, "variables") %>%
     dplyr::bind_rows() %>%
     dplyr::distinct()
@@ -319,25 +319,25 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
       stop(paste("there is no PLD file present in the simulation directory of:", simu.name, ". Set read.inputs to FALSE."), call. = FALSE)
     }
     pld <- read_param_file(pld.path)
-    geometryOption      <- as.numeric(pld$PLOT$geometryOption$value)
-    spacingBetweenRows  <- as.numeric(pld$PLOT$spacingBetweenRows$value)
-    spacingWithinRows   <- as.numeric(pld$PLOT$spacingWithinRows$value)
-    plotWidth           <- as.numeric(pld$PLOT$plotWidth$value)
-    plotHeight          <- as.numeric(pld$PLOT$plotHeight$value)
-    northOrientation    <- as.numeric(pld$PLOT$northOrientation$value)
-    cellWidth           <- as.numeric(pld$PLOT$cellWidth$value)
-    soilDepth           <- sum(pld$LAYERS$layers$value[[1]]$thick)
-    waterTable          <- pld$SOIL$waterTable$value
+    geometryOption     <- as.numeric(pld$PLOT$geometryOption$value)
+    spacingBetweenRows <- as.numeric(pld$PLOT$spacingBetweenRows$value)
+    spacingWithinRows  <- as.numeric(pld$PLOT$spacingWithinRows$value)
+    plotWidth          <- as.numeric(pld$PLOT$plotWidth$value)
+    plotHeight         <- as.numeric(pld$PLOT$plotHeight$value)
+    northOrientation   <- as.numeric(pld$PLOT$northOrientation$value)
+    cellWidth          <- as.numeric(pld$PLOT$cellWidth$value)
+    soilDepth          <- sum(pld$LAYERS$layers$value[[1]]$thick)
+    waterTable         <- pld$SOIL$waterTable$value
 
     plot.area <- ifelse(geometryOption == 1, spacingBetweenRows * spacingWithinRows, plotWidth * plotHeight)
-    plot.info <- dplyr::tibble(SimulationName      = simu.name,
-                               plotWidth           = ifelse(geometryOption == 1, spacingBetweenRows, plotWidth),
-                               plotHeight          = ifelse(geometryOption == 1, spacingWithinRows,  plotHeight),
-                               plot.area           = plot.area,
-                               northOrientation    = northOrientation,
-                               cellWidth           = cellWidth,
-                               soilDepth           = soilDepth,
-                               waterTable          = waterTable)
+    plot.info <- dplyr::tibble(SimulationName   = simu.name,
+                               plotWidth        = ifelse(geometryOption == 1, spacingBetweenRows, plotWidth),
+                               plotHeight       = ifelse(geometryOption == 1, spacingWithinRows,  plotHeight),
+                               plot.area        = plot.area,
+                               northOrientation = northOrientation,
+                               cellWidth        = cellWidth,
+                               soilDepth        = soilDepth,
+                               waterTable       = waterTable)
   } else {
     plot.info <- tree.info <- dplyr::tibble()
   }
@@ -354,9 +354,9 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
   }
 
   ## Creatd output list & assign class
-  output <- list(annualtree = dplyr::distinct(annualtree.dv$data),
-                 annualcrop = dplyr::distinct(annualcrop.dv$data),
-                 annualplot = dplyr::distinct(clean_crop_name(annualplot.dv$data)),
+  output <- list(annualTrees = dplyr::distinct(annualtree.dv$data),
+                 annualCells = dplyr::distinct(annualcells.dv$data),
+                 annualPlot = dplyr::distinct(clean_crop_name(annualplot.dv$data)),
                  trees      = dplyr::distinct(trees.dv$data),
                  plot       = dplyr::distinct(clean_crop_name(plot.dv$data)),
                  climate    = dplyr::distinct(climate.dv$data),

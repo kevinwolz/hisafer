@@ -17,7 +17,7 @@ plot_hisafe_ts(hop, variables, profile, cumulative = FALSE,
 \item{variables}{A character vector of the names of the variables to plot.
 More than one variable name can be passed, but all variables must be from the same \code{profile}.}
 
-\item{profile}{A character string of the profile for which to plot a timeseries. If 'annualtree' or 'annualplot', annual timeseries are created.
+\item{profile}{A character string of the profile for which to plot a timeseries. If 'annualTrees' or 'annualPlot', annual timeseries are created.
 If 'trees', 'plot', or 'climate', daily timeseries are created.}
 
 \item{cumulative}{Logical indicating wheter \code{variables} should be cumulated before plotting.}
@@ -47,7 +47,7 @@ If \code{NA}, the default, then solid lines are used for all simulations. The de
 \item{facet.year}{A logical indicating whether, for daily profiles, the plot should be faceted by year. This helps with seeing finer level detail.}
 
 \item{crop.points}{Logical indicating if points should be plotted as well, with point shape desgnating the main crop name.
-Only applies when \code{profile} is 'plot' or 'annualplot'.}
+Only applies when \code{profile} is 'plot' or 'annualPlot'.}
 
 \item{plot}{If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.}
 }
@@ -66,7 +66,7 @@ Plots a daily or annual timeseries of a single Hi-sAFe output variable.
 mydata <- read_hisafe(path = "./")
 
 # You can create an annual timeseries of carbonCoarseRoots:
-annual.plot <- plot_hisafe_ts(mydata, "carbonCoarseRoots", "annualtree")
+annual.plot <- plot_hisafe_ts(mydata, "carbonCoarseRoots", "annualTrees")
 
 # For a daily timeseries instead:
 daily.plot <- plot_hisafe_ts(mydata, "carbonCoarseRoots", "trees")
@@ -77,7 +77,7 @@ ggplot2::ggsave("annual_carbonCoarseRoots.png", annual.plot)
 }
 }
 \seealso{
-Other hisafe plot functions: \code{\link{plot_hisafe_annualcrop}},
+Other hisafe plot functions: \code{\link{plot_hisafe_annualcells}},
   \code{\link{plot_hisafe_cells}},
   \code{\link{plot_hisafe_monthcells}},
   \code{\link{plot_hisafe_scene}},

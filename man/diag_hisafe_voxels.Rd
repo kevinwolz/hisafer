@@ -36,7 +36,7 @@ diag_hisafe_ts(mydata, "daily")
 }
 }
 \seealso{
-Other hisafe diagnostic fucntions: \code{\link{diag_hisafe_annualcrop}},
+Other hisafe diagnostic fucntions: \code{\link{diag_hisafe_annualcells}},
   \code{\link{diag_hisafe_cells}},
   \code{\link{diag_hisafe_monthcells}},
   \code{\link{diag_hisafe_ts}}

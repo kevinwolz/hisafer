@@ -1,6 +1,6 @@
 ## This SUPPORTED.PROFILES object is only needed to write the exportFrequencies line of the sim file within build_structure().
 ## There is no better way to do this until a better way to describe export profiles and frequenceies in Hi-sAFe is determined.
-SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("annualplot", "annualtree", "annualcrop",
+SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("annualPlot", "annualTrees", "annualCells",
                                                  "plot", "trees", "cells", "cellsDetail",
                                                  "voxels", "voxelsDetail", "voxelsDebug", "voxelsOptim", "climate", "monthCells", "annualDBH"),
                                     freqs    = c(365,          365,          365,

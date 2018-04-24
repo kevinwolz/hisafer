@@ -65,7 +65,7 @@ ggsave_fitmax("monthDirectParIncident.png", tile.plot2)
 }
 }
 \seealso{
-Other hisafe plot functions: \code{\link{plot_hisafe_annualcrop}},
+Other hisafe plot functions: \code{\link{plot_hisafe_annualcells}},
   \code{\link{plot_hisafe_cells}},
   \code{\link{plot_hisafe_scene}},
   \code{\link{plot_hisafe_ts}},

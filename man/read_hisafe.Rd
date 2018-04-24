@@ -41,9 +41,9 @@ If \code{NULL}, then \code{date.max} and \code{date.min} are used instad.}
 \value{
 An object of class "hop". This is a list of 16 data frames (tibbles):
 \itemize{
- \item{annualtree}
- \item{annualcrop}
- \item{annualplot}
+ \item{annualTrees}
+ \item{annualCells}
+ \item{annualPlot}
  \item{trees}
  \item{plot}
  \item{climate}
@@ -67,6 +67,6 @@ Reads the designated output profiles from one or more Hi-sAFe simulations
 myexp <- read_hisafe(myhip)
 
 # If only the annual tree data is required:
-mytreeexp <- read_hisafe(myhip, profiles = "annualtree")
+mytreeexp <- read_hisafe(myhip, profiles = "annualTrees")
 }
 }

@@ -7,7 +7,7 @@
 #' @param hop An object of class hop.
 #' @param variables A character vector of the names of the variables to plot.
 #' More than one variable name can be passed, but all variables must be from the same \code{profile}.
-#' @param profile A character string of the profile for which to plot a timeseries. If 'annualtree' or 'annualplot', annual timeseries are created.
+#' @param profile A character string of the profile for which to plot a timeseries. If 'annualTrees' or 'annualPlot', annual timeseries are created.
 #' If 'trees', 'plot', or 'climate', daily timeseries are created.
 #' @param cumulative Logical indicating wheter \code{variables} should be cumulated before plotting.
 #' @param simu.names A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.
@@ -25,7 +25,7 @@
 #' @param aes.cols A list with arguments "color" and "linetype" containing character strings of the column names to use for plot aesthetics.
 #' @param facet.year A logical indicating whether, for daily profiles, the plot should be faceted by year. This helps with seeing finer level detail.
 #' @param crop.points Logical indicating if points should be plotted as well, with point shape desgnating the main crop name.
-#' Only applies when \code{profile} is 'plot' or 'annualplot'.
+#' Only applies when \code{profile} is 'plot' or 'annualPlot'.
 #' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.
 #' @export
 #' @importFrom dplyr %>%
@@ -37,7 +37,7 @@
 #' mydata <- read_hisafe(path = "./")
 #'
 #' # You can create an annual timeseries of carbonCoarseRoots:
-#' annual.plot <- plot_hisafe_ts(mydata, "carbonCoarseRoots", "annualtree")
+#' annual.plot <- plot_hisafe_ts(mydata, "carbonCoarseRoots", "annualTrees")
 #'
 #' # For a daily timeseries instead:
 #' daily.plot <- plot_hisafe_ts(mydata, "carbonCoarseRoots", "trees")
@@ -63,9 +63,9 @@ plot_hisafe_ts <- function(hop,
                            crop.points      = FALSE,
                            plot             = TRUE) {
 
-  annual.profiles <- c("annualtree", "annualplot")
+  annual.profiles <- c("annualTrees", "annualPlot")
   daily.profiles  <- c("trees", "plot", "climate")
-  tree.profiles   <- c("annualtree", "trees")
+  tree.profiles   <- c("annualTrees", "trees")
 
   is_hop(hop, error = TRUE)
   profile_check(hop, profile, error = TRUE)
@@ -198,7 +198,7 @@ plot_hisafe_ts <- function(hop,
       }
     }
 
-    if(crop.points & (profile %in% c("annualplot", "plot"))) {
+    if(crop.points & (profile %in% c("annualPlot", "plot"))) {
       plot.obj[[i]] <- plot.obj[[i]] +
         geom_point(aes(shape = mainCropName), size = 2, na.rm = TRUE) +
         guides(shape = guide_legend(title = "Main crop", title.hjust = 0.5))
@@ -351,8 +351,8 @@ plot_hisafe_monthcells <- function(hop,
   if(plot) return(plot.obj) else return(plot.data)
 }
 
-#' Tile plot of Hi-sAFe annualplot output variable
-#' @description Plots a tile plot of a single Hi-sAFe annualplot output variable.
+#' Tile plot of Hi-sAFe annualCells output variable
+#' @description Plots a tile plot of a single Hi-sAFe annualCells output variable.
 #' @details This function is very picky! You can only facet by two of the three manipulable variables: SimulationName, Year, Month.
 #' You must ensure that the one varibale not used for faceting is fixed at a single value.
 #' @return Returns a ggplot object.
@@ -374,13 +374,13 @@ plot_hisafe_monthcells <- function(hop,
 #' mydata <- read_hisafe(path = "./")
 #'
 #' # You can create a tile plot of monthDirectParIncident:
-#' tile.plot <- plot_hisafe_annualcrop(mydata, "yieldMax")
+#' tile.plot <- plot_hisafe_annualcells(mydata, "yieldMax")
 #'
 #' # Once you have the plot object, you can display it and save it:
 #' tile.plot
 #' ggsave_fitmax("yield.png", tile.plot)
 #' }
-plot_hisafe_annualcrop <- function(hop,
+plot_hisafe_annualcells<- function(hop,
                                    variable   = "yieldMax",
                                    simu.names = "all",
                                    years,
@@ -390,10 +390,10 @@ plot_hisafe_annualcrop <- function(hop,
                                    plot       = TRUE) {
 
   is_hop(hop, error = TRUE)
-  profile_check(hop, "annualcrop", error = TRUE)
-  variable_check(hop, "annualcrop", variable, error = TRUE)
+  profile_check(hop, "annualCells", error = TRUE)
+  variable_check(hop, "annualCells", variable, error = TRUE)
 
-  if(years[1] == "all") years <- unique(hop$annualcrop$Year)
+  if(years[1] == "all") years <- unique(hop$annualCells$Year)
 
   if(length(variable) > 1)       stop("variable argument must be a character vector of length 1", call. = FALSE)
   if(!is.numeric(years))         stop("years argument must be 'all' or a numeric vector",         call. = FALSE)
@@ -405,11 +405,11 @@ plot_hisafe_annualcrop <- function(hop,
   dates <- lubridate::ymd(paste0(years, "-01-01"))
   hop <- hop_filter(hop            = hop,
                     simu.names     = simu.names,
-                    dates          = dates[dates %in% hop$annualcrop$Date],
+                    dates          = dates[dates %in% hop$annualCells$Date],
                     strip.exp.plan = TRUE)
 
   if(plot.x == "y") { # Rotate scene if plot.x = "y"
-    for(p in c("tree.info", "annualcrop")) hop[[p]] <- swap_cols(hop[[p]], "x", "y")
+    for(p in c("tree.info", "annualCells")) hop[[p]] <- swap_cols(hop[[p]], "x", "y")
     hop$plot.info <- swap_cols(hop$plot.info, "plotWidth", "plotHeight")
   }
 
@@ -418,7 +418,7 @@ plot_hisafe_annualcrop <- function(hop,
   Y.MAX <- max(hop$plot.info$plotHeight)
 
   plot.data <- create_tile_data(hop     = hop,
-                                profile = "annualcrop")
+                                profile = "annualCells")
 
   tree.data <- create_tree_data(hop      = hop,
                                 trees    = trees,
@@ -428,7 +428,7 @@ plot_hisafe_annualcrop <- function(hop,
   plot.obj <- ggplot(plot.data) +
     labs(x     = "SimulationName",
          y     = "Year",
-         fill  = get_units(hop, "annualcrop", variable),
+         fill  = get_units(hop, "annualCells", variable),
          title = variable) +
     scale_x_continuous(expand = c(0, 0)) +
     scale_y_continuous(expand = c(0, 0)) +

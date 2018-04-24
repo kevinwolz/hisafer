@@ -33,9 +33,9 @@ Should only be set to \code{FALSE} if input files are corrupted.}
 \value{
 An object of class "hop". This is a list of 15 data frames (tibbles):
 \itemize{
- \item{annualtree}
- \item{annualcrop}
- \item{annualplot}
+ \item{annualTrees}
+ \item{annualCells}
+ \item{annualPlot}
  \item{trees}
  \item{plot}
  \item{climate}
