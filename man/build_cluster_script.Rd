@@ -6,7 +6,7 @@
 \usage{
 build_cluster_script(hip = NULL, simu.names = NULL, script.path = NULL,
   launch.call = "ScriptGen", default.folder = "", cluster.path,
-  email = NULL, num.cores = 1)
+  email.type = "END", email = NULL, num.cores = NULL)
 }
 \arguments{
 \item{simu.names}{A character vector of the names of the simulations to create the script for.
@@ -20,9 +20,12 @@ This must match the names of .SIM files as well as the names of the folders that
 
 \item{cluster.path}{A character string of the path on the cluster where the simulation folder is located.}
 
+\item{email.type}{Type of email notification. Valid type values are NONE, BEGIN, END, FAIL, REQUEUE, ALL.
+Multiple values may be specified in a comma separated list within a single character string (e.g. "BEGIN,END").}
+
 \item{email}{A character string of the email address to notify with cluster job updates. Use \code{NULL} for no email generation.}
 
-\item{num.cores}{The number of cores to request from the cluster.}
+\item{num.cores}{The number of cores to request from the cluster. Use \code{NULL} to make no specification.}
 }
 \value{
 Invisibly returns \code{TRUE}.
