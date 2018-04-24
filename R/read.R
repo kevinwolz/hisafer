@@ -436,7 +436,7 @@ read_table_hisafe <- function(file, ...) {
                               sep              = "\t",
                               stringsAsFactors = FALSE,
                               # "error!" is output by HISAFE & causes table merge errors if left; "NaN" output causes plot problems
-                              na.strings       = c("NA", "error!", "NaN", "-9999"),
+                              na.strings       = c("NA", "error!", "NaN", "-9999", "Infinity"),
                               encoding         = "latin1", ...))
 }
 
