@@ -5,14 +5,19 @@
 \title{Builds a cluster shell script}
 \usage{
 build_cluster_script(hip = NULL, simu.names = NULL, script.path = NULL,
-  launch.call = "ScriptGen", default.folder = "", cluster.path,
-  email.type = "END", email = NULL, num.cores = NULL)
+  script.name = "job", launch.call = "ScriptGen", default.folder = "",
+  cluster.path, email.type = "END", email = NULL, num.cores = NULL)
 }
 \arguments{
+\item{hip}{A hip object. If \code{NULL}, then \code{simu.names} and \code{script.path} are required.}
+
 \item{simu.names}{A character vector of the names of the simulations to create the script for.
 This must match the names of .SIM files as well as the names of the folders that files are in.}
 
-\item{script.path}{A character string of the local path for where to create the cluster script file.}
+\item{script.path}{A character string of the local path for where to create the cluster script file.
+If \code{NULL}, \code{hip} must be provided, and the path used will be the path element of the hip object.}
+
+\item{script.name}{A character sting of the name of the script to call on the cluster.}
 
 \item{launch.call}{The name of the safe lanuch script to use (one of 'ScriptGen' or 'ScriptCalib')}
 

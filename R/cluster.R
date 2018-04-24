@@ -1,9 +1,12 @@
 #' Builds a cluster shell script
 #' @description Builds a shell script to initialize Hi-sAFe simulations on the MUSE cluster.
 #' @return Invisibly returns \code{TRUE}.
+#' @param hip A hip object. If \code{NULL}, then \code{simu.names} and \code{script.path} are required.
 #' @param simu.names A character vector of the names of the simulations to create the script for.
 #' This must match the names of .SIM files as well as the names of the folders that files are in.
 #' @param script.path A character string of the local path for where to create the cluster script file.
+#' If \code{NULL}, \code{hip} must be provided, and the path used will be the path element of the hip object.
+#' @param script.name A character sting of the name of the script to call on the cluster.
 #' @param launch.call The name of the safe lanuch script to use (one of 'ScriptGen' or 'ScriptCalib')
 #' @param default.folder The folder in safe/data/SimSettings to use for parameter files that are not found in the simulation folder.
 #' @param cluster.path A character string of the path on the cluster where the simulation folder is located.
@@ -23,6 +26,7 @@
 build_cluster_script <- function(hip            = NULL,
                                  simu.names     = NULL,
                                  script.path    = NULL,
+                                 script.name    = "job",
                                  launch.call    = "ScriptGen",
                                  default.folder = "",
                                  cluster.path,
@@ -31,7 +35,7 @@ build_cluster_script <- function(hip            = NULL,
                                  num.cores      = NULL) {
 
   is_hip(hip, error = TRUE)
-  if(is.null(hip) == is.null(script.path))                                     stop("must provide hip or script.path, not both",                      call. = FALSE)
+  if(is.null(hip) & is.null(script.path))                                     stop("must provide hip or script.path",                                 call. = FALSE)
   if(!(all(is.character(simu.names)) | is.null(simu.names)))                   stop("simu.names argument must be 'all' or a character vector",        call. = FALSE)
   if(!((is.character(email) & length(email) == 1) | is.null(email)))           stop("email argument must be a character vector of length 1",          call. = FALSE)
   if(!((is.numeric(num.cores) & length(num.cores) == 1) | is.null(num.cores))) stop("num.cores argument must be a positive integer",                  call. = FALSE)
@@ -44,11 +48,13 @@ build_cluster_script <- function(hip            = NULL,
 
   SEQ <- FALSE
   if(!is.null(hip)) {
-    script.path <- hip$path
-    if(is.null(simu.names)) simu.names <- hip$exp.plan$SimulationName
-    if(all(grepl("Sim_[1-9]+", simu.names))) {
+    if(is.null(script.path)) script.path <- hip$path
+    if(is.null(simu.names))  simu.names  <- hip$exp.plan$SimulationName
+    simu.names.split <- strsplit(simu.names, "_\\s*(?=[^_]+$)", perl=TRUE)
+    simu.prefix.guess <- simu.names.split[[1]][1]
+    if(all(grepl(paste0(simu.prefix.guess, "_[0-9]+$"), simu.names) & map_dbl(simu.names.split, length) > 1)) {
       SEQ <- TRUE
-      seqs <- as.numeric(purrr::map_chr(strsplit(simu.names, "_"), 2))
+      seqs <- as.numeric(purrr::map_chr(simu.names.split, 2))
     }
   } else {
     script.path <- R.utils::getAbsolutePath(script.path)
@@ -58,7 +64,7 @@ build_cluster_script <- function(hip            = NULL,
 
   write_script <- function(i, SEQ) {
     write_line   <- function(x) cat(x, file = cluster.script, sep = "\n", append = TRUE)
-    if(SEQ) j <- "job" else j <- i
+    if(SEQ) j <- script.name else j <- i
     cluster.script <- file(description = clean_path(paste0(script.path, "/", j, ".sh")),
                            open        = "wb",
                            encoding    = "UTF-8")
@@ -80,11 +86,11 @@ build_cluster_script <- function(hip            = NULL,
   }
 
   if(SEQ) {
-    write_script("Sim_$SLURM_ARRAY_TASK_ID", SEQ = TRUE)
+    write_script(paste0(simu.prefix.guess, "_$SLURM_ARRAY_TASK_ID"), SEQ = TRUE)
   } else {
     purrr::walk(simu.names, write_script, SEQ = FALSE)
 
-    job.script <- file(description = clean_path(paste0(script.path, "/job.sh")),
+    job.script <- file(description = clean_path(paste0(script.path, "/", script.name, ".sh")),
                        open        = "wb",
                        encoding    = "UTF-8")
     cat("#!/bin/sh", file = job.script, sep = "\n")
