@@ -248,7 +248,7 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
   if(show.progress) cat("\n\nReading:", simu.name, "\nProfiles:", paste0(profiles, collapse = ", "))
 
   if(length(profiles) >= 1) {
-    out <- purrr::map(profiles, read_profile, path = file.prefix, show.progress = show.progress, max.size = max.size)
+    out <- purrr::map(profiles, read_profile, path = file.prefix, simu.name = simu.name, show.progress = show.progress, max.size = max.size)
     names(out) <- profiles
   } else {
     out <- list()
@@ -391,9 +391,10 @@ read_hisafe_example <- function(profiles = c("plot", "trees", "climate", "monthC
 #' @description Reads the designated output profiles from a single Hi-sAFe simulation.
 #' @return An list of two data frames (tibbles): \code{data} contains the data from the profile; \code{variables} contains the variable descriptions.
 #' @param profile A character string of the path to the profile to be read.
+#' @param simu.name A character string of the name of the simulation being read.
 #' @importFrom dplyr %>%
 #' @keywords internal
-read_hisafe_output_file <- function(profile){
+read_hisafe_output_file <- function(profile, simu.name){
 
   ## Read raw text & find break between description & data
   raw.text <- readLines(profile)
@@ -406,12 +407,17 @@ read_hisafe_output_file <- function(profile){
   dat <- read_table_hisafe(profile, skip = end.of.var.list) %>%
     dplyr::filter(Year != 0)
   if(nrow(dat) == 0) {
-    profile.name <- basename(profile)
-    warning(paste0(profile.name, " exists but contains no data"), call. = FALSE)
+    warning(paste0(basename(profile), " exists but contains no data"), call. = FALSE)
   } else {
     dat <- dat %>%                                               # remove row with Year==0 at the start of every output profile
       dplyr::mutate(Date = gsub(pattern = "a.", replacement = "", x = Date, fixed = TRUE)) %>% # is this here to fix an old bug?
       dplyr::mutate(Date = lubridate::dmy(Date))                 # convert Date column into date class
+
+    if(unique(dat$SimulationName) != simu.name) {
+      warning(paste0("SimulationName in ", basename(profile), " (", unique(dat$SimulationName), ") does not match the name of the simulation folder (",
+                     simu.name, "). Simulation folder name will override SimulationName in export profile."), call. = FALSE)
+      dat$SimulationName <- simu.name
+    }
   }
 
   return(list(data = dat, variables = variables))
@@ -439,13 +445,14 @@ read_table_hisafe <- function(file, ...) {
 #' @return A list containing the profile data and the profile variable definitions.
 #' @param profile A character string of the profile name.
 #' @param path A character string of the path to the folder containing the profiles.
+#' @param simu.name A character string of the name of the simulation being read.
 #' @param show.progress Logical indicating whether progress messsages should be printed to the console.
 #' @keywords internal
-read_profile <- function(profile, path, show.progress = TRUE, max.size = 3e8) {
+read_profile <- function(profile, path, simu.name, show.progress = TRUE, max.size = 3e8) {
   file <- paste0(path, profile, ".txt")
   if(show.progress) cat(paste0("\n   -- reading:  ", profile, collapse = ", "))
   if(file.info(file)$size < max.size) {
-    profile.list <- read_hisafe_output_file(file)
+    profile.list <- read_hisafe_output_file(file, simu.name)
     profile.data <- profile.list$data %>%
       dplyr::mutate_if(is.logical, as.numeric)   # columns read as logical must be coered to numeric to prevent plotting errors
     profile.variables <- profile.list$variables %>% dplyr::mutate(VariableClass = profile)

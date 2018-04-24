@@ -4,12 +4,15 @@
 \alias{read_profile}
 \title{Read a Hi-sAFe output profile}
 \usage{
-read_profile(profile, path, show.progress = TRUE, max.size = 3e+08)
+read_profile(profile, path, simu.name, show.progress = TRUE,
+  max.size = 3e+08)
 }
 \arguments{
 \item{profile}{A character string of the profile name.}
 
 \item{path}{A character string of the path to the folder containing the profiles.}
+
+\item{simu.name}{A character string of the name of the simulation being read.}
 
 \item{show.progress}{Logical indicating whether progress messsages should be printed to the console.}
 }

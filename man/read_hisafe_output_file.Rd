@@ -4,10 +4,12 @@
 \alias{read_hisafe_output_file}
 \title{Read a single Hi-sAFe output profile}
 \usage{
-read_hisafe_output_file(profile)
+read_hisafe_output_file(profile, simu.name)
 }
 \arguments{
 \item{profile}{A character string of the path to the profile to be read.}
+
+\item{simu.name}{A character string of the name of the simulation being read.}
 }
 \value{
 An list of two data frames (tibbles): \code{data} contains the data from the profile; \code{variables} contains the variable descriptions.
