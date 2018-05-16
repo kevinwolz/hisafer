@@ -133,8 +133,8 @@ read_hisafe <- function(hip           = NULL,
     return(x)
   }
 
-  data$annualTrees  <- data_tidy(data$annualTrees)
-  data$annualCells  <- data_tidy(data$annualCells)
+  data$annualTrees <- data_tidy(data$annualTrees)
+  data$annualCells <- data_tidy(data$annualCells)
   data$annualPlot  <- data_tidy(data$annualPlot)
   data$trees       <- data_tidy(data$trees)
   data$plot        <- data_tidy(data$plot)

@@ -511,7 +511,7 @@ variable_check <- function(hop, profile, variables, error = FALSE) {
 
 #' Shortcut to Hi-sAFe analysis
 #' @description Runs the various Hi-sAFe analysis functions from a single call.
-#' @return Invisibly returns \code{TRUE}.
+#' @return Invisibly returns \code{hop}.
 #' @param hop An object of class hop or face.
 #' @param carbon Logical indicating if annual carbon plot should be made.
 #' @param light Logical indicating if annual light plot should be made.
@@ -587,5 +587,41 @@ analyze_hisafe <- function(hop,
     }
   }
 
-  invisible(TRUE)
+  invisible(hop)
+}
+
+#' Write hop profiles to CSV files
+#' @description Writes hop profiles to CSV files.
+#' @return Invisibly returns \code{hop}.
+#' @param hop An object of class hop or face.
+#' @param profiles The profiles which to each write as a CSV.
+#' @param output.path A character string indicating the path to the directory where CSV files should be saved.
+#' Plots aresaved in a subdirectory within this directory named \code{/analysis/combined_outputs/}.
+#' If \code{NULL}, the experiment/simulation path is read from the hop object.
+#' @export
+#' @family hisafe analysis functions
+#' @examples
+#' \dontrun{
+#' write_hop(myhop)
+#' }
+write_hop <- function(hop, profiles = "all", output.path = NULL) {
+  is_hop(hop, error = TRUE)
+
+  supported.profiles <- c("annualTrees", "annualCells", "annualPlot", "trees", "plot", "climate", "monthCells", "cells", "voxels")
+  if(profiles[1] == "all") profiles <- supported.profiles
+  if(!all(profiles %in% supported.profiles)) stop(paste0("profiles argument must be 'all' or one or more of ",
+                                                         paste(supported.profiles, collapse = ", ")), call. = FALSE)
+  profiles <- profiles[profile_check(hop, profiles)]
+
+  if(is.null(output.path) & is.na(hop$exp.path)) stop("output.path argument cannot be NULL if hop$exp.path is NA", call. = FALSE)
+  if(is.null(output.path)) output.path <- hop$exp.path
+  if(!is.character(output.path)) stop("output.path argument must be character string", call. = FALSE)
+
+  dir.create(paste0(output.path, "/analysis/combined_outputs"), recursive = TRUE, showWarnings = FALSE)
+  write_profile <- function(profile, hop, output.path) {
+    readr::write_csv(hop[[profile]], paste0(output.path, "/analysis/combined_outputs/", basename(output.path), "_", profile, ".csv"))
+  }
+  purrr::walk(profiles, write_profile, hop = hop, output.path = output.path)
+
+  invisible(hop)
 }

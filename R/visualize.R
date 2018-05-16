@@ -824,7 +824,7 @@ hisafe_snapshot <- function(hop,
   ggsave_fitmax(paste0(legend.path, file.prefix, "_LEGEND.png"), legend.plot, dpi = 500)
 
   if(length(dates) == 0) stop("date filtering resulted in no dates to plot", call. = FALSE)
-  print(paste0("Creating visualizations for ", length(dates), " dates..."), quote = FALSE)
+  print(paste0("\nCreating visualizations for ", length(dates), " dates..."), quote = FALSE)
   pb <- txtProgressBar(min = 0, max = length(dates), initial = 0, style = 3)
   for(i in 1:length(dates)) {
     if(plot.x == "xy") {

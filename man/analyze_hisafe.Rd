@@ -28,7 +28,7 @@ analyze_hisafe(hop, carbon = TRUE, light = TRUE, nitrogen = TRUE,
 \item{water.daily}{Logical indicating if daily water plots should be made.}
 }
 \value{
-Invisibly returns \code{TRUE}.
+Invisibly returns \code{hop}.
 }
 \description{
 Runs the various Hi-sAFe analysis functions from a single call.
@@ -40,5 +40,6 @@ analyze_hisafe(myhop)
 }
 \seealso{
 Other hisafe analysis functions: \code{\link{plot_hisafe_cycle_annual}},
-  \code{\link{plot_hisafe_cycle_daily}}
+  \code{\link{plot_hisafe_cycle_daily}},
+  \code{\link{write_hop}}
 }

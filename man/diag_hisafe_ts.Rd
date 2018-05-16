@@ -12,7 +12,7 @@ diag_hisafe_ts(hop, profile, output.path = NULL, ...)
 \item{profile}{The profile for which to plot a timeseries. If 'annualTrees' or 'annualPlot', annual timeseries are created.
 If 'trees', 'plot', or 'climate', daily timeseries are created.}
 
-\item{output.path}{A character stting indicating the path to the directory where plots should be saved.
+\item{output.path}{A character string indicating the path to the directory where plots should be saved.
 Plots aresaved in a subdirectory within this directory named by \code{profile}.
 If no value is provided, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis/diagnostics".}
 

@@ -7,7 +7,7 @@
 #' @param hop An object of class "hop" or "face" containing output data from one or more Hi-sAFe simulations.
 #' @param profile The profile for which to plot a timeseries. If 'annualTrees' or 'annualPlot', annual timeseries are created.
 #' If 'trees', 'plot', or 'climate', daily timeseries are created.
-#' @param output.path A character stting indicating the path to the directory where plots should be saved.
+#' @param output.path A character string indicating the path to the directory where plots should be saved.
 #' Plots aresaved in a subdirectory within this directory named by \code{profile}.
 #' If no value is provided, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis/diagnostics".
 #' @param ... Other arguments passed to \code{\link{plot_hisafe_ts}}.
@@ -31,7 +31,7 @@ diag_hisafe_ts <- function(hop, profile, output.path = NULL, ...) {
   is_hop(hop, error = TRUE)
   profile_check(hop, profile, error = TRUE)
   if(!(profile %in% supported.profiles))                  stop("supplied profile is not supported by plot_hisafe_ts()", call. = FALSE)
-  if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character vector",       call. = FALSE)
+  if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character string",       call. = FALSE)
 
   ts.path <- clean_path(paste0(diag_output_path(hop, output.path), "/diagnostics/", profile, "/"))
   dir.create(ts.path, recursive = TRUE, showWarnings = FALSE)
