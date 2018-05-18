@@ -44,7 +44,7 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
   ## Calculate total soil depth
   soil.depth <- sum(as.numeric(get_used("layers")$thick))
 
-  if(get_used("nbTrees") != 0) {
+  if("data.frame" %in% class(get_used("tree.initialization"))) {
     ## Extract tree data
     tree.plot.data <- get_used("tree.initialization") %>%
       dplyr::mutate(x = treeX / get_used("cellWidth"),
@@ -56,17 +56,10 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
     num.trees <- 0
   }
   ## Calculate scene dimensions (cell size for plotting is always "1", but more/less cells added and labels adjusted based actual dimensions)
-  if(get_used("geometryOption") == 1) {
-    WIDTH.lab  <- get_used("spacingBetweenRows")
-    HEIGHT.lab <- get_used("spacingWithinRows")
-    WIDTH  <- WIDTH.lab   / get_used("cellWidth") * sqrt(num.trees)
-    HEIGHT <- HEIGHT.lab  / get_used("cellWidth") * sqrt(num.trees)
-  } else {
-    WIDTH.lab  <- get_used("plotWidth")
-    HEIGHT.lab <- get_used("plotHeight")
-    WIDTH  <- WIDTH.lab  / get_used("cellWidth")
-    HEIGHT <- HEIGHT.lab / get_used("cellWidth")
-  }
+  WIDTH.lab  <- get_used("plotWidth")
+  HEIGHT.lab <- get_used("plotHeight")
+  WIDTH  <- WIDTH.lab  / get_used("cellWidth")
+  HEIGHT <- HEIGHT.lab / get_used("cellWidth")
 
   ## Create plot data
   plot.data <- expand.grid(x    = 1:WIDTH,
@@ -80,20 +73,6 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
                   y  = y - 0.5) # x and y are now cell centers
 
   if(num.trees > 0) {
-    ## Modify tree locations for geometryOption = 1
-    if(get_used("geometryOption") == 1) {
-      if(num.trees == 1) {
-        tree.plot.data$x <- mean(plot.data$x)
-        tree.plot.data$y <- mean(plot.data$y)
-      } else if(num.trees == 4) {
-        tree.plot.data$x <- mean(plot.data$x) * c(1, 3, 1, 3) / 2
-        tree.plot.data$y <- mean(plot.data$y) * c(1, 1, 3, 3) / 2
-      } else if(num.trees == 9) {
-        tree.plot.data$x <- mean(plot.data$x) * c(1, 3, 5, 1, 3, 5, 1, 3, 5) / 3
-        tree.plot.data$y <- mean(plot.data$y) * c(1, 1, 1, 3, 3, 3, 5, 5, 5) / 3
-      }
-    }
-
     ## Determine interCrop cells
     create_range    <- function(x, tcd)   c(x - tcd, x + tcd)
     roundup         <- function(from, to) ceiling(from / to) * to
@@ -141,15 +120,15 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
       x.inside   <- unlist(purrr::map(boundaries, which_inside, plot.data$x))
       if(toric.x.both) x.inside <- c(x.inside, check_x_runover(boundaries)) # if toric symetry is on, check for intercrop runover across toric symmetry
       plot.data$crop[which(plot.data$x %in% x.inside)] <- interCropSpecies
-    } else if(get_used("weededAreaRadius") > 0) {
+    } else if(get_used("treeCropRadius") > 0) {
       xs <- as.list(tree.plot.data$x)
-      x.boundaries <- purrr::map(xs, create_range, get_used("weededAreaRadius"))
+      x.boundaries <- purrr::map(xs, create_range, get_used("treeCropRadius"))
       x.boundaries <- purrr::map(x.boundaries, round_if_needed, get_used("cellWidth"))
       x.inside     <- unlist(purrr::map(x.boundaries, which_inside, plot.data$x))
       if(toric.x.both) x.inside <- c(x.inside, check_x_runover(x.boundaries)) # if toric symetry is on, check for intercrop runover across toric symmetry
 
       ys <- as.list(tree.plot.data$y)
-      y.boundaries <- purrr::map(ys, create_range, get_used("weededAreaRadius"))
+      y.boundaries <- purrr::map(ys, create_range, get_used("treeCropRadius"))
       y.boundaries <- purrr::map(y.boundaries, round_if_needed, get_used("cellWidth"))
       y.inside     <- unlist(purrr::map(y.boundaries, which_inside, plot.data$y))
       if(toric.y.both) y.inside <- c(y.inside, check_y_runover(y.boundaries)) # if toric symetry is on, check for intercrop runover across toric symmetry

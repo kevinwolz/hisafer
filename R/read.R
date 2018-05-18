@@ -319,9 +319,6 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
       stop(paste("there is no PLD file present in the simulation directory of:", simu.name, ". Set read.inputs to FALSE."), call. = FALSE)
     }
     pld <- read_param_file(pld.path)
-    geometryOption     <- as.numeric(pld$PLOT$geometryOption$value)
-    spacingBetweenRows <- as.numeric(pld$PLOT$spacingBetweenRows$value)
-    spacingWithinRows  <- as.numeric(pld$PLOT$spacingWithinRows$value)
     plotWidth          <- as.numeric(pld$PLOT$plotWidth$value)
     plotHeight         <- as.numeric(pld$PLOT$plotHeight$value)
     northOrientation   <- as.numeric(pld$PLOT$northOrientation$value)
@@ -329,10 +326,10 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
     soilDepth          <- sum(pld$LAYERS$layers$value[[1]]$thick)
     waterTable         <- pld$SOIL$waterTable$value
 
-    plot.area <- ifelse(geometryOption == 1, spacingBetweenRows * spacingWithinRows, plotWidth * plotHeight)
+    plot.area <- plotWidth * plotHeight
     plot.info <- dplyr::tibble(SimulationName   = simu.name,
-                               plotWidth        = ifelse(geometryOption == 1, spacingBetweenRows, plotWidth),
-                               plotHeight       = ifelse(geometryOption == 1, spacingWithinRows,  plotHeight),
+                               plotWidth        = plotWidth,
+                               plotHeight       = plotHeight,
                                plot.area        = plot.area,
                                northOrientation = northOrientation,
                                cellWidth        = cellWidth,

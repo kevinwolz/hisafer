@@ -298,13 +298,9 @@ check_input_values <- function(hip, force) {
   }
 
   ## Spacing Errors
-  btwn.tree.error   <- ifelse(!all(((get_used_un("spacingBetweenRows") / get_used_un("cellWidth")) %% 1) != 0 & get_used_un("geometryOption") == 1),
-                              "", "-- (spacingBetweenRows / cellWidth) should be a whole number")
-  within.tree.error <- ifelse(!all(((get_used_un("spacingWithinRows")  / get_used_un("cellWidth")) %% 1) != 0 & get_used_un("geometryOption") == 1),
-                              "", "-- (spacingWithinRows / cellWidth) should be a whole number")
-  plot.width.error   <- ifelse(!all(((get_used_un("plotWidth") / get_used_un("cellWidth")) %% 1) != 0 & get_used_un("geometryOption") == 3),
+  plot.width.error   <- ifelse(!all(((get_used_un("plotWidth") / get_used_un("cellWidth")) %% 1) != 0),
                                "", "-- (plotWidth / cellWidth) should be a whole number")
-  plot.height.error <- ifelse(!all(((get_used_un("plotHeight")  / get_used_un("cellWidth")) %% 1) != 0 & get_used_un("geometryOption") == 3),
+  plot.height.error <- ifelse(!all(((get_used_un("plotHeight")  / get_used_un("cellWidth")) %% 1) != 0),
                               "", "-- (plotHeight / cellWidth) should be a whole number")
 
   ## Tree Centered in Cell Error
@@ -319,13 +315,9 @@ check_input_values <- function(hip, force) {
     okay.loc <- (X == 0 & Y == 0) | (abs(X %% get_used("cellWidth")[[i]] - rep(get_used("cellWidth")[[i]] / 2, length(X))) < 1e-5 &
                                        abs(Y %% get_used("cellWidth")[[i]] - rep(get_used("cellWidth")[[i]] / 2, length(Y))) < 1e-5)
 
-    if(get_used("geometryOption")[[i]] == 1) {
-      x.on.scene <- on_scene_check(X, get_used("spacingBetweenRows")[[i]])
-      y.on.scene <- on_scene_check(Y, get_used("spacingWithinRows")[[i]])
-    } else {
-      x.on.scene <- on_scene_check(X, get_used("plotWidth")[[i]])
-      y.on.scene <- on_scene_check(Y, get_used("plotHeight")[[i]])
-    }
+    x.on.scene <- on_scene_check(X, get_used("plotWidth")[[i]])
+    y.on.scene <- on_scene_check(Y, get_used("plotHeight")[[i]])
+
     on.scene <- (x.on.scene & y.on.scene)
 
     if(any(!okay.loc)) bad.trees       <- c(bad.trees,       paste0(hip$exp.plan$SimulationName[i], "-Tree", c(1:length(X))[!okay.loc]))
@@ -341,8 +333,8 @@ check_input_values <- function(hip, force) {
     ifelse(all(purrr::map2_lgl(get_used(param), get_used(ref), less_than)),
            "", paste0("-- ", param, " must be less than ", ref))
   }
-  treeCropDistance.error        <- less_than_comp("treeCropDistance",        "spacingBetweenRows")
-  treeRootPruningDistance.error <- less_than_comp("treeRootPruningDistance", "spacingBetweenRows")
+  treeCropDistance.error        <- less_than_comp("treeCropDistance",        "plotWidth")
+  treeRootPruningDistance.error <- less_than_comp("treeRootPruningDistance", "plotWidth")
 
   treePlantingYears.error    <- less_than_comp("treePlantingYears",    "nbSimulations")
   treePruningYears.error     <- less_than_comp("treePruningYears",     "nbSimulations")
@@ -370,10 +362,6 @@ check_input_values <- function(hip, force) {
   ## Don't Edit Export Profile Errors
   EP.error <- ifelse(is_mod("profileNames") | is_mod("exportFrequencies"),
                      "-- profileNames and exportFrequencies cannot be defined using define_hisafe(). Use the 'profiles' argument of build_hisafe().", "")
-
-  ## Don't Edit nbTrees Error
-  nbTrees.error <- ifelse(is_mod("nbTrees"),
-                          "-- nbTrees cannot be defined directly using define_hisafe(). Instead the size of the tree initialziation table will be used.", "")
 
   ## Timeseries Length Errors
   treePlanting.length.error <- ifelse(all(purrr::map_lgl(list(get_length("treePlantingYears"),
@@ -424,27 +412,9 @@ check_input_values <- function(hip, force) {
   simuNbrDays.length.error <- ifelse(all(unlist(get_length("simulationNbrDays")) == 1) | identical(get_length("mainCropSpecies"), get_length("simulationNbrDays")),
                                      "", "-- simulationNbrDays and mainCropSpecies must have the same length or simulationNbrDays must have length 1")
 
-  ## Geometry Option Errors
-  if(1 %in% get_used_un("geometryOption") & (is_mod("plotHeight") | is_mod("plotWidth"))) {
-    warning("-- when geometryOption = 1, plotHeight and plotWidth are not used." , call. = FALSE, immediate. = TRUE)
-  }
-  if(3 %in% get_used_un("geometryOption") & (is_mod("spacingBetweenRows") | is_mod("spacingWithinRows"))) {
-    warning("-- when geometryOption = 3, spacingBetweenRows and spacingWithinRows are not used." , call. = FALSE, immediate. = TRUE)
-  }
-  nbtree.error <- ifelse(any(get_used_un("geometryOption") == 1 & !(tree.rows %in% c(1,4,9))),
-                         "-- when geompetryOption = 1, the number of trees can only be 1, 4, or 9", "")
-
-  get_n_species <- function(x) length(unique(x$species))
-  if(all(is.na(tree.init))) {
-    n.tree.species <- rep(0, length(tree.init))
-  } else {
-    n.tree.species <- purrr::map_dbl(tree.init, get_n_species)
-  }
-  species.error <- ifelse(any(get_used_un("geometryOption") == 1 & n.tree.species > 1),
-                          "-- when geompetryOption = 1, there can only be one tree species", "")
-
-  weed.error <- ifelse(any(get_used_un("treeCropDistance") > 0 & get_used_un("weededAreaRadius") > 0),
-                       "-- treeCropDistance and weededAreaRadius can not both be greater than 0", "")
+  ## Geometry Errors
+  weed.error <- ifelse(any(get_used_un("treeCropDistance") > 0 & get_used_un("treeCropRadius") > 0),
+                       "-- treeCropDistance and treeCropRadius can not both be greater than 0", "")
 
   ## Root Init Errors
   root.init.diam.error <- ifelse(any(unlist(get_init_vals("root.initialization", "paramShape1")) < (0.75 * unlist(purrr::map2(get_used_un("cellWidth"),
@@ -468,14 +438,14 @@ check_input_values <- function(hip, force) {
                   unique.sim.error, unique.simname.error, simname.space.error,
                   unsupported.trees.error, too.many.trees.error,
                   unsupported.crops.error, unsupported.itks.error,
-                  btwn.tree.error, within.tree.error, plot.width.error, plot.height.error,
+                  plot.width.error, plot.height.error,
                   treeCropDistance.error, treeRootPruningDistance.error,
                   tree.centered.error, tree.offscene.error,
                   treePlantingYears.error, treePruningYears.error, treeThinningYears.error, treeRootPruningYears.error,
-                  tree.root.error, EP.error, nbTrees.error,
+                  tree.root.error, EP.error,
                   treePlanting.length.error, treePruning.length.error, treeThinning.length.error, rootPruning.length.error,
                   mainCrop.length.error, interCrop.length.error, simuNbrDays.length.error,
-                  nbtree.error, species.error, weed.error,
+                  weed.error,
                   root.init.diam.error, wth.error)
   all.errors <- paste0(all.errors[!(all.errors == "") & !is.na(all.errors)], collapse = "\n")
   if(all.errors != errors) stop(all.errors, call. = FALSE)

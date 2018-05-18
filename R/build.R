@@ -166,9 +166,7 @@ build_structure <- function(exp.plan, path, profiles, template, files, plot.scen
     trees.used <- NA
   }
 
-  if("nbTrees" %in% names(exp.plan)){
-    num.trees <- exp.plan$nbTrees
-  } else if(all(is.na(trees.used))) {
+  if(all(is.na(trees.used))) {
     num.trees <- 0
   } else {
     num.trees <- length(trees.used)
@@ -197,8 +195,7 @@ build_structure <- function(exp.plan, path, profiles, template, files, plot.scen
   ## Edit pld file
   pld.path <- list.files(simu.path, ".pld$", full.names = TRUE)
   pld      <- read_param_file(pld.path)
-  pld.new  <- edit_param_file(pld, dplyr::select(exp.plan, pld.params.to.edit)) %>%
-    edit_param_element("nbTrees", num.trees)
+  pld.new  <- edit_param_file(pld, dplyr::select(exp.plan, pld.params.to.edit))
   write_param_file(pld.new, pld.path)
   dum <- file.rename(pld.path, paste0(simu.path, "/", exp.plan$SimulationName, ".pld"))
 
