@@ -595,10 +595,8 @@ root_init_params <- function(template, reps = 1, ...) {
 #' @param ... Any parameters of Hi-sAFe tree initialization table:
 #'  \itemize{
 #'  \item{"species"}{}
-#'  \item{"age"}{}
 #'  \item{"height"}{}
 #'  \item{"crownBaseHeight"}{}
-#'  \item{"truncatureRatio"}{}
 #'  \item{"leafToFineRootsRatio"}{}
 #'  \item{"crownRadius"}{}
 #'  \item{"treeX"}{}
@@ -611,7 +609,7 @@ root_init_params <- function(template, reps = 1, ...) {
 #' tree.init <- tree_init_params(template = "agroforestry", height = 2)
 #' }
 tree_init_params <- function(template, ...) {
-  supported <- c("species", "age", "height", "crownBaseHeight", "truncatureRatio",
+  supported <- c("species", "height", "crownBaseHeight",
                  "leafToFineRootsRatio", "crownRadius", "treeX", "treeY")
   out <- modify_table(args           = list(...),
                       supported.args = supported,
@@ -683,7 +681,7 @@ layer_init_params <- function(template, ...) {
 #' layers <- layer_params(template = "agroforestry", sand = 20)
 #' }
 layer_params <- function(template, ...) {
-  supported = c("thick", "sand", "clay", "limeStone", "organicMatter",
+  supported <- c("thick", "sand", "clay", "limeStone", "organicMatter",
                 "partSizeSand", "stone", "stoneType", "infiltrability")
   out <- modify_table(args           = list(...),
                       supported.args = supported,

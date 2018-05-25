@@ -46,7 +46,7 @@ read_param_file <- function(path) {
                  varieties                   = c("ID", "codevar", "stlevamf" ,"stamflax" ,"stlevdrp" ,"stflodrp", "stdrpdes", "pgrainmaxi",     # .PLT
                                                  "adens", "croirac", "durvieF", "jvc", "sensiphot", "stlaxsen", "stsenlan", "nbgrmax",
                                                  "stdrpmat", "afruitpot", "dureefruit"),
-                 residue_incorporation_table = c("julres", "coderes", "P_qres", "P_Crespc", "P_CsurNres", "P_Nminres", "P_eaures"),             # .TEC
+                 residue_incorporation_table = c("julres", "coderes", "qres", "Crespc", "CsurNres", "Nminres", "eaures"),                       # .TEC
                  tillage_table               = c("jultrav", "profres", "proftrav"),                                                             # .TEC
                  irrigation_table            = c("julapl", "qte"),                                                                              # .TEC
                  fertilization_table         = c("julapN", "qte"),                                                                              # .TEC
