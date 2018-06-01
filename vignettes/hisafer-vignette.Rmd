@@ -1,5 +1,5 @@
 ---
-title: "Introduction to hisafer"
+title: "Introduction to hisafer 1.0.0"
 output: rmarkdown::pdf_document #html_vignette
 vignette: >
   %\VignetteIndexEntry{hisafer}
@@ -248,9 +248,9 @@ Hi-sAFe can generate quite a lot of output data. All of this data is created wit
 
 The resulting object created by `read_hisafe()` is an obeject of class "hop" (for "Hi-sAFe OutPut"). This is a list of 16 data frames (tibbles): 
 
-- `annualtree`
-- `annualcrop`
-- `annualplot`
+- `annualTrees`
+- `annualCells`
+- `annualPlot`
 - `trees`
 - `plot`
 - `climate`
@@ -279,6 +279,7 @@ hop <- read_hisafe(hip      = hip,
 #hisafer_example_hop <- read_hisafe(path       = "/Users/kevinwolz/Desktop/RESEARCH/ACTIVE_PROJECTS/HI-SAFE/vignette_output/lue", 
 #                                   simu.names = c("Sim_1", "Sim_2"), 
 #                                   profiles   = c("plot", "trees", "climate", "monthCells", "cells", "voxels"))
+#save(hisafer_example_hop, file = "/Users/kevinwolz/Desktop/hisafer_example_hop.Rdata")
 #devtools::use_data(hisafer_example_hop)
 hop  <- hisafer_example_hop
 ```
@@ -318,10 +319,10 @@ As you create your own analysis scripts to explore your `hop` object, there are 
 ### 5. Data DIAGNOSTICS
 Prior to performing any analyses using your `hop` object, it is highly recommended to check some basic diagnostics on your simluations to ensure that the simulations ran as expected. To do so, hisafer provides some basic diagnostic functions that allow you to compare your various simulations side by side:
 
-- `diag_hisafe_ts()` - plots a timeseries plot for each variable in the "annualtree", "annualplot", "trees", "plot", and  "climate" profiles of a `hop` object.
+- `diag_hisafe_ts()` - plots a timeseries plot for each variable in the "annualTrees", "annualPlot", "trees", "plot", and  "climate" profiles of a `hop` object.
 - `diag_hisafe_cells()` - plots a full range of tile plots for each variable in the "cells" profile of a `hop` object.
 - `diag_hisafe_monthcells()` - plots a full range of tile plots for each variable in the "monthCells" profile of a `hop` object.
-- `diag_hisafe_annualplot()` - plots a full range of tile plots for each variable in the "annualplot" profile of a `hop` object.
+- `diag_hisafe_annualcells()` - plots a full range of tile plots for each variable in the "annualCells" profile of a `hop` object.
 - `diag_hisafe_voxels()` - plots a timeseries  for each variable in the "voxels" profile of a `hop` object.
 
 You can also easily apply the various diagnostics functions using the shortcut function `diag_hisafe()`.
@@ -332,7 +333,7 @@ There are many different types of analyses that can be performed with Hi-sAFe ou
 #### 6.1 Basic plots
 Here are some basic plotting functions that can plot individual variables: 
 
-- `plot_hisafe_ts()` - plots "annualtree", "annualplot", "trees", "plot", or  "climate" timeseries data
+- `plot_hisafe_ts()` - plots "annualTrees", "annualPlot", "trees", "plot", or  "climate" timeseries data
 - `plot_hisafe_monthcells()` - plots tile plots of "monthCells" data
 - `plot_hisafe_cells()` - plots tile plots of "cells" data
 - `plot_hisafe_voxels()` - plots timeseries plots of "voxels" data

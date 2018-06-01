@@ -79,10 +79,10 @@ plot_hisafe_ts <- function(hop,
   if(!(length(doy.lim) == 2 & all(doy.lim %in% 1:366)))           stop("doy.lim argument must be of length 2 with values in 1:366", call. = FALSE)
   if(!(is.na(color.palette) | is.character(color.palette)))       stop("color.palette argument must be a character vector",         call. = FALSE)
   if(!(is.na(linetype.palette) | is.character(linetype.palette))) stop("linetype.palette argument must be a character vector",      call. = FALSE)
-  is_logical(cumulative)
-  is_logical(facet.year)
-  is_logical(crop.points)
-  is_logical(plot)
+  is_TF(cumulative)
+  is_TF(facet.year)
+  is_TF(crop.points)
+  is_TF(plot)
   variable_check(hop, profile, c(variables, aes.cols$color, aes.cols$linetype), error = TRUE)
   if(facet.year & length(variables) > 1)                          stop("facet.year can only be TRUE when plotting a single variable", call. = FALSE)
   if(!all(years %in% unique(hop[[profile]]$Year)))                stop(paste("not all values in years are present in the",  profile, "profile"),
@@ -282,9 +282,9 @@ plot_hisafe_monthcells <- function(hop,
   if(!all(months %in% 1:12))                                stop("months argument must be 'all' or a numeric vector with values in 1:12", call. = FALSE)
   if(!(plot.x %in% c("x", "y")))                            stop("plot.x must be one of 'x' or 'y'",                                      call. = FALSE)
   if(!all(months %in% hop$monthCells$Month))                stop("one or more values in months is not present in the monthCells profile of hop",     call. = FALSE)
-  is_logical(trees)
-  is_logical(canopies)
-  is_logical(plot)
+  is_TF(trees)
+  is_TF(canopies)
+  is_TF(plot)
 
   dates <- expand.grid(year = years + min(hop$monthCells$Year), month = months, day = 1)
   dates <- lubridate::ymd(paste(dates$year, dates$month, dates$day, sep = "-"))
@@ -292,6 +292,10 @@ plot_hisafe_monthcells <- function(hop,
                     simu.names     = simu.names,
                     dates          = dates[dates %in% hop$monthCells$Date],
                     strip.exp.plan = TRUE)
+
+  cellWidth  <- min(abs(diff(unique(hop$monthCells$x))))
+  plotWidth  <- max(hop$monthCells$x) + cellWidth
+  plotHeight <- max(hop$monthCells$y) + cellWidth
 
   if(plot.x == "y") { # Rotate scene if plot.x = "y"
     for(p in c("tree.info", "monthCells")) hop[[p]] <- swap_cols(hop[[p]], "x", "y")
@@ -309,12 +313,9 @@ plot_hisafe_monthcells <- function(hop,
                       as.character(avail.vars[[fixed]]),
                       paste(vars[fixed], "=", avail.vars[[fixed]]))
 
-  X.MIN <- Y.MIN <- 0
-  X.MAX <- max(hop$plot.info$plotWidth)
-  Y.MAX <- max(hop$plot.info$plotHeight)
-
-  plot.data <- create_tile_data(hop     = hop,
-                                profile = "monthCells")
+  plot.data <- create_tile_data(hop       = hop,
+                                profile   = "monthCells",
+                                cellWidth = cellWidth)
 
   tree.data <- create_tree_data(hop      = hop,
                                 trees    = trees,
@@ -326,8 +327,8 @@ plot_hisafe_monthcells <- function(hop,
          y     = rowfacet,
          fill  = get_units(hop, "monthCells", variable),
          title = paste0(variable, "\n(", fixed.var, ")")) +
-    coord_equal(xlim   = c(X.MIN, X.MAX),
-                ylim   = c(Y.MIN, Y.MAX),
+    coord_equal(xlim   = c(0, plotWidth),
+                ylim   = c(0, plotHeight),
                 expand = FALSE) +
     facet_grid(reformulate(colfacet, rowfacet), switch = "both") +
     geom_rect(aes_string(xmin = "x",
@@ -380,7 +381,7 @@ plot_hisafe_monthcells <- function(hop,
 #' tile.plot
 #' ggsave_fitmax("yield.png", tile.plot)
 #' }
-plot_hisafe_annualcells<- function(hop,
+plot_hisafe_annualcells <- function(hop,
                                    variable   = "yieldMax",
                                    simu.names = "all",
                                    years,
@@ -398,9 +399,9 @@ plot_hisafe_annualcells<- function(hop,
   if(length(variable) > 1)       stop("variable argument must be a character vector of length 1", call. = FALSE)
   if(!is.numeric(years))         stop("years argument must be 'all' or a numeric vector",         call. = FALSE)
   if(!(plot.x %in% c("x", "y"))) stop("plot.x must be one of 'x' or 'y'",                         call. = FALSE)
-  is_logical(trees)
-  is_logical(canopies)
-  is_logical(plot)
+  is_TF(trees)
+  is_TF(canopies)
+  is_TF(plot)
 
   dates <- lubridate::ymd(paste0(years, "-01-01"))
   hop <- hop_filter(hop            = hop,
@@ -413,12 +414,13 @@ plot_hisafe_annualcells<- function(hop,
     hop$plot.info <- swap_cols(hop$plot.info, "plotWidth", "plotHeight")
   }
 
-  X.MIN <- Y.MIN <- 0
-  X.MAX <- max(hop$plot.info$plotWidth)
-  Y.MAX <- max(hop$plot.info$plotHeight)
+  cellWidth  <- min(abs(diff(unique(hop$annualCells$x))))
+  plotWidth  <- max(hop$annualCells$x) + cellWidth
+  plotHeight <- max(hop$annualCells$y) + cellWidth
 
-  plot.data <- create_tile_data(hop     = hop,
-                                profile = "annualCells")
+  plot.data <- create_tile_data(hop       = hop,
+                                profile   = "annualCells",
+                                cellWidth = cellWidth)
 
   tree.data <- create_tree_data(hop      = hop,
                                 trees    = trees,
@@ -444,8 +446,8 @@ plot_hisafe_annualcells<- function(hop,
                                   barheight   = 1.5,
                                   title.vjust = 0.8,
                                   nbin        = 100)) +
-    coord_equal(xlim   = c(X.MIN, X.MAX),
-                ylim   = c(Y.MIN, Y.MAX),
+    coord_equal(xlim   = c(0, plotWidth),
+                ylim   = c(0, plotHeight),
                 expand = FALSE) +
     theme_hisafe_tile()
 
@@ -508,10 +510,10 @@ plot_hisafe_cells <- function(hop,
 
   if(length(variable) > 1)       stop("variable argument must be a character vector of length 1", call. = FALSE)
   if(!(plot.x %in% c("x", "y"))) stop("plot.x must be one of 'x' or 'y'",                         call. = FALSE)
-  is_logical(trees)
-  is_logical(canopies)
-  is_logical(plot)
-  is_logical(for.anim)
+  is_TF(trees)
+  is_TF(canopies)
+  is_TF(plot)
+  is_TF(for.anim)
 
   hop.full <- hop_filter(hop            = hop,
                          simu.names     = simu.names,
@@ -533,15 +535,16 @@ plot_hisafe_cells <- function(hop,
     y.lab <- "X (m)"
   }
 
-  X.MIN <- Y.MIN <- 0
-  X.MAX <- max(hop$plot.info$plotWidth)
-  Y.MAX <- max(hop$plot.info$plotHeight)
+  cellWidth  <- min(abs(diff(unique(hop$cells$x))))
+  plotWidth  <- max(hop$cells$x) + cellWidth
+  plotHeight <- max(hop$cells$y) + cellWidth
 
   ## Extract variable range over rel.dates to set scale
   value.range <- range(hop.full$cells[[variable]], na.rm = TRUE)
 
-  plot.data <- create_tile_data(hop     = hop,
-                                profile = "cells")
+  plot.data <- create_tile_data(hop       = hop,
+                                profile   = "cells",
+                                cellWidth = cellWidth)
 
   tree.data <- create_tree_data(hop      = hop,
                                 trees    = trees,
@@ -600,8 +603,8 @@ plot_hisafe_cells <- function(hop,
     viridis::scale_fill_viridis(option = "magma", limits = value.range) +
     scale_linetype_identity() +
     plot.guide +
-    coord_equal(xlim   = c(X.MIN, X.MAX),
-                ylim   = c(Y.MIN, Y.MAX),
+    coord_equal(xlim   = c(0, plotWidth),
+                ylim   = c(0, plotHeight),
                 expand = FALSE) +
     scale_x_continuous(sec.axis = sec_axis(~ ., labels = NULL)) +
     scale_y_continuous(sec.axis = sec_axis(~ ., labels = NULL)) +
@@ -679,7 +682,7 @@ plot_hisafe_voxels <- function(hop,
   if(!(all(is.na(Z)) | is.numeric(Z)))                              stop("Z must be numeric",                                        call. = FALSE)
   if(!((summarize.by %in% c("x", "y", "z")) | is.na(summarize.by))) stop("summarize.by must be one of 'x', 'y', or 'z'",             call. = FALSE)
   if(!(all(is.na(vline.dates)) | is.character(vline.dates)))        stop("vline.dates must be a character vector",                   call. = FALSE)
-  is_logical(plot)
+  is_TF(plot)
   if(length(unique(hop$plot.info$soilDepth)) > 1) warning("maximum soil depth is not consistent across all simluations within the hop", call. = FALSE)
 
   if(is.na(X)) X <- unique(hop$voxels$x)
@@ -1050,17 +1053,14 @@ add_phantom_trees <- function(tree.data) {
 #' @param plot.x The plot.x argument from the tile plot function
 #' @keywords internal
 create_tree_data <- function(hop, trees, canopies, plot.x) {
+  if(!(nrow(hop$tree.info) > 0 & nrow(hop$plot.info) > 0)) warning("tree.info or plot.info is unavilable in hop and is required if trees or canopies is TRUE. Use read.inputs = TRUE in read_hisafe().", call. = FALSE)
   if((trees | canopies) & nrow(hop$tree.info) > 0 & nrow(hop$plot.info) > 0){
     tree.data <- hop$tree.info %>%
       dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
+      dplyr::mutate(special.case = x == 0 & y == 0) %>% # special case when x == 0 & y == 0 : tree is at scene center
+      dplyr::mutate(x = x + special.case * plotWidth  / 2) %>%
+      dplyr::mutate(y = y + special.case * plotHeight / 2) %>%
       dplyr::select(SimulationName, id, species, x, y, plotWidth, plotHeight, cellWidth)
-
-    for(i in 1:nrow(tree.data)) {
-      if(tree.data$x[i] == 0 & tree.data$y[i] == 0){
-        tree.data$x[i] <- tree.data$x[i] + tree.data$x.center[i]
-        tree.data$y[i] <- tree.data$y[i] + tree.data$y.center[i]
-      }
-    }
 
     if(canopies) {
       profile_check(hop,  "trees", error = TRUE)
@@ -1082,10 +1082,10 @@ create_tree_data <- function(hop, trees, canopies, plot.x) {
 #' @description Generates tree data for hisafe tile plots
 #' @param hop An object of class hop.
 #' @param profile Character string of the profile to pull
+#' @param cellWidth Width of cells
 #' @keywords internal
-create_tile_data <- function(hop, profile) {
+create_tile_data <- function(hop, profile, cellWidth) {
   plot.data <- hop[[profile]] %>%
-    dplyr::left_join(dplyr::select(hop$plot.info, SimulationName, cellWidth), by = "SimulationName") %>%
     dplyr::mutate(xmax = x + cellWidth) %>%
     dplyr::mutate(ymax = y + cellWidth)
   if(nrow(plot.data) == 0) stop("hop filtering resulted in no remaining data to plot", call. = FALSE)

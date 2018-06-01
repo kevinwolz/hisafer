@@ -83,9 +83,9 @@ hisafe_slice <- function(hop,
 
   if(!requireNamespace("ggforce", quietly = TRUE)) stop("The package 'ggforce' is required for hisafe_slice(). Please install and load it.", call. = FALSE)
   is_hop(hop, error = TRUE)
-  is_logical(trees)
-  is_logical(crops)
-  is_logical(voxels)
+  is_TF(trees)
+  is_TF(crops)
+  is_TF(voxels)
   if(!(Y[1] == "all" | all(is.numeric(Y)))) stop("Y argument must be 'all' or a numeric vector", call. = FALSE)
 
   date <- lubridate::ymd(date)
@@ -100,8 +100,8 @@ hisafe_slice <- function(hop,
   voxel.vars <- voxel.vars[!is.na(voxel.vars)]
   tree.vars  <- tree.vars[!is.na(tree.vars)]
 
-  if(nrow(hop$plot.info) == 0) stop("plot.info is unavilable in hop and is required", call. = FALSE)
-  if(nrow(hop$tree.info) == 0) stop("tree.info is unavilable in hop and is required", call. = FALSE)
+  if(nrow(hop$plot.info) == 0) stop("plot.info is unavilable in hop and is required. Use read.inputs = TRUE in read_hisafe().", call. = FALSE)
+  if(nrow(hop$tree.info) == 0) stop("tree.info is unavilable in hop and is required. Use read.inputs = TRUE in read_hisafe().", call. = FALSE)
   profile_check(hop,  "trees", error = TRUE)
   variable_check(hop, "trees", tree.vars, error = TRUE)
 
@@ -215,6 +215,10 @@ hisafe_slice <- function(hop,
 
   if(trees) {
     hop$tree.info <- hop$tree.info %>%
+      dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
+      dplyr::mutate(special.case = x == 0 & y == 0) %>% # special case when x == 0 & y == 0 : tree is at scene center
+      dplyr::mutate(x = x + special.case * plotWidth  / 2) %>%
+      dplyr::mutate(y = y + special.case * plotHeight / 2) %>%
       dplyr::mutate(tree.pruning.dates      = list(NA)) %>%
       dplyr::mutate(root.pruning.dates      = list(NA)) %>%
       dplyr::mutate(tree.pruning            = 0) %>%
@@ -267,7 +271,6 @@ hisafe_slice <- function(hop,
       dplyr::mutate(trunk.alpha = .[[vars$trunk.alpha]]) %>%
       dplyr::left_join(tree.max,      by = tree.grouping.strings) %>%
       dplyr::left_join(hop$tree.info, by = c("SimulationName", "id")) %>%
-      dplyr::left_join(hop$plot.info, by = c("SimulationName")) %>%
       dplyr::left_join(tree.growth,   by = c("SimulationName", "Date", "id")) %>%
       dplyr::mutate(crown.radius          = crownRadiusInterRow) %>%
       dplyr::mutate(crown.base.height     = crownBaseHeight) %>%
@@ -791,8 +794,8 @@ hisafe_snapshot <- function(hop,
   profile_check(hop, "trees", error = TRUE)
   if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character vector", call. = FALSE)
   if(!is.character(file.prefix))                          stop("file.prefix argument must be a character vector", call. = FALSE)
-  is_logical(slice)
-  is_logical(cells)
+  is_TF(slice)
+  is_TF(cells)
 
   cells <- cells & profile_check(hop, "cells")
 
@@ -824,7 +827,7 @@ hisafe_snapshot <- function(hop,
   ggsave_fitmax(paste0(legend.path, file.prefix, "_LEGEND.png"), legend.plot, dpi = 500)
 
   if(length(dates) == 0) stop("date filtering resulted in no dates to plot", call. = FALSE)
-  print(paste0("\nCreating visualizations for ", length(dates), " dates..."), quote = FALSE)
+  cat(paste0("\nCreating visualizations for ", length(dates), " dates..."))
   pb <- txtProgressBar(min = 0, max = length(dates), initial = 0, style = 3)
   for(i in 1:length(dates)) {
     if(plot.x == "xy") {

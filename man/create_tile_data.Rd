@@ -4,12 +4,14 @@
 \alias{create_tile_data}
 \title{Generate tree data for hisafe tile plots}
 \usage{
-create_tile_data(hop, profile)
+create_tile_data(hop, profile, cellWidth)
 }
 \arguments{
 \item{hop}{An object of class hop.}
 
 \item{profile}{Character string of the profile to pull}
+
+\item{cellWidth}{Width of cells}
 }
 \description{
 Generates tree data for hisafe tile plots

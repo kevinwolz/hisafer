@@ -80,8 +80,8 @@ define_hisafe <- function(path,
   if(!(all(is.character(profiles)) | profiles[1] == "all")) stop("profiles argument must be 'all' or a character vector",    call. = FALSE)
   if(!(is.character(template) & length(template) == 1))     stop("template argument must be a character vector of length 1", call. = FALSE)
   if(!(is.null(bulk.pass) | is.list(bulk.pass)))            stop("bulk.pass argument must be a list",                        call. = FALSE)
-  is_logical(factorial)
-  is_logical(force)
+  is_TF(factorial)
+  is_TF(force)
 
   path          <- R.utils::getAbsolutePath(path)
   param.list    <- list(...)
@@ -168,7 +168,7 @@ define_hisafe_file <- function(file,
   if(!(all(is.character(profiles)) | profiles[1] == "all")) stop("profiles argument must be 'all' or a character vector",    call. = FALSE)
   if(!(is.character(template) & length(template) == 1))     stop("template argument must be a character vector of length 1", call. = FALSE)
   if(!dir.exists(template.path))                            stop("template directory does not exist",                        call. = FALSE)
-  is_logical(force)
+  is_TF(force)
 
   exp.plan <- dplyr::as_tibble(read.csv(file, header = TRUE, stringsAsFactors = FALSE))
 
@@ -609,8 +609,7 @@ root_init_params <- function(template, reps = 1, ...) {
 #' tree.init <- tree_init_params(template = "agroforestry", height = 2)
 #' }
 tree_init_params <- function(template, ...) {
-  supported <- c("species", "height", "crownBaseHeight",
-                 "leafToFineRootsRatio", "crownRadius", "treeX", "treeY")
+  supported <- c("species", "height", "crownBaseHeight", "leafToFineRootsRatio", "crownRadius", "treeX", "treeY")
   out <- modify_table(args           = list(...),
                       supported.args = supported,
                       character.args = "species",
@@ -652,6 +651,9 @@ layer_init_params <- function(template, ...) {
                       table.name     = "layer.initialization",
                       template       = template) %>%
     dplyr::mutate_all(function(x) format(x, nsmall = 1, trim = TRUE))
+
+  if(nrow(out) > 5) stop(paste("Hi-sAFe supports a maximum of 5 soil layers"), call. = FALSE)
+
   return(list(out))
 }
 
@@ -693,6 +695,9 @@ layer_params <- function(template, ...) {
                       template       = template) %>%
     dplyr::mutate_at(.vars = dplyr::vars(-stoneType), .funs = function(x) format(x, nsmall = 1, trim = TRUE)) %>%
     dplyr::mutate(stoneType = format(stoneType, nsmall = 0, trim = TRUE))
+
+  if(nrow(out) > 5) stop(paste("Hi-sAFe supports a maximum of 5 soil layers"), call. = FALSE)
+
   return(list(out))
 }
 

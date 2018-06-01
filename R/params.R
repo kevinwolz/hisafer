@@ -37,10 +37,10 @@ read_param_file <- function(path) {
     return(table.tibble)
   }
 
-  tables <- list(layers                      = c("name", "thick", "sand", "clay", "limeStone", "organicMatter",                             # .SIM
+  tables <- list(layers                      = c("name", "thick", "sand", "clay", "limeStone", "organicMatter",                                 # .SIM
                                                  "partSizeSand", "stone", "stoneType", "infiltrability"),
                  layer_initialization        = c("name", "waterContent", "no3Concentration", "nh4concentration"),                               # .SIM
-                 tree_initialization         = c("name", "species", "age", "height", "crownBaseHeight", "truncatureRatio",                      # .SIM
+                 tree_initialization         = c("name", "species", "height", "crownBaseHeight",                                                # .SIM
                                                  "leafToFineRootsRatio", "crownRadius", "treeX", "treeY"),
                  root_initialization         = c("name", "shape", "repartition", "paramShape1", "paramShape2", "paramShape3", "amount"),        # .SIM
                  varieties                   = c("ID", "codevar", "stlevamf" ,"stamflax" ,"stlevdrp" ,"stflodrp", "stdrpdes", "pgrainmaxi",     # .PLT

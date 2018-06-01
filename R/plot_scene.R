@@ -27,9 +27,10 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
   if(nrow(hip$exp.plan) > 1) {
     if(is.null(simu.name))                                  stop("must provide simu.name if hip contains more than one simulation", call. = FALSE)
     if(!(is.character(simu.name) & length(simu.name) == 1)) stop("simu.name argument must be a character vector of length 1",       call. = FALSE)
-    if(!(simu.name %in% hip$exp.plan$SimulationName))       stop("simu.name not present in hip",                                    call. = FALSE)
     hip$exp.plan <- dplyr::filter(hip$exp.plan, SimulationName == simu.name)
   }
+
+  if(!is.null(simu.name) & !(simu.name %in% hip$exp.plan$SimulationName)) stop("simu.name not present in hip", call. = FALSE)
 
   USED_PARAMS <- get_used_params(hip)
   get_used <- function(param) USED_PARAMS[[param]]$value[[1]]
@@ -47,10 +48,13 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
   if("data.frame" %in% class(get_used("tree.initialization"))) {
     ## Extract tree data
     tree.plot.data <- get_used("tree.initialization") %>%
+      dplyr::mutate(special.case = treeX == 0 & treeY == 0) %>% # special case when x == 0 & y == 0 : tree is at scene center
+      dplyr::mutate(treeX = treeX + special.case * get_used("plotWidth")  / 2) %>%
+      dplyr::mutate(treeY = treeY + special.case * get_used("plotHeight") / 2) %>%
       dplyr::mutate(x = treeX / get_used("cellWidth"),
                     y = treeY / get_used("cellWidth")) %>%
       dplyr::select(species, x, y)
-    num.trees <- nrow(tree.plot.data) #nbTrees is not an allowed entry to a hip object, but is rather modifying by build_hisafe based on nrow(tree.init.table)
+    num.trees <- nrow(tree.plot.data)
   } else {
     tree.plot.data <- dplyr::tibble(species = "No trees", x = NA_real_, y = NA_real_)
     num.trees <- 0

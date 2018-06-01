@@ -38,7 +38,7 @@ plot_hisafe_cycle_annual <- function(hop,
 
   if(!(cycle %in% c("carbon", "nitrogen", "water", "light")))                  stop("cycle argument must be one of: carbon, nitrogen, water, light", call. = FALSE)
   if(!(length(year.lim) == 2 & (is.numeric(year.lim) | all(is.na(year.lim))))) stop("year.lim argument must be a numeric vector of length 2",        call. = FALSE)
-  is_logical(plot)
+  is_TF(plot)
 
   hop <- hop_filter(hop = hop, simu.names = simu.names, tree.ids = tree.ids)
 
@@ -62,10 +62,7 @@ plot_hisafe_cycle_annual <- function(hop,
 
   } else if(cycle == "carbon") {
     if(!profile_check(hop, "trees")) return(NULL)
-    plot.data  <- get_carbon_pools(hop) %>%
-      dplyr::group_by(SimulationName, Year, Month, Day, Date, JulianDay, flux) %>%
-      dplyr::summarize(value = sum(value)) %>% # sum all trees on scene
-      dplyr::ungroup()
+    plot.data  <- get_carbon_pools(hop)
     plot.title <- "Tree Carbon Pools"
     y.lab      <- "Tree C storage (Mg C ha-1)"
     if(is.null(color.palette)) color.palette <- c("#009E73","#999999", "#D55E00", "#E69F00", "#56B4E9", "#0072B2", "#F0E442", "#CC79A7")
@@ -185,7 +182,7 @@ plot_hisafe_cycle_daily <- function(hop,
   if(!(cycle %in% c("carbon", "nitrogen", "water", "light")))   stop("cycle argument must be one of: carbon, nitrogen, water, light", call. = FALSE)
   if(!(all(is.numeric(years))        | years[1]      == "all")) stop("years argument must be 'all' or a numeric vector",              call. = FALSE)
   if(!(length(doy.lim) == 2 & all(doy.lim %in% 1:366)))         stop("doy.lim argument must be of length 2 with values in 1:366",     call. = FALSE)
-  is_logical(plot)
+  is_TF(plot)
 
   if(simu.names[1] == "all") simu.names <- unique(hop$exp.plan$SimulationName)
   if(years[1]      == "all") years      <- unique(hop$plot$Year[which(hop$plot$SimulationName %in% simu.names)])

@@ -458,7 +458,7 @@ profile_check <- function(hop, profiles, error = FALSE) {
   is_hop(hop, error = TRUE)
   not.supported <- profiles[!(profiles %in% SUPPORTED.PROFILES$profiles)]
   if(length(not.supported) > 0) stop(paste("The following profiles are not supported profiles:", paste(not.supported, collapse = ", ")), call. = FALSE)
-  is_logical(x = error)
+  is_TF(x = error)
 
   check <- purrr::map_lgl(profiles, function(x) nrow(hop[[x]]) > 0)
   not.found <- profiles[!check]
@@ -491,7 +491,7 @@ variable_check <- function(hop, profile, variables, error = FALSE) {
   is_hop(hop, error = TRUE)
   profile_check(hop, profile, error = TRUE)
   if(!is.character(variables)) stop("variable(s) argument must be a character vector", call. = FALSE)
-  is_logical(x = error)
+  is_TF(x = error)
 
   check <- purrr::map_lgl(variables, function(x) x %in% names(hop[[profile]]))
   not.found <- variables[!check]

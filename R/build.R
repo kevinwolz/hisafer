@@ -28,7 +28,7 @@ build_hisafe <- function(hip,
                          plot.scene    = TRUE,
                          summary.files = TRUE) {
   is_hip(hip, error = TRUE)
-  is_logical(plot.scene)
+  is_TF(plot.scene)
 
   allowed.files <- c("sim", "pld", "wth", "tree", "plt", "tec", "par", "pro")
   if(files[1] == "all") files <- allowed.files

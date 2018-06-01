@@ -62,7 +62,7 @@ read_hisafe <- function(hip           = NULL,
   if(is.null(hip) == is.null(path))                             stop("must provide hip or path, not both",                      call. = FALSE)
   if(!(all(is.character(simu.names)) | simu.names[1] == "all")) stop("simu.names argument must be 'all' or a character vector", call. = FALSE)
   if(!(all(is.character(profiles))   | profiles[1]   == "all")) stop("profiles argument must be 'all' or a character vector",   call. = FALSE)
-  is_logical(show.progress)
+  is_TF(show.progress)
   if(!(is.numeric(max.size) & length(max.size) == 1))           stop("max.size argument must be a positive integer",            call. = FALSE)
   if(max.size %% 1 != 0 & max.size > 0)                         stop("max.size argument must be a positive integer",            call. = FALSE)
 
@@ -324,7 +324,7 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
     northOrientation   <- as.numeric(pld$PLOT$northOrientation$value)
     cellWidth          <- as.numeric(pld$PLOT$cellWidth$value)
     soilDepth          <- sum(pld$LAYERS$layers$value[[1]]$thick)
-    waterTable         <- pld$SOIL$waterTable$value
+    waterTable         <- pld$WATER$waterTable$value
 
     plot.area <- plotWidth * plotHeight
     plot.info <- dplyr::tibble(SimulationName   = simu.name,

@@ -70,7 +70,7 @@ swap_cols <- function(df, col1, col2) {
   return(df)
 }
 
-is_logical <- function(x, error = TRUE) {
+is_TF <- function(x, error = TRUE) {
   x.name <- deparse(substitute(x))
   check  <- is.logical(x)
   if(error) {

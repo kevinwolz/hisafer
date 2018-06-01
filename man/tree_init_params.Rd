@@ -13,10 +13,8 @@ See \code{\link{define_hisafe}} for more details.}
 \item{...}{Any parameters of Hi-sAFe tree initialization table:
  \itemize{
  \item{"species"}{}
- \item{"age"}{}
  \item{"height"}{}
  \item{"crownBaseHeight"}{}
- \item{"truncatureRatio"}{}
  \item{"leafToFineRootsRatio"}{}
  \item{"crownRadius"}{}
  \item{"treeX"}{}

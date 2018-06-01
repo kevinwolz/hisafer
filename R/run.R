@@ -45,7 +45,7 @@ run_hisafe <- function(hip            = NULL,
   is_hip(hip, error = TRUE)
   if(is.null(hip) == is.null(path))                             stop("must provide hip OR path, not both",                           call. = FALSE)
   if(!(all(is.character(simu.names)) | simu.names[1] == "all")) stop("simu.names argument must be 'all' or a character vector",      call. = FALSE)
-  is_logical(parallel)
+  is_TF(parallel)
   if(!dir.exists(capsis.path))                                  stop("directory specified by capsis.path does not exist",            call. = FALSE)
   if(!("capsis.sh" %in% list.files(capsis.path)))               stop("directory specified by capsis.path does not contain Capsis",   call. = FALSE)
   if(!is.null(num.cores)) {
