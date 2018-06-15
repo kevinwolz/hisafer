@@ -7,6 +7,7 @@
 #' @param script.path A character string of the local path for where to create the cluster script file.
 #' If \code{NULL}, \code{hip} must be provided, and the path used will be the path element of the hip object.
 #' @param script.name A character sting of the name of the script to call on the cluster.
+#' @param model.version A character sting of the name of the Capsis folder (version) to call on the cluster.
 #' @param launch.call The name of the safe lanuch script to use (one of 'ScriptGen' or 'ScriptCalib')
 #' @param default.folder The folder in safe/data/SimSettings to use for parameter files that are not found in the simulation folder.
 #' @param cluster.path A character string of the path on the cluster where the simulation folder is located.
@@ -27,6 +28,7 @@ build_cluster_script <- function(hip            = NULL,
                                  simu.names     = NULL,
                                  script.path    = NULL,
                                  script.name    = "job",
+                                 model.version  = "Capsis4",
                                  launch.call    = "ScriptGen",
                                  default.folder = "",
                                  cluster.path,
@@ -80,7 +82,7 @@ build_cluster_script <- function(hip            = NULL,
     }
     write_line("module purge")
     write_line("module load jre/jre.8_x64")
-    write_line("cd /nfs/work/hisafe/Capsis4")
+    write_line(paste0("cd /nfs/work/hisafe/", model.version))
     write_line(clean_path(paste0("sh capsis.sh -p script safe.pgms.", launch.call, " ", cluster.path, "/", i, "/", i, ".sim", default.folder, collapse = "\n")))
     close(cluster.script)
   }
