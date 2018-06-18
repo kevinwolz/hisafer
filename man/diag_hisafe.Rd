@@ -4,16 +4,12 @@
 \alias{diag_hisafe}
 \title{Shortcut to Hi-sAFe diagnostics}
 \usage{
-diag_hisafe(hop, annualTrees = FALSE, annualPlot = FALSE, trees = TRUE,
-  plot = TRUE, climate = TRUE, annualCells = FALSE, monthCells = TRUE,
-  cells = TRUE, voxels = TRUE, ...)
+diag_hisafe(hop, trees = TRUE, plot = TRUE, climate = TRUE,
+  cells = TRUE, monthCells = TRUE, annualCells = FALSE, voxels = TRUE,
+  ...)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
-
-\item{annualTrees}{Logical indicating if annualTrees profile diagnostic plots should be made.}
-
-\item{annualPlot}{Logical indicating if annualPlot profile diagnostic plots should be made.}
 
 \item{trees}{Logical indicating if trees profile diagnostic plots should be made.}
 
@@ -21,9 +17,11 @@ diag_hisafe(hop, annualTrees = FALSE, annualPlot = FALSE, trees = TRUE,
 
 \item{climate}{Logical indicating if climate profile diagnostic plots should be made.}
 
-\item{annualCells}{Logical indicating if annualCells profile diagnostic plots should be made.}
+\item{cells}{Logical indicating if cells profile diagnostic plots should be made.}
 
 \item{monthCells}{Logical indicating if monthCells profile diagnostic plots should be made.}
+
+\item{annualCells}{Logical indicating if annualCells profile diagnostic plots should be made.}
 
 \item{voxels}{Logical indicating if voxels profile diagnostic plots should be made.}
 

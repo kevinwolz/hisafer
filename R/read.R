@@ -1,15 +1,13 @@
 #' Read output from one or more Hi-sAFe simulations
 #' @description Reads the designated output profiles from one or more Hi-sAFe simulations
-#' @return An object of class "hop". This is a list of 16 data frames (tibbles):
+#' @return An object of class "hop". This is a list of 14 data frames (tibbles):
 #' \itemize{
-#'  \item{annualTrees}
-#'  \item{annualCells}
-#'  \item{annualPlot}
 #'  \item{trees}
 #'  \item{plot}
 #'  \item{climate}
-#'  \item{monthCells}
 #'  \item{cells}
+#'  \item{monthCells}
+#'  \item{annualCells}
 #'  \item{voxels}
 #'  \item{variables}{ - variable descriptions and units from all read profiles}
 #'  \item{plot.info}{ - plot geometry data for each simulation}
@@ -44,8 +42,8 @@
 #' # Reading in Hi-sAFe simulation:
 #' myexp <- read_hisafe(myhip)
 #'
-#' # If only the annual tree data is required:
-#' mytreeexp <- read_hisafe(myhip, profiles = "annualTrees")
+#' # If only the tree data is required:
+#' mytreeexp <- read_hisafe(myhip, profiles = "trees")
 #' }
 read_hisafe <- function(hip           = NULL,
                         path          = NULL,
@@ -133,21 +131,19 @@ read_hisafe <- function(hip           = NULL,
     return(x)
   }
 
-  data$annualTrees <- data_tidy(data$annualTrees)
-  data$annualCells <- data_tidy(data$annualCells)
-  data$annualPlot  <- data_tidy(data$annualPlot)
   data$trees       <- data_tidy(data$trees)
   data$plot        <- data_tidy(data$plot)
   data$climate     <- data_tidy(data$climate)
-  data$monthCells  <- data_tidy(data$monthCells)
   data$cells       <- data_tidy(data$cells)
+  data$monthCells  <- data_tidy(data$monthCells)
+  data$annualCells <- data_tidy(data$annualCells)
   data$voxels      <- data_tidy(data$voxels)
-  data$variables   <- dplyr::distinct(data$variables)            # remove duplicate variable descriptions
+  data$variables   <- dplyr::distinct(data$variables) # remove duplicate variable descriptions
   data$exp.path    <- ifelse(nrow(EXP.PLAN) > 1, path, NA)
 
   ## Warn if lengths of all simulations are not equal
   if(length(simu.names) > 1) {
-    profiles.to.check <- c("annualPlot", "annualTrees", "annualCells", "plot", "trees", "cells", "voxels", "climate", "monthCells")
+    profiles.to.check <- c("trees", "plot", "climate", "cells", "monthCells", "annualCells", "voxels")
     year.summary <- data[[as.numeric(which.max(purrr::map_int(data[names(data) %in% profiles.to.check], nrow)))]] %>%
       dplyr::group_by(SimulationName) %>%
       dplyr::summarize(n = dplyr::n_distinct(Year) - 1) %>%
@@ -176,16 +172,14 @@ read_hisafe <- function(hip           = NULL,
 
 #' Read output from a single Hi-sAFe simulation
 #' @description Reads the designated output profiles from a single Hi-sAFe simulation. Called from within \code{\link{read_hisafe}}.
-#' @return An object of class "hop". This is a list of 15 data frames (tibbles):
+#' @return An object of class "hop". This is a list of 13 data frames (tibbles):
 #' \itemize{
-#'  \item{annualTrees}
-#'  \item{annualCells}
-#'  \item{annualPlot}
 #'  \item{trees}
 #'  \item{plot}
 #'  \item{climate}
-#'  \item{monthCells}
 #'  \item{cells}
+#'  \item{monthCells}
+#'  \item{annualCells}
 #'  \item{voxels}
 #'  \item{variables}{ - variable descriptions and units from all profiles}
 #'  \item{plot.info}{ - plot geometry data}
@@ -291,18 +285,16 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
     return(dv)
   }
 
-  annualtree.dv  <- get_prof(out, "annualTrees")
-  annualcells.dv <- get_prof(out, "annualCells")
-  annualplot.dv  <- get_prof(out, "annualPlot")
   trees.dv       <- get_prof(out, "trees")
   plot.dv        <- get_prof(out, "plot")
   climate.dv     <- get_prof(out, "climate")
-  monthCells.dv  <- get_prof(out, "monthCells")
   cells.dv       <- get_prof(out, "cells")
+  monthCells.dv  <- get_prof(out, "monthCells")
+  annualcells.dv <- get_prof(out, "annualCells")
   voxels.dv      <- get_prof(out, "voxels")
 
   ## Combine variables into one tibble, remove duplicates, rename col headers in English
-  vars.to.pull <- list(annualtree.dv, annualcells.dv, annualplot.dv, trees.dv, plot.dv, climate.dv, monthCells.dv, cells.dv, voxels.dv)
+  vars.to.pull <- list(trees.dv, plot.dv, climate.dv, cells.dv, monthCells.dv, annualcells.dv, voxels.dv)
   variables <- purrr::map(vars.to.pull, "variables") %>%
     dplyr::bind_rows() %>%
     dplyr::distinct()
@@ -326,11 +318,13 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
     soilDepth          <- sum(pld$LAYERS$layers$value[[1]]$thick)
     waterTable         <- pld$WATER$waterTable$value
 
-    plot.area <- plotWidth * plotHeight
+    plot.area.m2 <-
+    plot.area.ha <- plotWidth * plotHeight
     plot.info <- dplyr::tibble(SimulationName   = simu.name,
                                plotWidth        = plotWidth,
                                plotHeight       = plotHeight,
-                               plot.area        = plot.area,
+                               plotAreaM2       = plotWidth * plotHeight,
+                               plotAreaHa       = plotWidth * plotHeight / 10000,
                                northOrientation = northOrientation,
                                cellWidth        = cellWidth,
                                soilDepth        = soilDepth,
@@ -339,7 +333,7 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
     plot.info <- tree.info <- dplyr::tibble()
   }
 
-  ## Ensure crop names are characters in annual plot and plot
+  ## Ensure crop names are characters in plot
   clean_crop_name <- function(x) {
     for(i in c("mainCropName", "interCropName")) {
       if(i %in% names(x)) {
@@ -351,20 +345,18 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
   }
 
   ## Creatd output list & assign class
-  output <- list(annualTrees = dplyr::distinct(annualtree.dv$data),
+  output <- list(trees       = dplyr::distinct(trees.dv$data),
+                 plot        = dplyr::distinct(clean_crop_name(plot.dv$data)),
+                 climate     = dplyr::distinct(climate.dv$data),
+                 cells       = dplyr::distinct(cells.dv$data),
+                 monthCells  = dplyr::distinct(monthCells.dv$data),
                  annualCells = dplyr::distinct(annualcells.dv$data),
-                 annualPlot = dplyr::distinct(clean_crop_name(annualplot.dv$data)),
-                 trees      = dplyr::distinct(trees.dv$data),
-                 plot       = dplyr::distinct(clean_crop_name(plot.dv$data)),
-                 climate    = dplyr::distinct(climate.dv$data),
-                 monthCells = dplyr::distinct(monthCells.dv$data),
-                 cells      = dplyr::distinct(cells.dv$data),
-                 voxels     = dplyr::distinct(voxels.dv$data),
-                 variables  = variables,
-                 plot.info  = plot.info,
-                 tree.info  = tree.info,
-                 exp.plan   = EXP.PLAN,
-                 path       = dplyr::tibble(SimulationName = simu.name, path = simu.path))
+                 voxels      = dplyr::distinct(voxels.dv$data),
+                 variables   = variables,
+                 plot.info   = plot.info,
+                 tree.info   = tree.info,
+                 exp.plan    = EXP.PLAN,
+                 path        = dplyr::tibble(SimulationName = simu.name, path = simu.path))
 
   return(output)
 }

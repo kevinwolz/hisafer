@@ -1,14 +1,12 @@
 ## This SUPPORTED.PROFILES object is only needed to write the exportFrequencies line of the sim file within build_structure().
 ## There is no better way to do this until a better way to describe export profiles and frequenceies in Hi-sAFe is determined.
-SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("annualPlot", "annualTrees", "annualCells",
+SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("annualCells",
                                                  "plot", "trees", "cells", "cellsDetail",
                                                  "voxels", "voxelsDetail", "voxelsDebug", "voxelsOptim", "climate", "monthCells", "annualDBH"),
-                                    freqs    = c(365,          365,          365,
+                                    freqs    = c(365,
                                                  1,      1,       1,        1,
                                                  1,        1,               1,             1,            1,          30,           365),
-                                    description = c("annual plot-level data",
-                                                    "annual data for each tree in the scene",
-                                                    "annual data for each cell in the scene",
+                                    description = c("annual data for each cell in the scene",
                                                     "daily plot-level data",
                                                     "daily data for each tree in the scene",
                                                     "daily data for each cell in the scene (core variables)",
@@ -20,6 +18,8 @@ SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("annualPlot", "annualTrees", "a
                                                     "daily climate data",
                                                     "monthly data for each cell in the scene",
                                                     "only data for annual DBH of each tree"))
+
+PRIVATE.PROFILES <- c("voxelsDebug", "voxelsOptim", "annualDBH")
 
 INPUT.DEFS  <- readr::read_delim(system.file("extdata", "input_defs.txt",  package = "hisafer"), "\t", col_types = readr::cols())
 OUTPUT.DEFS <- dplyr::arrange(readr::read_delim(system.file("extdata", "output_defs.txt", package = "hisafer"), "\t", col_types = readr::cols()), profile, name)

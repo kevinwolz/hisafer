@@ -17,8 +17,7 @@ plot_hisafe_ts(hop, variables, profile, cumulative = FALSE,
 \item{variables}{A character vector of the names of the variables to plot.
 More than one variable name can be passed, but all variables must be from the same \code{profile}.}
 
-\item{profile}{A character string of the profile for which to plot a timeseries. If 'annualTrees' or 'annualPlot', annual timeseries are created.
-If 'trees', 'plot', or 'climate', daily timeseries are created.}
+\item{profile}{A character string of the profile for which to plot a timeseries. One of 'trees', 'plot', or 'climate'.}
 
 \item{cumulative}{Logical indicating wheter \code{variables} should be cumulated before plotting.}
 
@@ -47,7 +46,7 @@ If \code{NA}, the default, then solid lines are used for all simulations. The de
 \item{facet.year}{A logical indicating whether, for daily profiles, the plot should be faceted by year. This helps with seeing finer level detail.}
 
 \item{crop.points}{Logical indicating if points should be plotted as well, with point shape desgnating the main crop name.
-Only applies when \code{profile} is 'plot' or 'annualPlot'.}
+Only applies when \code{profile} is 'plot'.}
 
 \item{plot}{If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.}
 }
@@ -58,22 +57,19 @@ Otherwise, if \code{facet.year = TRUE}, plots of daily profiles will be faceted 
 If more than one value is passed to \code{variable}, then one plot will be created for each variable and combined using \code{\link{cowplot::plot_grid}}.
 }
 \description{
-Plots a daily or annual timeseries of a single Hi-sAFe output variable.
+Plots a daily timeseries of a single Hi-sAFe output variable.
 }
 \examples{
 \dontrun{
 # After reading in Hi-sAFe simulation data via:
 mydata <- read_hisafe(path = "./")
 
-# You can create an annual timeseries of carbonCoarseRoots:
-annual.plot <- plot_hisafe_ts(mydata, "carbonCoarseRoots", "annualTrees")
-
-# For a daily timeseries instead:
+# For a daily timeseries:
 daily.plot <- plot_hisafe_ts(mydata, "carbonCoarseRoots", "trees")
 
 # Once you have the plot object, you can display it and save it:
-annual.plot
-ggplot2::ggsave("annual_carbonCoarseRoots.png", annual.plot)
+daily.plot
+ggplot2::ggsave("carbonCoarseRoots.png", daily.plot)
 }
 }
 \seealso{

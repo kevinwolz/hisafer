@@ -225,8 +225,7 @@ hop_params <- function(variable = "names", search = FALSE) {
 #' hisafe_profiles()
 #' }
 hisafe_profiles <- function() {
-  private.profiles <- c("voxelsDebug", "voxelsOptim", "annualDBH")
-  public.profiles  <- dplyr::filter(SUPPORTED.PROFILES, !(profiles %in% private.profiles))
+  public.profiles  <- dplyr::filter(SUPPORTED.PROFILES, !(profiles %in% PRIVATE.PROFILES))
   print(as.data.frame(public.profiles), row.names = FALSE)
 }
 
@@ -308,7 +307,7 @@ hop_filter <- function(hop,
 
   ## id
   if(tree.ids[1] != "all") {
-    profiles.to.check <- c("annualTrees", "trees", "tree.info")
+    profiles.to.check <- c("trees", "tree.info")
     profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
     for(i in profiles) {
       if(!all(tree.ids %in% unique(hop[[i]]$id))) stop(paste0("one or more values of tree.id are not present in the ", i, " profile"), call. = FALSE)
@@ -340,7 +339,7 @@ hop_filter <- function(hop,
 
   ## STRIP EXP PLAN VARS
   if(strip.exp.plan) {
-    for(p in c("annualPlot", "annualTrees", "annualCells", "plot", "trees", "cells", "voxels", "climate", "monthCells")) {
+    for(p in c("annualCells", "plot", "trees", "cells", "voxels", "climate", "monthCells")) {
       if(nrow(hop[[p]]) > 0) {
         keep.cols <- c(1, which(names(hop[[p]]) == "Date"):ncol(hop[[p]]))
         hop[[p]] <- dplyr::select(hop[[p]], names(hop[[p]])[keep.cols])
@@ -607,7 +606,7 @@ analyze_hisafe <- function(hop,
 write_hop <- function(hop, profiles = "all", output.path = NULL) {
   is_hop(hop, error = TRUE)
 
-  supported.profiles <- c("annualTrees", "annualCells", "annualPlot", "trees", "plot", "climate", "monthCells", "cells", "voxels")
+  supported.profiles <- c("annualCells", "trees", "plot", "climate", "monthCells", "cells", "voxels")
   if(profiles[1] == "all") profiles <- supported.profiles
   if(!all(profiles %in% supported.profiles)) stop(paste0("profiles argument must be 'all' or one or more of ",
                                                          paste(supported.profiles, collapse = ", ")), call. = FALSE)

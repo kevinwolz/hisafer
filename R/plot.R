@@ -1,5 +1,5 @@
 #' Plot timeseries of Hi-sAFe output variable
-#' @description Plots a daily or annual timeseries of a single Hi-sAFe output variable.
+#' @description Plots a daily timeseries of a single Hi-sAFe output variable.
 #' @return If \code{plot = TRUE}, returns a ggplot object, otherwise the data that would create the plot is returned.
 #' If the data contains two more tree ids, the plot will be faceted by tree id.
 #' Otherwise, if \code{facet.year = TRUE}, plots of daily profiles will be faceted by year.
@@ -7,8 +7,7 @@
 #' @param hop An object of class hop.
 #' @param variables A character vector of the names of the variables to plot.
 #' More than one variable name can be passed, but all variables must be from the same \code{profile}.
-#' @param profile A character string of the profile for which to plot a timeseries. If 'annualTrees' or 'annualPlot', annual timeseries are created.
-#' If 'trees', 'plot', or 'climate', daily timeseries are created.
+#' @param profile A character string of the profile for which to plot a timeseries. One of 'trees', 'plot', or 'climate'.
 #' @param cumulative Logical indicating wheter \code{variables} should be cumulated before plotting.
 #' @param simu.names A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.
 #' @param years A numeric vector of the years within \code{hop} to include. Use "all" to include all available values.
@@ -25,7 +24,7 @@
 #' @param aes.cols A list with arguments "color" and "linetype" containing character strings of the column names to use for plot aesthetics.
 #' @param facet.year A logical indicating whether, for daily profiles, the plot should be faceted by year. This helps with seeing finer level detail.
 #' @param crop.points Logical indicating if points should be plotted as well, with point shape desgnating the main crop name.
-#' Only applies when \code{profile} is 'plot' or 'annualPlot'.
+#' Only applies when \code{profile} is 'plot'.
 #' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.
 #' @export
 #' @importFrom dplyr %>%
@@ -36,15 +35,12 @@
 #' # After reading in Hi-sAFe simulation data via:
 #' mydata <- read_hisafe(path = "./")
 #'
-#' # You can create an annual timeseries of carbonCoarseRoots:
-#' annual.plot <- plot_hisafe_ts(mydata, "carbonCoarseRoots", "annualTrees")
-#'
-#' # For a daily timeseries instead:
+#' # For a daily timeseries:
 #' daily.plot <- plot_hisafe_ts(mydata, "carbonCoarseRoots", "trees")
 #'
 #' # Once you have the plot object, you can display it and save it:
-#' annual.plot
-#' ggplot2::ggsave("annual_carbonCoarseRoots.png", annual.plot)
+#' daily.plot
+#' ggplot2::ggsave("carbonCoarseRoots.png", daily.plot)
 #' }
 plot_hisafe_ts <- function(hop,
                            variables,
@@ -63,14 +59,13 @@ plot_hisafe_ts <- function(hop,
                            crop.points      = FALSE,
                            plot             = TRUE) {
 
-  annual.profiles <- c("annualTrees", "annualPlot")
-  daily.profiles  <- c("trees", "plot", "climate")
-  tree.profiles   <- c("annualTrees", "trees")
+  allowed.profiles  <- c("trees", "plot", "climate")
+  tree.profiles     <- "trees"
 
   is_hop(hop, error = TRUE)
   profile_check(hop, profile, error = TRUE)
   variable_check(hop, profile, variables, error = TRUE)
-  if(!(profile %in% c(annual.profiles, daily.profiles))) stop("supplied profile is not supported", call. = FALSE)
+  if(!(profile %in% allowed.profiles)) stop("supplied profile is not supported", call. = FALSE)
 
   if(years[1]    == "all")                              years    <- unique(hop[[profile]]$Year)
   if(tree.ids[1] == "all" & profile %in% tree.profiles) tree.ids <- unique(hop[[profile]]$id)
@@ -95,36 +90,26 @@ plot_hisafe_ts <- function(hop,
                     date.max   = date.max)
 
   ## Create profile-specific x aesthetic, axis label, plot theme, and time.lim filter
-  if(profile %in% annual.profiles){
+  x.var       <- "fake.date"
+  x.label     <- "Date"
+  if(facet.year) {
+    facet <- facet_wrap(~Year)
+    scale_x_ts  <- scale_x_date(date_labels = "%b", expand = c(0,0),
+                                limits = lubridate::as_date(lubridate::parse_date_time(paste0("8000-", doy.lim), "%Y-%j")))
+    theme.extra <- theme(axis.ticks.length = unit(5, "points"),
+                         axis.text.x       = element_text(margin = margin(t = 5, unit = "points"), angle = 90, hjust = 1, vjust = 0.5),
+                         axis.text.y       = element_text(margin = margin(r = 5, unit = "points")))
+  } else {
     x.var       <- "Date"
-    x.label     <- "Year"
     facet       <- geom_blank()
     scale_x_ts  <- scale_x_date(date_labels = "%Y") # "%b-%Y"
     theme.extra <- geom_blank()
-    plot.data  <- hop[[profile]] %>%
-      dplyr::filter(Year %in% years)
-  } else {
-    x.var       <- "fake.date"
-    x.label     <- "Date"
-    if(facet.year) {
-      facet <- facet_wrap(~Year)
-      scale_x_ts  <- scale_x_date(date_labels = "%b", expand = c(0,0),
-                                  limits = lubridate::as_date(lubridate::parse_date_time(paste0("8000-", doy.lim), "%Y-%j")))
-      theme.extra <- theme(axis.ticks.length = unit(5, "points"),
-                           axis.text.x       = element_text(margin = margin(t = 5, unit = "points"), angle = 90, hjust = 1, vjust = 0.5),
-                           axis.text.y       = element_text(margin = margin(r = 5, unit = "points")))
-    } else {
-      x.var       <- "Date"
-      facet       <- geom_blank()
-      scale_x_ts  <- scale_x_date(date_labels = "%Y") # "%b-%Y"
-      theme.extra <- geom_blank()
-    }
-    plot.data  <- hop[[profile]] %>%
-      dplyr::filter(Year %in% years) %>%
-      dplyr::mutate(fake.date = lubridate::ymd(paste0("8000-", Month, "-", Day)))
-    yrs.to.remove <- unique(plot.data$Year)[table(plot.data$Year) == length(unique(plot.data$SimulationName))]
-    plot.data <- dplyr::filter(plot.data, !(Year %in% yrs.to.remove))
   }
+  plot.data  <- hop[[profile]] %>%
+    dplyr::filter(Year %in% years) %>%
+    dplyr::mutate(fake.date = lubridate::ymd(paste0("8000-", Month, "-", Day)))
+  yrs.to.remove <- unique(plot.data$Year)[table(plot.data$Year) == length(unique(plot.data$SimulationName))]
+  plot.data <- dplyr::filter(plot.data, !(Year %in% yrs.to.remove))
 
   ## Filter/Facet by supplied tree.ids
   if(profile %in% tree.profiles) {
@@ -198,7 +183,7 @@ plot_hisafe_ts <- function(hop,
       }
     }
 
-    if(crop.points & (profile %in% c("annualPlot", "plot"))) {
+    if(crop.points & (profile %in% "plot")) {
       plot.obj[[i]] <- plot.obj[[i]] +
         geom_point(aes(shape = mainCropName), size = 2, na.rm = TRUE) +
         guides(shape = guide_legend(title = "Main crop", title.hjust = 0.5))
@@ -382,13 +367,13 @@ plot_hisafe_monthcells <- function(hop,
 #' ggsave_fitmax("yield.png", tile.plot)
 #' }
 plot_hisafe_annualcells <- function(hop,
-                                   variable   = "yieldMax",
-                                   simu.names = "all",
-                                   years,
-                                   plot.x     = "x",
-                                   trees      = TRUE,
-                                   canopies   = TRUE,
-                                   plot       = TRUE) {
+                                    variable   = "yieldMax",
+                                    simu.names = "all",
+                                    years,
+                                    plot.x     = "x",
+                                    trees      = TRUE,
+                                    canopies   = TRUE,
+                                    plot       = TRUE) {
 
   is_hop(hop, error = TRUE)
   profile_check(hop, "annualCells", error = TRUE)

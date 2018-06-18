@@ -39,16 +39,14 @@ If NA, the maximum date in the output data is used. Only used if \code{dates} is
 If \code{NULL}, then \code{date.max} and \code{date.min} are used instad.}
 }
 \value{
-An object of class "hop". This is a list of 16 data frames (tibbles):
+An object of class "hop". This is a list of 14 data frames (tibbles):
 \itemize{
- \item{annualTrees}
- \item{annualCells}
- \item{annualPlot}
  \item{trees}
  \item{plot}
  \item{climate}
- \item{monthCells}
  \item{cells}
+ \item{monthCells}
+ \item{annualCells}
  \item{voxels}
  \item{variables}{ - variable descriptions and units from all read profiles}
  \item{plot.info}{ - plot geometry data for each simulation}
@@ -66,7 +64,7 @@ Reads the designated output profiles from one or more Hi-sAFe simulations
 # Reading in Hi-sAFe simulation:
 myexp <- read_hisafe(myhip)
 
-# If only the annual tree data is required:
-mytreeexp <- read_hisafe(myhip, profiles = "annualTrees")
+# If only the tree data is required:
+mytreeexp <- read_hisafe(myhip, profiles = "trees")
 }
 }

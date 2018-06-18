@@ -9,8 +9,7 @@ diag_hisafe_ts(hop, profile, output.path = NULL, ...)
 \arguments{
 \item{hop}{An object of class "hop" or "face" containing output data from one or more Hi-sAFe simulations.}
 
-\item{profile}{The profile for which to plot a timeseries. If 'annualTrees' or 'annualPlot', annual timeseries are created.
-If 'trees', 'plot', or 'climate', daily timeseries are created.}
+\item{profile}{The profile for which to plot a timeseries. One of 'trees', 'plot', or 'climate'.}
 
 \item{output.path}{A character string indicating the path to the directory where plots should be saved.
 Plots aresaved in a subdirectory within this directory named by \code{profile}.
@@ -24,7 +23,7 @@ data from more than one Hi-sAFe simulation, the plots will contain multiple line
 If the data contains two more tree ids, the plots will be faceted by tree id.
 }
 \description{
-Plots a daily or annual timeseries of every Hi-sAFe output variable in a specified output profile.
+Plots a daily timeseries of every Hi-sAFe output variable in a specified output profile.
 All plots are saved as png files to a specifified output path.
 }
 \examples{
@@ -32,10 +31,7 @@ All plots are saved as png files to a specifified output path.
 # After reading in Hi-sAFe simulation data via:
 mydata <- read_hisafe(path = "mydir", simu.names = "MySimulation")
 
-# You can create an annual timeseries of every annualTrees variable:
-diag_hisafe_ts(mydata, "annualTrees")
-
-# For daily timeseries of the trees profile instead:
+# You can create a daily timeseries of every trees variable:
 diag_hisafe_ts(mydata, "trees")
 }
 }
