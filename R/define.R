@@ -206,7 +206,7 @@ define_hisafe_file <- function(file,
 check_input_values <- function(hip, force) {
 
   if(force) {
-    warning("Bypassing validation of input parameter definitions can lead to unpredictable functionality of Hi-sAFe." ,
+    warning("Bypassing validation of input parameter definitions can lead to unpredictable functionality of Hi-sAFe.",
             call. = FALSE, immediate. = TRUE)
     return(FALSE)
   }
@@ -328,6 +328,18 @@ check_input_values <- function(hip, force) {
   tree.centered.error <- ifelse(length(bad.trees)       == 0, "", paste("-- The following trees are not centered on a cell:",                   paste(bad.trees, collapse = ", ")))
   tree.offscene.error <- ifelse(length(off.scene.trees) == 0, "", paste("-- The following trees' coordinates are beyond the scene boundaries:", paste(off.scene.trees, collapse = ", ")))
 
+  ## Trees located on same cell
+  colocated_trees <- function(tree.init) {
+    out <- tree.init %>%
+      dplyr::select(treeX, treeY) %>%
+      duplicated() %>%
+      any()
+    return(out)
+  }
+  coloc <- purrr::map_lgl(get_used("tree.initialization"), colocated_trees)
+  coloc.error <- ifelse(any(coloc), paste0("-- There can only be one tree planted on each cell. These simulations have two or more trees located on the same cell: ",
+                                           paste(hip$exp.plan$SimulationName[coloc], collapse = ', ')), "")
+
   ## Distance & Time Errors
   less_than_comp <- function(param, ref) {
     ifelse(all(purrr::map2_lgl(get_used(param), get_used(ref), less_than)),
@@ -357,11 +369,25 @@ check_input_values <- function(hip, force) {
   }
 
   tree.root.error <- ifelse(all(tree.rows == root.rows),
-                            "", "-- number of rows in the tree initialization and root initialization tables must be equal")
+                            "", "-- The number of rows in the tree initialization and root initialization tables must be equal.")
 
   ## Don't Edit Export Profile Errors
   EP.error <- ifelse(is_mod("profileNames") | is_mod("exportFrequencies"),
                      "-- profileNames and exportFrequencies cannot be defined using define_hisafe(). Use the 'profiles' argument of build_hisafe().", "")
+
+  ## STICS parameter dependencies check
+  capillary.error <- ifelse((is_mod("capillaryUptake") | is_mod("capillaryUptakeMinWater")) & all(get_used("capillary") == 0),
+                            "-- capillaryUptake and capillaryUptakeMinWater are not active parameters when capillary = 0.", "")
+  drainage.error <- ifelse((is_mod("drainagePipesSpacing") | is_mod("drainagePipesDepth") | is_mod("waterConductivity") | is_mod("impermeableLayerDepth"))
+                    & all(get_used("artificialDrainage") == 0),
+                    "-- drainagePipesSpacing, drainagePipesDepth, waterConductivity, and impermeableLayerDepth are not active parameters when artificialDrainage = 0.",
+                    "")
+  denitrif.error <- ifelse((is_mod("denitrificationDepth") | is_mod("denitrificationRate")) & all(get_used("denitrification") == 0),
+                           "-- denitrificationDepth and denitrificationRate are not active parameters when denitrification = 0.", "")
+  watertable.error <- ifelse((is_mod("no3ConcentrationInWaterTable") | is_mod("nh4ConcentrationInWaterTable")) & all(get_used("waterTable") == 0),
+                             "-- no3ConcentrationInWaterTable and nh4ConcentrationInWaterTable are not active parameters when waterTable = 0.", "")
+  dm.error <- ifelse(any(get_used("artificialDrainage") == 1 & get_used("macroporosity") == 0),
+                     "-- macroporosity mucst be activated (set to 1) if artificialDrainage is activated (set to 1).", "")
 
   ## Timeseries Length Errors
   treePlanting.length.error <- ifelse(all(purrr::map_lgl(list(get_length("treePlantingYears"),
@@ -416,12 +442,6 @@ check_input_values <- function(hip, force) {
   weed.error <- ifelse(any(get_used_un("treeCropDistance") > 0 & get_used_un("treeCropRadius") > 0),
                        "-- treeCropDistance and treeCropRadius can not both be greater than 0", "")
 
-  ## Root Init Errors
-  root.init.diam.error <- ifelse(any(unlist(get_init_vals("root.initialization", "paramShape1")) < (0.75 * unlist(purrr::map2(get_used_un("cellWidth"),
-                                                                                                                              root.rows,
-                                                                                                                              rep)))),
-                                 "-- paramShape1 of root initialization table cannot be smaller than 0.75 * cellWidth", "")
-
   ## All weatherFile files exist
   if("weatherFile" %in% names(hip$exp.plan)) {
     if(all(file.exists(hip$exp.plan$weatherFile))) {
@@ -439,14 +459,15 @@ check_input_values <- function(hip, force) {
                   unsupported.trees.error, too.many.trees.error,
                   unsupported.crops.error, unsupported.itks.error,
                   plot.width.error, plot.height.error,
+                  coloc.error,
                   treeCropDistance.error, treeRootPruningDistance.error,
                   tree.centered.error, tree.offscene.error,
                   treePlantingYears.error, treePruningYears.error, treeThinningYears.error, treeRootPruningYears.error,
                   tree.root.error, EP.error,
+                  capillary.error, drainage.error, denitrif.error, watertable.error, dm.error,
                   treePlanting.length.error, treePruning.length.error, treeThinning.length.error, rootPruning.length.error,
                   mainCrop.length.error, interCrop.length.error, simuNbrDays.length.error,
-                  weed.error,
-                  root.init.diam.error, wth.error)
+                  weed.error, wth.error)
   all.errors <- paste0(all.errors[!(all.errors == "") & !is.na(all.errors)], collapse = "\n")
   if(all.errors != errors) stop(all.errors, call. = FALSE)
 
