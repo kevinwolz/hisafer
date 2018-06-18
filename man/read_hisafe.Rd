@@ -39,7 +39,7 @@ If NA, the maximum date in the output data is used. Only used if \code{dates} is
 If \code{NULL}, then \code{date.max} and \code{date.min} are used instad.}
 }
 \value{
-An object of class "hop". This is a list of 14 data frames (tibbles):
+An object of class "hop". This is a list of 13 data frames (tibbles):
 \itemize{
  \item{trees}
  \item{plot}
@@ -48,7 +48,6 @@ An object of class "hop". This is a list of 14 data frames (tibbles):
  \item{monthCells}
  \item{annualCells}
  \item{voxels}
- \item{variables}{ - variable descriptions and units from all read profiles}
  \item{plot.info}{ - plot geometry data for each simulation}
  \item{tree.info}{ - tree species and location data for each simulation}
  \item{exp.plan}{ - the exp.plan of the hip object that generated the simulation}

@@ -31,7 +31,7 @@ Should only be set to \code{FALSE} if input files are corrupted.}
 \item{max.size}{The maximum file size (in bytes) that should be read. Files larger than this value will be ignored, with a warning.}
 }
 \value{
-An object of class "hop". This is a list of 13 data frames (tibbles):
+An object of class "hop". This is a list of 12 data frames (tibbles):
 \itemize{
  \item{trees}
  \item{plot}
@@ -40,7 +40,6 @@ An object of class "hop". This is a list of 13 data frames (tibbles):
  \item{monthCells}
  \item{annualCells}
  \item{voxels}
- \item{variables}{ - variable descriptions and units from all profiles}
  \item{plot.info}{ - plot geometry data}
  \item{tree.info}{ - tree species and location data}
  \item{exp.plan}{ - the exp.plan of the hip object that generated the simulation}

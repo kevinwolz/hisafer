@@ -12,7 +12,7 @@ read_hisafe_output_file(profile, simu.name)
 \item{simu.name}{A character string of the name of the simulation being read.}
 }
 \value{
-An list of two data frames (tibbles): \code{data} contains the data from the profile; \code{variables} contains the variable descriptions.
+A data frame (tibbles) containing the data from the profile.
 }
 \description{
 Reads the designated output profiles from a single Hi-sAFe simulation.

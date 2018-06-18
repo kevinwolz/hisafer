@@ -1,6 +1,6 @@
 #' Read output from one or more Hi-sAFe simulations
 #' @description Reads the designated output profiles from one or more Hi-sAFe simulations
-#' @return An object of class "hop". This is a list of 14 data frames (tibbles):
+#' @return An object of class "hop". This is a list of 13 data frames (tibbles):
 #' \itemize{
 #'  \item{trees}
 #'  \item{plot}
@@ -9,7 +9,6 @@
 #'  \item{monthCells}
 #'  \item{annualCells}
 #'  \item{voxels}
-#'  \item{variables}{ - variable descriptions and units from all read profiles}
 #'  \item{plot.info}{ - plot geometry data for each simulation}
 #'  \item{tree.info}{ - tree species and location data for each simulation}
 #'  \item{exp.plan}{ - the exp.plan of the hip object that generated the simulation}
@@ -119,7 +118,6 @@ read_hisafe <- function(hip           = NULL,
   # purrr::map(map_df(data, ~ as.data.frame(purrr::map(.x, ~ unname(nest(.))))), bind_rows)
   # However, this isn't necessary becasue read_simulation always produces identically sized and named lists.
 
-
   ## Tidy up data
   data_tidy <- function(x){
     if(nrow(x) > 0) {
@@ -138,7 +136,6 @@ read_hisafe <- function(hip           = NULL,
   data$monthCells  <- data_tidy(data$monthCells)
   data$annualCells <- data_tidy(data$annualCells)
   data$voxels      <- data_tidy(data$voxels)
-  data$variables   <- dplyr::distinct(data$variables) # remove duplicate variable descriptions
   data$exp.path    <- ifelse(nrow(EXP.PLAN) > 1, path, NA)
 
   ## Warn if lengths of all simulations are not equal
@@ -172,7 +169,7 @@ read_hisafe <- function(hip           = NULL,
 
 #' Read output from a single Hi-sAFe simulation
 #' @description Reads the designated output profiles from a single Hi-sAFe simulation. Called from within \code{\link{read_hisafe}}.
-#' @return An object of class "hop". This is a list of 13 data frames (tibbles):
+#' @return An object of class "hop". This is a list of 12 data frames (tibbles):
 #' \itemize{
 #'  \item{trees}
 #'  \item{plot}
@@ -181,7 +178,6 @@ read_hisafe <- function(hip           = NULL,
 #'  \item{monthCells}
 #'  \item{annualCells}
 #'  \item{voxels}
-#'  \item{variables}{ - variable descriptions and units from all profiles}
 #'  \item{plot.info}{ - plot geometry data}
 #'  \item{tree.info}{ - tree species and location data}
 #'  \item{exp.plan}{ - the exp.plan of the hip object that generated the simulation}
@@ -252,53 +248,27 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
     dplyr::left_join(..., by = c("SimulationName", "Date", "Day", "Month", "Year" ,
                                  "JulianDay", "stepNum", "cellId", "id", "x", "y"))
   }
-  cell.data <- list(out[["cells"]]$data,
-                    out[["cellsDetail"]]$data)
-  cell.vars <- list(out[["cells"]]$variables,
-                    out[["cellsDetail"]]$variables)
-  out[["cells"]]$data      <- Reduce(join_cells,       cell.data[!purrr::map_lgl(cell.data, is.null)])
-  out[["cells"]]$variables <- Reduce(dplyr::bind_rows, cell.vars[!purrr::map_lgl(cell.vars, is.null)])
-  out$cellsDetail <- NULL
+  cell.data <- out[grep("^cells", names(out))] %>%
+    purrr::map("data")
+  out[["cells"]]$data <- Reduce(join_cells, cell.data[!purrr::map_lgl(cell.data, is.null)])
 
   join_voxels <- function(...){
     dplyr::left_join(..., by = c("SimulationName", "Date", "Day", "Month", "Year" ,
                                  "JulianDay", "stepNum", "cellId", "id", "x", "y", "z"))
   }
-  vox.data <- list(out[["voxels"]]$data,
-                   out[["voxelsDetail"]]$data,
-                   out[["voxelsDebug"]]$data,
-                   out[["voxelsOptim"]]$data)
-  vox.vars <- list(out[["voxels"]]$variables,
-                   out[["voxelsDetail"]]$variables,
-                   out[["voxelsDebug"]]$variables,
-                   out[["voxelsOptim"]]$variables)
-  out[["voxels"]]$data      <- Reduce(join_voxels,      vox.data[!purrr::map_lgl(vox.data, is.null)])
-  out[["voxels"]]$variables <- Reduce(dplyr::bind_rows, vox.vars[!purrr::map_lgl(vox.vars, is.null)])
-  out$voxelsDetail <- out$voxelsDebug <- out$voxelsOptim <- NULL
+  vox.data <- out[grep("^voxels", names(out))] %>%
+    purrr::map("data")
+  out[["voxels"]]$data <- Reduce(join_voxels, vox.data[!purrr::map_lgl(vox.data, is.null)])
 
   get_prof <- function(out, prof) {
     if(is.null(out[[prof]])) {
-      dv <- list(data = dplyr::tibble(), variables = dplyr::tibble())
+      dv <- dplyr::tibble()
     } else {
-      dv <- out[[prof]]
+      dv <- out[[prof]] %>%
+        dplyr::distinct()
     }
     return(dv)
   }
-
-  trees.dv       <- get_prof(out, "trees")
-  plot.dv        <- get_prof(out, "plot")
-  climate.dv     <- get_prof(out, "climate")
-  cells.dv       <- get_prof(out, "cells")
-  monthCells.dv  <- get_prof(out, "monthCells")
-  annualcells.dv <- get_prof(out, "annualCells")
-  voxels.dv      <- get_prof(out, "voxels")
-
-  ## Combine variables into one tibble, remove duplicates, rename col headers in English
-  vars.to.pull <- list(trees.dv, plot.dv, climate.dv, cells.dv, monthCells.dv, annualcells.dv, voxels.dv)
-  variables <- purrr::map(vars.to.pull, "variables") %>%
-    dplyr::bind_rows() %>%
-    dplyr::distinct()
-  if(ncol(variables) > 0) names(variables) <- c("Subject", "SubjectId", "VariableName", "Units", "Description", "VariableClass")
 
   ## Read plot characteristics from .PLD file
   if(read.inputs) {
@@ -345,14 +315,13 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
   }
 
   ## Creatd output list & assign class
-  output <- list(trees       = dplyr::distinct(trees.dv$data),
-                 plot        = dplyr::distinct(clean_crop_name(plot.dv$data)),
-                 climate     = dplyr::distinct(climate.dv$data),
-                 cells       = dplyr::distinct(cells.dv$data),
-                 monthCells  = dplyr::distinct(monthCells.dv$data),
-                 annualCells = dplyr::distinct(annualcells.dv$data),
-                 voxels      = dplyr::distinct(voxels.dv$data),
-                 variables   = variables,
+  output <- list(trees       = get_prof(out, "trees"),
+                 plot        = clean_crop_name(get_prof(out, "plot")),
+                 climate     = get_prof(out, "climate"),
+                 cells       = get_prof(out, "cells"),
+                 monthCells  = get_prof(out, "monthCells"),
+                 annualCells = get_prof(out, "annualCells"),
+                 voxels      = get_prof(out, "voxels"),
                  plot.info   = plot.info,
                  tree.info   = tree.info,
                  exp.plan    = EXP.PLAN,
@@ -378,7 +347,7 @@ read_hisafe_example <- function(profiles = c("plot", "trees", "climate", "monthC
 
 #' Read a single Hi-sAFe output profile
 #' @description Reads the designated output profiles from a single Hi-sAFe simulation.
-#' @return An list of two data frames (tibbles): \code{data} contains the data from the profile; \code{variables} contains the variable descriptions.
+#' @return A data frame (tibbles) containing the data from the profile.
 #' @param profile A character string of the path to the profile to be read.
 #' @param simu.name A character string of the name of the simulation being read.
 #' @importFrom dplyr %>%
@@ -388,9 +357,6 @@ read_hisafe_output_file <- function(profile, simu.name){
   ## Read raw text & find break between description & data
   raw.text <- readLines(profile)
   end.of.var.list <- which(raw.text[-1] == "")[1]
-
-  ## Read variable descriptions
-  variables <- read_table_hisafe(profile, skip = 7, nrows = end.of.var.list - 8) # always 7 header rows at start of each profile
 
   ## Read data
   dat <- read_table_hisafe(profile, skip = end.of.var.list) %>%
@@ -409,7 +375,7 @@ read_hisafe_output_file <- function(profile, simu.name){
     }
   }
 
-  return(list(data = dat, variables = variables))
+  return(dat)
 }
 
 #' Read from a Hi-sAFe output profile
@@ -441,15 +407,13 @@ read_profile <- function(profile, path, simu.name, show.progress = TRUE, max.siz
   file <- paste0(path, profile, ".txt")
   if(show.progress) cat(paste0("\n   -- reading:  ", profile, collapse = ", "))
   if(file.info(file)$size < max.size) {
-    profile.list <- read_hisafe_output_file(file, simu.name)
-    profile.data <- profile.list$data %>%
+    profile.data <- read_hisafe_output_file(file, simu.name) %>%
       dplyr::mutate_if(is.logical, as.numeric)   # columns read as logical must be coered to numeric to prevent plotting errors
-    profile.variables <- profile.list$variables %>% dplyr::mutate(VariableClass = profile)
   } else {
     warning(paste(profile, "profile too large (> max.size) to read"), call. = FALSE)
-    profile.data <- profile.variables <- dplyr::tibble()
+    profile.data <- dplyr::tibble()
   }
-  return(list(data = profile.data, variables = profile.variables))
+  return(profile.data)
 }
 
 #' Read tree information from a Hi-sAFe pld file
