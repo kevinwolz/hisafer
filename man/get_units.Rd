@@ -2,18 +2,16 @@
 % Please edit documentation in R/plot.R
 \name{get_units}
 \alias{get_units}
-\title{Extract variable units from a hop object}
+\title{Get variable units}
 \usage{
-get_units(hop, profile, variable)
+get_units(variable, prof)
 }
 \arguments{
-\item{hop}{An object of class hop.}
-
-\item{profile}{A characgter string of the profile that \code{variable} is from.}
-
 \item{variable}{A character string of the name of the variable to get units for.}
+
+\item{prof}{A characgter string of the profile that \code{variable} is from.}
 }
 \description{
-Extracts variable units from a hop object. Use within all hisafe plot functions.
+Gets variable units. Used within all hisafe plot functions.
 }
 \keyword{internal}

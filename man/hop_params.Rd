@@ -4,7 +4,7 @@
 \alias{hop_params}
 \title{Display Hi-sAFe output variables}
 \usage{
-hop_params(variable = "names", search = FALSE)
+hop_params(variable = "names", search = FALSE, quiet = FALSE)
 }
 \arguments{
 \item{variable}{A character vector of specific Hi-sAFe output variables of which to display details.
@@ -14,6 +14,8 @@ If "all", then the names, definitions, and units of all Hi-sAFe output variables
 
 \item{search}{Logical indicating whether \code{variable} should be treated as a regular expression and
 searched for in the variable names rather than matched literally.}
+
+\item{quiet}{Logical indicating whether or not to supress output printed to console.}
 }
 \value{
 Invisibly returns an alphebetized character vector of the names of Hi-sAFe output variables

@@ -161,6 +161,7 @@ hip_params <- function(variable = "names", search = FALSE, template = "agrofores
 #' If "all", then the names, definitions, and units of all Hi-sAFe output variables is printed.
 #' @param search Logical indicating whether \code{variable} should be treated as a regular expression and
 #' searched for in the variable names rather than matched literally.
+#' @param quiet Logical indicating whether or not to supress output printed to console.
 #' @export
 #' @family hisafe helper functions
 #' @examples
@@ -169,13 +170,13 @@ hip_params <- function(variable = "names", search = FALSE, template = "agrofores
 #' hop_params("carbonBranches") # details of cellWidth parameter
 #' hop_params("all")            # details of all parameters
 #' }
-hop_params <- function(variable = "names", search = FALSE) {
+hop_params <- function(variable = "names", search = FALSE, quiet = FALSE) {
 
   if(!is.character(variable))                           stop("variable argument must be a character vector",                call. = FALSE)
   if(search & length(variable) > 1)                     stop("search = TRUE is only possible with a single variable input", call. = FALSE)
 
   acceptable <- c(OUTPUT.DEFS$name, "names", "all")
-  if(any(!(variable %in% acceptable)) & !search) {
+  if(any(!(variable %in% acceptable)) & !search & !quiet) {
     bad.vars <- sort(variable[!(variable %in% acceptable)])
     close.matches  <- purrr::map(bad.vars, stringdist::stringdist, b = OUTPUT.DEFS$name)
     suggested.vars <- OUTPUT.DEFS$name[unlist(purrr::map(close.matches, which.min))]
@@ -186,33 +187,37 @@ hop_params <- function(variable = "names", search = FALSE) {
   if(variable[1] == "all") {
     for(i in 1:nrow(OUTPUT.DEFS)){
       var.def <- OUTPUT.DEFS[i, ]
-      if(i == 1) { cat(var.def$name) } else { cat("\n\n", var.def$name) }
-      cat("\n  -- Output profile:", var.def$profile)
-      cat("\n  -- Definition:",     var.def$definition)
-      cat("\n  -- Units:",          var.def$unit)
+      if(i == 1) cat(var.def$name) else if(!quiet) cat("\n\n", var.def$name)
+      if(!quiet) {
+        cat("\n  -- Output profile:", var.def$profile)
+        cat("\n  -- Definition:",     var.def$definition)
+        cat("\n  -- Units:",          var.def$unit)
+      }
     }
-  } else if (variable[1] == "names") {
+  } else if (variable[1] == "names" & !quiet) {
     cat(paste0(OUTPUT.DEFS$profile, " - ", OUTPUT.DEFS$name, collapse = "\n"))
   } else {
-    if(search) cat("'variable' values will be searched as regular expressions.")
+    if(search & !quiet) cat("'variable' values will be searched as regular expressions.")
     for(i in 1:length(variable)){
       if(search) {
         var.def <- dplyr::filter(OUTPUT.DEFS, stringr::str_detect(tolower(name), variable[i]))
         if(nrow(var.def) == 0) {
-          cat("\n\n  --", paste(variable[i], "was not detected in any Hi-sAFe input parameter names"))
+          if(!quiet) cat("\n\n  --", paste(variable[i], "was not detected in any Hi-sAFe input parameter names"))
           next
         }
       } else {
         var.def <- dplyr::filter(OUTPUT.DEFS, name == variable[i])
       }
-      for(j in 1:nrow(var.def)){
-        cat("\n\n", var.def$name[j])
-        cat("\n  -- Output profile:", var.def$profile[j])
-        cat("\n  -- Definition:",     var.def$definition[j])
-        cat("\n  -- Units:",          var.def$unit[j])
+      if(!quiet) {
+        for(j in 1:nrow(var.def)){
+          cat("\n\n", var.def$name[j])
+          cat("\n  -- Output profile:", var.def$profile[j])
+          cat("\n  -- Definition:",     var.def$definition[j])
+          cat("\n  -- Units:",          var.def$unit[j])
+        }
       }
     }
-    invisible(OUTPUT.DEFS$name)
+    invisible(var.def)
   }
 }
 

@@ -157,7 +157,7 @@ plot_hisafe_ts <- function(hop,
                                                   linetype = aes.cols$linetype,
                                                   group    = "SimulationName")) +
       labs(x        = x.label,
-           y        = paste0("Cumulative"[cumulative], variables[i], " (", get_units(hop, profile, variables[i]), ")"),
+           y        = gsub(" \\(\\)", "", paste0("Cumulative"[cumulative], variables[i], " (", get_units(variable = variables[i], prof = profile), ")")),
            title    = ifelse(length(variables) == 1, variables[i], ""),
            color    = ifelse(aes.cols$color    == "SimulationName", "", aes.cols$color),
            linetype = ifelse(aes.cols$linetype == "SimulationName", "", aes.cols$linetype)) +
@@ -310,7 +310,7 @@ plot_hisafe_monthcells <- function(hop,
   plot.obj <- ggplot(plot.data) +
     labs(x     = colfacet,
          y     = rowfacet,
-         fill  = get_units(hop, "monthCells", variable),
+         fill  = get_units(variable = variable, prof = "monthCells"),
          title = paste0(variable, "\n(", fixed.var, ")")) +
     coord_equal(xlim   = c(0, plotWidth),
                 ylim   = c(0, plotHeight),
@@ -415,7 +415,7 @@ plot_hisafe_annualcells <- function(hop,
   plot.obj <- ggplot(plot.data) +
     labs(x     = "SimulationName",
          y     = "Year",
-         fill  = get_units(hop, "annualCells", variable),
+         fill  = get_units(variable = variable, prof = "annualCells"),
          title = variable) +
     scale_x_continuous(expand = c(0, 0)) +
     scale_y_continuous(expand = c(0, 0)) +
@@ -570,7 +570,7 @@ plot_hisafe_cells <- function(hop,
                       y     = y.lab,
                       title = title.lab)
     plot.theme <- theme_hisafe_tile()
-    plot.guide <- guides(fill = guide_colourbar(title       = get_units(hop, "cells", variable),
+    plot.guide <- guides(fill = guide_colourbar(title       = get_units(variable = variable, prof = "cells"),
                                                 barwidth    = 15,
                                                 barheight   = 1.5,
                                                 title.vjust = 0.8,
@@ -712,7 +712,7 @@ plot_hisafe_voxels <- function(hop,
 
   plot.obj <- ggplot(plot.data, aes_string(x = "Date", y = variable, color = summarize.by, linetype = summarize.by, group = group.by)) +
     labs(x        = "Date",
-         y        = paste0(variable, " (", get_units(hop, "voxels", variable), ")"),
+         y        = gsub(" \\(\\)", "", paste0(variable, " (", get_units(variable = variable, prof = "voxels"), ")")),
          color    = paste(summarize.by, "(m)"),
          linetype = paste(summarize.by, "(m)"),
          title    = variable,
@@ -938,17 +938,18 @@ get_dims <- function(ggobj,
   return(list(height = height, width = width))
 }
 
-#' Extract variable units from a hop object
-#' @description Extracts variable units from a hop object. Use within all hisafe plot functions.
-#' @param hop An object of class hop.
-#' @param profile A characgter string of the profile that \code{variable} is from.
+#' Get variable units
+#' @description Gets variable units. Used within all hisafe plot functions.
 #' @param variable A character string of the name of the variable to get units for.
+#' @param prof A characgter string of the profile that \code{variable} is from.
 #' @keywords internal
-get_units <- function(hop, profile, variable) {
-  var.unit <- hop$variables %>%
-    dplyr::filter(VariableClass == profile, VariableName == variable) %>%
-    .$Units %>%
+get_units <- function(variable, prof) {
+  var.unit <- hop_params(variable, quiet = TRUE) %>%
+    dplyr::filter(profile == prof) %>%
+    .$unit %>%
     gsub(pattern = "\\.", replacement = " ")
+
+  if(length(var.unit) == 0) var.unit <- ""
   return(var.unit)
 }
 
