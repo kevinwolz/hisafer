@@ -620,9 +620,9 @@ plot_hisafe_cells <- function(hop,
 #' @param date.max A character vector containing the minimum date (yyyy-mm-dd) to include.
 #' If \code{NA}, the default, than the maximum value in the voxels profile is used
 #' @param simu.names A character string containing the SimulationNames to include. Use "all" to include all available values.
-#' @param x A numeric vector of the x values of the voxels to include. If \code{NA}, the default, then all x values are used.
-#' @param y A numeric vector of the y values of the voxels to include. If \code{NA}, the default, then all y values are used.
-#' @param z A numeric vector of the z values of the voxels to include. If \code{NA}, the default, then all z values are used.
+#' @param X A numeric vector of the x values of the voxels to include. If \code{NA}, the default, then all x values are used.
+#' @param Y A numeric vector of the y values of the voxels to include. If \code{NA}, the default, then all y values are used.
+#' @param Z A numeric vector of the z values of the voxels to include. If \code{NA}, the default, then all z values are used.
 #' @param summarize.by One of 'x', 'y', or 'z', indicating  an axis over which to average voxel values.
 #' If \code{NA}, the default, then now averaging is done and each voxel is plotted as its own line.
 #' @param vline.dates A character vector of dates (yyyy-mm-dd) at which to plot dashed vertical reference lines.

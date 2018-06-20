@@ -21,6 +21,12 @@ If \code{NA}, the default, than the maximum value in the voxels profile is used}
 
 \item{simu.names}{A character string containing the SimulationNames to include. Use "all" to include all available values.}
 
+\item{X}{A numeric vector of the x values of the voxels to include. If \code{NA}, the default, then all x values are used.}
+
+\item{Y}{A numeric vector of the y values of the voxels to include. If \code{NA}, the default, then all y values are used.}
+
+\item{Z}{A numeric vector of the z values of the voxels to include. If \code{NA}, the default, then all z values are used.}
+
 \item{summarize.by}{One of 'x', 'y', or 'z', indicating  an axis over which to average voxel values.
 If \code{NA}, the default, then now averaging is done and each voxel is plotted as its own line.}
 
@@ -28,12 +34,6 @@ If \code{NA}, the default, then now averaging is done and each voxel is plotted 
 If \code{NA}, the default, then no reference lines are drawn.}
 
 \item{plot}{If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.}
-
-\item{x}{A numeric vector of the x values of the voxels to include. If \code{NA}, the default, then all x values are used.}
-
-\item{y}{A numeric vector of the y values of the voxels to include. If \code{NA}, the default, then all y values are used.}
-
-\item{z}{A numeric vector of the z values of the voxels to include. If \code{NA}, the default, then all z values are used.}
 }
 \value{
 Returns ggplot object.

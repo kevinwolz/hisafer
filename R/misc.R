@@ -250,7 +250,7 @@ hop_rename <- function(hop, old.names, new.names) {
   is_hop(hop, error = TRUE)
   if(!all(old.names %in% hop$exp.plan$SimulationName)) stop("one or more values in old.names is not present in hop", call. = FALSE)
 
-  profiles.to.check <- names(hop)[!(names(hop) %in% c("variables", "exp.path"))]
+  profiles.to.check <- names(hop)[!(names(hop) %in% "exp.path")]
   profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
 
   existing.names <- unique(hop[[profiles[1]]]$SimulationName)
@@ -304,7 +304,7 @@ hop_filter <- function(hop,
   ## SimulationName
   if(simu.names[1] != "all") {
     if(!all(simu.names %in% hop$exp.plan$SimulationName)) stop("one or more values in simu.names is not present in hop", call. = FALSE)
-    profiles.to.check <- names(hop)[!(names(hop) %in% c("variables", "exp.path"))]
+    profiles.to.check <- names(hop)[!(names(hop) %in% "exp.path")]
     profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
     for(i in profiles) { hop[[i]] <- dplyr::filter(hop[[i]], SimulationName %in% simu.names) }
     if(length(simu.names) == 1) { class(hop) <- class(hop)[class(hop) != "hop-group"] }
@@ -321,7 +321,7 @@ hop_filter <- function(hop,
   }
 
   ## Date
-  profiles.to.check <- names(hop)[!(names(hop) %in% c("exp.plan", "variables", "exp.path", "tree.info", "plot.info", "path"))]
+  profiles.to.check <- names(hop)[!(names(hop) %in% c("exp.plan", "exp.path", "tree.info", "plot.info", "path"))]
   profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
 
   if(is.null(dates) & !is.na(date.min) & !is.na(date.max)) {
@@ -398,7 +398,6 @@ hop_merge <- function(...) {
 
   merged_hop$exp.plan  <- dplyr::bind_cols(hip[, "SimulationName"], hip[,  unique.cols], hip[, other.cols])
   merged_hop$exp.plan  <- dplyr::select(merged_hop$exp.plan, "SimulationName", unique.cols)
-  merged_hop$variables <- dplyr::distinct(merged_hop$variables)
   merged_hop$exp.path  <- NA
 
   class(merged_hop) <- c("hop-group", "hop", class(merged_hop))
