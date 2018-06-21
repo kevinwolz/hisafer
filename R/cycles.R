@@ -76,28 +76,28 @@ plot_hisafe_cycle_annual <- function(hop,
   METHOD <- ifelse(profile_check(hop, "cells"), "cells", "plot")
 
   if(cycle == "water") {
-    plot.data <- get_water_fluxes(hop, profile = METHOD)
+    plot.data <- get_water_fluxes(hop = hop, profile = METHOD)
     plot.title <- "Water Cycle"
     y.lab      <- "Water flux (mm)"
     if(is.null(color.palette)) color.palette <- c("#D55E00", "#E69F00", "#F0E442", "grey20", "grey40", "grey60", "grey80",
                                                   "#009E73", "#0072B2", "#56B4E9")
 
   } else if(cycle == "nitrogen") {
-    plot.data <- get_nitrogen_fluxes(hop, profile = METHOD)
+    plot.data <- get_nitrogen_fluxes(hop = hop, profile = METHOD)
     plot.title <- "Nitrogen Cycle"
     y.lab      <- "N flux (kg M ha-1)"
     if(is.null(color.palette)) color.palette <- c("#D55E00", "#E69F00", "#F0E442", "grey20", "grey40", "grey80",
                                                   "#009E73", "#0072B2", "#56B4E9", "#CC79A7", "black", "white")
 
   } else if(cycle == "light") {
-    plot.data  <- get_light_fluxes(hop)
+    plot.data  <- get_light_fluxes(hop = hop)
     plot.title <- "Light Capture"
     y.lab      <- "Intercepted PAR (% of incident PAR)"
     if(is.null(color.palette)) color.palette <- c("#E69F00", "grey20", "#56B4E9", "#009E73")
 
   } else if(cycle == "carbon") {
     if(!profile_check(hop, "trees")) return(NULL)
-    plot.data  <- get_carbon_pools(hop)
+    plot.data  <- get_carbon_pools(hop = hop)
     plot.title <- "Tree Carbon Pools"
     y.lab      <- "Tree C storage (Mg C ha-1)"
     if(is.null(color.palette)) color.palette <- c("#009E73", "#999999", "#D55E00", "#E69F00", "#56B4E9", "#0072B2", "#F0E442")
@@ -230,7 +230,7 @@ plot_hisafe_cycle_daily <- function(hop,
   METHOD <- ifelse(profile_check(hop, "cells"), "cells", "plot")
 
   if(cycle == "water") {
-    plot.data <- get_water_fluxes(hop, profile = METHOD) %>%
+    plot.data <- get_water_fluxes(hop = hop, profile = METHOD) %>%
       dplyr::filter(flux %in% c("Uptake - Trees", "Uptake - Inter crop", "Uptake - Main crop")) %>%
       dplyr::mutate(flux = droplevels(flux))
     levels(plot.data$flux) <- c("Trees", "Inter crop", "Main crop")
@@ -241,7 +241,7 @@ plot_hisafe_cycle_daily <- function(hop,
     y.lab       <- "Water uptake (mm)"
 
   } else if(cycle == "nitrogen") {
-    plot.data <- get_nitrogen_fluxes(hop, profile = METHOD) %>%
+    plot.data <- get_nitrogen_fluxes(hop = hop, profile = METHOD) %>%
       dplyr::filter(flux %in% c("Uptake - Trees", "Uptake - Inter crop", "Uptake - Main crop")) %>%
       dplyr::mutate(flux = droplevels(flux))
     levels(plot.data$flux) <- c("Trees", "Inter crop", "Main crop")
@@ -252,7 +252,7 @@ plot_hisafe_cycle_daily <- function(hop,
     y.lab       <- "Nitrogen uptake (kg ha-1)"
 
   } else if(cycle == "light") {
-    plot.data   <- get_light_fluxes(hop)
+    plot.data   <- get_light_fluxes(hop = hop)
     if(is.null(color.palette)) color.palette <- c("#E69F00", "grey20", "#56B4E9", "#009E73")
     cycle.geom  <- geom_area(aes(fill = flux), na.rm = TRUE)
     cycle.scale <- scale_fill_manual(values = color.palette)
@@ -261,7 +261,7 @@ plot_hisafe_cycle_daily <- function(hop,
 
   } else if(cycle == "carbon") {
     if(!profile_check(hop, "trees")) return(NULL)
-    plot.data   <- get_carbon_pools(hop)
+    plot.data   <- get_carbon_pools(hop = hop)
     if(is.null(color.palette)) color.palette <- c("#009E73", "#999999", "#D55E00", "#E69F00", "#56B4E9", "#0072B2", "#F0E442")
     cycle.geom  <- geom_area(aes(fill = flux), na.rm = TRUE)
     cycle.scale <- scale_fill_manual(values = color.palette)

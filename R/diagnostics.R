@@ -29,11 +29,11 @@ diag_hisafe_ts <- function(hop, profile, output.path = NULL, ...) {
   if(!(profile %in% supported.profiles))                  stop("supplied profile is not supported by plot_hisafe_ts()", call. = FALSE)
   if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character string",       call. = FALSE)
 
-  ts.path <- clean_path(paste0(diag_output_path(hop, output.path), "/diagnostics/", profile, "/"))
+  ts.path <- clean_path(paste0(diag_output_path(hop = hop, output.path = output.path), "/diagnostics/", profile, "/"))
   dir.create(ts.path, recursive = TRUE, showWarnings = FALSE)
 
   last.col  <- ifelse(grepl("tree", profile), "id", "stepNum")
-  var.names <- vars_to_diag(hop, profile, last.col)
+  var.names <- vars_to_diaghop = hop, profile = profile, last.col = last.col)
   plot.list <- purrr::map(var.names, plot_hisafe_ts, hop = hop, profile = profile, ...)
 
   file.names <- paste0(profile, "_", var.names, ".png")
@@ -81,10 +81,10 @@ diag_hisafe_monthcells <- function(hop,
   if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character vector",                          call. = FALSE)
   if(!all(schemes %in% allowed.schemes))                  stop("schemes argument must be one of: year.simname, month.simname, month.year", call. = FALSE)
 
-  monthcells.path <- clean_path(paste0(diag_output_path(hop, output.path), "/diagnostics/monthCells/"))
+  monthcells.path <- clean_path(paste0(diag_output_path(hop = hop, output.path = output.path), "/diagnostics/monthCells/"))
   dir.create(monthcells.path, recursive = TRUE, showWarnings = FALSE)
 
-  var.names <- vars_to_diag(hop, "monthCells", "y")
+  var.names <- vars_to_diag(hop = hop, profile = "monthCells", last.col = "y")
 
   ## Create plots
   if("year.simname" %in% schemes){
@@ -178,10 +178,10 @@ diag_hisafe_annualcells <- function(hop,
   profile_check(hop, "annualCells", error = TRUE)
   if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character vector", call. = FALSE)
 
-  annualcells.path <- clean_path(paste0(diag_output_path(hop, output.path), "/diagnostics/annualCells/"))
+  annualcells.path <- clean_path(paste0(diag_output_path(hop = hop, output.path = output.path), "/diagnostics/annualCells/"))
   dir.create(annualcells.path, recursive = TRUE, showWarnings = FALSE)
 
-  var.names <- vars_to_diag(hop, "annualCells", "y")
+  var.names <- vars_to_diag(hop = hop, profile = "annualCells", last.col = "y")
   plot.list <- purrr::map(var.names, plot_hisafe_annualcells, hop = hop, years = years, ...)
 
   file.names <- paste0("annualCells_", var.names, ".png")
@@ -218,10 +218,10 @@ diag_hisafe_cells <- function(hop,
   profile_check(hop, "cells", error = TRUE)
   if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character vector", call. = FALSE)
 
-  cells.path <- clean_path(paste0(diag_output_path(hop, output.path), "/diagnostics/cells/"))
+  cells.path <- clean_path(paste0(diag_output_path(hop = hop, output.path = output.path), "/diagnostics/cells/"))
   dir.create(cells.path, recursive = TRUE, showWarnings = FALSE)
 
-  var.names <- vars_to_diag(hop, "cells", "y")
+  var.names <- vars_to_diag(hop = hop, profile = "cells", last.col = "y")
   plot.list <- purrr::map(var.names, plot_hisafe_cells, hop = hop, dates = dates, ...)
 
   file.names <- paste0("cells_", var.names, ".png")
@@ -260,10 +260,10 @@ diag_hisafe_voxels <- function(hop, output.path = NULL, ...) {
   profile_check(hop, "voxels", error = TRUE)
   if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character vector", call. = FALSE)
 
-  voxels.path <- clean_path(paste0(diag_output_path(hop, output.path), "/diagnostics/voxels/"))
+  voxels.path <- clean_path(paste0(diag_output_path(hop = hop, output.path = output.path), "/diagnostics/voxels/"))
   dir.create(voxels.path, recursive = TRUE, showWarnings = FALSE)
 
-  var.names <- vars_to_diag(hop, "voxels", "z")
+  var.names <- vars_to_diag(hop = hop, profile = "voxels", last.col = "z")
   plot.list <- purrr::map(var.names, plot_hisafe_voxels, hop = hop, ...)
 
   file.names <- paste0("voxels_", var.names, ".png")
@@ -318,22 +318,22 @@ diag_hisafe <- function(hop,
 
   if(annualCells & profile_check(hop, "annualCells")) {
     cat("\n-- Plotting annualCells diagnostics")
-    diag_hisafe_annualcells(hop)
+    diag_hisafe_annualcells(hop = hop)
   }
 
   if(monthCells & profile_check(hop, "monthCells")) {
     cat("\n-- Plotting monthCells diagnostics")
-    diag_hisafe_monthcells(hop)
+    diag_hisafe_monthcells(hop = hop)
   }
 
   if(cells & profile_check(hop, "cells")) {
     cat("\n-- Plotting cells diagnostics")
-    diag_hisafe_cells(hop)
+    diag_hisafe_cells(hop = hop)
   }
 
   if(voxels & profile_check(hop, "voxels")) {
     cat("\n-- Plotting voxels diagnostics")
-    diag_hisafe_voxels(hop)
+    diag_hisafe_voxels(hop = hop)
   }
 
   invisible(TRUE)

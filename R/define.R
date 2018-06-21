@@ -122,7 +122,7 @@ define_hisafe <- function(path,
               profiles = profiles,
               path     = path)
 
-  check_input_values(hip, force)
+  check_input_values(hip = hip, force = force)
 
   class(hip) <- c("hip", class(hip))
   return(hip)
@@ -189,7 +189,7 @@ define_hisafe_file <- function(file,
               profiles = profiles,
               path     = clean_path(paste0(path, "/", exp.name)))
 
-  check_input_values(hip, force)
+  check_input_values(hip = hip, force = force)
 
   class(hip) <- c("hip", class(hip))
   return(hip)

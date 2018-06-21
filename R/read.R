@@ -359,7 +359,7 @@ read_hisafe_output_file <- function(profile, simu.name){
   end.of.var.list <- which(raw.text[-1] == "")[1]
 
   ## Read data
-  dat <- read_table_hisafe(profile, skip = end.of.var.list) %>%
+  dat <- read_table_hisafe(file = profile, skip = end.of.var.list) %>%
     dplyr::filter(Year != 0)
   if(nrow(dat) == 0) {
     warning(paste0(basename(profile), " exists but contains no data"), call. = FALSE)
@@ -403,11 +403,11 @@ read_table_hisafe <- function(file, ...) {
 #' @param simu.name A character string of the name of the simulation being read.
 #' @param show.progress Logical indicating whether progress messsages should be printed to the console.
 #' @keywords internal
-read_profile <- function(profile, path, simu.name, show.progress = TRUE, max.size = 3e8) {
+read_profile <- function(profile, path, simu.name, show.progress, max.size) {
   file <- paste0(path, profile, ".txt")
   if(show.progress) cat(paste0("\n   -- reading:  ", profile, collapse = ", "))
   if(file.info(file)$size < max.size) {
-    profile.data <- read_hisafe_output_file(file, simu.name) %>%
+    profile.data <- read_hisafe_output_file(profile = file, simu.name = simu.name) %>%
       dplyr::mutate_if(is.logical, as.numeric)   # columns read as logical must be coered to numeric to prevent plotting errors
   } else {
     warning(paste(profile, "profile too large (> max.size) to read"), call. = FALSE)
