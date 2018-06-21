@@ -74,6 +74,7 @@ plot_hisafe_ts <- function(hop,
   if(!(length(doy.lim) == 2 & all(doy.lim %in% 1:366)))           stop("doy.lim argument must be of length 2 with values in 1:366", call. = FALSE)
   if(!(is.na(color.palette) | is.character(color.palette)))       stop("color.palette argument must be a character vector",         call. = FALSE)
   if(!(is.na(linetype.palette) | is.character(linetype.palette))) stop("linetype.palette argument must be a character vector",      call. = FALSE)
+  if(!all(purrr::map_lgl(aes.cols, function(x) length(x) == 1 & is.character(x)))) stop("aes.cols list elements must be character vectors of length 1", call. = FALSE)
   is_TF(cumulative)
   is_TF(facet.year)
   is_TF(crop.points)
