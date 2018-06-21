@@ -27,7 +27,7 @@
 #' @param read.inputs Logical indicating whether data should be read from the .PLD and .SIM files for the tree.info and plot.info data slots.
 #' Setting this to \code{FALSE} severly limits hisafer's plotting/analysis capacity.
 #' Should only be set to \code{FALSE} if input files are corrupted.
-#' @param max.size The maximum file size (in bytes) that should be read. Files larger than this value will be ignored, with a warning.
+#' @param max.size The maximum file size (MB) that should be read. Files larger than this value will be ignored, with a warning.
 #' @param date.min A character string of the minimum date to keep, in the format "YYYY-MM-DD".
 #' If NA, the minimum date in the output data is used. Only used if \code{dates} is \code{NULL}.
 #' @param date.max A character string of the maximum date to keep, in the format "YYYY-MM-DD".
@@ -50,7 +50,7 @@ read_hisafe <- function(hip           = NULL,
                         profiles      = "all",
                         show.progress = TRUE,
                         read.inputs   = TRUE,
-                        max.size      = 3e8,
+                        max.size      = 300,
                         date.min      = NA,
                         date.max      = NA,
                         dates         = NULL) {
@@ -60,8 +60,7 @@ read_hisafe <- function(hip           = NULL,
   if(!(all(is.character(simu.names)) | simu.names[1] == "all")) stop("simu.names argument must be 'all' or a character vector", call. = FALSE)
   if(!(all(is.character(profiles))   | profiles[1]   == "all")) stop("profiles argument must be 'all' or a character vector",   call. = FALSE)
   is_TF(show.progress)
-  if(!(is.numeric(max.size) & length(max.size) == 1))           stop("max.size argument must be a positive integer",            call. = FALSE)
-  if(max.size %% 1 != 0 & max.size > 0)                         stop("max.size argument must be a positive integer",            call. = FALSE)
+  if(!(is.numeric(max.size) & length(max.size) == 1 & max.size > 0)) stop("max.size argument must be a positive number", call. = FALSE)
 
   if(profiles[1] == "all" & !is.null(hip)) profiles <- hip$profiles
 
@@ -197,7 +196,7 @@ read_hisafe <- function(hip           = NULL,
 #' @param profiles A character vector of the names of Hi-sAFe output profiles to read.
 #' If "all" the default, reads all supported Hi-sAFe output profiles. For currently supported profiles see: \code{\link{hisafe_profiles}}
 #' @param show.progress Logical indicating whether progress messsages should be printed to the console.
-#' @param max.size The maximum file size (in bytes) that should be read. Files larger than this value will be ignored, with a warning.
+#' @param max.size The maximum file size (MB) that should be read. Files larger than this value will be ignored, with a warning.
 #' @keywords internal
 read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.inputs, max.size) {
 
@@ -402,11 +401,12 @@ read_table_hisafe <- function(file, ...) {
 #' @param path A character string of the path to the folder containing the profiles.
 #' @param simu.name A character string of the name of the simulation being read.
 #' @param show.progress Logical indicating whether progress messsages should be printed to the console.
+#' @param max.size The maximum file size (MB) that should be read. Files larger than this value will be ignored, with a warning.
 #' @keywords internal
 read_profile <- function(profile, path, simu.name, show.progress, max.size) {
   file <- paste0(path, profile, ".txt")
   if(show.progress) cat(paste0("\n   -- reading:  ", profile, collapse = ", "))
-  if(file.info(file)$size < max.size) {
+  if((file.info(file)$size / 1e6) < max.size) {
     profile.data <- read_hisafe_output_file(profile = file, simu.name = simu.name) %>%
       dplyr::mutate_if(is.logical, as.numeric)   # columns read as logical must be coered to numeric to prevent plotting errors
   } else {

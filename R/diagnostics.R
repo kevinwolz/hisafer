@@ -33,7 +33,7 @@ diag_hisafe_ts <- function(hop, profile, output.path = NULL, ...) {
   dir.create(ts.path, recursive = TRUE, showWarnings = FALSE)
 
   last.col  <- ifelse(grepl("tree", profile), "id", "stepNum")
-  var.names <- vars_to_diaghop = hop, profile = profile, last.col = last.col)
+  var.names <- vars_to_diag(hop = hop, profile = profile, last.col = last.col)
   plot.list <- purrr::map(var.names, plot_hisafe_ts, hop = hop, profile = profile, ...)
 
   file.names <- paste0(profile, "_", var.names, ".png")

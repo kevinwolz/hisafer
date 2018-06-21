@@ -6,7 +6,7 @@
 \usage{
 read_hisafe(hip = NULL, path = NULL, simu.names = "all",
   profiles = "all", show.progress = TRUE, read.inputs = TRUE,
-  max.size = 3e+08, date.min = NA, date.max = NA, dates = NULL)
+  max.size = 300, date.min = NA, date.max = NA, dates = NULL)
 }
 \arguments{
 \item{hip}{An object of class "hip". To create a hip object see \code{\link{define_hisafe}}.
@@ -27,7 +27,7 @@ If \code{hip} is not provided, then \code{path} is required. If \code{hip} is pr
 Setting this to \code{FALSE} severly limits hisafer's plotting/analysis capacity.
 Should only be set to \code{FALSE} if input files are corrupted.}
 
-\item{max.size}{The maximum file size (in bytes) that should be read. Files larger than this value will be ignored, with a warning.}
+\item{max.size}{The maximum file size (MB) that should be read. Files larger than this value will be ignored, with a warning.}
 
 \item{date.min}{A character string of the minimum date to keep, in the format "YYYY-MM-DD".
 If NA, the minimum date in the output data is used. Only used if \code{dates} is \code{NULL}.}

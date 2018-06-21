@@ -28,7 +28,7 @@ If "all" the default, reads all supported Hi-sAFe output profiles. For currently
 Setting this to \code{FALSE} severly limits hisafer's plotting/analysis capacity.
 Should only be set to \code{FALSE} if input files are corrupted.}
 
-\item{max.size}{The maximum file size (in bytes) that should be read. Files larger than this value will be ignored, with a warning.}
+\item{max.size}{The maximum file size (MB) that should be read. Files larger than this value will be ignored, with a warning.}
 }
 \value{
 An object of class "hop". This is a list of 12 data frames (tibbles):
