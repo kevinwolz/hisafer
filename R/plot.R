@@ -670,9 +670,9 @@ plot_hisafe_voxels <- function(hop,
   is_TF(plot)
   if(length(unique(hop$plot.info$soilDepth)) > 1) warning("maximum soil depth is not consistent across all simluations within the hop", call. = FALSE)
 
-  if(is.na(X)) X <- unique(hop$voxels$x)
-  if(is.na(Y)) Y <- unique(hop$voxels$y)
-  if(is.na(Z)) Z <- unique(hop$voxels$z)
+  if(all(is.na(X))) X <- unique(hop$voxels$x)
+  if(all(is.na(Y))) Y <- unique(hop$voxels$y)
+  if(all(is.na(Z))) Z <- unique(hop$voxels$z)
   if(!all(X %in% unique(hop$voxels$x))) stop("one or more values of X are not present in the voxel profile", call. = FALSE)
   if(!all(Y %in% unique(hop$voxels$y))) stop("one or more values of Y are not present in the voxel profile", call. = FALSE)
   if(!all(Z %in% unique(hop$voxels$z))) stop("one or more values of Z are not present in the voxel profile", call. = FALSE)

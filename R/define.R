@@ -307,6 +307,7 @@ check_input_values <- function(hip, force) {
   on_scene_check <- function(x, edge) is.na(x) | (x <= edge & x >=0)
   bad.trees <- ""
   off.scene.trees <- ""
+  coloc.sims <- ""
   for(i in 1:nrow(hip$exp.plan)) {
     X <- get_init_vals("tree.initialization", "treeX")[[i]]
     Y <- get_init_vals("tree.initialization", "treeY")[[i]]
@@ -317,28 +318,24 @@ check_input_values <- function(hip, force) {
 
     x.on.scene <- on_scene_check(X, get_used("plotWidth")[[i]])
     y.on.scene <- on_scene_check(Y, get_used("plotHeight")[[i]])
-
     on.scene <- (x.on.scene & y.on.scene)
+
+    coloc <- any(duplicated(dplyr::tibble(x = X, y = Y)))
 
     if(any(!okay.loc)) bad.trees       <- c(bad.trees,       paste0(hip$exp.plan$SimulationName[i], "-Tree", c(1:length(X))[!okay.loc]))
     if(any(!on.scene)) off.scene.trees <- c(off.scene.trees, paste0(hip$exp.plan$SimulationName[i], "-Tree", c(1:length(X))[!on.scene]))
+    if(any(coloc))     coloc.sims      <- c(coloc.sims,      hip$exp.plan$SimulationName[i])
   }
   bad.trees       <- bad.trees[bad.trees != ""]
   off.scene.trees <- off.scene.trees[off.scene.trees != ""]
-  tree.centered.error <- ifelse(length(bad.trees)       == 0, "", paste("-- The following trees are not centered on a cell:",                   paste(bad.trees, collapse = ", ")))
-  tree.offscene.error <- ifelse(length(off.scene.trees) == 0, "", paste("-- The following trees' coordinates are beyond the scene boundaries:", paste(off.scene.trees, collapse = ", ")))
+  coloc.sims      <- coloc.sims[coloc.sims != ""]
 
-  ## Trees located on same cell
-  colocated_trees <- function(tree.init) {
-    out <- tree.init %>%
-      dplyr::select(treeX, treeY) %>%
-      duplicated() %>%
-      any()
-    return(out)
-  }
-  coloc <- purrr::map_lgl(get_used("tree.initialization"), colocated_trees)
-  coloc.error <- ifelse(any(coloc), paste0("-- There can only be one tree planted on each cell. These simulations have two or more trees located on the same cell: ",
-                                           paste(hip$exp.plan$SimulationName[coloc], collapse = ', ')), "")
+  tree.centered.error <- ifelse(length(bad.trees)       == 0, "", paste("-- The following trees are not centered on a cell:",
+                                                                        paste(bad.trees, collapse = ", ")))
+  tree.offscene.error <- ifelse(length(off.scene.trees) == 0, "", paste("-- The following trees' coordinates are beyond the scene boundaries:",
+                                                                        paste(off.scene.trees, collapse = ", ")))
+  tree.coloc.error    <- ifelse(length(coloc.sims)      == 0, "", paste("-- The following simulations have two or more trees located on the same cell:",
+                                                                        paste(hip$exp.plan$SimulationName[coloc], collapse = ', ')))
 
   ## Distance & Time Errors
   less_than_comp <- function(param, ref) {
@@ -379,9 +376,9 @@ check_input_values <- function(hip, force) {
   capillary.error <- ifelse((is_mod("capillaryUptake") | is_mod("capillaryUptakeMinWater")) & all(get_used("capillary") == 0),
                             "-- capillaryUptake and capillaryUptakeMinWater are not active parameters when capillary = 0.", "")
   drainage.error <- ifelse((is_mod("drainagePipesSpacing") | is_mod("drainagePipesDepth") | is_mod("waterConductivity") | is_mod("impermeableLayerDepth"))
-                    & all(get_used("artificialDrainage") == 0),
-                    "-- drainagePipesSpacing, drainagePipesDepth, waterConductivity, and impermeableLayerDepth are not active parameters when artificialDrainage = 0.",
-                    "")
+                           & all(get_used("artificialDrainage") == 0),
+                           "-- drainagePipesSpacing, drainagePipesDepth, waterConductivity, and impermeableLayerDepth are not active parameters when artificialDrainage = 0.",
+                           "")
   denitrif.error <- ifelse((is_mod("denitrificationDepth") | is_mod("denitrificationRate")) & all(get_used("denitrification") == 0),
                            "-- denitrificationDepth and denitrificationRate are not active parameters when denitrification = 0.", "")
   watertable.error <- ifelse((is_mod("no3ConcentrationInWaterTable") | is_mod("nh4ConcentrationInWaterTable")) & all(get_used("waterTable") == 0),
@@ -459,9 +456,8 @@ check_input_values <- function(hip, force) {
                   unsupported.trees.error, too.many.trees.error,
                   unsupported.crops.error, unsupported.itks.error,
                   plot.width.error, plot.height.error,
-                  coloc.error,
                   treeCropDistance.error, treeRootPruningDistance.error,
-                  tree.centered.error, tree.offscene.error,
+                  tree.centered.error, tree.offscene.error, tree.coloc.error,
                   treePlantingYears.error, treePruningYears.error, treeThinningYears.error, treeRootPruningYears.error,
                   tree.root.error, EP.error,
                   capillary.error, drainage.error, denitrif.error, watertable.error, dm.error,
@@ -589,13 +585,13 @@ check_type <- function(variable, exp.plan) {
 root_init_params <- function(template, reps = 1, ...) {
   supported <- c("shape", "repartition", "paramShape1", "paramShape2", "paramShape3", "amount")
   temp <- modify_table(args           = list(...),
-                      supported.args = supported,
-                      character.args = NULL,
-                      numeric.args   = supported,
-                      positive.args  = supported,
-                      perc.args      = NULL,
-                      table.name     = "root.initialization",
-                      template       = template)
+                       supported.args = supported,
+                       character.args = NULL,
+                       numeric.args   = supported,
+                       positive.args  = supported,
+                       perc.args      = NULL,
+                       table.name     = "root.initialization",
+                       template       = template)
 
   out <- list(temp)
   if(reps > 1) {
@@ -705,7 +701,7 @@ layer_init_params <- function(template, ...) {
 #' }
 layer_params <- function(template, ...) {
   supported <- c("thick", "sand", "clay", "limeStone", "organicMatter",
-                "partSizeSand", "stone", "stoneType", "infiltrability")
+                 "partSizeSand", "stone", "stoneType", "infiltrability")
   out <- modify_table(args           = list(...),
                       supported.args = supported,
                       numeric.args   = supported,
