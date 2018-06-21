@@ -2,18 +2,20 @@
 % Please edit documentation in R/cycles.R
 \name{get_nitrogen_fluxes}
 \alias{get_nitrogen_fluxes}
-\title{Get nitrogen fluxes from a hop object}
+\title{Get nitrogen fluxes in and out of soil from a hop object}
 \usage{
-get_nitrogen_fluxes(hop)
+get_nitrogen_fluxes(hop, profile)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
+
+\item{profile}{An character string indicating from which profile to pull flux data. Either "cells" or "plot".}
 }
 \value{
 A tibble with extracted and calculated nitrogen fluxes.
 }
 \description{
-Get nitrogen fluxes from a hop object.
+Get nitrogen fluxes in and our of soil from a hop object.
 Used within hisafe cycle functions.
 }
 \keyword{internal}

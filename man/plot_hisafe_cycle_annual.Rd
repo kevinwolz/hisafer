@@ -2,7 +2,7 @@
 % Please edit documentation in R/cycles.R
 \name{plot_hisafe_cycle_annual}
 \alias{plot_hisafe_cycle_annual}
-\title{Plot annual barchart of  major cycles}
+\title{Plot annual barchart of major cycles}
 \usage{
 plot_hisafe_cycle_annual(hop, cycle, simu.names = "all", tree.ids = "all",
   year.lim = c(NA, NA), color.palette = NULL, plot = TRUE)
@@ -31,6 +31,39 @@ If \code{hop} contains more than one simulation, the plot will be faceted by Sim
 }
 \description{
 Plots an annual barchart of tree carbon pools, water fluxes, nitrogen fluxes, or light capture.
+}
+\details{
+Detailed description of the flux components of the nitrogen and water cycles:
+
+NITROGEN
+\itemize{
+ \item{"Uptake - Trees"}{ - nitrogen uptake by trees}
+ \item{"Uptake - Inter crop"}{ - nitrogen uptake by main crop}
+ \item{"Uptake - Main crop"}{ - nitrogen uptake by inter crop}
+ \item{"Gaseous losses"}{ - gaseous nitrogen losses via denitrification & volatilization of mineral/organic fertilizer inputs}
+ \item{"Run-off"}{ - nitrogen contained in rain water (wet deposition) that runs off the scene}
+ \item{"Leaching"}{ - nitrate leaching via the (1) bottom of the scene, (2) artificial drainage pipes, and (3) losses to the water table when the nirate concentration in the water table is lower than the nitrate concentration of voxels that it saturates}
+ \item{"Fertilization"}{ - mineral nitrogen added by both mineral & organic fertilizers, plus organic nitrogen added by organic fetilizers}
+ \item{"Irrigation"}{ - nitrogen added via irrigation water}
+ \item{"Deposition"}{ - nitrogen added via wet deposition}
+ \item{"Fixation"}{ - nitrogen added via fixation by crops}
+ \item{"Litter"}{ - nitrogen added to soil via aerial and root litter from both trees and crops}
+ \item{"Water table"}{ - nitrogen added by the water table when the nirate concentration in the water table is higher than the nitrate concentration of voxels that it saturates}
+}
+
+WATER
+\itemize{
+ \item{"Uptake - Trees"}{ - water uptake by trees}
+ \item{"Uptake - Inter crop"}{ - water uptake by main crop}
+ \item{"Uptake - Main crop"}{ - water uptake by inter crop}
+ \item{"Interception"}{ - rain water intercepted by both tree and crop canopies, minus any water that flows down tree and crop stems}
+ \item{"Run-off"}{ - rain & irrigation water that runs off the scene (including both the "surface" run-off associated with soil surface conditions plus the "overflow" runoff associated with saturation of the top soil layer and lack of infiltribility)}
+ \item{"Soil evaporation"}{ - water evaporated from surface soil layers}
+ \item{"Drainage"}{ - water drainage via the (1) bottom of the scene and (2) artificial drainage pipes}
+ \item{"Irrigation"}{ - water added via irrigation}
+ \item{"Water table"}{ - water added to soil when the water table saturates voxels (the water added is the difference between field capacity and the current water content of the voxel)}
+ \item{"Precipitation"}{ - precipitation (rain & snow)}
+}
 }
 \examples{
 \dontrun{

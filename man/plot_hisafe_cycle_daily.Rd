@@ -35,7 +35,7 @@ If \code{plot = TRUE}, returns a ggplot object. If \code{plot = FALSE}, returns 
 If \code{hop} contains more than one simulation, the plot will be faceted by SimulationName.
 }
 \description{
-Plots a daily timeseries of carbon pools, water extraction, nitrogen extraction, or light capture
+Plots a daily timeseries of carbon pools, water uptake, nitrogen uptake, or light capture
 }
 \examples{
 \dontrun{

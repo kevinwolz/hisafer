@@ -2,12 +2,14 @@
 % Please edit documentation in R/cycles.R
 \name{get_water_fluxes}
 \alias{get_water_fluxes}
-\title{Get water fluxes from a hop object}
+\title{#' Get water fluxes from a hop object}
 \usage{
-get_water_fluxes(hop)
+get_water_fluxes(hop, profile)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
+
+\item{profile}{An character string indicating from which profile to pull flux data. Either "cells" or "plot".}
 }
 \value{
 A tibble with extracted and calculated water fluxes.
