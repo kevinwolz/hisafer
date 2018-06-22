@@ -92,7 +92,7 @@ hisafe_slice <- function(hop,
 
   demanded.vars <- as.character(unlist(vars))
   cell.vars  <- c(demanded.vars[grep("crop|yield",  names(vars))],
-                  "phenologicStage", "nitrogenFertilisation", "height", "biomass", "yield")
+                  "phenologicStage", "nitrogenFertilisationMineral", "nitrogenFertilisationOrganic", "height", "biomass", "grainBiomass")
   voxel.vars <- demanded.vars[grep("voxel", names(vars))]
   tree.vars  <- c(demanded.vars[!(demanded.vars %in% c(cell.vars, voxel.vars))],
                   "crownRadiusInterRow", "crownRadiusTreeLine", "crownBaseHeight", "dbh", "height")
@@ -329,10 +329,10 @@ hisafe_slice <- function(hop,
       dplyr::mutate(yield.alpha = .[[vars$yield.alpha]]) %>%
       dplyr::filter(y %in% Yc) %>%
       dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
-      dplyr::mutate(cell.height    = nan_to_zero((biomass - yield) / biomass * height)) %>%
-      dplyr::mutate(yield.height   = nan_to_zero(yield / biomass * height)) %>%
+      dplyr::mutate(cell.height    = nan_to_zero((biomass - grainBiomass) / biomass * height)) %>%
+      dplyr::mutate(yield.height   = nan_to_zero(grainBiomass / biomass * height)) %>%
       dplyr::mutate(cell.color     = as.numeric(factor(phenologicStage))) %>%
-      dplyr::mutate(fert.level     = nitrogenFertilisation) %>%
+      dplyr::mutate(fert.level     = nitrogenFertilisationMineral + nitrogenFertilisationOrganic) %>%
       dplyr::select(SimulationName, Year, Date, x, cellWidth, cell.height, cell.color, crop.alpha, yield.alpha, yield.height, fert.level) %>%
       dplyr::group_by(SimulationName, Year, Date, x, cellWidth) %>%
       dplyr::summarize(cell.height  = mean(cell.height),
@@ -347,7 +347,7 @@ hisafe_slice <- function(hop,
     cell.max <- hop.full$cells %>%
       dplyr::mutate(crop.alpha  = .[[vars$crop.alpha]]) %>%
       dplyr::mutate(yield.alpha = .[[vars$yield.alpha]]) %>%
-      dplyr::mutate(fert.level  = nitrogenFertilisation) %>%
+      dplyr::mutate(fert.level  = nitrogenFertilisationMineral + nitrogenFertilisationOrganic) %>%
       dplyr::filter(y %in% Yc) %>%
       dplyr::group_by(SimulationName, Year, Date, x) %>%
       dplyr::summarize(crop.alpha  = sum(crop.alpha),
@@ -737,8 +737,8 @@ hisafe_slice <- function(hop,
 #' @export
 #' @importFrom dplyr %>%
 #' @import ggplot2
-#' @import gtable
 #' @import egg
+#' @import gtable
 #' @family hisafe visualization functions
 #' @examples
 #' \dontrun{
@@ -781,10 +781,10 @@ hisafe_snapshot <- function(hop,
   ## this can be removed as well as the @import egg in this function's documentation.
   b <- body(gtable_frame)
   b[6] <- parse(text = "if (fixed_ar) {
-                ar <- as.numeric(g$heights[tt[1]]) / as.numeric(g$widths[ll[1]])
-                height <- width * (ar / length(ll))
+                ar <- as.numeric(g$heights[tt[1]])/as.numeric(g$widths[ll[1]])
+                height <- width * (ar/length(ll)) - sum(margins) * (ar/length(ll))
                 g$respect <- FALSE
-                }")
+}")
   body(gtable_frame) <- b
   assignInNamespace("gtable_frame", gtable_frame, ns = 'egg')
   #####################################################################

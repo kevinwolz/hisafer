@@ -373,11 +373,11 @@ check_input_values <- function(hip, force) {
                      "-- profileNames and exportFrequencies cannot be defined using define_hisafe(). Use the 'profiles' argument of build_hisafe().", "")
 
   ## STICS parameter dependencies check
-  capillary.error <- ifelse((is_mod("capillaryUptake") | is_mod("capillaryUptakeMinWater")) & all(get_used("capillary") == 0),
-                            "-- capillaryUptake and capillaryUptakeMinWater are not active parameters when capillary = 0.", "")
+  capillary.error <- ifelse((is_mod("capillaryUptake") | is_mod("capillaryUptakeMinWater")) & (all(get_used("capillary") == 0) & all(get_used("macropososity") == 0)),
+                            "-- capillaryUptake and capillaryUptakeMinWater are not active parameters when capillary = 0 or macropososity = 0.", "")
   drainage.error <- ifelse((is_mod("drainagePipesSpacing") | is_mod("drainagePipesDepth") | is_mod("waterConductivity") | is_mod("impermeableLayerDepth"))
-                           & all(get_used("artificialDrainage") == 0),
-                           "-- drainagePipesSpacing, drainagePipesDepth, waterConductivity, and impermeableLayerDepth are not active parameters when artificialDrainage = 0.",
+                           & (all(get_used("artificialDrainage") == 0)& all(get_used("macropososity") == 0)),
+                           "-- drainagePipesSpacing, drainagePipesDepth, waterConductivity, and impermeableLayerDepth are not active parameters when artificialDrainage = 0 or macroporosity = 0.",
                            "")
   denitrif.error <- ifelse((is_mod("denitrificationDepth") | is_mod("denitrificationRate")) & all(get_used("denitrification") == 0),
                            "-- denitrificationDepth and denitrificationRate are not active parameters when denitrification = 0.", "")
@@ -385,6 +385,8 @@ check_input_values <- function(hip, force) {
                              "-- no3ConcentrationInWaterTable and nh4ConcentrationInWaterTable are not active parameters when waterTable = 0.", "")
   dm.error <- ifelse(any(get_used("artificialDrainage") == 1 & get_used("macroporosity") == 0),
                      "-- macroporosity mucst be activated (set to 1) if artificialDrainage is activated (set to 1).", "")
+  cap.error <- ifelse(any(get_used("capillary") == 1 & get_used("macroporosity") == 0),
+                     "-- macroporosity mucst be activated (set to 1) if capillary is activated (set to 1).", "")
 
   ## Timeseries Length Errors
   treePlanting.length.error <- ifelse(all(purrr::map_lgl(list(get_length("treePlantingYears"),
@@ -460,7 +462,7 @@ check_input_values <- function(hip, force) {
                   tree.centered.error, tree.offscene.error, tree.coloc.error,
                   treePlantingYears.error, treePruningYears.error, treeThinningYears.error, treeRootPruningYears.error,
                   tree.root.error, EP.error,
-                  capillary.error, drainage.error, denitrif.error, watertable.error, dm.error,
+                  capillary.error, drainage.error, denitrif.error, watertable.error, dm.error, cap.error,
                   treePlanting.length.error, treePruning.length.error, treeThinning.length.error, rootPruning.length.error,
                   mainCrop.length.error, interCrop.length.error, simuNbrDays.length.error,
                   weed.error, wth.error)

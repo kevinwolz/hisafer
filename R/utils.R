@@ -1,14 +1,15 @@
 ## This SUPPORTED.PROFILES object is only needed to write the exportFrequencies line of the sim file within build_structure().
 ## There is no better way to do this until a better way to describe export profiles and frequenceies in Hi-sAFe is determined.
-SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("annualCells",
-                                                 "plot", "trees", "cells", "cellsDetail",
-                                                 "voxels", "voxelsDetail", "voxelsDebug", "voxelsOptim", "climate", "monthCells", "annualDBH"),
-                                    freqs    = c(365,
-                                                 1,      1,       1,        1,
-                                                 1,        1,               1,             1,            1,          30,           365),
-                                    description = c("annual data for each cell in the scene",
-                                                    "daily plot-level data",
-                                                    "daily data for each tree in the scene",
+SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("plot",   "plotDetail",
+                                                 "trees",  "treesDetail",
+                                                 "cells",  "cellsDetail",
+                                                 "voxels", "voxelsDetail", "voxelsDebug", "voxelsOptim",
+                                                 "climate", "monthCells", "annualCells", "annualDBH"),
+                                    freqs    = c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 30, 365, 365),
+                                    description = c("daily plot-level data (core variables)",
+                                                    "daily plot-level data (supplemental variables)",
+                                                    "daily data for each tree in the scene (core variables)",
+                                                    "daily data for each tree in the scene (supplemental variables)",
                                                     "daily data for each cell in the scene (core variables)",
                                                     "daily data for each cell in the scene (supplemental variables)",
                                                     "daily data for each voxel in the scene (core variables)",
@@ -17,6 +18,7 @@ SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("annualCells",
                                                     "daily data for each voxel in the scene (water module optimization variables)",
                                                     "daily climate data",
                                                     "monthly data for each cell in the scene",
+                                                    "annual data for each cell in the scene",
                                                     "only data for annual DBH of each tree"))
 
 PRIVATE.PROFILES <- c("voxelsDebug", "voxelsOptim", "annualDBH")

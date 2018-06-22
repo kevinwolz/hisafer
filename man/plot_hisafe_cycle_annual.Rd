@@ -56,7 +56,7 @@ WATER
  \item{"Uptake - Trees"}{ - water uptake by trees}
  \item{"Uptake - Inter crop"}{ - water uptake by main crop}
  \item{"Uptake - Main crop"}{ - water uptake by inter crop}
- \item{"Interception"}{ - rain water intercepted by both tree and crop canopies, minus any water that flows down tree and crop stems}
+ \item{"Interception"}{ - rain water intercepted by both tree and crop canopies (and then subsequently evaporated off)}
  \item{"Run-off"}{ - rain & irrigation water that runs off the scene (including both the "surface" run-off associated with soil surface conditions plus the "overflow" runoff associated with saturation of the top soil layer and lack of infiltribility)}
  \item{"Soil evaporation"}{ - water evaporated from surface soil layers}
  \item{"Drainage"}{ - water drainage (1) out of the bottom of the scene, (2) into the water table, and (3) into artificial drainage pipes}

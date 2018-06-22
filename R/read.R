@@ -243,21 +243,21 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
     out <- list()
   }
 
-  join_cells <- function(...){
-    dplyr::left_join(..., by = c("SimulationName", "Date", "Day", "Month", "Year" ,
-                                 "JulianDay", "stepNum", "cellId", "id", "x", "y"))
-  }
-  cell.data <- out[grep("^cells", names(out))] %>%
-    purrr::map("data")
-  out[["cells"]]$data <- Reduce(join_cells, cell.data[!purrr::map_lgl(cell.data, is.null)])
+  base.cols <- c("SimulationName", "Date", "Day", "Month", "Year", "JulianDay", "stepNum")
+  join_plot   <- function(...) dplyr::left_join(..., by = base.cols)
+  join_trees  <- function(...) dplyr::left_join(..., by = c(base.cols, "id"))
+  join_cells  <- function(...) dplyr::left_join(..., by = c(base.cols, "id", "x", "y"))
+  join_voxels <- function(...) dplyr::left_join(..., by = c(base.cols, "cellId", "id", "x", "y", "z"))
 
-  join_voxels <- function(...){
-    dplyr::left_join(..., by = c("SimulationName", "Date", "Day", "Month", "Year" ,
-                                 "JulianDay", "stepNum", "cellId", "id", "x", "y", "z"))
-  }
-  vox.data <- out[grep("^voxels", names(out))] %>%
-    purrr::map("data")
-  out[["voxels"]]$data <- Reduce(join_voxels, vox.data[!purrr::map_lgl(vox.data, is.null)])
+  plot.data   <- out[grep("^plot", names(out))]
+  trees.data  <- out[grep("^trees", names(out))]
+  cells.data  <- out[grep("^cells", names(out))]
+  voxels.data <- out[grep("^voxels", names(out))]
+
+  out[["plot"]]   <- Reduce(join_plot,   plot.data[  !purrr::map_lgl(plot.data,   is.null)])
+  out[["trees"]]  <- Reduce(join_trees,  trees.data[ !purrr::map_lgl(trees.data,  is.null)])
+  out[["cells"]]  <- Reduce(join_cells,  cells.data[ !purrr::map_lgl(cells.data,  is.null)])
+  out[["voxels"]] <- Reduce(join_voxels, voxels.data[!purrr::map_lgl(voxels.data, is.null)])
 
   get_prof <- function(out, prof) {
     if(is.null(out[[prof]])) {
