@@ -38,7 +38,7 @@
 #'  \item{"Interception"}{ - rain water intercepted by both tree and crop canopies, minus any water that flows down tree and crop stems}
 #'  \item{"Run-off"}{ - rain & irrigation water that runs off the scene (including both the "surface" run-off associated with soil surface conditions plus the "overflow" runoff associated with saturation of the top soil layer and lack of infiltribility)}
 #'  \item{"Soil evaporation"}{ - water evaporated from surface soil layers}
-#'  \item{"Drainage"}{ - water drainage via the (1) bottom of the scene and (2) artificial drainage pipes}
+#'  \item{"Drainage"}{ - water drainage (1) out of the bottom of the scene, (2) into the water table, and (3) into artificial drainage pipes}
 #'  \item{"Irrigation"}{ - water added via irrigation}
 #'  \item{"Water table"}{ - water added to soil when the water table saturates voxels (the water added is the difference between field capacity and the current water content of the voxel)}
 #'  \item{"Precipitation"}{ - precipitation (rain & snow)}
@@ -342,7 +342,7 @@ get_water_fluxes <- function(hop, profile) {
   if(profile == "cells") {
     variable_check(hop, "cells",
                    c("cropType", "rainInterceptedByTrees", "stemFlowByTrees", "rainInterceptedByCrop", "stemFlowByCrop",
-                     "runOff", "soilEvaporation", "drainageBottom", "drainageArtificial", "waterUptakeByTrees",
+                     "runOff", "soilEvaporation", "drainageBottom", "drainageArtificial", "drainageWaterTable", "waterUptakeByTrees",
                      "waterUptake", "irrigation", "waterAddedByWaterTable",
                      "waterUptakeInSaturationByTrees", "waterUptakeInSaturationByCrop", "capillaryRise"),
                    error = TRUE)
@@ -353,7 +353,7 @@ get_water_fluxes <- function(hop, profile) {
       dplyr::mutate(interception  = rainInterceptedByTrees - stemFlowByTrees + rainInterceptedByCrop - stemFlowByCrop,
                     runOff        = runOff,
                     evaporation   = soilEvaporation,
-                    drainage      = drainageBottom + drainageArtificial,
+                    drainage      = drainageBottom + drainageArtificial + drainageWaterTable,
                     uptakeTree    = waterUptakeByTrees,
                     uptakeMain    = waterUptake * as.numeric(cropType == "mainCrop"),
                     uptakeInter   = waterUptake * as.numeric(cropType == "interCrop"),

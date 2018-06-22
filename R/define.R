@@ -574,7 +574,6 @@ check_type <- function(variable, exp.plan) {
 #'  \item{"paramShape1"}{}
 #'  \item{"paramShape2"}{}
 #'  \item{"paramShape3"}{}
-#'  \item{"amount"}{}
 #' }
 #' @export
 #' @family hisafe definition functions
@@ -583,7 +582,7 @@ check_type <- function(variable, exp.plan) {
 #' root.init <- root_init_params(template = "agroforestry", reps = 2, amount = 1)
 #' }
 root_init_params <- function(template, reps = 1, ...) {
-  supported <- c("shape", "repartition", "paramShape1", "paramShape2", "paramShape3", "amount")
+  supported <- c("shape", "repartition", "paramShape1", "paramShape2", "paramShape3")
   temp <- modify_table(args           = list(...),
                        supported.args = supported,
                        character.args = NULL,

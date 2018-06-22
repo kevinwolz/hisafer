@@ -17,7 +17,6 @@ See \code{\link{define_hisafe}} for more details.}
  \item{"paramShape1"}{}
  \item{"paramShape2"}{}
  \item{"paramShape3"}{}
- \item{"amount"}{}
 }}
 
 \item{rep}{Number of times to repeats the rows of the defined table.}
