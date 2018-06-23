@@ -783,7 +783,7 @@ hisafe_snapshot <- function(hop,
   ## Once/if egg::gtable_frame is updated in the CRAN version of the package,
   ## this can be removed as well as the @import egg in this function's documentation.
   b <- body(gtable_frame)
-  b[6] <- parse(text = "if (fixed_ar) {
+  b[8] <- parse(text = "if (fixed_ar) {
                 ar <- as.numeric(g$heights[tt[1]])/as.numeric(g$widths[ll[1]])
                 height <- width * (ar/length(ll)) - sum(margins) * (ar/length(ll))
                 g$respect <- FALSE
@@ -1448,8 +1448,8 @@ add_historic_data <- function(df, dates, mem.max) {
   return(out)
 }
 
-#' Build white boxes to cover phantom trees
-#' @description Builds white boxes to cover phantom trees for \code{\link{hisafe_slice}}
+#' Extract complete dates
+#' @description Extracts complete dates for \code{\link{hisafe_slice}}
 #' @param hop An object of class hop.
 #' @param profile Character string of the name of a hop profile.
 #' @param dates Character vector or Date vector of dates to check.
