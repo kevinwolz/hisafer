@@ -99,10 +99,15 @@ hip_params <- function(variable = "names", search = FALSE, template = "agrofores
   acceptable <- c(PARAM_NAMES, "names", "all")
   if(any(!(variable %in% acceptable)) & !search) {
     bad.vars <- sort(variable[!(variable %in% acceptable)])
-    close.matches  <- purrr::map(bad.vars, stringdist::stringdist, b = PARAM_NAMES)
-    suggested.vars <- PARAM_NAMES[unlist(purrr::map(close.matches, which.min))]
-    stop(paste0("The following are not supported Hi-sAFe input parameters: ", paste(bad.vars, collapse = ", "),
-                "\n       Did you mean: ", paste(suggested.vars, collapse = " or "), "?"), call. = FALSE)
+    if(requireNamespace("stringdist", quietly = TRUE)) {
+      close.matches  <- purrr::map(bad.vars, stringdist::stringdist, b = PARAM_NAMES)
+      suggested.vars <- PARAM_NAMES[unlist(purrr::map(close.matches, which.min))]
+      stop(paste0("The following are not supported Hi-sAFe input parameters: ", paste(bad.vars, collapse = ", "),
+                  "\n       Did you mean: ", paste(suggested.vars, collapse = " or "), "?"), call. = FALSE)
+    } else {
+      stop(paste0("The following are not supported Hi-sAFe input parameters: ", paste(bad.vars, collapse = ", "),
+                  "\nPlease install the 'stringdist' package for hip_params() to provide suggestions."), call. = FALSE)
+    }
   }
 
   if(variable[1] == "all") {
@@ -178,10 +183,15 @@ hop_params <- function(variable = "names", search = FALSE, quiet = FALSE) {
   acceptable <- c(OUTPUT.DEFS$name, "names", "all")
   if(any(!(variable %in% acceptable)) & !search & !quiet) {
     bad.vars <- sort(variable[!(variable %in% acceptable)])
-    close.matches  <- purrr::map(bad.vars, stringdist::stringdist, b = OUTPUT.DEFS$name)
-    suggested.vars <- OUTPUT.DEFS$name[unlist(purrr::map(close.matches, which.min))]
-    stop(paste0("The following are not supported Hi-sAFe input parameters: ", paste(bad.vars, collapse = ", "),
-                "\n       Did you mean: ", paste(suggested.vars, collapse = " or "), "?"), call. = FALSE)
+    if(requireNamespace("stringdist", quietly = TRUE)) {
+      close.matches  <- purrr::map(bad.vars, stringdist::stringdist, b = OUTPUT.DEFS$name)
+      suggested.vars <- OUTPUT.DEFS$name[unlist(purrr::map(close.matches, which.min))]
+      stop(paste0("The following are not supported Hi-sAFe output parameters: ", paste(bad.vars, collapse = ", "),
+                  "\n       Did you mean: ", paste(suggested.vars, collapse = " or "), "?"), call. = FALSE)
+    } else {
+      stop(paste0("The following are not supported Hi-sAFe output parameters: ", paste(bad.vars, collapse = ", "),
+                  "\nPlease install the 'stringdist' package for hop_params() to provide suggestions."), call. = FALSE)
+    }
   }
 
   if(variable[1] == "all") {

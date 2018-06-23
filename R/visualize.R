@@ -775,6 +775,9 @@ hisafe_snapshot <- function(hop,
                                         voxel.C.alpha = "fineRootCost",
                                         voxel.R.alpha = "totalTreeNitrogenUptake"), ...) {
 
+  if(!requireNamespace(c("gtable", "egg"), quietly = TRUE)) stop("The packages 'gtable' and 'egg' is required for hisafe_snapshot().
+                                                                 Please install and load them", call. = FALSE)
+
   #####################################################################
   ##### MODIFY egg::gtable_frame #####
   ## Once/if egg::gtable_frame is updated in the CRAN version of the package,
@@ -789,7 +792,6 @@ hisafe_snapshot <- function(hop,
   assignInNamespace("gtable_frame", gtable_frame, ns = 'egg')
   #####################################################################
 
-  if(!requireNamespace(c("gtable"), quietly = TRUE)) stop("The package 'gtable' is required for hisafe_snapshot(). Please install and load it.", call. = FALSE)
   is_hop(hop, error = TRUE)
   profile_check(hop, "trees", error = TRUE)
   if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character vector", call. = FALSE)
@@ -1384,9 +1386,15 @@ visual_legend <- function(hop,
       dplyr::mutate(y = scale_ab(y, min.y, max.y)) %>%
       dplyr::mutate(f = scale_ab(f, min.f, max.f))
 
+    if(requireNamespace("viridis", quietly = TRUE)) {
+      color.palette <- viridis::scale_fill_viridis(option = "magma")
+    } else {
+      color.palette <- ggplot2::scale_fill_gradient()
+    }
+
     plot.obj <- plot.obj +
       geom_raster(data = mini.cells, aes(x = x, y = y, fill = f)) +
-      viridis::scale_fill_viridis(option = "magma") +
+      color.palette +
       guides(fill = guide_colourbar(title     = NULL,
                                     barwidth  = 4,
                                     direction = "horizontal",

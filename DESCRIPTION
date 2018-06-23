@@ -1,7 +1,7 @@
 Package: hisafer
 Type: Package
 Title: An R Toolbox for the Hi-sAFe Biophysical Agroforestry Model
-Version: 1.0.1
+Version: 1.1.0
 Author: Kevin Wolz
 Maintainer: Kevin Wolz <wolzkevin@gmail.com>
 Description: An R toolbox for the Hi-sAFe biophysical agroforestry model.
@@ -17,15 +17,7 @@ Imports: ggplot2 (>= 2.2.1),
     purrr (>= 0.2.3),
     readr (>= 1.1.1),
     lubridate (>= 1.6.0),
-    viridis (>= 0.4.0),
-    R.utils (>= 2.5.0),
-    parallel (>= 3.4.1),
-    foreach (>= 1.4.3),
-    doParallel (>= 1.0.11),
-    memuse (>= 4.0-0),
-    stringdist (>= 0.9.4.6),
-    egg (>= 0.2.0),
-    cowplot (>= 0.9.2)
+    R.utils (>= 2.5.0)
 Remotes: thomasp85/ggforce
 License: GPL-3
 Encoding: UTF-8
@@ -34,5 +26,13 @@ RoxygenNote: 6.0.1
 Suggests: knitr,
     rmarkdown,
     ggforce (>= 0.1.1),
-    gtable (>= 0.2.0)
+    viridis (>= 0.4.0),
+    egg (>= 0.2.0),
+    gtable (>= 0.2.0),
+    cowplot (>= 0.9.2),
+    stringdist (>= 0.9.4.6),
+    parallel (>= 3.4.1),
+    foreach (>= 1.4.3),
+    doParallel (>= 1.0.11),
+    memuse (>= 4.0-0)
 VignetteBuilder: knitr

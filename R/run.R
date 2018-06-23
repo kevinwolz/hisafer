@@ -15,7 +15,6 @@
 #' @param quietly Logical indicating whether status messages should printed to the console.
 #' @export
 #' @importFrom foreach %dopar%
-#' @importFrom foreach %do%
 #' @family hisafe run functions
 #' @examples
 #' \dontrun{
@@ -73,7 +72,11 @@ run_hisafe <- function(hip            = NULL,
 
   ## Set allowed memory
   if(mem.spec) { # TRUE or non-zero
-    if(isTRUE(mem.spec)) mem.spec <- memuse::Sys.meminfo()$totalram@size * 1024 / parallel::detectCores()
+    if(isTRUE(mem.spec)) {
+      if(!requireNamespace(c("memuse", "parallel"), quietly = TRUE)) stop("The packages 'memuse' and 'parallel' are required if mem.spec = TRUE.
+                                                                          Please install and load them.", call. = FALSE)
+      mem.spec <- memuse::Sys.meminfo()$totalram@size * 1024 / parallel::detectCores()
+    }
     pre.wd <- getwd()
     setwd(capsis.path)
     if(.Platform$OS.type == "windows") {
@@ -87,6 +90,9 @@ run_hisafe <- function(hip            = NULL,
 
   ## Run
   if(parallel) {
+    parallel.packages <- c("foreach", "parallel", "doParallel")
+    if(!requireNamespace(parallel.packages, quietly = TRUE)) stop("The packages 'foreach', 'parallel', and 'doParallel are required
+                                                                  for parallel computing with run_hisafe(). Please install and load them.", call. = FALSE)
     if(length(simu.names) == 1)        stop("There is only 1 simulation to run. Parallel computing is not possible.", call. = FALSE)
     if(num.cores > length(simu.names)) stop("num.cores cannot be greater than length(simu.names)",                    call. = FALSE)
 
@@ -105,12 +111,15 @@ run_hisafe <- function(hip            = NULL,
     doParallel::stopImplicitCluster()
   } else {
     if(!quietly) cat("\nInitializing", length(simu.names), "simulations on 1 core")
-    run.log <- foreach::foreach(i = simu.names) %do% call_hisafe(path           = path,
-                                                                 simu.name      = i,
-                                                                 capsis.path    = capsis.path,
-                                                                 launch.call    = launch.call,
-                                                                 default.folder = default.folder,
-                                                                 quietly        = quietly)
+    for(i in simu.names) {
+      run.log <- call_hisafe(path           = path,
+                             simu.name      = i,
+                             capsis.path    = capsis.path,
+                             launch.call    = launch.call,
+                             default.folder = default.folder,
+                             quietly        = quietly)
+      if(!quietly) cat(paste("\nSimulation", i, "complete"))
+    }
   }
   if(!quietly) cat("\nAll simulations complete")
   invisible(run.log)
