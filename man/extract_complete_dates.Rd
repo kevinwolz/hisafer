@@ -2,7 +2,7 @@
 % Please edit documentation in R/visualize.R
 \name{extract_complete_dates}
 \alias{extract_complete_dates}
-\title{Build white boxes to cover phantom trees}
+\title{Extract complete dates}
 \usage{
 extract_complete_dates(hop, profile, dates)
 }
@@ -14,6 +14,6 @@ extract_complete_dates(hop, profile, dates)
 \item{dates}{Character vector or Date vector of dates to check.}
 }
 \description{
-Builds white boxes to cover phantom trees for \code{\link{hisafe_slice}}
+Extracts complete dates for \code{\link{hisafe_slice}}
 }
 \keyword{internal}

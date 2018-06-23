@@ -423,7 +423,7 @@ get_nitrogen_fluxes <- function(hop, profile) {
                     irrigation     = -nitrogenIrrigation,
                     deposition     = -nitrogenRain,
                     fixation       = -nitrogenFixation,
-                    watertable     = nitrogenAddedByWaterTable,
+                    watertable     = -nitrogenAddedByWaterTable,
                     upatakeTree    = nitrogenUptakeByTrees,
                     uptakeMain     = nitrogenUptake * as.numeric(cropType == "mainCrop"),
                     uptakeInter    = nitrogenUptake * as.numeric(cropType == "interCrop"),
