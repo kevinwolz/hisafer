@@ -118,7 +118,7 @@ hisafe_slice <- function(hop,
 
   x.lab <- "X (m)"
   if(plot.x == "y") { # Switch x-y if plot.x == "y"
-    if(!crops)  stop("crops must be TRUE if plot.x = 'y'",  call. = FALSE)
+    #if(!crops)  stop("crops must be TRUE if plot.x = 'y'",  call. = FALSE)
     x.lab <- "Y (m)"
     for(p in c("tree.info", "cells", "voxels")[c(TRUE, crops, voxels)]) hop[[p]] <- swap_cols(hop[[p]], "x", "y")
     hop$trees     <- swap_cols(hop$trees,     "crownRadiusInterRow", "crownRadiusTreeLine")
@@ -441,6 +441,12 @@ hisafe_slice <- function(hop,
     climate.data$waterTableDepth[climate.data$waterTableDepth < climate.data$soilDepth] <- 0
   }
 
+  white.boxes <- build_white_boxes_slice(hop   = hop,
+                                         X.MIN = X.MIN,
+                                         X.MAX = X.MAX,
+                                         Y.MIN = Y.MIN,
+                                         Y.MAX = Y.MAX)
+
   ## CREATE PLOT
   plot.obj <- ggplot() +
     labs(x = x.lab, y = "Z (m)", title = date) +
@@ -696,6 +702,17 @@ hisafe_slice <- function(hop,
   }
 
   if("hop-group" %in% class(hop)) plot.obj <- plot.obj + facet_wrap(~SimulationName, nrow = plot.rows)
+
+  ## WHITE BOXES TO COVER PHANTOM TREES
+  plot.obj <- plot.obj +
+    geom_rect(data = white.boxes,
+              size = 0,
+              fill = "white",
+              na.rm = TRUE,
+              aes(xmin = xmin,
+                  xmax = xmax,
+                  ymin = ymin,
+                  ymax = ymax))
 
   return(plot.obj)
 }
@@ -1421,6 +1438,36 @@ visual_legend <- function(hop,
   }
 
   return(plot.obj)
+}
+
+#' Build white boxes to cover phantom trees
+#' @description Builds white boxes to cover phantom trees for \code{\link{hisafe_slice}}
+#' @param hop An object of class hop.
+#' @param X.MIN Lower x limit for plot.
+#' @param X.MAX Upper x limit for plot.
+#' @param Y.MIN Lower y limit for plot.
+#' @param Y.MAX Upper y limit for plot.
+#' @keywords internal
+build_white_boxes_slice <- function(hop, X.MIN, X.MAX, Y.MIN, Y.MAX) {
+  boxes <- hop$plot.info %>%
+    dplyr::select(SimulationName, plotWidth) %>%
+    dplyr::filter(plotWidth < max(plotWidth))
+
+  pos.box <- boxes %>%
+    dplyr::mutate(xmin = plotWidth,
+                  xmax = X.MAX,
+                  ymin = Y.MIN,
+                  ymax = Y.MAX)
+  neg.box <- boxes %>%
+    dplyr::mutate(xmin = X.MIN,
+                  xmax = 0,
+                  ymin = Y.MIN,
+                  ymax = Y.MAX)
+
+  white.boxes <- dplyr::bind_rows(pos.box, neg.box) %>%
+    dplyr::filter(SimulationName %in% boxes$SimulationName)
+
+  return(white.boxes)
 }
 
 #' Add historic data
