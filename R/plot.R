@@ -282,14 +282,14 @@ plot_hisafe_monthcells <- function(hop,
                     dates          = dates[dates %in% hop$monthCells$Date],
                     strip.exp.plan = TRUE)
 
-  cellWidth  <- min(abs(diff(unique(hop$monthCells$x))))
-  plotWidth  <- max(hop$monthCells$x) + cellWidth
-  plotHeight <- max(hop$monthCells$y) + cellWidth
-
   if(plot.x == "y") { # Rotate scene if plot.x = "y"
     for(p in c("tree.info", "monthCells")) hop[[p]] <- swap_cols(hop[[p]], "x", "y")
     hop$plot.info <- swap_cols(hop$plot.info, "plotWidth", "plotHeight")
   }
+
+  cellWidth  <- min(abs(diff(unique(hop$monthCells$x))))
+  plotWidth  <- max(hop$monthCells$x) + cellWidth
+  plotHeight <- max(hop$monthCells$y) + cellWidth
 
   ## Determine which variable is not part of faceting & trigger associated error
   vars <- c("SimulationName", "Year", "Month")
@@ -634,7 +634,6 @@ plot_hisafe_cells <- function(hop,
                 ylim   = c(0, plotHeight),
                 expand = FALSE) +
     scale_x_continuous(sec.axis = sec_axis(~ ., labels = NULL)) +
-    scale_y_continuous(sec.axis = sec_axis(~ ., labels = NULL)) +
     plot.theme
 
   plot.obj <- plot.obj %>%
@@ -645,7 +644,12 @@ plot_hisafe_cells <- function(hop,
 
   if(plot.x == "y") {
     plot.obj <- plot.obj +
-      scale_y_continuous(breaks = 0:Y.MAX, labels = as.character(abs(Y.MAX - 0:Y.MAX)))
+      scale_y_continuous(breaks   = 0:plotHeight,
+                         labels   = as.character(abs(plotHeight - 0:plotHeight)),
+                         sec.axis = sec_axis(~ ., labels = NULL))
+  } else {
+    plot.obj <- plot.obj +
+      scale_y_continuous(sec.axis = sec_axis(~ ., labels = NULL))
   }
 
   if(plot) return(plot.obj) else return(plot.data)

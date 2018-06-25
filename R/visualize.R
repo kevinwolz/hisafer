@@ -173,7 +173,7 @@ hisafe_slice <- function(hop,
   if(voxels & nrow(hop$voxels) == 0) hop$voxels <- add_historic_data(df = hop.full$voxels, dates = date, mem.max = mem.max)
   if(crops  & nrow(hop$cells)  == 0) hop$cells  <- add_historic_data(df = hop.full$cells,  dates = date, mem.max = mem.max)
 
-  crops  <- crops  & nrow(hop$voxels) > 0
+  crops  <- crops  & nrow(hop$cells) > 0
   voxels <- voxels & nrow(hop$voxels) > 0
 
   rect.min.border <- 0.25
@@ -914,10 +914,14 @@ hisafe_snapshot <- function(hop,
                                    voxels       = voxels,
                                    plot.x       = plot.x,
                                    mem.max      = mem.max, ...) +
-          theme(axis.title.x = element_blank(),
-                axis.text.x  = element_blank(),
-                axis.ticks.x = element_blank(),
-                plot.margin  = margin(5,5,0,10))
+          theme(plot.margin  = margin(5,5,0,10))
+
+        if(cells) {
+          slice.plot <- slice.plot +
+            theme(axis.title.x = element_blank(),
+                  axis.text.x  = element_blank(),
+                  axis.ticks.x = element_blank())
+        }
       }
 
       if(cells) {
