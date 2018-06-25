@@ -8,8 +8,8 @@ plot_hisafe_ts(hop, variables, profile, cumulative = FALSE,
   simu.names = "all", years = "all", tree.ids = "all", date.min = NA,
   date.max = NA, doy.lim = c(1, 365), color.palette = NA,
   linetype.palette = NA, aes.cols = list(color = "SimulationName", linetype
-  = "SimulationName"), facet.year = FALSE, crop.points = FALSE,
-  plot = TRUE)
+  = "SimulationName"), facet.simu = FALSE, facet.year = FALSE,
+  crop.points = FALSE, plot = TRUE)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -17,7 +17,7 @@ plot_hisafe_ts(hop, variables, profile, cumulative = FALSE,
 \item{variables}{A character vector of the names of the variables to plot.
 More than one variable name can be passed, but all variables must be from the same \code{profile}.}
 
-\item{profile}{A character string of the profile for which to plot a timeseries. One of 'trees', 'plot', or 'climate'.}
+\item{profile}{A character string of the profile for which to plot a timeseries. One of 'trees', 'plot', 'climate', or 'cells'.}
 
 \item{cumulative}{Logical indicating wheter \code{variables} should be cumulated before plotting.}
 
@@ -43,7 +43,9 @@ If \code{NA}, the default, then solid lines are used for all simulations. The de
 
 \item{aes.cols}{A list with arguments "color" and "linetype" containing character strings of the column names to use for plot aesthetics.}
 
-\item{facet.year}{A logical indicating whether, for daily profiles, the plot should be faceted by year. This helps with seeing finer level detail.}
+\item{facet.simu}{A logical indicating whether the plot should be faceted by SimulationName This helps when values among simulations are overplotted.}
+
+\item{facet.year}{A logical indicating whether the plot should be faceted by year. This helps with seeing finer level detail.}
 
 \item{crop.points}{Logical indicating if points should be plotted as well, with point shape desgnating the main crop name.
 Only applies when \code{profile} is 'plot'.}

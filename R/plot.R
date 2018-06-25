@@ -7,7 +7,7 @@
 #' @param hop An object of class hop.
 #' @param variables A character vector of the names of the variables to plot.
 #' More than one variable name can be passed, but all variables must be from the same \code{profile}.
-#' @param profile A character string of the profile for which to plot a timeseries. One of 'trees', 'plot', or 'climate'.
+#' @param profile A character string of the profile for which to plot a timeseries. One of 'trees', 'plot', 'climate', or 'cells'.
 #' @param cumulative Logical indicating wheter \code{variables} should be cumulated before plotting.
 #' @param simu.names A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.
 #' @param years A numeric vector of the years within \code{hop} to include. Use "all" to include all available values.
@@ -22,7 +22,8 @@
 #' @param linetype.palette A character string of values defining the linetype palette to use in plots with multiple simulations.
 #' If \code{NA}, the default, then solid lines are used for all simulations. The default supports up to 48 simulations.
 #' @param aes.cols A list with arguments "color" and "linetype" containing character strings of the column names to use for plot aesthetics.
-#' @param facet.year A logical indicating whether, for daily profiles, the plot should be faceted by year. This helps with seeing finer level detail.
+#' @param facet.simu A logical indicating whether the plot should be faceted by SimulationName This helps when values among simulations are overplotted.
+#' @param facet.year A logical indicating whether the plot should be faceted by year. This helps with seeing finer level detail.
 #' @param crop.points Logical indicating if points should be plotted as well, with point shape desgnating the main crop name.
 #' Only applies when \code{profile} is 'plot'.
 #' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.
@@ -55,11 +56,12 @@ plot_hisafe_ts <- function(hop,
                            color.palette    = NA,
                            linetype.palette = NA,
                            aes.cols         = list(color = "SimulationName", linetype = "SimulationName"),
+                           facet.simu       = FALSE,
                            facet.year       = FALSE,
                            crop.points      = FALSE,
                            plot             = TRUE) {
 
-  allowed.profiles  <- c("trees", "plot", "climate")
+  allowed.profiles  <- c("trees", "plot", "climate", "cells")
   tree.profiles     <- "trees"
 
   is_hop(hop, error = TRUE)
@@ -76,13 +78,17 @@ plot_hisafe_ts <- function(hop,
   if(!(is.na(linetype.palette) | is.character(linetype.palette))) stop("linetype.palette argument must be a character vector",      call. = FALSE)
   if(!all(purrr::map_lgl(aes.cols, function(x) length(x) == 1 & is.character(x)))) stop("aes.cols list elements must be character vectors of length 1", call. = FALSE)
   is_TF(cumulative)
+  is_TF(facet.simu)
   is_TF(facet.year)
   is_TF(crop.points)
   is_TF(plot)
   variable_check(hop, profile, c(variables, aes.cols$color, aes.cols$linetype), error = TRUE)
-  if(facet.year & length(variables) > 1)                          stop("facet.year can only be TRUE when plotting a single variable", call. = FALSE)
-  if(!all(years %in% unique(hop[[profile]]$Year)))                stop(paste("not all values in years are present in the",  profile, "profile"),
-                                                                       call. = FALSE)
+  #if(facet.simu & length(variables) > 1)                              stop("facet.simu can only be TRUE when plotting a single variable", call. = FALSE)
+  if(facet.year & length(variables) > 1)                              stop("facet.year can only be TRUE when plotting a single variable", call. = FALSE)
+  if(facet.simu & length(tree.ids)  > 1 & profile %in% tree.profiles) stop("facet.simu can only be TRUE when plotting a single tree",     call. = FALSE)
+  if(facet.year & length(tree.ids)  > 1 & profile %in% tree.profiles) stop("facet.year can only be TRUE when plotting a single tree",     call. = FALSE)
+  if(!all(years %in% unique(hop[[profile]]$Year)))                    stop(paste("not all values in years are present in the",  profile, "profile"),
+                                                                           call. = FALSE)
 
   hop <- hop_filter(hop        = hop,
                     simu.names = simu.names,
@@ -93,20 +99,40 @@ plot_hisafe_ts <- function(hop,
   ## Create profile-specific x aesthetic, axis label, plot theme, and time.lim filter
   x.var       <- "fake.date"
   x.label     <- "Date"
-  if(facet.year) {
+  if(facet.simu & facet.year) {
+    facet <- facet_grid(Year~SimulationName)
+    scale_x_ts  <- scale_x_date(date_labels = "%b", expand = c(0,0),
+                                limits = lubridate::as_date(lubridate::parse_date_time(paste0("8000-", doy.lim), "%Y-%j")))
+  } else if(facet.year) {
     facet <- facet_wrap(~Year)
     scale_x_ts  <- scale_x_date(date_labels = "%b", expand = c(0,0),
                                 limits = lubridate::as_date(lubridate::parse_date_time(paste0("8000-", doy.lim), "%Y-%j")))
-    theme.extra <- theme(axis.ticks.length = unit(5, "points"),
-                         axis.text.x       = element_text(margin = margin(t = 5, unit = "points"), angle = 90, hjust = 1, vjust = 0.5),
-                         axis.text.y       = element_text(margin = margin(r = 5, unit = "points")))
+  } else if(facet.simu) {
+    x.var       <- "Date"
+    facet       <- facet_wrap(~SimulationName)
+    scale_x_ts  <- scale_x_date(date_labels = "%Y")
   } else {
     x.var       <- "Date"
     facet       <- geom_blank()
-    scale_x_ts  <- scale_x_date(date_labels = "%Y") # "%b-%Y"
+    scale_x_ts  <- scale_x_date(date_labels = "%Y")
     theme.extra <- geom_blank()
   }
-  plot.data  <- hop[[profile]] %>%
+  if(facet.simu | facet.year) {
+    theme.extra <- theme(axis.ticks.length = unit(5, "points"),
+                         axis.text.x       = element_text(margin = margin(t = 5, unit = "points"), angle = 90, hjust = 1, vjust = 0.5),
+                         axis.text.y       = element_text(margin = margin(r = 5, unit = "points")))
+  }
+
+  plot.data  <- hop[[profile]]
+
+  if(profile == "cells") {
+    plot.data <- plot.data %>%
+      dplyr::group_by(SimulationName, Date, Day, Month, Year, JulianDay, stepNum) %>%
+      dplyr::summarize_if(is.numeric, mean) %>%
+      dplyr::ungroup()
+  }
+
+  plot.data <- plot.data %>%
     dplyr::filter(Year %in% years) %>%
     dplyr::mutate(fake.date = lubridate::ymd(paste0("8000-", Month, "-", Day)))
   yrs.to.remove <- unique(plot.data$Year)[table(plot.data$Year) == length(unique(plot.data$SimulationName))]
@@ -120,7 +146,7 @@ plot_hisafe_ts <- function(hop,
       facet <- facet_wrap(~id)
       if(profile == "trees") {
         x.var <- "Date"
-        scale_x_ts <- scale_x_date(date_labels = "%Y") # "%b-%Y"
+        scale_x_ts <- scale_x_date(date_labels = "%Y")
         theme.extra <- geom_blank()
       }
     }
@@ -139,6 +165,12 @@ plot_hisafe_ts <- function(hop,
     scale_linetype <- scale_linetype_discrete()
   }
 
+  geom        <- geom_line(size = 1, na.rm = TRUE, aes_string(color = aes.cols$color, linetype = aes.cols$linetype))
+  scale_color <- scale_color_manual(values = color.palette)
+  if(facet.simu) {
+    scale_color <- scale_linetype <- geom_blank()
+    geom <- geom_line(size = 1, na.rm = TRUE, color = "black")
+  }
 
   ## Group for cumulation
   if(cumulative) {
@@ -154,8 +186,6 @@ plot_hisafe_ts <- function(hop,
   for(i in 1:length(variables)) {
     plot.obj[[i]] <- ggplot(plot.data, aes_string(x        = x.var,
                                                   y        = variables[i],
-                                                  color    = aes.cols$color,
-                                                  linetype = aes.cols$linetype,
                                                   group    = "SimulationName")) +
       labs(x        = x.label,
            y        = gsub(" \\(\\)", "", paste0("Cumulative"[cumulative], variables[i], " (", get_units(variable = variables[i], prof = profile), ")")),
@@ -165,8 +195,8 @@ plot_hisafe_ts <- function(hop,
       facet +
       scale_x_ts +
       scale_y_continuous(sec.axis = sec_axis(~ ., labels = NULL)) +
-      geom_line(size = 1, na.rm = TRUE) +
-      scale_color_manual(values = color.palette) +
+      geom +
+      scale_color +
       scale_linetype +
       theme_hisafe_ts(legend.title = element_blank()) +
       theme.extra
@@ -195,10 +225,13 @@ plot_hisafe_ts <- function(hop,
     if(!requireNamespace("cowplot", quietly = TRUE)) stop("The package 'cowplot' is required when passing 2 or more variable names.
                                                           Please install and load it", call. = FALSE)
 
-    plot.obj <- cowplot::plot_grid(plotlist = plot.obj)
+    plot.obj <- cowplot::plot_grid(plotlist = plot.obj, ncol = 1)
   } else {
     plot.obj <- plot.obj[[1]]
   }
+
+  plot.data <- plot.data %>%
+    dplyr::select(-fake.date)
 
   if(plot) return(plot.obj) else return(plot.data)
 }
