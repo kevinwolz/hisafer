@@ -259,7 +259,13 @@ check_input_values <- function(hip, force) {
   if(prelim.errors != errors) stop(prelim.errors, call. = FALSE)
 
   ## SimulationName errors
-  unique.sim.error     <- ifelse(identical(hip$exp.plan, dplyr::distinct(hip$exp.plan)),
+  paste_together  <- function(x) unlist(purrr::map(x, paste, collapse = ";"))
+  orig.exp.plan <- hip$exp.plan %>%
+    dplyr::mutate_if(is.list, paste_together)
+  test.exp.plan <- orig.exp.plan %>%
+    dplyr::distinct()
+
+  unique.sim.error     <- ifelse(identical(orig.exp.plan, test.exp.plan),
                                  "", "-- Each simulaton must be distinct.")
   unique.simname.error <- ifelse(unique(table(unlist(hip$exp.plan$SimulationName))) == 1,
                                  "", "-- SimulationName - each siulation must have a unique name")
