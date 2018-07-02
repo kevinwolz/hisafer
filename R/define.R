@@ -90,9 +90,9 @@ define_hisafe <- function(path,
   ## Get profile names and check that they are present in template directory
   available.profiles <- get_available_profiles(template)
   if(profiles[1] == "all") {
-    profiles <- available.profiles
+    profiles <- available.profiles[!(available.profiles %in% PRIVATE.PROFILES)]
   } else if(!all(profiles %in% available.profiles)) {
-    missing.profiles      <- profiles[!(profiles %in% available.profiles)]
+    missing.profiles <- profiles[!(profiles %in% available.profiles)]
     stop(paste(c("The following profiles are not available:", missing.profiles), collapse = "\n"), call. = FALSE)
   }
 

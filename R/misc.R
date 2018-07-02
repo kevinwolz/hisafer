@@ -131,7 +131,7 @@ hip_params <- function(variable = "names", search = FALSE, template = "agrofores
     if(search) cat("'variable' values will be searched as regular expressions.")
     for(i in 1:length(variable)){
       if(search) {
-        var.def <- dplyr::filter(INPUT.DEFS, stringr::str_detect(tolower(name), variable[i]))
+        var.def <- dplyr::filter(INPUT.DEFS, stringr::str_detect(tolower(name), tolower(variable[i])))
         if(nrow(var.def) == 0) {
           cat("\n\n  --", paste(variable[i], "was not detected in any Hi-sAFe input parameter names"))
           next
@@ -210,7 +210,7 @@ hop_params <- function(variable = "names", search = FALSE, quiet = FALSE) {
     if(search & !quiet) cat("'variable' values will be searched as regular expressions.")
     for(i in 1:length(variable)){
       if(search) {
-        var.def <- dplyr::filter(OUTPUT.DEFS, stringr::str_detect(tolower(name), variable[i]))
+        var.def <- dplyr::filter(OUTPUT.DEFS, stringr::str_detect(tolower(name), tolower(variable[i])))
         if(nrow(var.def) == 0) {
           if(!quiet) cat("\n\n  --", paste(variable[i], "was not detected in any Hi-sAFe input parameter names"))
           next
@@ -241,7 +241,7 @@ hop_params <- function(variable = "names", search = FALSE, quiet = FALSE) {
 #' }
 hisafe_profiles <- function() {
   public.profiles  <- dplyr::filter(SUPPORTED.PROFILES, !(profiles %in% PRIVATE.PROFILES))
-  print(as.data.frame(public.profiles), row.names = FALSE)
+  print(as.data.frame(public.profiles), right = FALSE, row.names = FALSE)
 }
 
 #' Change SimulationNames in a hop object
