@@ -5,7 +5,7 @@
 #' data from more than one Hi-sAFe simulation, the plots will contain multiple lines, colored and labeled by SimulationName.
 #' If the data contains two more tree ids, the plots will be faceted by tree id.
 #' @param hop An object of class "hop" or "face" containing output data from one or more Hi-sAFe simulations.
-#' @param profile The profile for which to plot a timeseries. One of 'trees', 'plot', or 'climate'.
+#' @param profile The profile for which to plot a timeseries. One of 'trees', 'plot', 'climate', or 'cells'.
 #' @param output.path A character string indicating the path to the directory where plots should be saved.
 #' Plots aresaved in a subdirectory within this directory named by \code{profile}.
 #' If no value is provided, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis/diagnostics".
@@ -23,7 +23,7 @@
 #' }
 diag_hisafe_ts <- function(hop, profile, output.path = NULL, ...) {
 
-  supported.profiles <- c("trees", "plot", "climate")
+  supported.profiles <- c("trees", "plot", "climate", "cells")
   is_hop(hop, error = TRUE)
   profile_check(hop, profile, error = TRUE)
   if(!(profile %in% supported.profiles))                  stop("supplied profile is not supported by plot_hisafe_ts()", call. = FALSE)
@@ -306,7 +306,7 @@ diag_hisafe <- function(hop,
 
   profiles.to.check <- names(hop)[!(names(hop) %in% c("variables", "plot.info", "tree.info", "exp.plan", "path", "exp.path"))]
   profiles.avail <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
-  profiles.todo  <- c("trees", "plot", "climate")[c(trees, plot, climate)]
+  profiles.todo  <- c("trees", "plot", "climate", "cells")[c(trees, plot, climate, cells)]
   profiles.todo  <- profiles.avail[profiles.avail %in% profiles.todo]
 
   if(length(profiles.todo) >= 1) {
@@ -324,11 +324,6 @@ diag_hisafe <- function(hop,
   if(monthCells & profile_check(hop, "monthCells")) {
     cat("\n-- Plotting monthCells diagnostics")
     diag_hisafe_monthcells(hop = hop)
-  }
-
-  if(cells & profile_check(hop, "cells")) {
-    cat("\n-- Plotting cells diagnostics")
-    diag_hisafe_cells(hop = hop)
   }
 
   if(voxels & profile_check(hop, "voxels")) {

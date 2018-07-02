@@ -244,10 +244,10 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
   }
 
   base.cols <- c("SimulationName", "Date", "Day", "Month", "Year", "JulianDay", "stepNum")
-  join_plot   <- function(...) dplyr::left_join(..., by = base.cols)
-  join_trees  <- function(...) dplyr::left_join(..., by = c(base.cols, "id"))
-  join_cells  <- function(...) dplyr::left_join(..., by = c(base.cols, "id", "x", "y"))
-  join_voxels <- function(...) dplyr::left_join(..., by = c(base.cols, "cellId", "id", "x", "y", "z"))
+  join_plot   <- function(...) dplyr::left_join(..., by = base.cols, suffix = c("", ".REMOVE"))
+  join_trees  <- function(...) dplyr::left_join(..., by = c(base.cols, "id"), suffix = c("", ".REMOVE"))
+  join_cells  <- function(...) dplyr::left_join(..., by = c(base.cols, "id", "x", "y"), suffix = c("", ".REMOVE"))
+  join_voxels <- function(...) dplyr::left_join(..., by = c(base.cols, "cellId", "id", "x", "y", "z"), suffix = c("", ".REMOVE"))
 
   plot.data   <- out[grep("^plot",        names(out))]
   trees.data  <- out[grep("^trees",       names(out))]
@@ -268,7 +268,8 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
       dv <- dplyr::tibble()
     } else {
       dv <- out[[prof]] %>%
-        dplyr::distinct()
+        dplyr::distinct() %>%
+        dplyr::select(-dplyr::ends_with(".REMOVE", ignore.case = FALSE))
     }
     return(dv)
   }

@@ -9,7 +9,7 @@ diag_hisafe_ts(hop, profile, output.path = NULL, ...)
 \arguments{
 \item{hop}{An object of class "hop" or "face" containing output data from one or more Hi-sAFe simulations.}
 
-\item{profile}{The profile for which to plot a timeseries. One of 'trees', 'plot', or 'climate'.}
+\item{profile}{The profile for which to plot a timeseries. One of 'trees', 'plot', 'climate', or 'cells'.}
 
 \item{output.path}{A character string indicating the path to the directory where plots should be saved.
 Plots aresaved in a subdirectory within this directory named by \code{profile}.
