@@ -1024,7 +1024,8 @@ get_dims <- function(ggobj,
 #' @param prof A characgter string of the profile that \code{variable} is from.
 #' @keywords internal
 get_units <- function(variable, prof) {
-  var.unit <- hop_params(variable, quiet = TRUE) %>%
+  var.unit <- gsub("_[0-9]+", "_X", variable) %>%
+    hop_params(quiet = TRUE) %>%
     dplyr::filter(profile == prof) %>%
     .$unit %>%
     gsub(pattern = "\\.", replacement = " ")
