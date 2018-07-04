@@ -48,20 +48,22 @@ build_cluster_script <- function(hip            = NULL,
 
   if(default.folder != "") default.folder <- paste0(" ", default.folder)
 
-  SEQ <- FALSE
   if(!is.null(hip)) {
     if(is.null(script.path)) script.path <- hip$path
     if(is.null(simu.names))  simu.names  <- hip$exp.plan$SimulationName
-    simu.names.split <- strsplit(simu.names, "_\\s*(?=[^_]+$)", perl=TRUE)
-    simu.prefix.guess <- simu.names.split[[1]][1]
-    if(all(grepl(paste0(simu.prefix.guess, "_[0-9]+$"), simu.names) & map_dbl(simu.names.split, length) > 1)) {
-      SEQ <- TRUE
-      seqs <- as.numeric(purrr::map_chr(simu.names.split, 2))
-    }
   } else {
     script.path <- R.utils::getAbsolutePath(script.path)
     if(!dir.exists(script.path)) stop("directory specified by script.path does not exist", call. = FALSE)
     if(is.null(simu.names))      stop("simu.names cannot by NULL if hip is not provided",  call. = FALSE)
+  }
+
+  ## Determine if sequential script can be built
+  SEQ <- FALSE
+  simu.names.split <- strsplit(simu.names, "_\\s*(?=[^_]+$)", perl=TRUE)
+  simu.prefix.guess <- simu.names.split[[1]][1]
+  if(all(grepl(paste0(simu.prefix.guess, "_[0-9]+$"), simu.names) & map_dbl(simu.names.split, length) > 1)) {
+    SEQ <- TRUE
+    seqs <- as.numeric(purrr::map_chr(simu.names.split, 2))
   }
 
   write_script <- function(i, SEQ) {
