@@ -32,7 +32,7 @@ diag_hisafe_ts <- function(hop, profile, output.path = NULL, ...) {
   ts.path <- clean_path(paste0(diag_output_path(hop = hop, output.path = output.path), "/diagnostics/", profile, "/"))
   dir.create(ts.path, recursive = TRUE, showWarnings = FALSE)
 
-  if(profile == "tree") last.col <- "id" else if(profile == "cells") last.col <- "y" else last.col <- "stepNum"
+  if(profile == "trees") last.col <- "id" else if(profile == "cells") last.col <- "y" else last.col <- "stepNum"
 
   var.names <- vars_to_diag(hop = hop, profile = profile, last.col = last.col)
   plot.list <- purrr::map(var.names, plot_hisafe_ts, hop = hop, profile = profile, ...)

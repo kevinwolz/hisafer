@@ -113,6 +113,7 @@ plot_hisafe_cycle_annual <- function(hop,
   ## Filter & Summarize plot data
   complete.yrs <- plot.data %>%
     dplyr::group_by(SimulationName, Year) %>%
+    dplyr::filter(flux == flux[1]) %>%
     dplyr::summarize(n = n() >= 365)
 
   plot.data <- plot.data %>%

@@ -188,7 +188,7 @@ plot_hisafe_ts <- function(hop,
                                                   y        = variables[i],
                                                   group    = "SimulationName")) +
       labs(x        = x.label,
-           y        = gsub(" \\(\\)", "", paste0("Cumulative"[cumulative], variables[i], " (", get_units(variable = variables[i], prof = profile), ")")),
+           y        = gsub(" \\(\\)", "", paste0("Cumulative "[cumulative], variables[i], " (", get_units(variable = variables[i], prof = profile), ")")),
            title    = ifelse(length(variables) == 1, variables[i], ""),
            color    = ifelse(aes.cols$color    == "SimulationName", "", aes.cols$color),
            linetype = ifelse(aes.cols$linetype == "SimulationName", "", aes.cols$linetype)) +
