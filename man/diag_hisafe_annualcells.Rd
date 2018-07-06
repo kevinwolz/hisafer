@@ -4,8 +4,8 @@
 \alias{diag_hisafe_annualcells}
 \title{Plot annualCells diagnostics of Hi-sAFe output}
 \usage{
-diag_hisafe_annualcells(hop, years = seq(0, (max(hop$annualCells$Year) -
-  min(hop$annualCells$Year)), 5), output.path = NULL, ...)
+diag_hisafe_annualcells(hop, years = seq(min(hop$annualCells$Year),
+  max(hop$annualCells$Year), 5), output.path = NULL, ...)
 }
 \arguments{
 \item{hop}{An object of class "hop" or "face" containing output data from one or more Hi-sAFe simulations.}

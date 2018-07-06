@@ -246,7 +246,7 @@ plot_hisafe_ts <- function(hop,
 #' @param rowfacet One of "Year", "Month", or "SimulationName", indicating which variable to use for row faceting.
 #' @param colfacet One of "Year", "Month", or "SimulationName", indicating which variable to use for column faceting.
 #' @param simu.names A character string containing the SimulationNames to include. Use "all" to include all available values.
-#' @param years A numeric vector containing the years (after planting) to include. Use "all" to include all available values.
+#' @param years A numeric vector containing the years to include. Use "all" to include all available values.
 #' @param months A numeric vector containing the months to include. Use "all" to include all available values.
 #' @param plot.x Either "x" or "y", indicating which axis of the simulation scene should be plotted on the x-axis of the plot.
 #' @param trees Logical indicating if a point should be plotted at the location of each tree.
@@ -270,7 +270,7 @@ plot_hisafe_ts <- function(hop,
 #'                                      rowfacet = "SimulationName",
 #'                                      colfacet = "Month",
 #'                                      simu.names = "all",
-#'                                      years = 20,
+#'                                      years = 2000,
 #'                                      months = 1:12)
 #'
 #' # Once you have the plot object, you can display it and save it:
@@ -282,7 +282,7 @@ plot_hisafe_monthcells <- function(hop,
                                    colfacet   = "SimulationName",
                                    rowfacet   = "Year",
                                    simu.names = "all",
-                                   years      = seq(0, 40, 5),
+                                   years      = seq(min(hop$monthCells$Year), max(hop$monthCells$Year), 5),
                                    months     = 6,
                                    plot.x     = "x",
                                    trees      = TRUE,
@@ -294,7 +294,7 @@ plot_hisafe_monthcells <- function(hop,
   variable_check(hop, "monthCells", variable, error = TRUE)
 
   if(simu.names[1] == "all") simu.names <- unique(hop$monthCells$SimulationName)
-  if(years[1]      == "all") years      <- unique(hop$monthCells$Year) -  min(hop$monthCells$Year)
+  if(years[1]      == "all") years      <- unique(hop$monthCells$Year)
   if(months[1]     == "all") months     <- unique(hop$monthCells$Month)
 
   if(length(variable) > 1)                                  stop("variable argument must be a character vector of length 1",              call. = FALSE)
@@ -308,7 +308,7 @@ plot_hisafe_monthcells <- function(hop,
   is_TF(canopies)
   is_TF(plot)
 
-  dates <- expand.grid(year = years + min(hop$monthCells$Year), month = months, day = 1)
+  dates <- expand.grid(year = years, month = months, day = 1)
   dates <- lubridate::ymd(paste(dates$year, dates$month, dates$day, sep = "-"))
   hop <- hop_filter(hop            = hop,
                     simu.names     = simu.names,

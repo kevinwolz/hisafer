@@ -96,7 +96,7 @@ diag_hisafe_monthcells <- function(hop,
                              colfacet   = "SimulationName",
                              rowfacet   = "Year",
                              simu.names = "all",
-                             years      = seq(0, (max(hop$monthCells$Year) - min(hop$monthCells$Year)), 5),
+                             years      = seq(min(hop$monthCells$Year), max(hop$monthCells$Year), 5),
                              months     = 6,
                              trees      = trees,
                              canopies   = canopies)
@@ -112,7 +112,7 @@ diag_hisafe_monthcells <- function(hop,
                              colfacet   = "SimulationName",
                              rowfacet   = "Month",
                              simu.names = "all",
-                             years      = (round(median(hop$monthCells$Year),0) - min(hop$monthCells$Year)),
+                             years      = round(median(hop$monthCells$Year), 0),
                              months     = 1:12,
                              trees      = trees,
                              canopies   = canopies)
@@ -130,7 +130,7 @@ diag_hisafe_monthcells <- function(hop,
                                colfacet   = "Year",
                                rowfacet   = "Month",
                                simu.names = sim.name,
-                               years      = seq(0, (max(hop$monthCells$Year) - min(hop$monthCells$Year)), 5),
+                               years      = seq(min(hop$monthCells$Year), max(hop$monthCells$Year), 5),
                                months     = 1:12,
                                trees      = trees,
                                canopies   = canopies)
@@ -172,7 +172,7 @@ diag_hisafe_monthcells <- function(hop,
 #' diag_hisafe_annualcells(mydata)
 #' }
 diag_hisafe_annualcells <- function(hop,
-                                   years       = seq(0, (max(hop$annualCells$Year) - min(hop$annualCells$Year)), 5),
+                                   years       = seq(min(hop$annualCells$Year), max(hop$annualCells$Year), 5),
                                    output.path = NULL, ...) {
 
   is_hop(hop, error = TRUE)

@@ -6,8 +6,9 @@
 \usage{
 plot_hisafe_monthcells(hop, variable = "monthRelativeTotalParIncident",
   colfacet = "SimulationName", rowfacet = "Year", simu.names = "all",
-  years = seq(0, 40, 5), months = 6, plot.x = "x", trees = TRUE,
-  canopies = TRUE, plot = TRUE)
+  years = seq(min(hop$monthCells$Year), max(hop$monthCells$Year), 5),
+  months = 6, plot.x = "x", trees = TRUE, canopies = TRUE,
+  plot = TRUE)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -20,7 +21,7 @@ plot_hisafe_monthcells(hop, variable = "monthRelativeTotalParIncident",
 
 \item{simu.names}{A character string containing the SimulationNames to include. Use "all" to include all available values.}
 
-\item{years}{A numeric vector containing the years (after planting) to include. Use "all" to include all available values.}
+\item{years}{A numeric vector containing the years to include. Use "all" to include all available values.}
 
 \item{months}{A numeric vector containing the months to include. Use "all" to include all available values.}
 
@@ -56,7 +57,7 @@ tile.plot2 <- plot_hisafe_monthcells(mydata, "monthDirectParIncident",
                                      rowfacet = "SimulationName",
                                      colfacet = "Month",
                                      simu.names = "all",
-                                     years = 20,
+                                     years = 2000,
                                      months = 1:12)
 
 # Once you have the plot object, you can display it and save it:
