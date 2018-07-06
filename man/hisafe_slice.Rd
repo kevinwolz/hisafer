@@ -71,7 +71,7 @@ Values can include upper case and/or lower case letters.}
 
 \item{voxels}{A logical indicating whether or not to plot the voxels in the scene.}
 
-\item{climate}{A logical indicating whether or not to plot climate aspects (e.g. precipitation) in the scene.}
+\item{climate}{A logical indicating whether or not to plot climate aspects (precipitation, water table) in the scene.}
 
 \item{mem.max}{An integer specifying the maximum number of days into the past to search
 for crop/voxel data when no data is available for \code{date} within \code{hop}.}

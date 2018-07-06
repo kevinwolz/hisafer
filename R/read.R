@@ -11,8 +11,8 @@
 #'  \item{voxels}
 #'  \item{plot.info}{ - plot geometry data for each simulation}
 #'  \item{tree.info}{ - tree species and location data for each simulation}
-#'  \item{exp.plan}{ - the exp.plan of the hip object that generated the simulation}
-#'  \item{path}{ - the paths to the simulation folders}
+#'  \item{exp.plan}{ - the exp.plan of the hip object that generated the simulations}
+#'  \item{metadata}{ - the metadata of each simulations (path to simulation folders, model versions, run date , run duration)}
 #'  \item{exp.path}{ - the path to the experiment folder}
 #' }
 #' @param hip An object of class "hip". To create a hip object see \code{\link{define_hisafe}}.
@@ -243,7 +243,7 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
     out <- list()
   }
 
-  base.cols <- c("SimulationName", "Date", "Day", "Month", "Year", "JulianDay", "stepNum")
+  base.cols <- c("SimulationName", "Date", "Day", "Month", "Year", "JulianDay")
   join_plot   <- function(...) dplyr::left_join(..., by = base.cols, suffix = c("", ".REMOVE"))
   join_trees  <- function(...) dplyr::left_join(..., by = c(base.cols, "id"), suffix = c("", ".REMOVE"))
   join_cells  <- function(...) dplyr::left_join(..., by = c(base.cols, "id", "x", "y"), suffix = c("", ".REMOVE"))
@@ -307,6 +307,26 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
     plot.info <- tree.info <- dplyr::tibble()
   }
 
+  ## Read simulation metadata
+  simu.metadata <- dplyr::tibble(SimulationName = simu.name, path = simu.path)
+
+  session.path <- clean_path(paste0(path, "/", simu.name, "/output-", simu.name, "/session.txt"))
+  if(file.exists(session.path)) {
+    session.names <- c("hisafe.version", "stics.version", "capsis.version", "simulation.start", "simulation.seconds")
+    session.info <- scan(session.path, what = "character", encoding = "latin1", sep = "\n", quiet = TRUE) %>%
+      .[-1] %>%
+      purrr::map(strsplit, split = " = ") %>%
+      purrr::map(1) %>%
+      purrr::map(2) %>%
+      c(rep(list(NA), length(session.names) - length(.))) %>% # if a simulation was not completed, simulation.start & simulation.seconds will not be in the file
+      as.data.frame(col.names = session.names, stringsAsFactors = FALSE) %>%
+      dplyr::as_tibble() %>%
+      mutate(simulation.start   = lubridate::ymd_hms(simulation.start)) %>%
+      mutate(simulation.seconds = as.numeric(simulation.seconds))
+    simu.metadata <- dplyr::bind_cols(simu.metadata, session.info)
+  }
+
+
   ## Ensure crop names are characters in plot
   clean_crop_name <- function(x) {
     for(i in c("mainCropName", "interCropName")) {
@@ -329,7 +349,7 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
                  plot.info   = plot.info,
                  tree.info   = tree.info,
                  exp.plan    = EXP.PLAN,
-                 path        = dplyr::tibble(SimulationName = simu.name, path = simu.path))
+                 metadata    = simu.metadata)
 
   return(output)
 }
@@ -347,56 +367,6 @@ read_hisafe_example <- function(profiles = c("plot", "trees", "climate", "monthC
   hop <- read_hisafe(path     = clean_path(paste0(system.file("extdata", "example_output", package = "hisafer"), "/")),
                      profiles = profiles, ...)
   return(hop)
-}
-
-#' Read a single Hi-sAFe output profile
-#' @description Reads the designated output profiles from a single Hi-sAFe simulation.
-#' @return A data frame (tibbles) containing the data from the profile.
-#' @param profile A character string of the path to the profile to be read.
-#' @param simu.name A character string of the name of the simulation being read.
-#' @importFrom dplyr %>%
-#' @keywords internal
-read_hisafe_output_file <- function(profile, simu.name){
-
-  ## Read raw text & find break between description & data
-  raw.text <- readLines(profile)
-  end.of.var.list <- which(raw.text[-1] == "")[1]
-
-  ## Read data
-  dat <- read_table_hisafe(file = profile, skip = end.of.var.list) %>%
-    dplyr::filter(Year != 0)
-  if(nrow(dat) == 0) {
-    warning(paste0(basename(profile), " exists but contains no data"), call. = FALSE)
-  } else {
-    dat <- dat %>%                                               # remove row with Year==0 at the start of every output profile
-      dplyr::mutate(Date = gsub(pattern = "a.", replacement = "", x = Date, fixed = TRUE)) %>% # is this here to fix an old bug?
-      dplyr::mutate(Date = lubridate::dmy(Date))                 # convert Date column into date class
-
-    if(unique(dat$SimulationName) != simu.name) {
-      warning(paste0("SimulationName in ", basename(profile), " (", unique(dat$SimulationName), ") does not match the name of the simulation folder (",
-                     simu.name, "). Simulation folder name will override SimulationName in export profile."), call. = FALSE)
-      dat$SimulationName <- simu.name
-    }
-  }
-
-  return(dat)
-}
-
-#' Read from a Hi-sAFe output profile
-#' @description Customized read.table call to read from a Hi-sAFe output profile.
-#' @return A data frame.
-#' @param file A character string of the path to the file to be read.
-#' @param ... Any other arguements passed to \code{read.table}
-#' @keywords internal
-read_table_hisafe <- function(file, ...) {
-  # using read.table rather readr::read_table because read_table is not working
-  dplyr::as_tibble(read.table(file,
-                              header           = TRUE,
-                              sep              = "\t",
-                              stringsAsFactors = FALSE,
-                              # "error!" is output by HISAFE & causes table merge errors if left; "NaN" output causes plot problems
-                              na.strings       = c("NA", "error!", "NaN", "-9999", "Infinity"),
-                              encoding         = "latin1", ...))
 }
 
 #' Read a Hi-sAFe output profile
@@ -419,6 +389,37 @@ read_profile <- function(profile, path, simu.name, show.progress, max.size) {
     profile.data <- dplyr::tibble()
   }
   return(profile.data)
+}
+
+#' Read a single Hi-sAFe output profile
+#' @description Reads the designated output profiles from a single Hi-sAFe simulation.
+#' @return A data frame (tibbles) containing the data from the profile.
+#' @param profile A character string of the path to the profile to be read.
+#' @param simu.name A character string of the name of the simulation being read.
+#' @importFrom dplyr %>%
+#' @keywords internal
+read_hisafe_output_file <- function(profile, simu.name){
+  dat <- dplyr::as_tibble(read.table(file             = profile,
+                                     header           = TRUE,
+                                     sep              = "\t",
+                                     stringsAsFactors = FALSE,
+                                     # "error!" is output by HISAFE & causes table merge errors if left; "NaN" output causes plot problems
+                                     na.strings       = c("NA", "error!", "NaN", "-9999", "Infinity"),
+                                     encoding         = "latin1"))
+
+  if(nrow(dat) == 0) {
+    warning(paste0(basename(profile), " exists but contains no data"), call. = FALSE)
+  } else {
+    dat <- dat %>%
+      dplyr::filter(Year != 0) %>%
+      dplyr::mutate(Date = lubridate::dmy(Date)) # convert Date column into date class
+    if(unique(dat$SimulationName) != simu.name) {
+      warning(paste0("SimulationName in ", basename(profile), " (", unique(dat$SimulationName), ") does not match the name of the simulation folder (",
+                     simu.name, "). Simulation folder name will override SimulationName in export profile."), call. = FALSE)
+      dat$SimulationName <- simu.name
+    }
+  }
+  return(dat)
 }
 
 #' Read tree information from a Hi-sAFe pld file

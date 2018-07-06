@@ -50,8 +50,8 @@ An object of class "hop". This is a list of 13 data frames (tibbles):
  \item{voxels}
  \item{plot.info}{ - plot geometry data for each simulation}
  \item{tree.info}{ - tree species and location data for each simulation}
- \item{exp.plan}{ - the exp.plan of the hip object that generated the simulation}
- \item{path}{ - the paths to the simulation folders}
+ \item{exp.plan}{ - the exp.plan of the hip object that generated the simulations}
+ \item{metadata}{ - the metadata of each simulations (path to simulation folders, model versions, run date , run duration)}
  \item{exp.path}{ - the path to the experiment folder}
 }
 }

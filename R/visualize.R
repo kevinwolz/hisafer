@@ -39,7 +39,7 @@
 #' @param trees A logical indicating whether or not to plot the trees in the scene.
 #' @param crops A logical indicating whether or not to plot the crops in the scene.
 #' @param voxels A logical indicating whether or not to plot the voxels in the scene.
-#' @param climate A logical indicating whether or not to plot climate aspects (e.g. precipitation) in the scene.
+#' @param climate A logical indicating whether or not to plot climate aspects (precipitation, water table) in the scene.
 #' @param mem.max An integer specifying the maximum number of days into the past to search
 #' for crop/voxel data when no data is available for \code{date} within \code{hop}.
 #' @param plot.rows An integer specifying \code{nrow} passed to \code{ggplot2::facet_wrap}.
@@ -107,10 +107,10 @@ hisafe_slice <- function(hop,
 
   crops   <- crops   & profile_check(hop, "cells")
   voxels  <- voxels  & profile_check(hop, "voxels")
-  climate <- climate & profile_check(hop, "climate")
+  climate <- climate & profile_check(hop, "plot")
   if(crops)   variable_check(hop, "cells",  cell.vars,  error = TRUE)
   if(voxels)  variable_check(hop, "voxels", voxel.vars, error = TRUE)
-  if(climate) variable_check(hop, "climate", c("precipitation", "waterTableDepth"), error = TRUE)
+  if(climate) variable_check(hop, "plot", c("precipitation", "waterTableDepth"), error = TRUE)
   if(any(is.na(unlist(vars)))) { # account for any NA vars specifications
     vars <- purrr::map(vars, function(x) tidyr::replace_na(x, "none"))
     for(i in c("trees", "cells", "voxels")[c(trees, crops, voxels)]) hop[[i]]$none <- NA_real_
@@ -167,7 +167,7 @@ hisafe_slice <- function(hop,
 
   crops   <- crops   & nrow(hop.full$cells)   > 0
   voxels  <- voxels  & nrow(hop.full$voxels)  > 0
-  climate <- climate & nrow(hop.full$climate) > 0
+  climate <- climate & nrow(hop.full$plot) > 0
 
   ## VOXEL & CELL MEMORY
   if(voxels & nrow(hop$voxels) == 0) hop$voxels <- add_historic_data(df = hop.full$voxels, dates = date, mem.max = mem.max)
@@ -432,9 +432,9 @@ hisafe_slice <- function(hop,
   }
 
   if(climate) {
-    climate.data <- hop$climate %>%
+    climate.data <- hop$plot %>%
       dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
-      dplyr::mutate(precip.magnitude = nan_to_zero(precipitation / max(hop.full$climate$precipitation))) %>%
+      dplyr::mutate(precip.magnitude = nan_to_zero(precipitation / max(hop.full$plot$precipitation))) %>%
       dplyr::mutate(soilDepth        = -soilDepth) %>%
       dplyr::mutate(water.table      = as.numeric(waterTableDepth > soilDepth)) %>%
       dplyr::select(SimulationName, Year, Date, precip.magnitude, waterTableDepth, soilDepth, plotWidth, water.table)

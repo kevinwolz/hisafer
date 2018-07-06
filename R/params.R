@@ -51,8 +51,8 @@ read_param_file <- function(path) {
                  irrigation_table            = c("julapl", "qte"),                                                                              # .TEC
                  fertilization_table         = c("julapN", "qte"),                                                                              # .TEC
                  cutting_table               = c("julfauche", "hautcoupe", "lairesiduel", "msresiduel", "anitcoupe"),                           # .TEC
-                 fertilization_parameters    = c("engamm", "orgeng", "deneng", "voleng"),                                                       # hisafe.par
-                 residue_parameters          = c("CroCo", "akres", "bkres", "awb", "bwb", "cwb", "ahres", "bhres", "kbio", "yres", "CNresmin",  # hisafe.par
+                 fertilization_parameters    = c("engamm", "orgeng", "deneng", "voleng"),                                                       # stics.par
+                 residue_parameters          = c("CroCo", "akres", "bkres", "awb", "bwb", "cwb", "ahres", "bhres", "kbio", "yres", "CNresmin",  # stics.par
                                                  "CNresmax", "qmulchruis0", "mouillabilmulch", "kcouvmlch", "albedomulchresidus", "Qmulchdec"))
   new.sim <- list()
   next_threshold <- 0

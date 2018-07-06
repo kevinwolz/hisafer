@@ -14,19 +14,22 @@ hisafe_info <- function(capsis.path) {
   if(!dir.exists(capsis.path))                    stop("directory specified by capsis.path does not exist",          call. = FALSE)
   if(!("capsis.sh" %in% list.files(capsis.path))) stop("directory specified by capsis.path does not contain Capsis", call. = FALSE)
 
-  #cat("Capsis Version:",  capsis.version)
+  hisafe.id.card <- clean_path(paste0(capsis.path, "/src/safe/session.txt"))
+  hisafe.info <- scan(hisafe.id.card, what = "character", encoding = "latin1", sep = "\n", quiet = TRUE) %>%
+    .[-1] %>%
+    purrr::map(strsplit, split = " = ") %>%
+    purrr::map(1) %>%
+    purrr::map(2) %>%
+    as.data.frame(col.names = c("hisafe", "stics", "capsis"), stringsAsFactors = FALSE) %>%
+    dplyr::as_tibble()
 
-  hisafe.id.card <- clean_path(paste0(capsis.path, "/src/safe/idcard.properties"))
-  hisafe.info <- scan(hisafe.id.card, what = "character", encoding = "latin1", sep = "\n", quiet = TRUE)
-  hisafe.version <- strsplit(grep("Version = ", hisafe.info, value = TRUE), split = " = ", fixed = TRUE)[[1]][2]
-  cat("Hi-sAFe Version:", hisafe.version)
-
-  #cat("\n\nSTICS Version:",   stics.version)
-
-  cat("\n\nJava Version:")
+  cat("\nHi-sAFe Version:", hisafe.info$hisafe)
+  cat("\nCapsis Version:",  hisafe.info$capsis)
+  cat("\nSTICS Version:",   hisafe.info$stics)
+  cat("\nJava Version:")
   system("java -version", wait = TRUE)
 
-  invisible(hisafe.version)
+  invisible(hisafe.info)
 }
 
 #' Copy a Hi-sAFe template to specified location
@@ -331,7 +334,7 @@ hop_filter <- function(hop,
   }
 
   ## Date
-  profiles.to.check <- names(hop)[!(names(hop) %in% c("exp.plan", "exp.path", "tree.info", "plot.info", "path"))]
+  profiles.to.check <- names(hop)[!(names(hop) %in% NON.DATA.HOP.ELEMENTS)]
   profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
 
   if(is.null(dates) & !is.na(date.min) & !is.na(date.max)) {

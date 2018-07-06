@@ -127,7 +127,7 @@ plot_hisafe_ts <- function(hop,
 
   if(profile == "cells") {
     plot.data <- plot.data %>%
-      dplyr::group_by(SimulationName, Date, Day, Month, Year, JulianDay, stepNum) %>%
+      dplyr::group_by(SimulationName, Date, Day, Month, Year, JulianDay) %>%
       dplyr::summarize_if(is.numeric, mean) %>%
       dplyr::ungroup()
   }

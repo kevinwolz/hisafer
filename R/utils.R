@@ -7,7 +7,7 @@ SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("plot",   "plotDetail",
                                                  "climate",
                                                  "monthCells", "monthCellsDetail",
                                                  "annualCells", "annualDBH"),
-                                    freqs    = c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 30, 30, 365, 365),
+                                    freqs       = c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 30, 30, 365, 365),
                                     description = c("daily plot-level data (core variables)",
                                                     "daily plot-level data (supplemental variables)",
                                                     "daily data for each tree in the scene (core variables)",
@@ -25,6 +25,7 @@ SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("plot",   "plotDetail",
                                                     "only data for annual DBH of each tree"))
 
 PRIVATE.PROFILES <- c("voxelsDebug", "voxelsOptim", "annualDBH")
+NON.DATA.HOP.ELEMENTS <- c("plot.info", "tree.info", "exp.plan", "metadata", "exp.path")
 
 INPUT.DEFS  <- readr::read_delim(system.file("extdata", "input_defs.txt",  package = "hisafer"), "\t", col_types = readr::cols())
 OUTPUT.DEFS <- dplyr::arrange(readr::read_delim(system.file("extdata", "output_defs.txt", package = "hisafer"), "\t", col_types = readr::cols()), profile, name)

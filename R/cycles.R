@@ -85,7 +85,7 @@ plot_hisafe_cycle_annual <- function(hop,
   } else if(cycle == "nitrogen") {
     plot.data <- get_nitrogen_fluxes(hop = hop, profile = METHOD)
     plot.title <- "Nitrogen Cycle"
-    y.lab      <- "N flux (kg M ha-1)"
+    y.lab      <- "N flux (kg N ha-1)"
     if(is.null(color.palette)) color.palette <- c("#D55E00", "#E69F00", "#F0E442", "grey20", "grey40", "grey80",
                                                   "#009E73", "#0072B2", "#56B4E9", "#CC79A7", "black", "white")
 
@@ -250,7 +250,7 @@ plot_hisafe_cycle_daily <- function(hop,
     cycle.geom  <- geom_area(aes(fill = flux), na.rm = TRUE)
     cycle.scale <- scale_fill_manual(values = color.palette)
     pre.title   <- "Nitrogen Uptake"
-    y.lab       <- "Nitrogen uptake (kg ha-1)"
+    y.lab       <- "Nitrogen uptake (kg N ha-1)"
 
   } else if(cycle == "light") {
     plot.data   <- get_light_fluxes(hop = hop)
@@ -337,8 +337,8 @@ plot_hisafe_cycle_daily <- function(hop,
 #' @importFrom dplyr %>%
 #' @keywords internal
 get_water_fluxes <- function(hop, profile) {
-  profile_check(hop, c(profile, "climate"), error = TRUE)
-  variable_check(hop, "climate", "precipitation", error = TRUE)
+  profile_check(hop, c(profile, "plot"), error = TRUE)
+  variable_check(hop, "plot", "precipitation", error = TRUE)
 
   if(profile == "cells") {
     variable_check(hop, "cells",
@@ -348,8 +348,11 @@ get_water_fluxes <- function(hop, profile) {
                      "waterUptakeInSaturationByTrees", "waterUptakeInSaturationByCrop", "capillaryRise"),
                    error = TRUE)
 
+    plot.data <- hop$plot %>%
+      dplyr::select(SimulationName, Date, precipitation)
+
     out <- hop$cells %>%
-      dplyr::left_join(hop$climate, by = c("SimulationName", "Year", "Month", "Day", "Date", "JulianDay")) %>%
+      dplyr::left_join(plot.data, by = c("SimulationName", "Date")) %>%
       replace(is.na(.), 0) %>%
       dplyr::mutate(interception  = rainInterceptedByTrees + rainInterceptedByCrop,
                     runOff        = runOff,
