@@ -6,8 +6,7 @@
 #' This must match the names of .SIM files as well as the names of the folders that files are in.
 #' @param script.path A character string of the local path for where to create the cluster script file.
 #' If \code{NULL}, \code{hip} must be provided, and the path used will be the path element of the hip object.
-#' @param script.name A character sting of the name of the script to call on the cluster.
-#' @param model.version A character sting of the name of the Capsis folder (version) to call on the cluster.
+#' @param model.version A character string of the name of the Capsis folder (version) to call on the cluster.
 #' @param launch.call The name of the safe lanuch script to use (one of 'ScriptGen' or 'ScriptCalib')
 #' @param default.folder The folder in safe/data/SimSettings to use for parameter files that are not found in the simulation folder.
 #' @param cluster.path A character string of the path on the cluster where the simulation folder is located.
@@ -27,7 +26,6 @@
 build_cluster_script <- function(hip            = NULL,
                                  simu.names     = NULL,
                                  script.path    = NULL,
-                                 script.name    = "job",
                                  model.version  = "Capsis4",
                                  launch.call    = "ScriptGen",
                                  default.folder = "",
@@ -37,7 +35,7 @@ build_cluster_script <- function(hip            = NULL,
                                  num.cores      = NULL) {
 
   is_hip(hip, error = TRUE)
-  if(is.null(hip) & is.null(script.path))                                     stop("must provide hip or script.path",                                 call. = FALSE)
+  if(is.null(hip) & is.null(script.path))                                      stop("must provide hip or script.path",                                call. = FALSE)
   if(!(all(is.character(simu.names)) | is.null(simu.names)))                   stop("simu.names argument must be 'all' or a character vector",        call. = FALSE)
   if(!((is.character(email) & length(email) == 1) | is.null(email)))           stop("email argument must be a character vector of length 1",          call. = FALSE)
   if(!((is.numeric(num.cores) & length(num.cores) == 1) | is.null(num.cores))) stop("num.cores argument must be a positive integer",                  call. = FALSE)
@@ -68,7 +66,7 @@ build_cluster_script <- function(hip            = NULL,
 
   write_script <- function(i, SEQ) {
     write_line   <- function(x) cat(x, file = cluster.script, sep = "\n", append = TRUE)
-    if(SEQ) j <- script.name else j <- i
+    if(SEQ) j <- "batch" else j <- i
     cluster.script <- file(description = clean_path(paste0(script.path, "/", j, ".sh")),
                            open        = "wb",
                            encoding    = "UTF-8")
@@ -94,7 +92,7 @@ build_cluster_script <- function(hip            = NULL,
   } else {
     purrr::walk(simu.names, write_script, SEQ = FALSE)
 
-    job.script <- file(description = clean_path(paste0(script.path, "/", script.name, ".sh")),
+    job.script <- file(description = clean_path(paste0(script.path, "/job.sh")),
                        open        = "wb",
                        encoding    = "UTF-8")
     cat("#!/bin/sh", file = job.script, sep = "\n")
