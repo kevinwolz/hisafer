@@ -224,7 +224,9 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
   files       <- paste0(file.prefix, profiles, ".txt" )
 
   ## Check for existence of all requested profiles and warn if profile does not exist
-  if(!all(file.exists(files))) {
+  if(!any(file.exists(files))) {
+    stop(paste("None of the requested profiles exist for", simu.name), call. = FALSE)
+  } else if(!all(file.exists(files))) {
     missing.profiles <- basename(files[!file.exists(files)])
     missing.profile.error <- paste(c("The following requested profiles do not exist:",
                                      paste0("      --", missing.profiles)),
