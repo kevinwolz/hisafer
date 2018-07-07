@@ -4,7 +4,7 @@
 \alias{profile_check}
 \title{Check for existiance of profiles in a hop object}
 \usage{
-profile_check(hop, profiles, error = FALSE)
+profile_check(hop, profiles = NULL, error = FALSE)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
@@ -14,8 +14,8 @@ profile_check(hop, profiles, error = FALSE)
 \item{error}{Logical indicating whehter or not an error should be thrown if any profiles in \code{profiles} are not found.}
 }
 \value{
-A logical vector the same length as \code{profiles} indicating whether each profile is found in \code{hop}.
-If \code{error} is \code{TRUE}, this vector is returned invisibly.
+If profiles is \code{NULL}, the default, then a character vector of the available profiles in the hop.
+If profiles is not \code{NULL}, then a logical vector the same length as \code{profiles} indicating whether each profile is found in \code{hop}.
 }
 \description{
 Checks for existiance of profiles in a hop object

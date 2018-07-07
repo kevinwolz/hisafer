@@ -219,7 +219,7 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
   }
 
   ## Create profile paths
-  if(profiles[1] == "all") profiles <- SUPPORTED.PROFILES$profiles
+  if(profiles[1] == "all") profiles <- SUPPORTED.PROFILES$profiles[!(SUPPORTED.PROFILES$profiles %in% PRIVATE.PROFILES)]
   file.prefix <- paste0(simu.path, "/output-", simu.name, "/", simu.name, "_")
   files       <- paste0(file.prefix, profiles, ".txt" )
 

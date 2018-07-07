@@ -25,6 +25,7 @@ SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("plot",   "plotDetail",
                                                     "only data for annual DBH of each tree"))
 
 PRIVATE.PROFILES <- c("voxelsDebug", "voxelsOptim", "annualDBH")
+CORE.PROFILES <- c("plot", "trees", "cells", "voxels", "climate", "monthCells", "annualCells")
 NON.DATA.HOP.ELEMENTS <- c("plot.info", "tree.info", "exp.plan", "metadata", "exp.path")
 
 INPUT.DEFS  <- readr::read_delim(system.file("extdata", "input_defs.txt",  package = "hisafer"), "\t", col_types = readr::cols())

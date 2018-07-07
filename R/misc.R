@@ -318,15 +318,15 @@ hop_filter <- function(hop,
   if(simu.names[1] != "all") {
     if(!all(simu.names %in% hop$exp.plan$SimulationName)) stop("one or more values in simu.names is not present in hop", call. = FALSE)
     profiles.to.check <- names(hop)[!(names(hop) %in% "exp.path")]
-    profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
-    for(i in profiles) { hop[[i]] <- dplyr::filter(hop[[i]], SimulationName %in% simu.names) }
-    if(length(simu.names) == 1) { class(hop) <- class(hop)[class(hop) != "hop-group"] }
+    profiles <- profiles.to.check[profile_check(hop = hop, profiles = profiles.to.check)]
+    for(i in profiles) hop[[i]] <- dplyr::filter(hop[[i]], SimulationName %in% simu.names)
+    if(length(simu.names) == 1) class(hop) <- class(hop)[class(hop) != "hop-group"]
   }
 
   ## id
   if(tree.ids[1] != "all") {
     profiles.to.check <- c("trees", "tree.info")
-    profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
+    profiles <- profiles.to.check[profile_check(hop = hop, profiles = profiles.to.check)]
     for(i in profiles) {
       if(!all(tree.ids %in% unique(hop[[i]]$id))) stop(paste0("one or more values of tree.id are not present in the ", i, " profile"), call. = FALSE)
       hop[[i]] <- dplyr::filter(hop[[i]], id %in% tree.ids)
@@ -334,10 +334,9 @@ hop_filter <- function(hop,
   }
 
   ## Date
-  profiles.to.check <- names(hop)[!(names(hop) %in% NON.DATA.HOP.ELEMENTS)]
-  profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
+  profiles <- profile_check(hop = hop)
 
-  if(is.null(dates) & !is.na(date.min) & !is.na(date.max)) {
+  if(is.null(dates) & (!is.na(date.min) | !is.na(date.max))) {
     date.min <- lubridate::ymd(date.min)
     date.max <- lubridate::ymd(date.max)
 
@@ -357,7 +356,7 @@ hop_filter <- function(hop,
 
   ## STRIP EXP PLAN VARS
   if(strip.exp.plan) {
-    for(p in c("annualCells", "plot", "trees", "cells", "voxels", "climate", "monthCells")) {
+    for(p in CORE.PROFILES) {
       if(nrow(hop[[p]]) > 0) {
         keep.cols <- c(1, which(names(hop[[p]]) == "Date"):ncol(hop[[p]]))
         hop[[p]] <- dplyr::select(hop[[p]], names(hop[[p]])[keep.cols])
@@ -459,8 +458,8 @@ is_hop <- function(hop, error = FALSE) {
 
 #' Check for existiance of profiles in a hop object
 #' @description Checks for existiance of profiles in a hop object
-#' @return A logical vector the same length as \code{profiles} indicating whether each profile is found in \code{hop}.
-#' If \code{error} is \code{TRUE}, this vector is returned invisibly.
+#' @return If profiles is \code{NULL}, the default, then a character vector of the available profiles in the hop.
+#' If profiles is not \code{NULL}, then a logical vector the same length as \code{profiles} indicating whether each profile is found in \code{hop}.
 #' @param hop An object of class hop or face.
 #' @param profiles A character vector of the names of the profiles to check for.
 #' @param error Logical indicating whehter or not an error should be thrown if any profiles in \code{profiles} are not found.
@@ -470,22 +469,27 @@ is_hop <- function(hop, error = FALSE) {
 #' \dontrun{
 #' profile_check(myhop, "voxels")
 #' }
-profile_check <- function(hop, profiles, error = FALSE) {
+profile_check <- function(hop, profiles = NULL, error = FALSE) {
   is_hop(hop, error = TRUE)
-  not.supported <- profiles[!(profiles %in% SUPPORTED.PROFILES$profiles)]
-  if(length(not.supported) > 0) stop(paste("The following profiles are not supported profiles:", paste(not.supported, collapse = ", ")), call. = FALSE)
   is_TF(x = error)
 
-  check <- purrr::map_lgl(profiles, function(x) nrow(hop[[x]]) > 0)
-  not.found <- profiles[!check]
-  if(error) {
-    if(length(not.found) > 0) {
-      stop(paste("The following export profiles are required but not found in hop:",
-                 paste(not.found, collapse = ", ")), call. = FALSE)
-    }
-    invisible(check)
+  if(is.null(profiles)) {
+    check <- purrr::map_lgl(CORE.PROFILES, function(x) nrow(hop[[x]]) > 0)
+    return(CORE.PROFILES[check])
   } else {
-    return(check)
+    not.supported <- profiles[!(profiles %in% CORE.PROFILES)]
+    if(length(not.supported) > 0) stop(paste("The following profiles are not supported profiles:", paste(not.supported, collapse = ", ")), call. = FALSE)
+
+    check <- purrr::map_lgl(profiles, function(x) nrow(hop[[x]]) > 0)
+    not.found <- profiles[!check]
+    if(error) {
+      if(length(not.found) > 0) {
+        stop(paste("The following export profiles are required but not found in hop:",
+                   paste(not.found, collapse = ", ")), call. = FALSE)
+      }
+    } else {
+      return(check)
+    }
   }
 }
 
