@@ -345,16 +345,10 @@ check_input_values <- function(hip, force) {
 
   ## Distance & Time Errors
   less_than_comp <- function(param, ref) {
-    ifelse(all(purrr::map2_lgl(get_used(param), get_used(ref), less_than)),
-           "", paste0("-- ", param, " must be less than ", ref))
+    ifelse(all(purrr::map2_lgl(get_used(param), get_used(ref), less_than)), "", paste0("-- ", param, " must be less than ", ref))
   }
   treeCropDistance.error        <- less_than_comp("treeCropDistance",        "plotWidth")
   treeRootPruningDistance.error <- less_than_comp("treeRootPruningDistance", "plotWidth")
-
-  treePlantingYears.error    <- less_than_comp("treePlantingYears",    "nbSimulations")
-  treePruningYears.error     <- less_than_comp("treePruningYears",     "nbSimulations")
-  treeThinningYears.error    <- less_than_comp("treeThinningYears",    "nbSimulations")
-  treeRootPruningYears.error <- less_than_comp("treeRootPruningYears", "nbSimulations")
 
   ## nrow(tree_init) == nrow(root_init) Error
   tree.init <- get_used("tree.initialization")
@@ -435,11 +429,6 @@ check_input_values <- function(hip, force) {
                                    "", "-- length of mainCropSpecies cannot be larger than value of nbSimulations")
   interCrop.long.error   <- ifelse(all(purrr::map2_lgl(get_length("interCropSpecies"), get_used("nbSimulations"), less_than)),
                                    "", "-- length of interCropSpecies cannot be larger than value of nbSimulations")
-
-  mainCrop.length.error    <- ifelse(all(identical(get_length("mainCropSpecies"), get_length("mainCropItk"))),
-                                     "", "-- mainCropSpecies and mainCropItk must have the same length")
-  interCrop.length.error   <- ifelse(all(identical(get_length("interCropSpecies"), get_length("interCropItk"))),
-                                     "", "-- interCropSpecies and interCropItk must have the same length")
   simuNbrDays.length.error <- ifelse(all(unlist(get_length("simulationNbrDays")) == 1) | identical(get_length("mainCropSpecies"), get_length("simulationNbrDays")),
                                      "", "-- simulationNbrDays and mainCropSpecies must have the same length or simulationNbrDays must have length 1")
 
@@ -466,11 +455,10 @@ check_input_values <- function(hip, force) {
                   plot.width.error, plot.height.error,
                   treeCropDistance.error, treeRootPruningDistance.error,
                   tree.centered.error, tree.offscene.error, tree.coloc.error,
-                  treePlantingYears.error, treePruningYears.error, treeThinningYears.error, treeRootPruningYears.error,
                   tree.root.error, EP.error,
                   capillary.error, drainage.error, denitrif.error, watertable.error, dm.error, cap.error,
                   treePlanting.length.error, treePruning.length.error, treeThinning.length.error, rootPruning.length.error,
-                  mainCrop.length.error, interCrop.length.error, simuNbrDays.length.error,
+                  simuNbrDays.length.error,
                   weed.error, wth.error)
   all.errors <- paste0(all.errors[!(all.errors == "") & !is.na(all.errors)], collapse = "\n")
   if(all.errors != errors) stop(all.errors, call. = FALSE)
