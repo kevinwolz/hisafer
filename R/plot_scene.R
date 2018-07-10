@@ -72,7 +72,7 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
                            stringsAsFactors = FALSE) %>%
     dplyr::as_tibble() %>%
     dplyr::arrange(desc(y), x) %>%
-    dplyr::mutate(id = 1:nrow(.),
+    dplyr::mutate(idCell = 1:nrow(.),
                   x  = x - 0.5,
                   y  = y - 0.5) # x and y are now cell centers
 
@@ -165,7 +165,7 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
     scale_x_continuous(expand = c(0, 0)) +
     scale_y_continuous(expand = c(0, 0)) +
     geom_tile(color = "black", aes(fill = crop)) +
-    geom_text(aes(label = id)) +
+    geom_text(aes(label = idCell)) +
     geom_point(data = tree.plot.data, size = 10, aes(color = species), na.rm = TRUE) +
     geom_point(data = tree.plot.data, shape = 21, size = 10, na.rm = TRUE) +
     scale_color_manual(values = c("black", "grey70", "grey30", "grey50")) +

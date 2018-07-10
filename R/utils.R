@@ -24,9 +24,10 @@ SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("plot",   "plotDetail",
                                                     "annual data for each cell in the scene",
                                                     "only data for annual DBH of each tree"))
 
-PRIVATE.PROFILES <- c("voxelsDebug", "voxelsOptim", "annualDBH")
-CORE.PROFILES <- c("plot", "trees", "cells", "voxels", "climate", "monthCells", "annualCells")
-NON.DATA.HOP.ELEMENTS <- c("plot.info", "tree.info", "exp.plan", "metadata", "exp.path")
+PRIVATE.PROFILES    <- c("voxelsDebug", "voxelsOptim", "annualDBH")
+PUBLIC.PROFILES     <- SUPPORTED.PROFILES$profiles[!(SUPPORTED.PROFILES$profiles %in% PRIVATE.PROFILES)]
+DATA.PROFILES       <- c("plot", "trees", "cells", "voxels", "climate", "monthCells", "annualCells")
+FILTERABLE.ELEMENTS <- c(DATA.PROFILES, "plot.info", "tree.info", "exp.plan", "metadata")
 
 INPUT.DEFS  <- readr::read_delim(system.file("extdata", "input_defs.txt",  package = "hisafer"), "\t", col_types = readr::cols())
 OUTPUT.DEFS <- dplyr::arrange(readr::read_delim(system.file("extdata", "output_defs.txt", package = "hisafer"), "\t", col_types = readr::cols()), profile, name)

@@ -219,7 +219,7 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
   }
 
   ## Create profile paths
-  if(profiles[1] == "all") profiles <- SUPPORTED.PROFILES$profiles[!(SUPPORTED.PROFILES$profiles %in% PRIVATE.PROFILES)]
+  if(profiles[1] == "all") profiles <- PUBLIC.PROFILES
   file.prefix <- paste0(simu.path, "/output-", simu.name, "/", simu.name, "_")
   files       <- paste0(file.prefix, profiles, ".txt" )
 
@@ -247,9 +247,9 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
 
   base.cols <- c("SimulationName", "Date", "Day", "Month", "Year", "JulianDay")
   join_plot   <- function(...) dplyr::left_join(..., by = base.cols, suffix = c("", ".REMOVE"))
-  join_trees  <- function(...) dplyr::left_join(..., by = c(base.cols, "id"), suffix = c("", ".REMOVE"))
-  join_cells  <- function(...) dplyr::left_join(..., by = c(base.cols, "id", "x", "y"), suffix = c("", ".REMOVE"))
-  join_voxels <- function(...) dplyr::left_join(..., by = c(base.cols, "cellId", "id", "x", "y", "z"), suffix = c("", ".REMOVE"))
+  join_trees  <- function(...) dplyr::left_join(..., by = c(base.cols, "idTree"), suffix = c("", ".REMOVE"))
+  join_cells  <- function(...) dplyr::left_join(..., by = c(base.cols, "idCell", "x", "y"), suffix = c("", ".REMOVE"))
+  join_voxels <- function(...) dplyr::left_join(..., by = c(base.cols, "idCell", "idVoxel", "x", "y", "z"), suffix = c("", ".REMOVE"))
 
   plot.data   <- out[grep("^plot",        names(out))]
   trees.data  <- out[grep("^trees",       names(out))]
@@ -443,10 +443,10 @@ read_tree_info <- function(path, simu.name) {
       dplyr::mutate(x = treeX, y = treeY) %>%
       dplyr::select(species, x, y)
     tree.info <- tree.info %>%
-      dplyr::mutate(id = 1:nrow(tree.info)) %>%
+      dplyr::mutate(idTree = 1:nrow(tree.info)) %>%
       dplyr::mutate(SimulationName = rep(simu.name, nrow(tree.info))) %>%
       dplyr::mutate(simulationYearStart = sim$SIMULATION$simulationYearStart$value) %>%
-      dplyr::select(SimulationName, id, dplyr::everything())
+      dplyr::select(SimulationName, idTree, dplyr::everything())
     if(!sim$TREE_PRUNING$treePruningYears$commented) {
       tree.info <- tree.info %>%
         dplyr::mutate(treePruningYears     = sim$TREE_PRUNING$treePruningYears$value) %>%

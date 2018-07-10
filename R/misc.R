@@ -3,6 +3,7 @@
 #' @return Invisibly returns the Hi-sAFe version number
 #' @param capsis.path A character string of the path to the Capsis folder
 #' @export
+#' @family hisafe helper functions
 #' @examples
 #' \dontrun{
 #' hisafe_info()
@@ -43,6 +44,7 @@ hisafe_info <- function(capsis.path) {
 #' @param new.name A character string of the a name for the newly copied folder.
 #' If \code{NULL}, the default, then the name will remain the same as the original template folder.
 #' @export
+#' @family hisafe helper functions
 #' @examples
 #' \dontrun{
 #' copy_hisafe_template("agroforestry_default", "/Users/myname/Desktop/")
@@ -243,8 +245,7 @@ hop_params <- function(variable = "names", search = FALSE, quiet = FALSE) {
 #' hisafe_profiles()
 #' }
 hisafe_profiles <- function() {
-  public.profiles  <- dplyr::filter(SUPPORTED.PROFILES, !(profiles %in% PRIVATE.PROFILES))
-  print(as.data.frame(public.profiles), right = FALSE, row.names = FALSE)
+  print(as.data.frame(PUBLIC.PROFILES), right = FALSE, row.names = FALSE)
 }
 
 #' Change SimulationNames in a hop object
@@ -263,8 +264,7 @@ hop_rename <- function(hop, old.names, new.names) {
   is_hop(hop, error = TRUE)
   if(!all(old.names %in% hop$exp.plan$SimulationName)) stop("one or more values in old.names is not present in hop", call. = FALSE)
 
-  profiles.to.check <- names(hop)[!(names(hop) %in% "exp.path")]
-  profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
+  profiles <- which_profiles(hop = hop, profiles = FILTERABLE.ELEMENTS)
 
   existing.names <- unique(hop[[profiles[1]]]$SimulationName)
   missing.names  <- existing.names[!(unique(existing.names) %in% old.names)]
@@ -278,8 +278,8 @@ hop_rename <- function(hop, old.names, new.names) {
   return(hop)
 }
 
-#' Filter a hop object by SimulationName, Date, and id
-#' @description Filters a hop object by SimulationName, Date, and id
+#' Filter a hop object by SimulationName, Date, and idTree
+#' @description Filters a hop object by SimulationName, Date, and idTree
 #' @return A hop object.
 #' @param hop An object of class hop or face.
 #' @param simu.names A character vector of the SimulationNames to keep. If "all", no filtering occurs.
@@ -317,25 +317,22 @@ hop_filter <- function(hop,
   ## SimulationName
   if(simu.names[1] != "all") {
     if(!all(simu.names %in% hop$exp.plan$SimulationName)) stop("one or more values in simu.names is not present in hop", call. = FALSE)
-    profiles.to.check <- names(hop)[!(names(hop) %in% "exp.path")]
-    profiles <- profiles.to.check[profile_check(hop = hop, profiles = profiles.to.check)]
+    profiles <- which_profiles(hop = hop, profiles = FILTERABLE.ELEMENTS)
     for(i in profiles) hop[[i]] <- dplyr::filter(hop[[i]], SimulationName %in% simu.names)
     if(length(simu.names) == 1) class(hop) <- class(hop)[class(hop) != "hop-group"]
   }
 
-  ## id
+  ## idTree
   if(tree.ids[1] != "all") {
-    profiles.to.check <- c("trees", "tree.info")
-    profiles <- profiles.to.check[profile_check(hop = hop, profiles = profiles.to.check)]
+    profiles <- which_profiles(hop = hop, profiles = c("trees", "tree.info"))
     for(i in profiles) {
-      if(!all(tree.ids %in% unique(hop[[i]]$id))) stop(paste0("one or more values of tree.id are not present in the ", i, " profile"), call. = FALSE)
-      hop[[i]] <- dplyr::filter(hop[[i]], id %in% tree.ids)
+      if(!all(tree.ids %in% unique(hop[[i]]$idTree))) stop(paste0("one or more values of tree.ids are not present in the ", i, " profile"), call. = FALSE)
+      hop[[i]] <- dplyr::filter(hop[[i]], idTree %in% tree.ids)
     }
   }
 
   ## Date
-  profiles <- profile_check(hop = hop)
-
+  profiles <- which_profiles(hop = hop, profiles = DATA.PROFILES)
   if(is.null(dates) & (!is.na(date.min) | !is.na(date.max))) {
     date.min <- lubridate::ymd(date.min)
     date.max <- lubridate::ymd(date.max)
@@ -346,17 +343,15 @@ hop_filter <- function(hop,
     if(is.na(date.min)) date.min <- min(existing.ranges)
     if(is.na(date.max)) date.max <- max(existing.ranges)
 
-    for(i in profiles) { hop[[i]] <- dplyr::filter(hop[[i]], Date %in% seq(date.min, date.max, 1)) }
+    for(i in profiles) hop[[i]] <- dplyr::filter(hop[[i]], Date %in% seq(date.min, date.max, 1))
   } else if(!is.null(dates)) {
     dates <- lubridate::ymd(dates)
-    for(i in profiles) {
-      hop[[i]] <- dplyr::filter(hop[[i]], Date %in% dates)
-    }
+    for(i in profiles) hop[[i]] <- dplyr::filter(hop[[i]], Date %in% dates)
   }
 
   ## STRIP EXP PLAN VARS
   if(strip.exp.plan) {
-    for(p in CORE.PROFILES) {
+    for(p in DATA.PROFILES) {
       if(nrow(hop[[p]]) > 0) {
         keep.cols <- c(1, which(names(hop[[p]]) == "Date"):ncol(hop[[p]]))
         hop[[p]] <- dplyr::select(hop[[p]], names(hop[[p]])[keep.cols])
@@ -458,8 +453,7 @@ is_hop <- function(hop, error = FALSE) {
 
 #' Check for existiance of profiles in a hop object
 #' @description Checks for existiance of profiles in a hop object
-#' @return If profiles is \code{NULL}, the default, then a character vector of the available profiles in the hop.
-#' If profiles is not \code{NULL}, then a logical vector the same length as \code{profiles} indicating whether each profile is found in \code{hop}.
+#' @return A logical vector the same length as \code{profiles} indicating whether each profile is found in \code{hop}.
 #' @param hop An object of class hop or face.
 #' @param profiles A character vector of the names of the profiles to check for.
 #' @param error Logical indicating whehter or not an error should be thrown if any profiles in \code{profiles} are not found.
@@ -469,28 +463,40 @@ is_hop <- function(hop, error = FALSE) {
 #' \dontrun{
 #' profile_check(myhop, "voxels")
 #' }
-profile_check <- function(hop, profiles = NULL, error = FALSE) {
+profile_check <- function(hop, profiles, error = FALSE) {
   is_hop(hop, error = TRUE)
   is_TF(x = error)
 
-  if(is.null(profiles)) {
-    check <- purrr::map_lgl(CORE.PROFILES, function(x) nrow(hop[[x]]) > 0)
-    return(CORE.PROFILES[check])
-  } else {
-    not.supported <- profiles[!(profiles %in% CORE.PROFILES)]
-    if(length(not.supported) > 0) stop(paste("The following profiles are not supported profiles:", paste(not.supported, collapse = ", ")), call. = FALSE)
+  not.supported <- profiles[!(profiles %in% FILTERABLE.ELEMENTS)]
+  if(length(not.supported) > 0) stop(paste("The following profiles are not supported profiles:", paste(not.supported, collapse = ", ")), call. = FALSE)
 
-    check <- purrr::map_lgl(profiles, function(x) nrow(hop[[x]]) > 0)
-    not.found <- profiles[!check]
-    if(error) {
-      if(length(not.found) > 0) {
-        stop(paste("The following export profiles are required but not found in hop:",
-                   paste(not.found, collapse = ", ")), call. = FALSE)
-      }
-    } else {
-      return(check)
+  check <- purrr::map_lgl(profiles, function(x) nrow(hop[[x]]) > 0)
+  not.found <- profiles[!check]
+  if(error) {
+    if(length(not.found) > 0) {
+      stop(paste("The following export profiles are required but not found in hop:",
+                 paste(not.found, collapse = ", ")), call. = FALSE)
     }
+  } else {
+    return(check)
   }
+}
+
+#' Get which profiles exist in a hop
+#' @description Gets names of which profiles exist in a hop.
+#' @return A character vector of the available profiles in the hop.
+#' @param hop An object of class hop or face.
+#' @param profiles A character vector of the names of the profiles to check for.
+#' If \code{NULL}, returns the names of all available profiles.
+#' @export
+#' @family hisafe helper functions
+#' @examples
+#' \dontrun{
+#' what_profiles(myhop, c("cells", "voxels"))
+#' }
+which_profiles <- function(hop, profiles = NULL) {
+  if(is.null(profiles)) profiles <- FILTERABLE.ELEMENTS
+  return(profiles[profile_check(hop = hop, profiles = profiles)])
 }
 
 #' Check for existiance of variables in a hop object
@@ -627,11 +633,10 @@ analyze_hisafe <- function(hop,
 write_hop <- function(hop, profiles = "all", output.path = NULL) {
   is_hop(hop, error = TRUE)
 
-  supported.profiles <- c("annualCells", "trees", "plot", "climate", "monthCells", "cells", "voxels")
-  if(profiles[1] == "all") profiles <- supported.profiles
-  if(!all(profiles %in% supported.profiles)) stop(paste0("profiles argument must be 'all' or one or more of ",
-                                                         paste(supported.profiles, collapse = ", ")), call. = FALSE)
-  profiles <- profiles[profile_check(hop, profiles)]
+  if(profiles[1] == "all") profiles <- DATA.PROFILES
+  if(!all(profiles %in% DATA.PROFILES)) stop(paste0("profiles argument must be 'all' or one or more of ",
+                                                    paste(DATA.PROFILES, collapse = ", ")), call. = FALSE)
+  profiles <- which_profiles(hop = hop, profiles = profiles)
 
   if(is.null(output.path) & is.na(hop$exp.path)) stop("output.path argument cannot be NULL if hop$exp.path is NA", call. = FALSE)
   if(is.null(output.path)) output.path <- hop$exp.path

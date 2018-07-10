@@ -206,7 +206,7 @@ hisafe_slice <- function(hop,
   X.MAX <- max(hop$plot.info$plotWidth)
 
   ## AESTHETIC GROUPING/RELAITVE VARIABLES
-  tree.grouping.strings  <- c("SimulationName", "Year", "id")[c(grepl("s|S", tree.rel.vars), grepl("y|Y", tree.rel.vars), grepl("t|T", tree.rel.vars))]
+  tree.grouping.strings  <- c("SimulationName", "Year", "idTree")[c(grepl("s|S", tree.rel.vars), grepl("y|Y", tree.rel.vars), grepl("t|T", tree.rel.vars))]
   crop.grouping.strings  <- c("SimulationName", "Year")[c(grepl("s|S", crop.rel.vars),  grepl("y|Y", crop.rel.vars))]
   voxel.grouping.strings <- c("SimulationName", "Year")[c(grepl("s|S", voxel.rel.vars), grepl("y|Y", voxel.rel.vars))]
   tree.grouping.symbols  <- rlang::parse_quosures(paste(tree.grouping.strings,  collapse = ";"))
@@ -260,18 +260,18 @@ hisafe_slice <- function(hop,
                        trunk.alpha.max = max(trunk.alpha))
 
     tree.growth <- hop.full$trees %>%
-      dplyr::group_by(SimulationName, id) %>%
+      dplyr::group_by(SimulationName, idTree) %>%
       dplyr::mutate(trunk.growth  = as.numeric(c(FALSE, diff(dbh) > 0))) %>%
       dplyr::mutate(crown.growth  = as.numeric(c(FALSE, diff(crownRadiusInterRow) > 0))) %>%
       dplyr::mutate(height.growth = as.numeric(c(FALSE, diff(height) > 0))) %>%
-      dplyr::select(SimulationName, Date, id, trunk.growth, crown.growth, height.growth)
+      dplyr::select(SimulationName, Date, idTree, trunk.growth, crown.growth, height.growth)
 
     tree.data <- hop$trees %>%
       dplyr::mutate(crown.alpha = .[[vars$crown.alpha]]) %>%
       dplyr::mutate(trunk.alpha = .[[vars$trunk.alpha]]) %>%
       dplyr::left_join(tree.max,      by = tree.grouping.strings) %>%
-      dplyr::left_join(hop$tree.info, by = c("SimulationName", "id")) %>%
-      dplyr::left_join(tree.growth,   by = c("SimulationName", "Date", "id")) %>%
+      dplyr::left_join(hop$tree.info, by = c("SimulationName", "idTree")) %>%
+      dplyr::left_join(tree.growth,   by = c("SimulationName", "Date", "idTree")) %>%
       dplyr::mutate(crown.radius          = crownRadiusInterRow) %>%
       dplyr::mutate(crown.base.height     = crownBaseHeight) %>%
       dplyr::mutate(tree.height           = height) %>%
@@ -282,14 +282,14 @@ hisafe_slice <- function(hop,
       dplyr::mutate(tree.x                = x) %>%
       dplyr::mutate(crown.linetype        = "solid") %>% # for non-phantom trees
       dplyr::mutate(tree.pruning.height   = pmin(tree.height * tree.pruning.prop, tree.pruning.max.height)) %>%
-      dplyr::select(SimulationName, Date, id, plotWidth, plotHeight,
+      dplyr::select(SimulationName, Date, idTree, plotWidth, plotHeight,
                     crown.radius, crown.base.height, tree.height, trunk.radius,
                     crown.center.y, tree.x, trunk.growth, crown.growth, height.growth,
                     crown.alpha, trunk.alpha, crown.linetype,
                     tree.pruning, tree.pruning.height, root.pruning, root.pruning.depth, root.pruning.distance)
 
     trunk.data <- tree.data %>%
-      dplyr::select(SimulationName, Date, id, tree.x, tree.height, trunk.radius, trunk.alpha) %>%
+      dplyr::select(SimulationName, Date, idTree, tree.x, tree.height, trunk.radius, trunk.alpha) %>%
       dplyr::mutate(base.radius = trunk.radius) %>%
       dplyr::mutate(L.x = tree.x - base.radius) %>%
       dplyr::mutate(R.x = tree.x + base.radius) %>%
@@ -299,21 +299,21 @@ hisafe_slice <- function(hop,
       dplyr::mutate(T.y = tree.height)
     trunk.data <- dplyr::tibble(SimulationName = rep(trunk.data$SimulationName, 3),
                                 Date           = rep(trunk.data$Date, 3),
-                                id             = rep(trunk.data$id, 3),
+                                idTree         = rep(trunk.data$idTree, 3),
                                 trunk.alpha    = rep(trunk.data$trunk.alpha, 3),
                                 x              = c(trunk.data$L.x, trunk.data$R.x, trunk.data$T.x),
                                 y              = c(trunk.data$L.y, trunk.data$R.y, trunk.data$T.y))
 
     ## Add phantom trees if tree crowns grow beyond edge of scene
     phantom.data <- tree.data %>%
-      dplyr::group_by(SimulationName, Date, id) %>%
+      dplyr::group_by(SimulationName, Date, idTree) %>%
       dplyr::mutate(pos = (tree.x - crown.radius) < 0) %>%
       dplyr::mutate(neg = (tree.x + crown.radius) > plotWidth) %>%
-      dplyr::select(SimulationName, Date, id, pos, neg) %>%
+      dplyr::select(SimulationName, Date, idTree, pos, neg) %>%
       tidyr::gather(key = "side", value = "phantom", pos, neg) %>%
       dplyr::mutate(side = as.numeric(as.character(factor(side, levels = c("neg", "pos"), labels = c("-1", "1"))))) %>%
       dplyr::filter(phantom) %>%
-      dplyr::left_join(tree.data, by = c("SimulationName", "Date", "id")) %>%
+      dplyr::left_join(tree.data, by = c("SimulationName", "Date", "idTree")) %>%
       dplyr::mutate(tree.x = tree.x + plotWidth * side) %>%
       dplyr::select(-side, -phantom) %>%
       dplyr::mutate(crown.linetype = "dotted") # for phantom trees
@@ -528,7 +528,7 @@ hisafe_slice <- function(hop,
                    size  = 0.5,
                    na.rm = TRUE,
                    aes(alpha = trunk.alpha,
-                       group = id,
+                       group = idTree,
                        x     = x,
                        y     = y)) +
       ## CROWN

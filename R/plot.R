@@ -1,7 +1,7 @@
 #' Plot timeseries of Hi-sAFe output variable
 #' @description Plots a daily timeseries of a single Hi-sAFe output variable.
 #' @return If \code{plot = TRUE}, returns a ggplot object, otherwise the data that would create the plot is returned.
-#' If the data contains two more tree ids, the plot will be faceted by tree id.
+#' If the data contains two more tree ids, the plot will be faceted by idTree.
 #' Otherwise, if \code{facet.year = TRUE}, plots of daily profiles will be faceted by year.
 #' If more than one value is passed to \code{variable}, then one plot will be created for each variable and combined using \code{\link{cowplot::plot_grid}}.
 #' @param hop An object of class hop.
@@ -70,7 +70,7 @@ plot_hisafe_ts <- function(hop,
   if(!(profile %in% allowed.profiles)) stop("supplied profile is not supported", call. = FALSE)
 
   if(years[1]    == "all")                              years    <- unique(hop[[profile]]$Year)
-  if(tree.ids[1] == "all" & profile %in% tree.profiles) tree.ids <- unique(hop[[profile]]$id)
+  if(tree.ids[1] == "all" & profile %in% tree.profiles) tree.ids <- unique(hop[[profile]]$idTree)
 
   if(!all(is.numeric(years)))                                     stop("years argument must be 'all' or a numeric vector",          call. = FALSE)
   if(!(length(doy.lim) == 2 & all(doy.lim %in% 1:366)))           stop("doy.lim argument must be of length 2 with values in 1:366", call. = FALSE)
@@ -141,9 +141,9 @@ plot_hisafe_ts <- function(hop,
   ## Filter/Facet by supplied tree.ids
   if(profile %in% tree.profiles) {
     plot.data <- plot.data %>%
-      dplyr::mutate(id = paste("Tree", id))
+      dplyr::mutate(idTree = paste("Tree", idTree))
     if(length(tree.ids) > 1) {
-      facet <- facet_wrap(~id)
+      facet <- facet_wrap(~idTree)
       if(profile == "trees") {
         x.var <- "Date"
         scale_x_ts <- scale_x_date(date_labels = "%Y")
@@ -174,7 +174,7 @@ plot_hisafe_ts <- function(hop,
 
   ## Group for cumulation
   if(cumulative) {
-    cum.group.strings <- c("SimulationName", "id"[profile == "trees"], "Year"[facet.year])
+    cum.group.strings <- c("SimulationName", "idTree"[profile == "trees"], "Year"[facet.year])
     cum.group.symbols <- rlang::parse_quosures(paste(cum.group.strings, collapse = ";"))
     plot.data <- plot.data %>%
       dplyr::group_by(!!!cum.group.symbols) %>%
@@ -763,7 +763,7 @@ plot_hisafe_voxels <- function(hop,
                     date.max   = date.max)
 
   plot.data <- hop$voxels %>%
-    dplyr::select(SimulationName, Date, id, x, y, z, variable) %>%
+    dplyr::select(SimulationName, Date, idVoxel, x, y, z, variable) %>%
     dplyr::filter(x %in% X,
                   y %in% Y,
                   z %in% Z)
@@ -1091,27 +1091,27 @@ add_trees <- function(plot.obj, tree.data, white.boxes, trees, canopies) {
 #' @keywords internal
 add_phantom_trees <- function(tree.data) {
   phantom.data.x <- tree.data %>%
-    dplyr::group_by(SimulationName, Date, Year, Month, Day, id) %>%
+    dplyr::group_by(SimulationName, Date, Year, Month, Day, idTree) %>%
     dplyr::mutate(pos = (x - crownRadiusInterRow) < 0) %>%
     dplyr::mutate(neg = (x + crownRadiusInterRow) > plotWidth) %>%
-    dplyr::select(SimulationName, Date, Year, Month, Day, id, pos, neg) %>%
+    dplyr::select(SimulationName, Date, Year, Month, Day, idTree, pos, neg) %>%
     tidyr::gather(key = "side", value = "phantom", pos, neg) %>%
     dplyr::mutate(side = as.numeric(as.character(factor(side, levels = c("neg", "pos"), labels = c("-1", "1"))))) %>%
     dplyr::filter(phantom) %>%
-    dplyr::left_join(tree.data, by = c("SimulationName", "Date", "Year", "Month", "Day", "id")) %>%
+    dplyr::left_join(tree.data, by = c("SimulationName", "Date", "Year", "Month", "Day", "idTree")) %>%
     dplyr::mutate(x = x + plotWidth * side) %>%
     dplyr::select(-side, -phantom) %>%
     dplyr::mutate(crown.linetype = "dotted")
 
   phantom.data.y <- tree.data %>%
-    dplyr::group_by(SimulationName, Date, Year, Month, Day, id) %>%
+    dplyr::group_by(SimulationName, Date, Year, Month, Day, idTree) %>%
     dplyr::mutate(pos = (y - crownRadiusTreeLine) < 0) %>%
     dplyr::mutate(neg = (y + crownRadiusTreeLine) > plotHeight) %>%
-    dplyr::select(SimulationName, Date, Year, Month, Day, id, pos, neg) %>%
+    dplyr::select(SimulationName, Date, Year, Month, Day, idTree, pos, neg) %>%
     tidyr::gather(key = "side", value = "phantom", pos, neg) %>%
     dplyr::mutate(side = as.numeric(as.character(factor(side, levels = c("neg", "pos"), labels = c("-1", "1"))))) %>%
     dplyr::filter(phantom) %>%
-    dplyr::left_join(tree.data, by = c("SimulationName", "Date", "Year", "Month", "Day", "id")) %>%
+    dplyr::left_join(tree.data, by = c("SimulationName", "Date", "Year", "Month", "Day", "idTree")) %>%
     dplyr::mutate(y = y + plotHeight * side) %>%
     dplyr::select(-side, -phantom) %>%
     dplyr::mutate(crown.linetype = "dotted")
@@ -1136,15 +1136,15 @@ create_tree_data <- function(hop, trees, canopies, plot.x) {
       dplyr::mutate(special.case = x == 0 & y == 0) %>% # special case when x == 0 & y == 0 : tree is at scene center
       dplyr::mutate(x = x + special.case * plotWidth  / 2) %>%
       dplyr::mutate(y = y + special.case * plotHeight / 2) %>%
-      dplyr::select(SimulationName, id, species, x, y, plotWidth, plotHeight, cellWidth)
+      dplyr::select(SimulationName, idTree, species, x, y, plotWidth, plotHeight, cellWidth)
 
     if(canopies) {
       profile_check(hop,  "trees", error = TRUE)
       variable_check(hop, "trees", c("crownRadiusInterRow", "crownRadiusTreeLine"), error = TRUE)
       if(plot.x == "y") hop$trees <- swap_cols(hop$trees, "crownRadiusInterRow", "crownRadiusTreeLine")
       tree.data <- hop$trees %>%
-        dplyr::select(SimulationName, Date, Year, Month, Day, id, crownRadiusInterRow, crownRadiusTreeLine) %>%
-        dplyr::left_join(tree.data, by = c("SimulationName", "id")) %>%
+        dplyr::select(SimulationName, Date, Year, Month, Day, idTree, crownRadiusInterRow, crownRadiusTreeLine) %>%
+        dplyr::left_join(tree.data, by = c("SimulationName", "idTree")) %>%
         dplyr::mutate(crown.linetype = "solid") %>% # for non-phantom trees
         add_phantom_trees()
     }

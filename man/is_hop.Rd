@@ -21,9 +21,12 @@ is_hop(myhop)
 }
 }
 \seealso{
-Other hisafe helper functions: \code{\link{hip_params}},
+Other hisafe helper functions: \code{\link{copy_hisafe_template}},
+  \code{\link{hip_params}}, \code{\link{hisafe_info}},
   \code{\link{hisafe_profiles}}, \code{\link{hop_filter}},
   \code{\link{hop_merge}}, \code{\link{hop_params}},
   \code{\link{hop_rename}}, \code{\link{is_hip}},
-  \code{\link{profile_check}}, \code{\link{variable_check}}
+  \code{\link{join_profiles}}, \code{\link{profile_check}},
+  \code{\link{variable_check}},
+  \code{\link{which_profiles}}
 }

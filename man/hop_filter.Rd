@@ -2,7 +2,7 @@
 % Please edit documentation in R/misc.R
 \name{hop_filter}
 \alias{hop_filter}
-\title{Filter a hop object by SimulationName, Date, and id}
+\title{Filter a hop object by SimulationName, Date, and idTree}
 \usage{
 hop_filter(hop, simu.names = "all", tree.ids = "all", date.min = NA,
   date.max = NA, dates = NULL, strip.exp.plan = FALSE)
@@ -30,7 +30,7 @@ If \code{NULL}, then \code{date.max} and \code{date.min} are used instad.}
 A hop object.
 }
 \description{
-Filters a hop object by SimulationName, Date, and id
+Filters a hop object by SimulationName, Date, and idTree
 }
 \examples{
 \dontrun{
@@ -38,9 +38,12 @@ newhop <- hop_filter(myhop, c("Sim_1", "Sim_2"))
 }
 }
 \seealso{
-Other hisafe helper functions: \code{\link{hip_params}},
+Other hisafe helper functions: \code{\link{copy_hisafe_template}},
+  \code{\link{hip_params}}, \code{\link{hisafe_info}},
   \code{\link{hisafe_profiles}}, \code{\link{hop_merge}},
   \code{\link{hop_params}}, \code{\link{hop_rename}},
   \code{\link{is_hip}}, \code{\link{is_hop}},
-  \code{\link{profile_check}}, \code{\link{variable_check}}
+  \code{\link{join_profiles}}, \code{\link{profile_check}},
+  \code{\link{variable_check}},
+  \code{\link{which_profiles}}
 }

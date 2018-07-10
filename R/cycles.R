@@ -526,9 +526,9 @@ get_carbon_pools <- function(hop) {
                  error = TRUE)
   out <- hop$trees %>%
     replace(is.na(.), 0) %>%
-    dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay, id,
+    dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay, idTree,
                   carbonFoliage, carbonBranches, carbonCoarseRoots, carbonFineRoots, carbonLabile, carbonStem, carbonStump) %>%
-    dplyr::select(-id) %>%
+    dplyr::select(-idTree) %>%
     dplyr::group_by(SimulationName, Year, Month, Day, Date, JulianDay) %>%
     dplyr::summarize_all(sum) %>%
     dplyr::ungroup() %>%
