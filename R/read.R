@@ -225,7 +225,19 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
 
   ## Check for existence of all requested profiles and warn if profile does not exist
   if(!any(file.exists(files))) {
-    stop(paste("None of the requested profiles exist for", simu.name), call. = FALSE)
+    warning(paste("No requested profiles found for the following simulation:", simu.name), call. = FALSE)
+    output <- list(trees       = dplyr::tibble(),
+                   plot        = dplyr::tibble(),
+                   climate     = dplyr::tibble(),
+                   cells       = dplyr::tibble(),
+                   monthCells  = dplyr::tibble(),
+                   annualCells = dplyr::tibble(),
+                   voxels      = dplyr::tibble(),
+                   plot.info   = dplyr::tibble(),
+                   tree.info   = dplyr::tibble(),
+                   exp.plan    = dplyr::tibble(),
+                   metadata    = dplyr::tibble())
+    return(output)
   } else if(!all(file.exists(files))) {
     missing.profiles <- basename(files[!file.exists(files)])
     missing.profile.error <- paste(c("The following requested profiles do not exist:",
