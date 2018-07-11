@@ -650,3 +650,54 @@ write_hop <- function(hop, profiles = "all", output.path = NULL) {
 
   invisible(hop)
 }
+
+#' Join multiple hop profiles together
+#' @description Joins multiple hop profiles together into a single tibble (data.frame) using \code{dplyr::full_join()}.
+#' When joining the 'cells' profile with the 'trees', 'plot', or 'climate' profiles, only numeric columns from the 'cells'
+#' profile are kept, and values are averaged across all cells before joining.
+#' When joining the 'voxels' profile with the 'cells' profile, only numeric columns from the 'voxels'
+#' profile are kept, and values are summed across all voxels in each cell before joining.
+#' The 'voxels' profile cannot be joinged with the 'trees', 'plot', or 'climate' profiles.
+#' @return A tibble (data.frame)
+#' @param hop An object of class hop or face.
+#' @param profiles The profiles to join
+#' @export
+#' @family hisafe helper functions
+#' @examples
+#' \dontrun{
+#' my.df <- join_profiles(hop, c("trees", "plot"))
+#' }
+join_profiles <- function(hop, profiles) {
+  is_hop(hop, error = TRUE)
+  profile_check(hop = hop, profiles = profiles, error = TRUE)
+  hop <- hop_filter(hop, strip.exp.plan = TRUE)
+
+  group1 <- c("trees", "plot", "climate")
+  group2 <- c("cells")
+  group3 <- c("voxels")
+  core.join.cols <- c("SimulationName", "Date", "Day", "Month", "Year", "JulianDay")
+
+  if(all(profiles %in% group1)){
+    out <- hop[profiles] %>%
+      purrr::reduce(dplyr::full_join, by = core.join.cols)
+  } else if(all(profiles %in% c(group2, group3))){
+    hop$voxels <- hop$voxels %>%
+      dplyr::group_by_at(c(core.join.cols, "idCell")) %>%
+      dplyr::summarize_if(is.numeric, sum) %>%
+      dplyr::ungroup()
+    out <- hop[profiles] %>%
+      purrr::reduce(dplyr::full_join, by = c(core.join.cols, "idCell"))
+  } else if(all(profiles %in% c(group1, group2))){
+    hop$cells <- hop$cells %>%
+      dplyr::group_by_at(core.join.cols) %>%
+      dplyr::summarize_if(is.numeric, mean) %>%
+      dplyr::ungroup()
+    out <- hop[profiles] %>%
+      purrr::reduce(dplyr::full_join, by = core.join.cols)
+  } else if(all(profiles %in% c(group1, group3))){
+    stop("Cannot join voxels profile with trees, plot, or climate profiles.", call. = FALSE)
+  } else {
+    stop(paste("join_profiles() only supports the following profiles:", paste(c(group1, group2, group3), collapse = ", ")), call. = FALSE)
+  }
+  return(out)
+}
