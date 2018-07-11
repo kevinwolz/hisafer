@@ -24,6 +24,7 @@
 #' @param aes.cols A list with arguments "color" and "linetype" containing character strings of the column names to use for plot aesthetics.
 #' @param facet.simu A logical indicating whether the plot should be faceted by SimulationName This helps when values among simulations are overplotted.
 #' @param facet.year A logical indicating whether the plot should be faceted by year. This helps with seeing finer level detail.
+#' @param facet.crop A logical indicating whether the plot should be faceted by cropType (mainCrop vs. interCrop). Only applies when \code{profile} is 'cells'.
 #' @param crop.points Logical indicating if points should be plotted as well, with point shape desgnating the main crop name.
 #' Only applies when \code{profile} is 'plot'.
 #' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.
@@ -58,6 +59,7 @@ plot_hisafe_ts <- function(hop,
                            aes.cols         = list(color = "SimulationName", linetype = "SimulationName"),
                            facet.simu       = FALSE,
                            facet.year       = FALSE,
+                           facet.crop       = FALSE,
                            crop.points      = FALSE,
                            plot             = TRUE) {
 
@@ -80,6 +82,7 @@ plot_hisafe_ts <- function(hop,
   is_TF(cumulative)
   is_TF(facet.simu)
   is_TF(facet.year)
+  is_TF(facet.crop)
   is_TF(crop.points)
   is_TF(plot)
   variable_check(hop, profile, c(variables, aes.cols$color, aes.cols$linetype), error = TRUE)
@@ -96,28 +99,39 @@ plot_hisafe_ts <- function(hop,
                     date.min   = date.min,
                     date.max   = date.max)
 
-  ## Create profile-specific x aesthetic, axis label, plot theme, and time.lim filter
-  x.var       <- "fake.date"
-  x.label     <- "Date"
-  if(facet.simu & facet.year) {
+  ## Create facet
+  facet.year <- facet.year & profile == "cells"
+  if(length(variables) > 1) force.rows <- 1 else force.rows <- NULL
+
+  if(facet.crop & facet.simu) {
+    if(length(variables) > 1) stop("facet.crop and facet.simu can only both be TRUE when plotting a single variable", call. = FALSE)
+    facet <- facet_grid(cropType~SimulationName)
+  } else if(facet.crop & facet.year) {
+    stop("facet.crop and facet.year cannot both be TRUE", call. = FALSE)
+  } else if(facet.crop) {
+    facet <- facet_wrap(~cropType, nrow = force.rows)
+  } else if(facet.simu & facet.year) {
     facet <- facet_grid(Year~SimulationName)
-    scale_x_ts  <- scale_x_date(date_labels = "%b", expand = c(0,0),
-                                limits = lubridate::as_date(lubridate::parse_date_time(paste0("8000-", doy.lim), "%Y-%j")))
   } else if(facet.year) {
     facet <- facet_wrap(~Year)
-    scale_x_ts  <- scale_x_date(date_labels = "%b", expand = c(0,0),
-                                limits = lubridate::as_date(lubridate::parse_date_time(paste0("8000-", doy.lim), "%Y-%j")))
   } else if(facet.simu) {
-    x.var       <- "Date"
-    facet       <- facet_wrap(~SimulationName)
-    scale_x_ts  <- scale_x_date(date_labels = "%Y")
+    facet <- facet_wrap(~SimulationName, nrow = force.rows)
   } else {
-    x.var       <- "Date"
-    facet       <- geom_blank()
-    scale_x_ts  <- scale_x_date(date_labels = "%Y")
+    facet <- geom_blank()
     theme.extra <- geom_blank()
   }
-  if(facet.simu | facet.year) {
+
+  # Create facet-specific x-axis aesthetic & label
+  if(facet.year) {
+    x.var       <- "fake.date"
+    scale_x_ts  <- scale_x_date(date_labels = "%b", expand = c(0,0),
+                                limits = lubridate::as_date(lubridate::parse_date_time(paste0("8000-", doy.lim), "%Y-%j")))
+  } else {
+    x.var <- "Date"
+    scale_x_ts  <- scale_x_date(date_labels = "%Y")
+  }
+
+  if(facet.simu | facet.year | facet.crop) {
     theme.extra <- theme(axis.ticks.length = unit(5, "points"),
                          axis.text.x       = element_text(margin = margin(t = 5, unit = "points"), angle = 90, hjust = 1, vjust = 0.5),
                          axis.text.y       = element_text(margin = margin(r = 5, unit = "points")))
@@ -126,8 +140,14 @@ plot_hisafe_ts <- function(hop,
   plot.data  <- hop[[profile]]
 
   if(profile == "cells") {
+    if(facet.crop) {
+      plot.data <- plot.data %>%
+        dplyr::group_by(SimulationName, Date, Day, Month, Year, JulianDay, cropType)
+    } else {
+      plot.data <- plot.data %>%
+        dplyr::group_by(SimulationName, Date, Day, Month, Year, JulianDay)
+    }
     plot.data <- plot.data %>%
-      dplyr::group_by(SimulationName, Date, Day, Month, Year, JulianDay) %>%
       dplyr::summarize_if(is.numeric, mean) %>%
       dplyr::ungroup()
   }
@@ -143,7 +163,7 @@ plot_hisafe_ts <- function(hop,
     plot.data <- plot.data %>%
       dplyr::mutate(idTree = paste("Tree", idTree))
     if(length(tree.ids) > 1) {
-      facet <- facet_wrap(~idTree)
+      facet <- facet_wrap(~idTree, nrow = force.rows)
       if(profile == "trees") {
         x.var <- "Date"
         scale_x_ts <- scale_x_date(date_labels = "%Y")
@@ -167,27 +187,26 @@ plot_hisafe_ts <- function(hop,
 
   geom        <- geom_line(size = 1, na.rm = TRUE, aes_string(color = aes.cols$color, linetype = aes.cols$linetype))
   scale_color <- scale_color_manual(values = color.palette)
-  if(facet.simu) {
+  if(facet.simu | length(unique(plot.data$SimulationName)) == 1) {
     scale_color <- scale_linetype <- geom_blank()
     geom <- geom_line(size = 1, na.rm = TRUE, color = "black")
   }
 
   ## Group for cumulation
   if(cumulative) {
-    cum.group.strings <- c("SimulationName", "idTree"[profile == "trees"], "Year"[facet.year])
-    cum.group.symbols <- rlang::parse_quosures(paste(cum.group.strings, collapse = ";"))
+    cum.group <- c("SimulationName", "idTree"[profile == "trees"], "Year"[facet.year], "cropType"[facet.crop])
     plot.data <- plot.data %>%
-      dplyr::group_by(!!!cum.group.symbols) %>%
+      dplyr::group_by_at(cum.group) %>%
       dplyr::mutate_at(variables, cumsum)
   }
 
   ## Create plot
   plot.obj <- list()
   for(i in 1:length(variables)) {
-    plot.obj[[i]] <- ggplot(plot.data, aes_string(x        = x.var,
-                                                  y        = variables[i],
-                                                  group    = "SimulationName")) +
-      labs(x        = x.label,
+    plot.obj[[i]] <- ggplot(plot.data, aes_string(x     = x.var,
+                                                  y     = variables[i],
+                                                  group = "SimulationName")) +
+      labs(x        = "Date",
            y        = gsub(" \\(\\)", "", paste0("Cumulative "[cumulative], variables[i], " (", get_units(variable = variables[i], prof = profile), ")")),
            title    = ifelse(length(variables) == 1, variables[i], ""),
            color    = ifelse(aes.cols$color    == "SimulationName", "", aes.cols$color),
