@@ -40,8 +40,7 @@ read_param_file <- function(path) {
   tables <- list(layers                      = c("name", "thick", "sand", "clay", "limeStone", "organicMatter",                                 # .PLD
                                                  "partSizeSand", "stone", "stoneType", "infiltrability"),
                  layer_initialization        = c("name", "waterContent", "no3Concentration", "nh4concentration"),                               # .PLD
-                 tree_initialization         = c("name", "species", "height", "crownBaseHeight",                                                # .PLD
-                                                 "leafToFineRootsRatio", "crownRadius", "treeX", "treeY"),
+                 tree_initialization         = c("name", "species", "height", "crownBaseHeight", "crownRadius", "treeX", "treeY"),              # .PLD
                  root_initialization         = c("name", "shape", "repartition", "paramShape1", "paramShape2", "paramShape3"),                  # .PLD
                  varieties                   = c("ID", "codevar", "stlevamf" ,"stamflax" ,"stlevdrp" ,"stflodrp", "stdrpdes", "pgrainmaxi",     # .PLT
                                                  "adens", "croirac", "durvieF", "jvc", "sensiphot", "stlaxsen", "stsenlan", "nbgrmax",

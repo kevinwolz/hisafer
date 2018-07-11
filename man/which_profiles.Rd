@@ -9,7 +9,8 @@ which_profiles(hop, profiles = NULL)
 \arguments{
 \item{hop}{An object of class hop or face.}
 
-\item{profiles}{A character vector of the names of the profiles to check for.}
+\item{profiles}{A character vector of the names of the profiles to check for.
+If \code{NULL}, returns the names of all available profiles.}
 }
 \value{
 A character vector of the available profiles in the hop.
