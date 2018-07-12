@@ -4,12 +4,14 @@
 \alias{join_profiles}
 \title{Join multiple hop profiles together}
 \usage{
-join_profiles(hop, profiles)
+join_profiles(hop, profiles, ...)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
 
 \item{profiles}{The profiles to join}
+
+\item{...}{Other arguments passed to \code{\link{hop_filter}}}
 }
 \value{
 A tibble (data.frame)

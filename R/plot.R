@@ -220,18 +220,7 @@ plot_hisafe_ts <- function(hop,
       theme_hisafe_ts(legend.title = element_blank()) +
       theme.extra
 
-    if(length(variables) > 1) {
-      plot.obj[[i]] <- plot.obj[[i]] +
-        theme(plot.title      = element_blank())
-      if(i == 1) {
-        plot.obj[[i]] <- plot.obj[[i]] +
-          theme(legend.position      = c(0.01, 0.99),
-                legend.justification = c(0, 1))
-      } else {
-        plot.obj[[i]] <- plot.obj[[i]] +
-          theme(legend.position = "none")
-      }
-    }
+    if(length(variables) > 1) plot.obj[[i]] <- plot.obj[[i]] + theme(plot.title = element_blank())
 
     if(crop.points & (profile %in% "plot")) {
       plot.obj[[i]] <- plot.obj[[i]] +
@@ -243,16 +232,12 @@ plot_hisafe_ts <- function(hop,
   if(length(plot.obj) > 1) {
     if(!requireNamespace("cowplot", quietly = TRUE)) stop("The package 'cowplot' is required when passing 2 or more variable names.
                                                           Please install and load it", call. = FALSE)
-
-    plot.obj <- cowplot::plot_grid(plotlist = plot.obj, ncol = 1)
+    plot.out <- cowplot::plot_grid(plotlist = plot.obj, ncol = 1)
   } else {
-    plot.obj <- plot.obj[[1]]
+    plot.out <- plot.obj[[1]]
   }
 
-  plot.data <- plot.data %>%
-    dplyr::select(-fake.date)
-
-  if(plot) return(plot.obj) else return(plot.data)
+  if(plot) return(plot.out) else return(dplyr::select(plot.data, -fake.date))
 }
 
 #' Tile plot of Hi-sAFe monthCells output variable

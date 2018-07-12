@@ -661,16 +661,17 @@ write_hop <- function(hop, profiles = "all", output.path = NULL) {
 #' @return A tibble (data.frame)
 #' @param hop An object of class hop or face.
 #' @param profiles The profiles to join
+#' @param ... Other arguments passed to \code{\link{hop_filter}}
 #' @export
 #' @family hisafe helper functions
 #' @examples
 #' \dontrun{
 #' my.df <- join_profiles(hop, c("trees", "plot"))
 #' }
-join_profiles <- function(hop, profiles) {
+join_profiles <- function(hop, profiles, ...) {
   is_hop(hop, error = TRUE)
   profile_check(hop = hop, profiles = profiles, error = TRUE)
-  hop <- hop_filter(hop, strip.exp.plan = TRUE)
+  hop <- hop_filter(hop, strip.exp.plan = TRUE, ...)
 
   group1 <- c("trees", "plot", "climate")
   group2 <- c("cells")
