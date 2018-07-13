@@ -100,7 +100,7 @@ plot_hisafe_ts <- function(hop,
                     date.max   = date.max)
 
   ## Create facet
-  facet.year <- facet.year & profile == "cells"
+  facet.crop <- facet.crop & profile == "cells"
   if(length(variables) > 1) force.rows <- 1 else force.rows <- NULL
 
   if(facet.crop & facet.simu) {
@@ -148,7 +148,7 @@ plot_hisafe_ts <- function(hop,
         dplyr::group_by(SimulationName, Date, Day, Month, Year, JulianDay)
     }
     plot.data <- plot.data %>%
-      dplyr::summarize_if(is.numeric, mean) %>%
+      dplyr::summarize_if(is.numeric, mean, na.rm = TRUE) %>%
       dplyr::ungroup()
   }
 

@@ -308,8 +308,10 @@ hop_filter <- function(hop,
   is_hop(hop, error = TRUE)
   if(!all(is.character(simu.names)))                                        stop("simu.names argument must be 'all' or a character vector",  call. = FALSE)
   if(!(tree.ids[1] == "all" | all(is.numeric(tree.ids))))                   stop("tree.ids argument must be 'all' or a numeric vector",      call. = FALSE)
-  if(!(length(date.min) == 1 & (is.character(date.min) | is.na(date.min)))) stop("date.min argument must be a character vector of length 1", call. = FALSE)
-  if(!(length(date.max) == 1 & (is.character(date.max) | is.na(date.max)))) stop("date.max argument must be a character vector of length 1", call. = FALSE)
+
+  date_check <- function(x) is.character(x) | is.na(x) |  "Date" %in% class(x)
+  if(!(length(date.min) == 1 & date_check(date.min)))                       stop("date.min argument must be a character vector of length 1", call. = FALSE)
+  if(!(length(date.max) == 1 & date_check(date.max)))                       stop("date.max argument must be a character vector of length 1", call. = FALSE)
   if(!(is.character(dates) | is.null(dates) | "Date" %in% class(dates)))    stop("dates argument must be a character or vector in the
                                                                                  format YYYY-MM-DD or a vector of class Date",               call. = FALSE)
   if(!is.null(dates) & (!is.na(date.min) | !is.na(date.min)))            warning("date.min and date.max are ignored if dates is not NULL", .immediate = TRUE)

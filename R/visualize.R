@@ -819,7 +819,7 @@ hisafe_snapshot <- function(hop,
   cells <- cells & profile_check(hop, "cells")
 
   legend.path <- clean_path(paste0(diag_output_path(hop, output.path), "/snapshots/"))
-  image.path  <- paste0(legend.path, "snapshot_images/")
+  image.path  <- paste0(legend.path, file.prefix, "/")
   dir.create(image.path, recursive = TRUE, showWarnings = FALSE)
 
   hop <- hop_filter(hop = hop, simu.names = simu.names)
@@ -932,7 +932,7 @@ hisafe_snapshot <- function(hop,
                                         simu.names   = simu.names,
                                         plot.x       = plot.x,
                                         mem.max      = mem.max,
-                                        for.anim     = TRUE) +
+                                        for.anim     = (cells & slice)) +
           theme(plot.margin  = margin(10,10,15,10))
       }
 
@@ -1484,7 +1484,7 @@ add_historic_data <- function(df, dates, mem.max) {
   dates <- lubridate::ymd(dates)
   add_hist <- function(date, df, mem.max) {
     df %>%
-      dplyr::filter(Date < date, Date >= date - mem.max) %>%
+      dplyr::filter(Date <= date, Date >= date - mem.max) %>%
       dplyr::group_by(SimulationName, Date) %>%
       dplyr::summarize(n = n()) %>%
       dplyr::filter(n > 0) %>%
