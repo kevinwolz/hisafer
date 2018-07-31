@@ -6,7 +6,8 @@
 \usage{
 plot_hisafe_voxels(hop, variable, date.min = NA, date.max = NA,
   simu.names = "all", X = NA, Y = NA, Z = NA, summarize.by = "z",
-  vline.dates = NA, plot = TRUE)
+  facet.simu = TRUE, facet.z = FALSE, vline.dates = NA,
+  plot = TRUE)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -28,7 +29,7 @@ If \code{NA}, the default, than the maximum value in the voxels profile is used}
 \item{Z}{A numeric vector of the z values of the voxels to include. If \code{NA}, the default, then all z values are used.}
 
 \item{summarize.by}{One of 'x', 'y', or 'z', indicating  an axis over which to average voxel values.
-If \code{NA}, the default, then now averaging is done and each voxel is plotted as its own line.}
+If \code{NA}, the default, then no averaging is done and each voxel is plotted as its own line.}
 
 \item{vline.dates}{A character vector of dates (yyyy-mm-dd) at which to plot dashed vertical reference lines.
 If \code{NA}, the default, then no reference lines are drawn.}
@@ -62,3 +63,4 @@ Other hisafe plot functions: \code{\link{plot_hisafe_annualcells}},
   \code{\link{plot_hisafe_scene}},
   \code{\link{plot_hisafe_ts}}
 }
+\concept{hisafe plot functions}

@@ -725,7 +725,7 @@ plot_hisafe_cells <- function(hop,
 #' @param Y A numeric vector of the y values of the voxels to include. If \code{NA}, the default, then all y values are used.
 #' @param Z A numeric vector of the z values of the voxels to include. If \code{NA}, the default, then all z values are used.
 #' @param summarize.by One of 'x', 'y', or 'z', indicating  an axis over which to average voxel values.
-#' If \code{NA}, the default, then now averaging is done and each voxel is plotted as its own line.
+#' If \code{NA}, the default, then no averaging is done and each voxel is plotted as its own line.
 #' @param vline.dates A character vector of dates (yyyy-mm-dd) at which to plot dashed vertical reference lines.
 #' If \code{NA}, the default, then no reference lines are drawn.
 #' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.
@@ -754,6 +754,8 @@ plot_hisafe_voxels <- function(hop,
                                Y            = NA,
                                Z            = NA,
                                summarize.by = "z",
+                               facet.simu   = TRUE,
+                               facet.z      = FALSE,
                                vline.dates  = NA,
                                plot         = TRUE) {
 
@@ -768,6 +770,8 @@ plot_hisafe_voxels <- function(hop,
   if(!(all(is.na(Z)) | is.numeric(Z)))                              stop("Z must be numeric",                                        call. = FALSE)
   if(!((summarize.by %in% c("x", "y", "z")) | is.na(summarize.by))) stop("summarize.by must be one of 'x', 'y', or 'z'",             call. = FALSE)
   if(!(all(is.na(vline.dates)) | is.character(vline.dates)))        stop("vline.dates must be a character vector",                   call. = FALSE)
+  is_TF(facet.simu)
+  is_TF(facet.z)
   is_TF(plot)
   if(length(unique(hop$plot.info$soilDepth)) > 1) warning("maximum soil depth is not consistent across all simluations within the hop", call. = FALSE)
 
@@ -789,7 +793,7 @@ plot_hisafe_voxels <- function(hop,
                   y %in% Y,
                   z %in% Z)
 
-  ## Determine faceting & axis labels
+  ## Summarize along axes
   if(summarize.by %in% c("x", "y", "z")) {
     plot.data <- plot.data %>%
       dplyr::group_by_(.dots = c("SimulationName", "Date", summarize.by)) %>%
@@ -802,6 +806,17 @@ plot_hisafe_voxels <- function(hop,
     plot.data <- plot.data %>%
       dplyr::mutate(xyz = paste(x, y, z, sep = "-"))
     group.by <- "xyz"
+  }
+
+  ## Determine faceting
+  if(facet.simu & facet.z) {
+    facet <- facet_grid(z~SimulationName)
+  } else if(facet.simu) {
+    facet <- facet_wrap(~SimulationName)
+  } else if(facet.z) {
+    facet <- facet_wrap(~z, ncol = 1)
+  } else {
+    facet <- element_blank()
   }
 
   plot.caption <- c(paste("X =", paste(X, collapse = ", ")),
@@ -818,7 +833,7 @@ plot_hisafe_voxels <- function(hop,
          linetype = paste(summarize.by, "(m)"),
          title    = variable,
          caption  = plot.caption) +
-    facet_wrap(~SimulationName) +
+    facet +
     scale_x_date(date_labels = "%d %b %Y") +
     geom_line(na.rm = TRUE) +
     scale_color_manual(values    = rep(c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7"), 6)) +
