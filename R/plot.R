@@ -518,6 +518,7 @@ plot_hisafe_annualcells <- function(hop,
 #' @param hop An object of class hop.
 #' @param variable A character string of the name of the variable to color the tiles.
 #' @param dates A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates to include.
+#' @param start.date If \code{NULL}, the default, then no cumulation of values occurs. Otherwise, a character string (in the format "YYYY-MM-DD") or an object of class Date indicating the date from which cumulation of \code{variable} should be calculated.
 #' @param rel.dates A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates from which to scale \code{variable}.
 #' In the plot, \code{variable} will be scaled to be between the minimum and maximum values of \code{variable} across these dates.
 #' @param simu.names A character string containing the SimulationNames to include. Use "all" to include all available values.
@@ -547,6 +548,7 @@ plot_hisafe_annualcells <- function(hop,
 plot_hisafe_cells <- function(hop,
                               variable,
                               dates,
+                              start.date = NULL,
                               rel.dates  = NULL,
                               simu.names = "all",
                               plot.x     = "x",
@@ -567,16 +569,31 @@ plot_hisafe_cells <- function(hop,
   is_TF(plot)
   is_TF(for.anim)
 
-  hop.full <- hop_filter(hop            = hop,
-                         simu.names     = simu.names,
-                         dates          = rel.dates,
-                         strip.exp.plan = TRUE)
-  hop      <- hop_filter(hop            = hop,
-                         simu.names     = simu.names,
-                         dates          = dates,
-                         strip.exp.plan = TRUE)
+  if(!is.null(start.date)) {
+    hop.full <- hop_filter(hop            = hop,
+                           simu.names     = simu.names,
+                           date.min       = start.date,
+                           date.max       = max(lubridate::ymd(dates)),
+                           strip.exp.plan = TRUE)
+    hop.full$cells <- hop.full$cells %>%
+      dplyr::select_at(c(BASE.COLS, "idCell", "x", "y", variable)) %>%
+      dplyr::arrange(SimulationName, idCell, Date) %>%
+      dplyr::group_by(SimulationName, idCell) %>%
+      dplyr::mutate_at(variable, cumsum) %>%
+      dplyr::ungroup()
+    hop <- hop.full
+  } else {
+    hop.full <- hop_filter(hop            = hop,
+                           simu.names     = simu.names,
+                           dates          = rel.dates,
+                           strip.exp.plan = TRUE)
+  }
+  hop <- hop_filter(hop            = hop,
+                    simu.names     = simu.names,
+                    dates          = dates,
+                    strip.exp.plan = TRUE)
 
-  if(nrow(hop$cells) == 0) hop$cells <- add_historic_data(df = hop.full$cells, dates = dates, mem.max = mem.max)
+  if(nrow(hop$cells) < length(dates)) hop$cells <- add_historic_data(df = hop.full$cells, dates = dates, mem.max = mem.max)
 
   x.lab <- "X (m)"
   y.lab <- "Y (m)"

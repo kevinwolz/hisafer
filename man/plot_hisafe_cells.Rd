@@ -4,9 +4,9 @@
 \alias{plot_hisafe_cells}
 \title{Tile plot of Hi-sAFe cells output variable}
 \usage{
-plot_hisafe_cells(hop, variable, dates, rel.dates = NULL,
-  simu.names = "all", plot.x = "x", trees = TRUE, canopies = TRUE,
-  plot = TRUE, mem.max = 0, for.anim = FALSE)
+plot_hisafe_cells(hop, variable, dates, start.date = NULL,
+  rel.dates = NULL, simu.names = "all", plot.x = "x", trees = TRUE,
+  canopies = TRUE, plot = TRUE, mem.max = 0, for.anim = FALSE)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -14,6 +14,8 @@ plot_hisafe_cells(hop, variable, dates, rel.dates = NULL,
 \item{variable}{A character string of the name of the variable to color the tiles.}
 
 \item{dates}{A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates to include.}
+
+\item{start.date}{If \code{NULL}, the default, then no cumulation of values occurs. Otherwise, a character string (in the format "YYYY-MM-DD") or an object of class Date indicating the date from which cumulation of \code{variable} should be calculated.}
 
 \item{rel.dates}{A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates from which to scale \code{variable}.
 In the plot, \code{variable} will be scaled to be between the minimum and maximum values of \code{variable} across these dates.}
@@ -60,3 +62,4 @@ Other hisafe plot functions: \code{\link{plot_hisafe_annualcells}},
   \code{\link{plot_hisafe_ts}},
   \code{\link{plot_hisafe_voxels}}
 }
+\concept{hisafe plot functions}
