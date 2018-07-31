@@ -5,9 +5,9 @@
 \title{Builds a cluster shell script}
 \usage{
 build_cluster_script(hip = NULL, simu.names = NULL, script.path = NULL,
-  model.version = "Capsis4", launch.call = "ScriptGen",
-  default.folder = "", cluster.path, email.type = "END", email = NULL,
-  num.cores = NULL)
+  script.name = NULL, simu.prefix = NULL, model.version = "Capsis4",
+  launch.call = "ScriptGen", default.folder = "", cluster.path,
+  email.type = "END", email = NULL, num.cores = NULL)
 }
 \arguments{
 \item{hip}{A hip object. If \code{NULL}, then \code{simu.names} and \code{script.path} are required.}
@@ -17,6 +17,10 @@ This must match the names of .SIM files as well as the names of the folders that
 
 \item{script.path}{A character string of the local path for where to create the cluster script file.
 If \code{NULL}, \code{hip} must be provided, and the path used will be the path element of the hip object.}
+
+\item{script.name}{A character string of the name of the cluster script file to call.}
+
+\item{simu.prefix}{A character string of the SimulationName prefix.}
 
 \item{model.version}{A character string of the name of the Capsis folder (version) to call on the cluster.}
 
