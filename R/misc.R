@@ -10,7 +10,7 @@
 #' }
 hisafe_info <- function(capsis.path) {
 
-  capsis.path <- R.utils::getAbsolutePath(capsis.path)
+  capsis.path <- get_absolute_path(capsis.path)
 
   if(!dir.exists(capsis.path))                    stop("directory specified by capsis.path does not exist",          call. = FALSE)
   if(!("capsis.sh" %in% list.files(capsis.path))) stop("directory specified by capsis.path does not contain Capsis", call. = FALSE)

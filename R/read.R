@@ -70,7 +70,7 @@ read_hisafe <- function(hip           = NULL,
     path       <- hip$path
     if(simu.names[1] == "all") simu.names <- EXP.PLAN$SimulationName
   } else {
-    path <- R.utils::getAbsolutePath(path)
+    path <- get_absolute_path(path)
     if(!dir.exists(path)) stop("directory specified by path does not exist", call. = FALSE)
     exp.summary.file <- clean_path(paste0(path, "/", basename(path), "_exp_summary.csv"))
     if(simu.names[1] == "all" & file.exists(exp.summary.file)) {
@@ -262,11 +262,10 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
     out <- list()
   }
 
-  base.cols <- c("SimulationName", "Date", "Day", "Month", "Year", "JulianDay")
-  join_plot   <- function(...) dplyr::left_join(..., by = base.cols, suffix = c("", ".REMOVE"))
-  join_trees  <- function(...) dplyr::left_join(..., by = c(base.cols, "idTree"), suffix = c("", ".REMOVE"))
-  join_cells  <- function(...) dplyr::left_join(..., by = c(base.cols, "idCell", "x", "y"), suffix = c("", ".REMOVE"))
-  join_voxels <- function(...) dplyr::left_join(..., by = c(base.cols, "idCell", "idVoxel", "x", "y", "z"), suffix = c("", ".REMOVE"))
+  join_plot   <- function(...) dplyr::left_join(..., by = BASE.COLS, suffix = c("", ".REMOVE"))
+  join_trees  <- function(...) dplyr::left_join(..., by = c(BASE.COLS, "idTree"), suffix = c("", ".REMOVE"))
+  join_cells  <- function(...) dplyr::left_join(..., by = c(BASE.COLS, "idCell", "x", "y"), suffix = c("", ".REMOVE"))
+  join_voxels <- function(...) dplyr::left_join(..., by = c(BASE.COLS, "idCell", "idVoxel", "x", "y", "z"), suffix = c("", ".REMOVE"))
 
   plot.data   <- out[grep("^plot",        names(out))]
   trees.data  <- out[grep("^trees",       names(out))]
@@ -275,12 +274,13 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
   mcells.data <- out[grep("^monthCells",  names(out))]
   acells.data <- out[grep("^annualCells", names(out))]
 
-  out[["plot"]]        <- Reduce(join_plot,   plot.data[  !purrr::map_lgl(plot.data,   is.null)])
-  out[["trees"]]       <- Reduce(join_trees,  trees.data[ !purrr::map_lgl(trees.data,  is.null)])
-  out[["cells"]]       <- Reduce(join_cells,  cells.data[ !purrr::map_lgl(cells.data,  is.null)])
-  out[["voxels"]]      <- Reduce(join_voxels, voxels.data[!purrr::map_lgl(voxels.data, is.null)])
-  out[["monthCells"]]  <- Reduce(join_cells,  mcells.data[!purrr::map_lgl(mcells.data, is.null)])
-  out[["annualCells"]] <- Reduce(join_cells,  acells.data[!purrr::map_lgl(acells.data, is.null)])
+  check_function <- function(x) is.null(x) | nrow(x) == 0
+  out[["plot"]]        <- Reduce(join_plot,   plot.data[  !purrr::map_lgl(plot.data,   check_function)])
+  out[["trees"]]       <- Reduce(join_trees,  trees.data[ !purrr::map_lgl(trees.data,  check_function)])
+  out[["cells"]]       <- Reduce(join_cells,  cells.data[ !purrr::map_lgl(cells.data,  check_function)])
+  out[["voxels"]]      <- Reduce(join_voxels, voxels.data[!purrr::map_lgl(voxels.data, check_function)])
+  out[["monthCells"]]  <- Reduce(join_cells,  mcells.data[!purrr::map_lgl(mcells.data, check_function)])
+  out[["annualCells"]] <- Reduce(join_cells,  acells.data[!purrr::map_lgl(acells.data, check_function)])
 
   get_prof <- function(out, prof) {
     if(is.null(out[[prof]])) {

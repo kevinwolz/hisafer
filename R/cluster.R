@@ -58,7 +58,7 @@ build_cluster_script <- function(hip            = NULL,
     if(is.null(script.path)) script.path <- hip$path
     if(is.null(simu.names))  simu.names  <- hip$exp.plan$SimulationName
   } else {
-    script.path <- R.utils::getAbsolutePath(script.path)
+    script.path <- get_absolute_path(script.path)
     if(!dir.exists(script.path)) stop("directory specified by script.path does not exist", call. = FALSE)
     if(is.null(simu.names))      stop("simu.names cannot by NULL if hip is not provided",  call. = FALSE)
   }

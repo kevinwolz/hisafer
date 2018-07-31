@@ -30,6 +30,8 @@ PUBLIC.PROFILES     <- SUPPORTED.PROFILES$profiles[!(SUPPORTED.PROFILES$profiles
 DATA.PROFILES       <- c("plot", "trees", "cells", "voxels", "climate", "monthCells", "annualCells")
 FILTERABLE.ELEMENTS <- c(DATA.PROFILES, "plot.info", "tree.info", "exp.plan", "metadata")
 
+BASE.COLS <- c("SimulationName", "Date", "Day", "Month", "Year", "JulianDay")
+
 INPUT.DEFS  <- readr::read_delim(system.file("extdata", "input_defs.txt",  package = "hisafer"), "\t", col_types = readr::cols())
 OUTPUT.DEFS <- dplyr::arrange(readr::read_delim(system.file("extdata", "output_defs.txt", package = "hisafer"), "\t", col_types = readr::cols()), profile, name)
 
@@ -38,22 +40,21 @@ INCLUDED.TEMPLATES <- EXTDATA[!(grepl("\\.", EXTDATA) | EXTDATA == "template_com
 INCLUDED.TEMPLATE.SUBPATH <- system.file("extdata", "template_common",  package = "hisafer")
 
 remove_whitespace <- function(x) gsub("^\\s+|\\s+$", "", x)
-clean_path        <- function(x) gsub("//", "/", x, fixed = TRUE)
+clean_path        <- function(x) gsub("//", "/", paste0(path, "/"), fixed = TRUE)
+get_absolute_path <- function(x) clean_path(base::normalizePath(x))
 
 get_template_path <- function(template) {
   path <- ifelse(template %in% INCLUDED.TEMPLATES,
                  system.file("extdata", template, package = "hisafer"),
                  template)
-  path <- R.utils::getAbsolutePath(path)
-  path <- clean_path(paste0(path, "/"))
+  path <- get_absolute_path(path)
   if(!dir.exists(path)) stop("template directory does not exist", call. = FALSE)
   return(path)
 }
 
 get_template_subpath <- function(template) {
   if(template %in% INCLUDED.TEMPLATES) {
-    path <- INCLUDED.TEMPLATE.SUBPATH
-    path <- clean_path(paste0(R.utils::getAbsolutePath(path), "/"))
+    path <- get_absolute_path(INCLUDED.TEMPLATE.SUBPATH)
   } else {
     path <- get_template_path(template)
   }

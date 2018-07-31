@@ -83,7 +83,7 @@ define_hisafe <- function(path,
   is_TF(factorial)
   is_TF(force)
 
-  path          <- R.utils::getAbsolutePath(path)
+  path          <- get_absolute_path(path)
   param.list    <- list(...)
   if(!is.null(bulk.pass)) param.list <- c(param.list, bulk.pass)
 
@@ -116,7 +116,7 @@ define_hisafe <- function(path,
   if(!("SimulationName" %in% names(exp.plan))) exp.plan$SimulationName <- paste0("Sim_", 1:nrow(exp.plan))
   exp.plan <- dplyr::select(exp.plan, SimulationName, dplyr::everything())
 
-  if("weatherFile" %in% names(exp.plan)) exp.plan$weatherFile <- as.character(R.utils::getAbsolutePath(exp.plan$weatherFile))
+  if("weatherFile" %in% names(exp.plan)) exp.plan$weatherFile <- as.character(get_absolute_path(exp.plan$weatherFile))
 
   if(nrow(exp.plan) > 1) path <- clean_path(paste0(path, "/", exp.name))
   hip <- list(exp.plan = exp.plan,
@@ -161,7 +161,7 @@ define_hisafe_file <- function(file,
                                template = "agroforestry",
                                force    = FALSE) {
 
-  path          <- R.utils::getAbsolutePath(path)
+  path          <- get_absolute_path(path)
   template.path <- get_template_path(template)
 
   if(!(is.character(file) & length(file) == 1))             stop("file argument must be a character vector of length 1",     call. = FALSE)

@@ -38,8 +38,8 @@ run_hisafe <- function(hip            = NULL,
                        launch.call    = "ScriptGen",
                        default.folder = "") {
 
-  capsis.path <- R.utils::getAbsolutePath(capsis.path)
-  if(!is.null(path)) path <- R.utils::getAbsolutePath(path)
+  capsis.path <- get_absolute_path(capsis.path)
+  if(!is.null(path)) path <- get_absolute_path(path)
 
   is_hip(hip, error = TRUE)
   if(is.null(hip) == is.null(path))                             stop("must provide hip OR path, not both",                           call. = FALSE)
