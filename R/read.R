@@ -137,6 +137,18 @@ read_hisafe <- function(hip           = NULL,
   data$voxels      <- data_tidy(data$voxels)
   data$exp.path    <- ifelse(nrow(EXP.PLAN) > 1, path, NA)
 
+  ## Assign class designators
+  if(length(simu.names) > 1) {
+    class(data) <- c("hop-group", "hop", class(data))
+  } else {
+    class(data) <- c("hop", class(data))
+  }
+
+  ## Check if there are NO results at all
+  if(!any(purrr::map_lgl(DATA.PROFILES, profile_check, hop = data))) {
+    stop("No requested profiles were found for any of the requested simulations", call. = FALSE)
+  }
+
   ## Warn if lengths of all simulations are not equal
   if(length(simu.names) > 1) {
     profiles.to.check <- c("trees", "plot", "climate", "cells", "monthCells", "annualCells", "voxels")
@@ -152,13 +164,6 @@ read_hisafe <- function(hip           = NULL,
                                    collapse = "\n")
       warning(year.length.warning, call. = FALSE)
     }
-  }
-
-  ## Assign class designators
-  if(length(simu.names) > 1) {
-    class(data) <- c("hop-group", "hop", class(data))
-  } else {
-    class(data) <- c("hop", class(data))
   }
 
   data <- hop_filter(hop = data, date.min = date.min, date.max = date.max, dates = dates)
@@ -290,14 +295,15 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
 
   ## Read plot characteristics from .PLD file
   if(read.inputs) {
-    tree.info <- read_tree_info(path, simu.name)
-
+    sim.path <- list.files(simu.path, ".sim$", full.names = TRUE)
     pld.path <- list.files(simu.path, ".pld$", full.names = TRUE)
-    if(length(pld.path) > 1) {
-      stop(paste("there is more than 1 PLD file present in the simulation directory of:", simu.name), call. = FALSE)
-    } else if(length(pld.path) == 0) {
-      stop(paste("there is no PLD file present in the simulation directory of:", simu.name, ". Set read.inputs to FALSE."), call. = FALSE)
-    }
+
+    if(length(sim.path) == 0) stop(paste("there is no SIM file present in the simulation directory of:", simu.name, ". Set read.inputs to FALSE."), call. = FALSE)
+    if(length(pld.path) == 0) stop(paste("there is no PLD file present in the simulation directory of:", simu.name, ". Set read.inputs to FALSE."), call. = FALSE)
+    if(length(sim.path) > 1)  stop(paste("there is >1 SIM file present in the simulation directory of:", simu.name, ". Set read.inputs to FALSE."), call. = FALSE)
+    if(length(pld.path) > 1)  stop(paste("there is >1 PLD file present in the simulation directory of:", simu.name, ". Set read.inputs to FALSE."), call. = FALSE)
+
+    tree.info <- read_tree_info(path, simu.name)
     pld <- read_param_file(pld.path)
     plotWidth          <- as.numeric(pld$PLOT$plotWidth$value)
     plotHeight         <- as.numeric(pld$PLOT$plotHeight$value)
@@ -427,7 +433,9 @@ read_hisafe_output_file <- function(profile, simu.name){
     dat <- dat %>%
       dplyr::filter(Year != 0) %>%
       dplyr::mutate(Date = lubridate::dmy(Date)) # convert Date column into date class
-    if(unique(dat$SimulationName) != simu.name) {
+    if(nrow(dat) == 0) {
+      warning(paste0(basename(profile), " exists but contains no data"), call. = FALSE)
+    } else if(unique(dat$SimulationName) != simu.name) {
       warning(paste0("SimulationName in ", basename(profile), " (", unique(dat$SimulationName), ") does not match the name of the simulation folder (",
                      simu.name, "). Simulation folder name will override SimulationName in export profile."), call. = FALSE)
       dat$SimulationName <- simu.name
