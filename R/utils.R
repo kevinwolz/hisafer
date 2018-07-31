@@ -6,8 +6,8 @@ SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("plot",   "plotDetail",
                                                  "voxels", "voxelsDetail", "voxelsDebug", "voxelsOptim",
                                                  "climate",
                                                  "monthCells", "monthCellsDetail",
-                                                 "annualCells", "annualDBH"),
-                                    freqs       = c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 30, 30, 365, 365),
+                                                 "annualCells", "annualDBH", "annualCellsYield"),
+                                    freqs       = c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 30, 30, 365, 365, 365),
                                     description = c("daily plot-level data (core variables)",
                                                     "daily plot-level data (supplemental variables)",
                                                     "daily data for each tree in the scene (core variables)",
@@ -22,9 +22,10 @@ SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("plot",   "plotDetail",
                                                     "monthly data for each cell in the scene (core variables)",
                                                     "monthly data for each cell in the scene (supplemental variables)",
                                                     "annual data for each cell in the scene",
-                                                    "only data for annual DBH of each tree"))
+                                                    "only data for annual DBH of tree 1",
+                                                    "only data for annual yield of specific cells"))
 
-PRIVATE.PROFILES    <- c("voxelsDebug", "voxelsOptim", "annualDBH")
+PRIVATE.PROFILES    <- c("voxelsDebug", "voxelsOptim", "annualDBH", "annualCellsYield")
 PUBLIC.PROFILES     <- SUPPORTED.PROFILES$profiles[!(SUPPORTED.PROFILES$profiles %in% PRIVATE.PROFILES)]
 DATA.PROFILES       <- c("plot", "trees", "cells", "voxels", "climate", "monthCells", "annualCells")
 FILTERABLE.ELEMENTS <- c(DATA.PROFILES, "plot.info", "tree.info", "exp.plan", "metadata")

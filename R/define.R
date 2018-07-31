@@ -91,6 +91,8 @@ define_hisafe <- function(path,
   available.profiles <- get_available_profiles(template)
   if(profiles[1] == "all") {
     profiles <- available.profiles[!(available.profiles %in% PRIVATE.PROFILES)]
+  } else if (profiles[1] == "all-private"){
+    profiles <- available.profiles
   } else if(!all(profiles %in% available.profiles)) {
     missing.profiles <- profiles[!(profiles %in% available.profiles)]
     stop(paste(c("The following profiles are not available:", missing.profiles), collapse = "\n"), call. = FALSE)
