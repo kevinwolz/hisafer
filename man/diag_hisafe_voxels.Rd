@@ -41,3 +41,4 @@ Other hisafe diagnostic fucntions: \code{\link{diag_hisafe_annualcells}},
   \code{\link{diag_hisafe_monthcells}},
   \code{\link{diag_hisafe_ts}}
 }
+\concept{hisafe diagnostic fucntions}

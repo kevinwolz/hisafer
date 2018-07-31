@@ -40,3 +40,4 @@ Other hisafe helper functions: \code{\link{hip_params}},
   \code{\link{variable_check}},
   \code{\link{which_profiles}}
 }
+\concept{hisafe helper functions}

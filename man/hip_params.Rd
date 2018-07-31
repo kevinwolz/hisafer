@@ -4,7 +4,8 @@
 \alias{hip_params}
 \title{Display supported Hi-sAFe input parameters}
 \usage{
-hip_params(variable = "names", search = FALSE, template = "agroforestry")
+hip_params(variable = "names", search = FALSE,
+  template = "agroforestry")
 }
 \arguments{
 \item{variable}{A character vector of specific Hi-sAFe parameters of which to display details.
@@ -48,3 +49,4 @@ Other hisafe helper functions: \code{\link{copy_hisafe_template}},
   \code{\link{variable_check}},
   \code{\link{which_profiles}}
 }
+\concept{hisafe helper functions}

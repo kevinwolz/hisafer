@@ -5,11 +5,12 @@
 \title{Plot timeseries of Hi-sAFe output variable}
 \usage{
 plot_hisafe_ts(hop, variables, profile, cumulative = FALSE,
-  simu.names = "all", years = "all", tree.ids = "all", date.min = NA,
-  date.max = NA, doy.lim = c(1, 365), color.palette = NA,
-  linetype.palette = NA, aes.cols = list(color = "SimulationName", linetype
-  = "SimulationName"), facet.simu = FALSE, facet.year = FALSE,
-  facet.crop = FALSE, crop.points = FALSE, plot = TRUE)
+  simu.names = "all", years = "all", tree.ids = "all",
+  date.min = NA, date.max = NA, doy.lim = c(1, 365),
+  color.palette = NA, linetype.palette = NA, aes.cols = list(color =
+  "SimulationName", linetype = "SimulationName"), facet.simu = FALSE,
+  facet.year = FALSE, facet.crop = FALSE, crop.points = FALSE,
+  plot = TRUE)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -83,3 +84,4 @@ Other hisafe plot functions: \code{\link{plot_hisafe_annualcells}},
   \code{\link{plot_hisafe_scene}},
   \code{\link{plot_hisafe_voxels}}
 }
+\concept{hisafe plot functions}

@@ -5,8 +5,8 @@
 \title{Shortcut to Hi-sAFe diagnostics}
 \usage{
 diag_hisafe(hop, trees = TRUE, plot = TRUE, climate = TRUE,
-  cells = TRUE, monthCells = TRUE, annualCells = FALSE, voxels = TRUE,
-  ...)
+  cells = TRUE, monthCells = TRUE, annualCells = FALSE,
+  voxels = TRUE, ...)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
@@ -38,3 +38,4 @@ Runs the various Hi-sAFe diagnostic functions from a single call.
 diag_hisafe(myhop)
 }
 }
+\concept{hisafe diagnostic functions}

@@ -23,4 +23,5 @@ Other hisafe param functions: \code{\link{edit_param_element}},
   \code{\link{edit_param_file}},
   \code{\link{read_param_file}}
 }
+\concept{hisafe param functions}
 \keyword{internal}

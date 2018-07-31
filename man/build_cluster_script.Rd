@@ -4,10 +4,11 @@
 \alias{build_cluster_script}
 \title{Builds a cluster shell script}
 \usage{
-build_cluster_script(hip = NULL, simu.names = NULL, script.path = NULL,
-  script.name = NULL, simu.prefix = NULL, model.version = "Capsis4",
-  launch.call = "ScriptGen", default.folder = "", cluster.path,
-  email.type = "END", email = NULL, num.cores = NULL)
+build_cluster_script(hip = NULL, simu.names = NULL,
+  script.path = NULL, script.name = NULL, simu.prefix = NULL,
+  model.version = "Capsis4", launch.call = "ScriptGen",
+  default.folder = "", cluster.path, email.type = "END",
+  email = NULL, num.cores = NULL)
 }
 \arguments{
 \item{hip}{A hip object. If \code{NULL}, then \code{simu.names} and \code{script.path} are required.}
@@ -51,3 +52,4 @@ mysim <- build_cluster_script("mysim",
                               email        = "me@work.com")
 }
 }
+\concept{hisafe cluster functions}

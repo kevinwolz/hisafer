@@ -4,7 +4,8 @@
 \alias{build_hisafe}
 \title{Build a Hi-sAFe simulation or experiment}
 \usage{
-build_hisafe(hip, files = "all", plot.scene = TRUE, summary.files = TRUE)
+build_hisafe(hip, files = "all", plot.scene = TRUE,
+  summary.files = TRUE)
 }
 \arguments{
 \item{hip}{An object of class "hip". To create a hip object see \code{\link{define_hisafe}}.}
@@ -37,3 +38,4 @@ myexp <- define_hisafe(path = "./simulations", latitude = c(30,60))
 build_hisafe(myexp)
 }
 }
+\concept{hisafe build functions}

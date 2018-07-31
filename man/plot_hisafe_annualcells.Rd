@@ -54,3 +54,4 @@ Other hisafe plot functions: \code{\link{plot_hisafe_cells}},
   \code{\link{plot_hisafe_ts}},
   \code{\link{plot_hisafe_voxels}}
 }
+\concept{hisafe plot functions}

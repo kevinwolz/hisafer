@@ -4,8 +4,9 @@
 \alias{diag_hisafe_monthcells}
 \title{Plot monthCells diagnostics of Hi-sAFe output}
 \usage{
-diag_hisafe_monthcells(hop, output.path = NULL, schemes = c("year.simname",
-  "month.simname", "month.year"), trees = TRUE, canopies = TRUE)
+diag_hisafe_monthcells(hop, output.path = NULL,
+  schemes = c("year.simname", "month.simname", "month.year"),
+  trees = TRUE, canopies = TRUE)
 }
 \arguments{
 \item{hop}{An object of class "hop" or "face" containing output data from one or more Hi-sAFe simulations.}
@@ -49,3 +50,4 @@ Other hisafe diagnostic fucntions: \code{\link{diag_hisafe_annualcells}},
   \code{\link{diag_hisafe_ts}},
   \code{\link{diag_hisafe_voxels}}
 }
+\concept{hisafe diagnostic fucntions}

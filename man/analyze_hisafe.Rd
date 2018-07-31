@@ -43,3 +43,4 @@ Other hisafe analysis functions: \code{\link{plot_hisafe_cycle_annual}},
   \code{\link{plot_hisafe_cycle_daily}},
   \code{\link{write_hop}}
 }
+\concept{hisafe analysis functions}

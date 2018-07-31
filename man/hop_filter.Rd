@@ -47,3 +47,4 @@ Other hisafe helper functions: \code{\link{copy_hisafe_template}},
   \code{\link{variable_check}},
   \code{\link{which_profiles}}
 }
+\concept{hisafe helper functions}

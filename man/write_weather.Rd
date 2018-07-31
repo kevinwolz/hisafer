@@ -22,3 +22,4 @@ write_weather(wth, "./my_site_modified.wth")
 \seealso{
 Other hisafe weather functions: \code{\link{read_weather}}
 }
+\concept{hisafe weather functions}

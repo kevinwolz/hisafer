@@ -40,3 +40,4 @@ Other hisafe diagnostic fucntions: \code{\link{diag_hisafe_annualcells}},
   \code{\link{diag_hisafe_ts}},
   \code{\link{diag_hisafe_voxels}}
 }
+\concept{hisafe diagnostic fucntions}

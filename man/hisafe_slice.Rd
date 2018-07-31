@@ -6,15 +6,16 @@
 \usage{
 hisafe_slice(hop, date, simu.names = "all", tree.ids = "all",
   plot.x = "x", Y = "all", rel.dates = NULL, height.dates = date,
-  max.soil.depth = NA, vars = list(crown.alpha = "leafArea", trunk.alpha =
-  "carbonLabile", crop.alpha = "lai", yield.alpha = "eai", voxel.alpha =
-  "totalTreeRootDensity", voxel.border = "cropRootDensity", voxel.L.size =
-  "theta", voxel.C.size = "totalTreeCoarseRootBiomass", voxel.R.size =
-  "mineralNitrogenStock", voxel.L.alpha = "totalTreeWaterUptake", voxel.C.alpha
-  = "fineRootCost", voxel.R.alpha = "totalTreeNitrogenUptake"),
-  tree.rel.vars = "SYT", crop.rel.vars = "SY", voxel.rel.vars = "SY",
-  trees = TRUE, crops = TRUE, voxels = TRUE, climate = TRUE,
-  mem.max = 0, plot.rows = 1)
+  max.soil.depth = NA, vars = list(crown.alpha = "leafArea",
+  trunk.alpha = "carbonLabile", crop.alpha = "lai", yield.alpha = "eai",
+  voxel.alpha = "totalTreeRootDensity", voxel.border = "cropRootDensity",
+  voxel.L.size = "theta", voxel.C.size = "totalTreeCoarseRootBiomass",
+  voxel.R.size = "mineralNitrogenStock", voxel.L.alpha =
+  "totalTreeWaterUptake", voxel.C.alpha = "fineRootCost", voxel.R.alpha =
+  "totalTreeNitrogenUptake"), tree.rel.vars = "SYT",
+  crop.rel.vars = "SY", voxel.rel.vars = "SY", trees = TRUE,
+  crops = TRUE, voxels = TRUE, climate = TRUE, mem.max = 0,
+  plot.rows = 1)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -91,3 +92,4 @@ Plots a "sliced" profile of the simulated Hi-sAFe scene. Requires the ggforce pa
 \seealso{
 Other hisafe visualization functions: \code{\link{hisafe_snapshot}}
 }
+\concept{hisafe visualization functions}

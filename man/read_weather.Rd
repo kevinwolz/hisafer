@@ -23,3 +23,4 @@ wth <- read_weather("./my_site.wth")
 \seealso{
 Other hisafe weather functions: \code{\link{write_weather}}
 }
+\concept{hisafe weather functions}

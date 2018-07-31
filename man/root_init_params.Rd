@@ -40,3 +40,4 @@ Other hisafe definition functions: \code{\link{define_hisafe_file}},
   \code{\link{layer_params}},
   \code{\link{tree_init_params}}
 }
+\concept{hisafe definition functions}

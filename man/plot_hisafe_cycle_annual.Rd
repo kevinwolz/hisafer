@@ -4,8 +4,9 @@
 \alias{plot_hisafe_cycle_annual}
 \title{Plot annual barchart of major cycles}
 \usage{
-plot_hisafe_cycle_annual(hop, cycle, simu.names = "all", tree.ids = "all",
-  year.lim = c(NA, NA), color.palette = NULL, plot = TRUE)
+plot_hisafe_cycle_annual(hop, cycle, simu.names = "all",
+  tree.ids = "all", year.lim = c(NA, NA), color.palette = NULL,
+  plot = TRUE)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
@@ -80,3 +81,4 @@ Other hisafe analysis functions: \code{\link{analyze_hisafe}},
   \code{\link{plot_hisafe_cycle_daily}},
   \code{\link{write_hop}}
 }
+\concept{hisafe analysis functions}

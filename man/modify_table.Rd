@@ -4,8 +4,8 @@
 \alias{modify_table}
 \title{Build tables for table param functions}
 \usage{
-modify_table(args, supported.args, numeric.args, character.args, positive.args,
-  perc.args, table.name, template)
+modify_table(args, supported.args, numeric.args, character.args,
+  positive.args, perc.args, table.name, template)
 }
 \arguments{
 \item{args}{From table param function}
