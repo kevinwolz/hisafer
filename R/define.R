@@ -50,6 +50,8 @@
 #'  \code{\link{layer_params}}, \code{\link{layer_init_params}}, \code{\link{tree_init_params}}, and \code{\link{root_init_params}}.
 #'  These functions create a list of data frames (tibbles).}
 #' }
+#' Passing \code{NA} to any parameter will "deactivate" the parameter by commenting it out in the resulting Hi-sAFe parameter file. This can be useful to deactivate
+#' processes such as tree root pruning or branch pruning, but care must be taken to only deactivate parameters that are not mandatory!
 #' @export
 #' @importFrom dplyr %>%
 #' @family hisafe definition functions
@@ -479,8 +481,10 @@ check_accepted <- function(variable, exp.plan) {
   exp.plan <- dplyr::mutate_all(exp.plan, as.list)
   if(variable %in% INPUT.DEFS$name) {
     to.check <- unlist(exp.plan[[variable]])
+    to.check <- to.check[!is.na(to.check)]
+    if(length(to.check) == 0) return("")
     element.def <- dplyr::filter(INPUT.DEFS, name == variable)
-    accepted.vals <- stringr::str_split(element.def$accepted, ";")[[1]]
+    accepted.vals <- stringr::str_split(element.def$accepted, "; ?|, ?")[[1]]
     accepted.pass <- (all(is.na(accepted.vals)) | all(as.character(to.check) %in% accepted.vals))
     if(accepted.pass) {
       return("")
@@ -503,6 +507,8 @@ check_range <- function(variable, exp.plan) {
   exp.plan <- dplyr::mutate_all(exp.plan, as.list)
   if(variable %in% INPUT.DEFS$name) {
     to.check <- unlist(exp.plan[[variable]])
+    to.check <- to.check[!is.na(to.check)]
+    if(length(to.check) == 0) return("")
     element.def <- dplyr::filter(INPUT.DEFS, name == variable)
     min.val  <- element.def$min
     max.val  <- element.def$max
@@ -533,6 +539,8 @@ check_type <- function(variable, exp.plan) {
   exp.plan <- dplyr::mutate_all(exp.plan, as.list)
   if(variable %in% INPUT.DEFS$name) {
     to.check <- unlist(exp.plan[[variable]])
+    to.check <- to.check[!is.na(to.check)]
+    if(length(to.check) == 0) return("")
     element.def <- dplyr::filter(INPUT.DEFS, name == variable)
     type  <- element.def$type
     if(is.na(type)) return("")

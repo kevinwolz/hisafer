@@ -13,7 +13,7 @@ hisafe_snapshot(hop, output.path = NULL,
   mem.max = 10, device = "png", dpi = 250, vars = list(crown.alpha
   = "leafArea", trunk.alpha = "carbonLabile", crop.alpha = "lai",
   yield.alpha = "eai", voxel.alpha = "totalTreeRootDensity", voxel.border =
-  "cropRootDensity", voxel.L.size = "waterStock", voxel.C.size =
+  "cropRootDensity", voxel.L.size = "theta", voxel.C.size =
   "totalTreeCoarseRootBiomass", voxel.R.size = "mineralNitrogenStock",
   voxel.L.alpha = "totalTreeWaterUptake", voxel.C.alpha = "fineRootCost",
   voxel.R.alpha = "totalTreeNitrogenUptake"), ...)

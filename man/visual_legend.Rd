@@ -7,7 +7,7 @@
 visual_legend(hop, vars = list(crown.alpha = "leafArea", trunk.alpha =
   "carbonLabile", crop.alpha = "lai", yield.alpha = "eai", voxel.alpha =
   "totalTreeRootDensity", voxel.border = "cropRootDensity", voxel.L.size =
-  "waterStock", voxel.C.size = "totalTreeCoarseRootBiomass", voxel.R.size =
+  "theta", voxel.C.size = "totalTreeCoarseRootBiomass", voxel.R.size =
   "mineralNitrogenStock", voxel.L.alpha = "totalTreeWaterUptake",
   voxel.C.alpha = "fineRootCost", voxel.R.alpha =
   "totalTreeNitrogenUptake"), cells.var = "relativeTotalParIncident")

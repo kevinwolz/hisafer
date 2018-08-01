@@ -128,7 +128,8 @@ write_param_file <- function(param.list, path) {
     if(length(param.list[[i]]) > 0) {
       for(j in 1:length(param.list[[i]])) { # elements
         if(!is.data.frame(param.list[[i]][[j]]$value[[1]])){ # is this a normal variable or a table of variables
-          comment.sign <- ifelse(param.list[[i]][[j]]$commented, "#", "")
+          to.comment <- param.list[[i]][[j]]$commented | all(is.na(param.list[[i]][[j]]$value))
+          comment.sign <- ifelse(to.comment, "#", "")
           sim.out <- paste(sim.out, paste0(comment.sign,
                                            names(param.list[[i]])[j],
                                            " = ",
@@ -234,11 +235,11 @@ get_template_params <- function(template) {
 
   sim.file    <- clean_path(list.files(template.path, ".sim$", full.names = TRUE))
   pld.file    <- clean_path(list.files(template.path, ".pld$", full.names = TRUE))
-  tree.file   <- list.files(paste0(template.subpath, "treeSpecies"),       paste0(template.tree, ".tree"), full.names = TRUE)
-  crop.file   <- list.files(paste0(template.subpath, "cropSpecies"),       paste0(template.crop, ".plt"),  full.names = TRUE)
-  tec.file    <- list.files(paste0(template.subpath, "cropInterventions"), paste0(template.crop, ".tec"),  full.names = TRUE)
-  hisafe.file <- clean_path(paste0(template.subpath, "generalParameters/hisafe.par"))
-  stics.file  <- clean_path(paste0(template.subpath, "generalParameters/stics.par"))
+  tree.file   <- list.files(paste0(template.subpath, "/treeSpecies"),       paste0(template.tree, ".tree"), full.names = TRUE)
+  crop.file   <- list.files(paste0(template.subpath, "/cropSpecies"),       paste0(template.crop, ".plt"),  full.names = TRUE)
+  tec.file    <- list.files(paste0(template.subpath, "/cropInterventions"), paste0(template.crop, ".tec"),  full.names = TRUE)
+  hisafe.file <- clean_path(paste0(template.subpath, "/generalParameters/hisafe.par"))
+  stics.file  <- clean_path(paste0(template.subpath, "/generalParameters/stics.par"))
 
   if(length(sim.file) > 1)  stop("there is more than 1 SIM file present in the template directory", call. = FALSE)
   if(length(pld.file) > 1)  stop("there is more than 1 PLD file present in the template directory", call. = FALSE)

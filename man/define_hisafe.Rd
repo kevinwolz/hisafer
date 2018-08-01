@@ -54,7 +54,9 @@ There are three methods for passing parameters to \code{define_hisafe}, one for 
  To define prameters within these tables, use the helper functions
  \code{\link{layer_params}}, \code{\link{layer_init_params}}, \code{\link{tree_init_params}}, and \code{\link{root_init_params}}.
  These functions create a list of data frames (tibbles).}
-}}
+}
+Passing \code{NA} to any parameter will "deactivate" the parameter by commenting it out in the resulting Hi-sAFe parameter file. This can be useful to deactivate
+processes such as tree root pruning or branch pruning, but care must be taken to only deactivate parameters that are not mandatory!}
 }
 \value{
 An object of class "hip". This is a list of 4 elements:

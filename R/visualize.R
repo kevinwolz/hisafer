@@ -458,7 +458,6 @@ hisafe_slice <- function(hop,
     coord_equal(xlim   = c(X.MIN, X.MAX),
                 ylim   = c(Y.MIN, Y.MAX),
                 expand = FALSE) +
-    scale_x_continuous(sec.axis = sec_axis(~ ., labels = NULL)) +
     scale_y_continuous(sec.axis = sec_axis(~ ., labels = NULL)) +
     theme_bw(base_size = 18) +
     theme(plot.margin      = unit(18 * c(1,1,1,1), "points"),
@@ -785,7 +784,7 @@ hisafe_snapshot <- function(hop,
                                         yield.alpha   = "eai",
                                         voxel.alpha   = "totalTreeRootDensity",
                                         voxel.border  = "cropRootDensity",
-                                        voxel.L.size  = "waterStock",
+                                        voxel.L.size  = "theta",
                                         voxel.C.size  = "totalTreeCoarseRootBiomass",
                                         voxel.R.size  = "mineralNitrogenStock",
                                         voxel.L.alpha = "totalTreeWaterUptake",
@@ -799,13 +798,13 @@ hisafe_snapshot <- function(hop,
   ##### MODIFY egg::gtable_frame #####
   ## Once/if egg::gtable_frame is updated in the CRAN version of the package,
   ## this can be removed as well as the @import egg in this function's documentation.
-  b <- body(gtable_frame)
+  b <- body(egg::gtable_frame)
   b[8] <- parse(text = "if (fixed_ar) {
                 ar <- as.numeric(g$heights[tt[1]])/as.numeric(g$widths[ll[1]])
                 height <- width * (ar/length(ll)) - sum(margins) * (ar/length(ll))
                 g$respect <- FALSE
 }")
-  body(gtable_frame) <- b
+  body(egg::gtable_frame) <- b
   assignInNamespace("gtable_frame", gtable_frame, ns = 'egg')
   #####################################################################
 
@@ -966,7 +965,7 @@ visual_legend <- function(hop,
                                       yield.alpha   = "eai",
                                       voxel.alpha   = "totalTreeRootDensity",
                                       voxel.border  = "cropRootDensity",
-                                      voxel.L.size  = "waterStock",
+                                      voxel.L.size  = "theta",
                                       voxel.C.size  = "totalTreeCoarseRootBiomass",
                                       voxel.R.size  = "mineralNitrogenStock",
                                       voxel.L.alpha = "totalTreeWaterUptake",
