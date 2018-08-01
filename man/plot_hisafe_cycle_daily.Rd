@@ -6,12 +6,12 @@
 \usage{
 plot_hisafe_cycle_daily(hop, cycle, years, simu.names = "all",
   tree.ids = "all", doy.lim = c(1, 366), color.palette = NULL,
-  plot = TRUE)
+  pheno.lines = TRUE, trim = TRUE, plot = TRUE)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
 
-\item{cycle}{One of "carbon", "nitrogen", "water", or "light".}
+\item{cycle}{One of "carbon", "nitrogen", "water", "light", or "carbon-increment.}
 
 \item{years}{A numeric vector of the calendar years to include.
 If more than one year is provided, years are used as facets, and only a single value can be supplied to \code{simu.names}.
@@ -28,6 +28,10 @@ This only applies when \code{cycle} is "carbon".}
 \item{color.palette}{A character stirng of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
 If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette.}
 
+\item{pheno.lines}{Logical indicating whether or not vertical dashed lines should be plotted on dates of phenoloigical stage changes}
+
+\item{trim}{Logical indicating whether or not to trim white space before and after the tree growth season when \code{cycle} is "carbon-increment"}
+
 \item{plot}{If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.}
 }
 \value{
@@ -35,7 +39,7 @@ If \code{plot = TRUE}, returns a ggplot object. If \code{plot = FALSE}, returns 
 If \code{hop} contains more than one simulation, the plot will be faceted by SimulationName.
 }
 \description{
-Plots a daily timeseries of carbon pools, water uptake, nitrogen uptake, or light capture
+Plots a daily timeseries of tree carbon pools, water uptake, nitrogen uptake, light capture, or tree carbon incrememnt.
 }
 \examples{
 \dontrun{

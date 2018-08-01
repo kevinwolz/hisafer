@@ -2,7 +2,7 @@
 % Please edit documentation in R/cycles.R
 \name{get_carbon_pools}
 \alias{get_carbon_pools}
-\title{Get carbon pools from a hop object}
+\title{Get tree carbon pools from a hop object}
 \usage{
 get_carbon_pools(hop)
 }
@@ -13,7 +13,7 @@ get_carbon_pools(hop)
 A tibble with extracted and calculated carbon pools.
 }
 \description{
-Get carbon pools from a hop object.
+Get tree carbon pools from a hop object.
 Used within hisafe cycle functions.
 }
 \keyword{internal}
