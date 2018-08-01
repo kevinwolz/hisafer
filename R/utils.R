@@ -37,11 +37,11 @@ OUTPUT.DEFS <- dplyr::arrange(readr::read_delim(system.file("extdata", "output_d
 
 EXTDATA <- list.files(system.file("extdata", package = "hisafer"))
 INCLUDED.TEMPLATES <- EXTDATA[!(grepl("\\.", EXTDATA) | EXTDATA == "template_common")]
-INCLUDED.TEMPLATE.SUBPATH <- system.file("extdata", "template_common",  package = "hisafer")
+INCLUDED.TEMPLATE.SUBPATH <- paste0(system.file("extdata", "template_common",  package = "hisafer"), "/")
 
 remove_whitespace <- function(x) gsub("^\\s+|\\s+$", "", x)
-clean_path        <- function(x) gsub("//", "/", paste0(path, "/"), fixed = TRUE)
-get_absolute_path <- function(x) clean_path(base::normalizePath(x))
+clean_path        <- function(x) gsub("//", "/", x, fixed = TRUE)
+get_absolute_path <- function(x) clean_path(base::normalizePath(x, mustWork = TRUE))
 
 get_template_path <- function(template) {
   path <- ifelse(template %in% INCLUDED.TEMPLATES,
