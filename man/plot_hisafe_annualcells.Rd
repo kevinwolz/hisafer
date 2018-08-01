@@ -48,7 +48,8 @@ ggsave_fitmax("yield.png", tile.plot)
 }
 }
 \seealso{
-Other hisafe plot functions: \code{\link{plot_hisafe_cells}},
+Other hisafe plot functions: \code{\link{plot_hisafe_bg}},
+  \code{\link{plot_hisafe_cells}},
   \code{\link{plot_hisafe_monthcells}},
   \code{\link{plot_hisafe_scene}},
   \code{\link{plot_hisafe_ts}},

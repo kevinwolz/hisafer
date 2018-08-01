@@ -57,6 +57,7 @@ ggsave_fitmax("tiled_relativeDirectParIncident.png", tile.plot)
 }
 \seealso{
 Other hisafe plot functions: \code{\link{plot_hisafe_annualcells}},
+  \code{\link{plot_hisafe_bg}},
   \code{\link{plot_hisafe_monthcells}},
   \code{\link{plot_hisafe_scene}},
   \code{\link{plot_hisafe_ts}},

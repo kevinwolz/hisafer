@@ -847,6 +847,79 @@ plot_hisafe_voxels <- function(hop,
   if(plot) return(plot.obj) else return(plot.data)
 }
 
+#' Plot belowground tree root depth & water table
+#' @description Plots a daily timeseries of tree maximum rooting depth, water table depth, and root senescence by anoxia.
+#' @return If \code{plot = TRUE}, returns a ggplot object, otherwise the data that would create the plot is returned.
+#' @param hop An object of class hop.
+#' @param simu.names A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.
+#' @param years A numeric vector of the years within \code{hop} to include. Use "all" to include all available values.
+#' @param tree.ids A numeric vector indicating a subset of tree ids to plot. Only one tree can be plotted at a time.
+#' @param sen A character vector indicated whether or not to plot the fine and coarse root senesence. Any value other than than "fine" and/or "coarse" will prevent them from being plotted.
+#' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.
+#' @export
+#' @importFrom dplyr %>%
+#' @import ggplot2
+#' @family hisafe plot functions
+#' @examples
+#' \dontrun{
+#' plot_hisafe_bg(hop)
+#' }
+plot_hisafe_bg <- function(hop,
+                           simu.names = "all",
+                           years      = "all",
+                           tree.ids   = 1,
+                           sen        = c("fine", "coarse"),
+                           plot       = TRUE) {
+
+  if(!requireNamespace("cowplot", quietly = TRUE)) stop("The package 'cowplot' is required by plot_hisafe_bg().
+                                                          Please install and load it", call. = FALSE)
+
+  is_hop(hop, error = TRUE)
+  profile_check(hop, "trees", error = TRUE)
+  variable_check(hop, "trees", c("rootingDepth", "carbonFineRootSenAnoxia", "carbonCoarseRootSenAnoxia"), error = TRUE)
+
+  if(years[1] == "all") years <- unique(hop$trees$Year)
+  if(!all(is.numeric(years)))                         stop("years argument must be 'all' or a numeric vector",       call. = FALSE)
+  if(!(is.numeric(tree.ids) & length(tree.ids) == 1)) stop("tree.ids argument must be a numeric vector of length 1", call. = FALSE)
+  is_TF(plot)
+
+  wt.profile <- ifelse(profile_check(hop, "plot"), "plot", "climate")
+  profile_check(hop, wt.profile, error = TRUE)
+  variable_check(hop, wt.profile, "waterTableDepth", error = TRUE)
+
+  hop <- hop_filter(hop, simu.names = simu.names, tree.ids = tree.ids)
+
+  plot.data <- join_profiles(hop, profiles = c("trees", wt.profile)) %>%
+    dplyr::filter(Year %in% years) %>%
+    dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay,
+                  rootingDepth, carbonFineRootSenAnoxia, carbonCoarseRootSenAnoxia, waterTableDepth)
+
+  base.plot <- ggplot(plot.data, aes(x = Date)) +
+    facet_wrap(~SimulationName, nrow = 1) +
+    theme_hisafe_ts()
+
+  root.wt.plot <- base.plot +
+    labs(y = "Root & water table depth (m)") +
+    geom_line(aes(y = -rootingDepth), size = 2) +
+    geom_line(aes(y = waterTableDepth), color = "blue")
+
+  fr.sen.plot <- base.plot +
+    labs(y = "Fine root sen. by anoxia (kg C)") +
+    geom_line(aes(y = carbonFineRootSenAnoxia))
+
+  cr.sen.plot <- base.plot +
+    labs(y = "Coarse root sen. by anoxia (kg C)") +
+    geom_line(aes(y = carbonCoarseRootSenAnoxia))
+
+  plot.list <- list(root.wt.plot)
+  if("fine"   %in% sen) plot.list <- c(plot.list, list(fr.sen.plot))
+  if("coarse" %in% sen) plot.list <- c(plot.list, list(cr.sen.plot))
+
+  plot.out <- cowplot::plot_grid(plotlist = plot.list, ncol = 1)
+
+  if(plot) return(plot.out) else return(plot.data)
+}
+
 #' Save ggplot to correctly-shaped image file
 #' @description When a ggplot has a fixed panel aspect ratio, it can be a pain to find the right dimensions for the whole plot
 #' (including axes, margins, legends, etc) when saving it to a fixed-size graphical device. ggsave_fitmax takes a ggplot

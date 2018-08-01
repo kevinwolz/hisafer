@@ -79,6 +79,7 @@ ggplot2::ggsave("carbonCoarseRoots.png", daily.plot)
 }
 \seealso{
 Other hisafe plot functions: \code{\link{plot_hisafe_annualcells}},
+  \code{\link{plot_hisafe_bg}},
   \code{\link{plot_hisafe_cells}},
   \code{\link{plot_hisafe_monthcells}},
   \code{\link{plot_hisafe_scene}},
