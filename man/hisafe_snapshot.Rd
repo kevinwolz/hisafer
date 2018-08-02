@@ -74,7 +74,7 @@ Invisibly returns the final plot object that was created.
 }
 \description{
 Creates daily plots combining \code{\link{hisafe_slice}} & \code{\link{plot_hisafe_cells}} and writes them to an output directory.
-Requires the gtable package.
+Requires the egg and gtable packages.
 This function creates the raw materials (daily images) for animations/videos of Hi-sAFe simulations.
 }
 \examples{

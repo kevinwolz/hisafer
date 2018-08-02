@@ -341,8 +341,8 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
       c(rep(list(NA), length(session.names) - length(.))) %>% # if a simulation was not completed, simulation.start & simulation.seconds will not be in the file
       as.data.frame(col.names = session.names, stringsAsFactors = FALSE) %>%
       dplyr::as_tibble() %>%
-      mutate(simulation.start   = lubridate::ymd_hms(simulation.start)) %>%
-      mutate(simulation.seconds = as.numeric(simulation.seconds))
+      dplyr::mutate(simulation.start   = lubridate::ymd_hms(simulation.start)) %>%
+      dplyr::mutate(simulation.seconds = as.numeric(simulation.seconds))
     simu.metadata <- dplyr::bind_cols(simu.metadata, session.info)
   }
 

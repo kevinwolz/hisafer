@@ -718,7 +718,7 @@ hisafe_slice <- function(hop,
 
 #' Create daily plots combining hisafe_slice() & plot_hisafe_cells()
 #' @description Creates daily plots combining \code{\link{hisafe_slice}} & \code{\link{plot_hisafe_cells}} and writes them to an output directory.
-#' Requires the gtable package.
+#' Requires the egg and gtable packages.
 #' This function creates the raw materials (daily images) for animations/videos of Hi-sAFe simulations.
 #' @return Invisibly returns the final plot object that was created.
 #' @param hop An object of class hop.
@@ -793,20 +793,6 @@ hisafe_snapshot <- function(hop,
 
   if(!requireNamespace(c("gtable", "egg"), quietly = TRUE)) stop("The packages 'gtable' and 'egg' is required for hisafe_snapshot().
                                                                  Please install and load them", call. = FALSE)
-
-  #####################################################################
-  ##### MODIFY egg::gtable_frame #####
-  ## Once/if egg::gtable_frame is updated in the CRAN version of the package,
-  ## this can be removed as well as the @import egg in this function's documentation.
-  b <- body(egg::gtable_frame)
-  b[8] <- parse(text = "if (fixed_ar) {
-                ar <- as.numeric(g$heights[tt[1]])/as.numeric(g$widths[ll[1]])
-                height <- width * (ar/length(ll)) - sum(margins) * (ar/length(ll))
-                g$respect <- FALSE
-}")
-  body(egg::gtable_frame) <- b
-  assignInNamespace("gtable_frame", gtable_frame, ns = 'egg')
-  #####################################################################
 
   is_hop(hop, error = TRUE)
   profile_check(hop, "trees", error = TRUE)
