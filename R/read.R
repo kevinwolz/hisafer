@@ -216,7 +216,8 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
   } else {
     simu.summary.file <- paste0(simu.path, "/support/", simu.name, "_simulation_summary.csv")
     if(file.exists(simu.summary.file)){
-      EXP.PLAN <- readr::read_csv(paste0(simu.path, "/support/", simu.name, "_simulation_summary.csv"), col_types = readr::cols())
+      EXP.PLAN <- readr::read_csv(paste0(simu.path, "/support/", simu.name, "_simulation_summary.csv"), col_types = readr::cols()) %>%
+        dplyr::mutate_if(function(x) all(is.na(x)), as.numeric)
     } else {
       warning("No simulation inputs summary (experimental plan) to read from simulation directory. This simulation may not have been created with hisafer.", call. = FALSE)
       EXP.PLAN <- dplyr::tibble(SimulationName = simu.name)
@@ -469,10 +470,10 @@ read_tree_info <- function(path, simu.name) {
       dplyr::select(SimulationName, idTree, dplyr::everything())
     if(!sim$TREE_PRUNING$treePruningYears$commented) {
       tree.info <- tree.info %>%
-        dplyr::mutate(treePruningYears     = sim$TREE_PRUNING$treePruningYears$value) %>%
-        dplyr::mutate(treePruningProp      = sim$TREE_PRUNING$treePruningProp$value) %>%
-        dplyr::mutate(treePruningMaxHeight = sim$TREE_PRUNING$treePruningMaxHeight$value) %>%
-        dplyr::mutate(treePruningDays      = sim$TREE_PRUNING$treePruningDays$value)
+        dplyr::mutate(treePruningYears     = list(sim$TREE_PRUNING$treePruningYears$value)) %>%
+        dplyr::mutate(treePruningProp      = list(sim$TREE_PRUNING$treePruningProp$value)) %>%
+        dplyr::mutate(treePruningMaxHeight = list(sim$TREE_PRUNING$treePruningMaxHeight$value)) %>%
+        dplyr::mutate(treePruningDays      = list(sim$TREE_PRUNING$treePruningDays$value))
     } else {
       tree.info <- tree.info %>%
         dplyr::mutate(treePruningYears     = list(NA_real_)) %>%
@@ -482,10 +483,10 @@ read_tree_info <- function(path, simu.name) {
     }
     if(!sim$TREE_ROOT_PRUNING$treeRootPruningYears$commented) {
       tree.info <- tree.info %>%
-        dplyr::mutate(treeRootPruningYears    = sim$TREE_ROOT_PRUNING$treeRootPruningYears$value) %>%
-        dplyr::mutate(treeRootPruningDays     = sim$TREE_ROOT_PRUNING$treeRootPruningDays$value) %>%
-        dplyr::mutate(treeRootPruningDistance = sim$TREE_ROOT_PRUNING$treeRootPruningDistance$value) %>%
-        dplyr::mutate(treeRootPruningDepth    = sim$TREE_ROOT_PRUNING$treeRootPruningDepth$value)
+        dplyr::mutate(treeRootPruningYears    = list(sim$TREE_ROOT_PRUNING$treeRootPruningYears$value)) %>%
+        dplyr::mutate(treeRootPruningDays     = list(sim$TREE_ROOT_PRUNING$treeRootPruningDays$value)) %>%
+        dplyr::mutate(treeRootPruningDistance = list(sim$TREE_ROOT_PRUNING$treeRootPruningDistance$value)) %>%
+        dplyr::mutate(treeRootPruningDepth    = list(sim$TREE_ROOT_PRUNING$treeRootPruningDepth$value))
     } else {
       tree.info <- tree.info %>%
         dplyr::mutate(treeRootPruningYears    = list(NA_real_)) %>%
