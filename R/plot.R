@@ -523,6 +523,8 @@ plot_hisafe_annualcells <- function(hop,
 #' In the plot, \code{variable} will be scaled to be between the minimum and maximum values of \code{variable} across these dates.
 #' @param simu.names A character string containing the SimulationNames to include. Use "all" to include all available values.
 #' @param plot.x Either "x" or "y", indicating which axis of the simulation scene should be plotted on the x-axis of the plot.
+#' @param N.arrow A character string indicating the color of the north arrow. Sting must be a valid color name passed to ggplot2.
+#' Use \code{FALSE} to not plot the north arrow.
 #' @param trees Logical indicating if a point should be plotted at the location of each tree.
 #' @param canopies Logical indicating if an elipsoid should be plotted representing the size of each tree canopy.
 #' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.
@@ -552,6 +554,7 @@ plot_hisafe_cells <- function(hop,
                               rel.dates  = NULL,
                               simu.names = "all",
                               plot.x     = "x",
+                              N.arrow    = "#000000",
                               trees      = TRUE,
                               canopies   = TRUE,
                               plot       = TRUE,
@@ -564,6 +567,7 @@ plot_hisafe_cells <- function(hop,
 
   if(length(variable) > 1)       stop("variable argument must be a character vector of length 1", call. = FALSE)
   if(!(plot.x %in% c("x", "y"))) stop("plot.x must be one of 'x' or 'y'",                         call. = FALSE)
+  if(!((is.character(N.arrow) | isFALSE(N.arrow)) & length(N.arrow) == 1)) stop("N.arrow argument must be a character vector of length 1", call. = FALSE)
   is_TF(trees)
   is_TF(canopies)
   is_TF(plot)
@@ -642,6 +646,17 @@ plot_hisafe_cells <- function(hop,
     facet_cells <- geom_blank()
   }
 
+  if(is.character(N.arrow) & nrow(hop$plot.info) > 0) {
+    north <- geom_spoke(data = hop$plot.info, aes(x      = cellWidth / 2,
+                                                  y      = cellWidth / 2,
+                                                  angle  = -(northOrientation - 90) * pi / 180,
+                                                  radius = -cellWidth / 2),
+                        color = N.arrow,
+                        arrow = arrow(ends = "first", length = unit(0.2, "cm")))
+  } else {
+    north <- geom_blank()
+  }
+
   if(for.anim) {
     plot.labs <- labs(x = x.lab,
                       y = y.lab)
@@ -681,6 +696,7 @@ plot_hisafe_cells <- function(hop,
                          ymin = "y",
                          ymax = "ymax",
                          fill = variable)) +
+    north +
     color.palette +
     scale_linetype_identity() +
     plot.guide +

@@ -5,8 +5,9 @@
 \title{Tile plot of Hi-sAFe cells output variable}
 \usage{
 plot_hisafe_cells(hop, variable, dates, start.date = NULL,
-  rel.dates = NULL, simu.names = "all", plot.x = "x", trees = TRUE,
-  canopies = TRUE, plot = TRUE, mem.max = 0, for.anim = FALSE)
+  rel.dates = NULL, simu.names = "all", plot.x = "x",
+  N.arrow = "#000000", trees = TRUE, canopies = TRUE, plot = TRUE,
+  mem.max = 0, for.anim = FALSE)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -23,6 +24,9 @@ In the plot, \code{variable} will be scaled to be between the minimum and maximu
 \item{simu.names}{A character string containing the SimulationNames to include. Use "all" to include all available values.}
 
 \item{plot.x}{Either "x" or "y", indicating which axis of the simulation scene should be plotted on the x-axis of the plot.}
+
+\item{N.arrow}{A character string indicating the color of the north arrow. Sting must be a valid color name passed to ggplot2.
+Use \code{FALSE} to not plot the north arrow.}
 
 \item{trees}{Logical indicating if a point should be plotted at the location of each tree.}
 
