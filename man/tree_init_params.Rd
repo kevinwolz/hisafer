@@ -15,7 +15,6 @@ See \code{\link{define_hisafe}} for more details.}
  \item{"species"}{}
  \item{"height"}{}
  \item{"crownBaseHeight"}{}
- \item{"leafToFineRootsRatio"}{}
  \item{"crownRadius"}{}
  \item{"treeX"}{}
  \item{"treeY"}{}

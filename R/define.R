@@ -390,7 +390,7 @@ check_input_values <- function(hip, force) {
   dm.error <- ifelse(any(get_used("artificialDrainage") == 1 & get_used("macroporosity") == 0),
                      "-- macroporosity mucst be activated (set to 1) if artificialDrainage is activated (set to 1).", "")
   cap.error <- ifelse(any(get_used("capillary") == 1 & get_used("macroporosity") == 0),
-                     "-- macroporosity mucst be activated (set to 1) if capillary is activated (set to 1).", "")
+                      "-- macroporosity mucst be activated (set to 1) if capillary is activated (set to 1).", "")
 
   ## Timeseries Length Errors
   treePlanting.length.error <- ifelse(all(purrr::map_lgl(list(get_length("treePlantingYears"),
@@ -619,7 +619,6 @@ root_init_params <- function(template, reps = 1, ...) {
 #'  \item{"species"}{}
 #'  \item{"height"}{}
 #'  \item{"crownBaseHeight"}{}
-#'  \item{"leafToFineRootsRatio"}{}
 #'  \item{"crownRadius"}{}
 #'  \item{"treeX"}{}
 #'  \item{"treeY"}{}
@@ -631,7 +630,7 @@ root_init_params <- function(template, reps = 1, ...) {
 #' tree.init <- tree_init_params(template = "agroforestry", height = 2)
 #' }
 tree_init_params <- function(template, ...) {
-  supported <- c("species", "height", "crownBaseHeight", "leafToFineRootsRatio", "crownRadius", "treeX", "treeY")
+  supported <- c("species", "height", "crownBaseHeight", "crownRadius", "treeX", "treeY")
   out <- modify_table(args           = list(...),
                       supported.args = supported,
                       character.args = "species",
@@ -747,7 +746,7 @@ modify_table <- function(args, supported.args, numeric.args, character.args, pos
     if(i %in% names(args)) if(!is.numeric(args[[i]]))               errors <- c(errors, paste("--", i, "must be numeric"))
   }
   for(i in character.args) {
-    if(i %in% names(args)) if(!is.numeric(args[[i]]))               errors <- c(errors, paste("--", i, "must be character"))
+    if(i %in% names(args)) if(!is.character(args[[i]]))             errors <- c(errors, paste("--", i, "must be character"))
   }
   for(i in positive.args) {
     if(i %in% names(args)) if(any(args[[i]] < 0))                   errors <- c(errors, paste("--", i, "must be greater than or equal to 0"))
@@ -765,6 +764,12 @@ modify_table <- function(args, supported.args, numeric.args, character.args, pos
   PARAM_DEFAULTS  <- get_param_vals(TEMPLATE_PARAMS, "value")
 
   out <- PARAM_DEFAULTS[[table.name]][[1]]
+
+  if(length(args) > 0) {
+    while(nrow(out) < max(purrr::map_dbl(args, length))) {
+      out <- dplyr::bind_rows(out, out[nrow(out),])
+    }
+  }
 
   for(arg in names(args)) {
     if(length(out[[arg]]) %% length(args[[arg]]) != 0) stop(paste("Length of provided", arg, "values does not go evenly into template table"), call. = FALSE)
