@@ -89,6 +89,7 @@ hisafe_slice <- function(hop,
   if(!(Y[1] == "all" | all(is.numeric(Y)))) stop("Y argument must be 'all' or a numeric vector", call. = FALSE)
 
   date <- lubridate::ymd(date)
+  if(length(date) != 1) stop("date argument must have length 1", call. = FALSE)
 
   demanded.vars <- as.character(unlist(vars))
   cell.vars  <- c(demanded.vars[grep("crop|yield",  names(vars))],
@@ -228,25 +229,25 @@ hisafe_slice <- function(hop,
       dplyr::mutate(tree.pruning.prop       = 0) %>%
       dplyr::mutate(tree.pruning.max.height = 0)
     for(i in 1:nrow(hop$tree.info)) {
-      if(!is.na(hop$tree.info$treePruningYears[[i]][1])) {
-        hop$tree.info$tree.pruning.dates[[i]] <- lubridate::ymd(paste0(hop$tree.info$treePruningYears[[i]] - 1 +
+      if(!is.na(unlist(hop$tree.info$treePruningYears[[i]])[1])) {
+        hop$tree.info$tree.pruning.dates[[i]] <- lubridate::ymd(paste0(unlist(hop$tree.info$treePruningYears[[i]]) - 1 +
                                                                          hop$tree.info$simulationYearStart[i], "-01-01")) + hop$tree.info$treePruningDays[[i]] - 1
       }
-      if(!is.na(hop$tree.info$treeRootPruningYears[[i]][1])) {
-        hop$tree.info$root.pruning.dates[[i]] <- lubridate::ymd(paste0(hop$tree.info$treeRootPruningYears[[i]] - 1 +
-                                                                         hop$tree.info$simulationYearStart[i], "-01-01")) + hop$tree.info$treeRootPruningDays[[i]] - 1
+      if(!is.na(unlist(hop$tree.info$treeRootPruningYears[[i]])[1])) {
+        hop$tree.info$root.pruning.dates[[i]] <- lubridate::ymd(paste0(unlist(hop$tree.info$treeRootPruningYears[[i]]) - 1 +
+                                                                         hop$tree.info$simulationYearStart[i], "-01-01")) + unlist(hop$tree.info$treeRootPruningDays[[i]]) - 1
       }
       hop$tree.info$tree.pruning[i]         <- as.numeric(date %in% hop$tree.info$tree.pruning.dates[[i]])
       if(hop$tree.info$tree.pruning[i] == 1) {
         prune.id <- which(hop$tree.info$tree.pruning.dates[[i]] == date)
-        hop$tree.info$tree.pruning.max.height[i] <- hop$tree.info$treePruningMaxHeight[[i]][prune.id]
-        hop$tree.info$tree.pruning.prop[i]       <- hop$tree.info$treePruningProp[[i]][prune.id]
+        hop$tree.info$tree.pruning.max.height[i] <- unlist(hop$tree.info$treePruningMaxHeight[[i]])[prune.id]
+        hop$tree.info$tree.pruning.prop[i]       <- unlist(hop$tree.info$treePruningProp[[i]])[prune.id]
       }
       hop$tree.info$root.pruning[i] <- as.numeric(date %in% hop$tree.info$root.pruning.dates[[i]])
       if(hop$tree.info$root.pruning[i] == 1) {
         prune.id <- which(hop$tree.info$root.pruning.dates[[i]] == date)
-        hop$tree.info$root.pruning.depth[i]    <- hop$tree.info$treeRootPruningDepth[[i]][prune.id]
-        hop$tree.info$root.pruning.distance[i] <- hop$tree.info$treeRootPruningDistance[[i]][prune.id]
+        hop$tree.info$root.pruning.depth[i]    <- unlist(hop$tree.info$treeRootPruningDepth[[i]])[prune.id]
+        hop$tree.info$root.pruning.distance[i] <- unlist(hop$tree.info$treeRootPruningDistance[[i]])[prune.id]
       } else {
 
       }

@@ -419,6 +419,11 @@ check_input_values <- function(hip, force) {
                                                         y = get_length("treeRootPruningYears"))), "",
                                      "-- treeRootPruningYears, treeRootPruningDays, treeRootPruningDistance, and treeRootPruningDepth must have the same length")
 
+  ## Root pruning depth less than max soil depth
+  rp.depth.check <- purrr::map2_lgl(get_used("treeRootPruningDepth"),
+                                    purrr::map(get_init_vals("layers", "thick"), function(x) max(cumsum(x))),
+                                    less_than)
+  if(!all(rp.depth.check)) warning("-- treeRootPruningDepth is greater than the maximum soil depth", call. = FALSE, immediate. = TRUE)
 
   ## Crop Length & Simulation Length Errors
   goes_evenly  <- function(x, y) x > y | y %% x == 0
