@@ -96,7 +96,7 @@ hisafe_slice <- function(hop,
                   "phenologicStage", "nitrogenFertilisationMineral", "nitrogenFertilisationOrganic", "height", "biomass", "grainBiomass")
   voxel.vars <- demanded.vars[grep("voxel", names(vars))]
   tree.vars  <- c(demanded.vars[!(demanded.vars %in% c(cell.vars, voxel.vars))],
-                  "crownRadiusInterRow", "crownRadiusTreeLine", "crownBaseHeight", "dbh", "height")
+                  "crownRadiusInterRow", "crownRadiusTreeLine", "crownBaseHeight", "dbh", "height", "age")
   cell.vars  <- cell.vars[!is.na(cell.vars)]
   voxel.vars <- voxel.vars[!is.na(voxel.vars)]
   tree.vars  <- tree.vars[!is.na(tree.vars)]
@@ -146,6 +146,15 @@ hisafe_slice <- function(hop,
     if(Y[1] == "all") Yv <- voxel.Ys$voxels.Y else Yv <- unique(dplyr::filter(voxel.Ys, voxels.Y.mod %in% Y)$voxels.Y)
     if(!all(Yv %in% voxel.Ys$voxels.Y)) stop("one or more values of Y are not present in hop", call. = FALSE)
   }
+
+  ## VERY FRAGILE approach to dealing with simulations that are extended from .PRJ files.
+  ## The tree intervention input year is a value that references the initial starting year of the base simulation that created the PRJ
+  ## However, simulationStartYear is the starting year of the simulation that extends from the .PRJ.
+  ## Here, trees$age is used to adjust the calculation of the date of the tree interventions.
+  ## However, this depends on hop including the all dates from the simulation (i.e. not being filtered before being supplied to hisafe_slice()).
+  tree.age.at.start <- 0
+  age.check <- round(min(hop$trees$age/365))
+  if(age.check > 0) tree.age.at.start <- age.check + 1
 
   hop.full <- hop_filter(hop            = hop,
                          simu.names     = simu.names,
@@ -214,7 +223,7 @@ hisafe_slice <- function(hop,
   crop.grouping.symbols  <- rlang::parse_quosures(paste(crop.grouping.strings,  collapse = ";"))
   voxel.grouping.symbols <- rlang::parse_quosures(paste(voxel.grouping.strings, collapse = ";"))
 
-  if(trees) {
+  if(trees | voxels) { # OR voxels because the tree root pruning needs to be calculated when voxels are being plotted.
     hop$tree.info <- hop$tree.info %>%
       dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
       dplyr::mutate(special.case = x == 0 & y == 0) %>% # special case when x == 0 & y == 0 : tree is at scene center
@@ -228,13 +237,14 @@ hisafe_slice <- function(hop,
       dplyr::mutate(root.pruning.depth      = 0) %>%
       dplyr::mutate(tree.pruning.prop       = 0) %>%
       dplyr::mutate(tree.pruning.max.height = 0)
+
     for(i in 1:nrow(hop$tree.info)) {
       if(!is.na(unlist(hop$tree.info$treePruningYears[[i]])[1])) {
-        hop$tree.info$tree.pruning.dates[[i]] <- lubridate::ymd(paste0(unlist(hop$tree.info$treePruningYears[[i]]) - 1 +
+        hop$tree.info$tree.pruning.dates[[i]] <- lubridate::ymd(paste0(unlist(hop$tree.info$treePruningYears[[i]]) - 1 - tree.age.at.start +
                                                                          hop$tree.info$simulationYearStart[i], "-01-01")) + hop$tree.info$treePruningDays[[i]] - 1
       }
       if(!is.na(unlist(hop$tree.info$treeRootPruningYears[[i]])[1])) {
-        hop$tree.info$root.pruning.dates[[i]] <- lubridate::ymd(paste0(unlist(hop$tree.info$treeRootPruningYears[[i]]) - 1 +
+        hop$tree.info$root.pruning.dates[[i]] <- lubridate::ymd(paste0(unlist(hop$tree.info$treeRootPruningYears[[i]]) - 1 - tree.age.at.start +
                                                                          hop$tree.info$simulationYearStart[i], "-01-01")) + unlist(hop$tree.info$treeRootPruningDays[[i]]) - 1
       }
       hop$tree.info$tree.pruning[i]         <- as.numeric(date %in% hop$tree.info$tree.pruning.dates[[i]])
@@ -487,6 +497,7 @@ hisafe_slice <- function(hop,
 
   if(crops) {
     plot.obj <- plot.obj +
+      ## CROP
       geom_rect(data = cell.data,
                 fill = "green",
                 size = 1,
@@ -497,6 +508,7 @@ hisafe_slice <- function(hop,
                     xmax  = x + cellWidth,
                     ymin  = 0,
                     ymax  = cell.height)) +
+      ## YIELD
       geom_rect(data  = cell.data,
                 fill  = "black",
                 color = "black",
@@ -600,24 +612,7 @@ hisafe_slice <- function(hop,
                        x    = tree.x - crown.radius,
                        y    = tree.pruning.height,
                        xend = tree.x + crown.radius,
-                       yend = tree.pruning.height)) +
-      ## ROOT PRUNING
-      geom_segment(data  = tree.data,
-                   color = "red",
-                   na.rm = TRUE,
-                   aes(size = 2 * root.pruning,
-                       x    = tree.x + root.pruning.distance,
-                       y    = max(hop$plot.info$cellWidth) / 2,
-                       xend = tree.x + root.pruning.distance,
-                       yend = -root.pruning.depth)) +
-      geom_segment(data  = tree.data,
-                   color = "red",
-                   na.rm = TRUE,
-                   aes(size = 2 * root.pruning,
-                       x    = tree.x - root.pruning.distance,
-                       y    = max(hop$plot.info$cellWidth) / 2,
-                       xend = tree.x - root.pruning.distance,
-                       yend = -root.pruning.depth))
+                       yend = tree.pruning.height))
   }
 
   if(voxels) {
@@ -685,6 +680,27 @@ hisafe_slice <- function(hop,
                                size  = voxel.R.border,
                                r     = voxel.R.size,
                                alpha = voxel.R.alpha))
+  }
+
+  if(trees | voxels) {
+    plot.obj <- plot.obj +
+      ## ROOT PRUNING
+      geom_segment(data  = tree.data,
+                   color = "red",
+                   na.rm = TRUE,
+                   aes(size = 2 * root.pruning,
+                       x    = tree.x + root.pruning.distance,
+                       y    = max(hop$plot.info$cellWidth) / 2,
+                       xend = tree.x + root.pruning.distance,
+                       yend = -root.pruning.depth)) +
+      geom_segment(data  = tree.data,
+                   color = "red",
+                   na.rm = TRUE,
+                   aes(size = 2 * root.pruning,
+                       x    = tree.x - root.pruning.distance,
+                       y    = max(hop$plot.info$cellWidth) / 2,
+                       xend = tree.x - root.pruning.distance,
+                       yend = -root.pruning.depth))
   }
 
   if(climate & voxels) {
@@ -1505,69 +1521,3 @@ extract_complete_dates <- function(hop, profile, dates) {
   dates <- dates[dates %in% complete.dates]
   return(dates)
 }
-# hisafe_animate <- function(path,
-#                            interval    = 10,
-#                            anim.format = "gif") {
-#
-#   path <- clean_path(paste0(R.utils::getAbsolutePath(path), "/"))
-#   folder.name <- basename(path)
-#   call <- paste0("convert -delay ", interval, " *.", " ", folder.name, ".", anim.format)
-#
-#   pre.wd <- getwd()
-#   setwd(path)
-#   log <- system(call, wait = TRUE, intern = TRUE)
-#   setwd(pre.wd)
-#
-#   anim.path <- paste0(clean_path(paste0(path, "/")), folder.name, ".", anim.format)
-#   invisible(anim.path)
-# }
-
-# #' Create a simulation progress bar
-# #' @description Creates a simulation progress bar. Used within \code{\link{hisafe_visual}}.
-# #' @return A ggplot object containing the progress bar
-# #' @param hop An object of class hop or face.
-# #' @param date A character string of the current simulation date, in the format "YYYY-MM-DD" or of class Date.
-# #' @import ggplot2
-# date_progress <- function(hop, date){
-#   date.lab <- as.character(date)
-#   date     <- lubridate::ymd(date)
-#   date.min <- min(hop$trees$Date)
-#   date.max <- max(hop$trees$Date)
-#
-#   dat <- dplyr::tibble(date.min = date.min, date = date, date.max = date.max)
-#
-#   plot.obj <- ggplot(dat, aes(xmin = date.min)) +
-#     labs(y = date.lab) +
-#     geom_rect(aes(xmax = date),
-#               ymin = 0,
-#               ymax = 1,
-#               color = NA,
-#               fill  = "grey50",
-#               alpha = 1) +
-#     geom_rect(aes(xmax = date.max),
-#               ymin = 0,
-#               ymax = 1,
-#               color = "black",
-#               size  = 3,
-#               fill  = NA) +
-#     theme_void() +
-#     scale_y_continuous(expand = c(0, 0)) +
-#     scale_x_date(date_breaks = "1 year", date_labels = "%Y", expand = c(0, 0)) +
-#     theme(#axis.title.y = element_blank(),
-#       axis.title.y = element_text(color = "black",
-#                                       size  = 30,
-#                                       angle = 0,
-#                                       hjust = 1,
-#                                       vjust = 0.5),
-#           axis.text.x  = element_text(color  = "black",
-#                                       size   = 30,
-#                                       angle  = 45,
-#                                       hjust  = 1,
-#                                       vjust  = 0.7),
-#           plot.margin       = margin(15, 0, 15, 0),
-#           aspect.ratio      = 0.1,
-#           axis.ticks        = element_line(color = "black", size = 2),
-#           axis.ticks.length = unit(-15, "points"))
-#
-#   return(plot.obj)
-# }
