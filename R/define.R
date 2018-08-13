@@ -235,6 +235,7 @@ check_input_values <- function(hip, force) {
     return(out.list)
   }
   less_than      <- function(x, y) all(is.na(x) | x <= y)
+  equal_to       <- function(x, y) all(is.na(x) | x == y)
 
   ## Get available template file names
   avail.path  <- get_template_subpath(hip$template)
@@ -428,18 +429,21 @@ check_input_values <- function(hip, force) {
   ## Crop Length & Simulation Length Errors
   goes_evenly  <- function(x, y) x > y | y %% x == 0
   if(!all(purrr::map2_lgl(get_length("mainCropSpecies"), get_used("nbSimulations"), goes_evenly))) {
-    warning("-- mainCropSpecies length does not go evenly into nbSimulations." , call. = FALSE, immediate. = TRUE)
+    warning("-- mainCropSpecies length does not go evenly into nbSimulations.", call. = FALSE, immediate. = TRUE)
   }
   if(!all(purrr::map2_lgl(get_length("interCropSpecies"), get_used("nbSimulations"), goes_evenly))) {
-    warning("-- interCropSpecies length does not go evenly into nbSimulations." , call. = FALSE, immediate. = TRUE)
+    warning("-- interCropSpecies length does not go evenly into nbSimulations.", call. = FALSE, immediate. = TRUE)
   }
-
-  mainCrop.long.error    <- ifelse(all(purrr::map2_lgl(get_length("mainCropSpecies"), get_used("nbSimulations"), less_than)),
-                                   "", "-- length of mainCropSpecies cannot be larger than value of nbSimulations")
-  interCrop.long.error   <- ifelse(all(purrr::map2_lgl(get_length("interCropSpecies"), get_used("nbSimulations"), less_than)),
-                                   "", "-- length of interCropSpecies cannot be larger than value of nbSimulations")
-  simuNbrDays.length.error <- ifelse(all(unlist(get_length("simulationNbrDays")) == 1) | identical(get_length("mainCropSpecies"), get_length("simulationNbrDays")),
-                                     "", "-- simulationNbrDays and mainCropSpecies must have the same length or simulationNbrDays must have length 1")
+  if(!all(purrr::map2_lgl(get_length("mainCropSpecies"), get_used("nbSimulations"), less_than))) {
+    warning("-- length of mainCropSpecies is larger than value of nbSimulations", call. = FALSE, immediate. = TRUE)
+  }
+  if(!all(purrr::map2_lgl(get_length("interCropSpecies"), get_used("nbSimulations"), less_than))) {
+    warning("-- length of interCropSpecies is larger than value of nbSimulations", call. = FALSE, immediate. = TRUE)
+  }
+  if(!all(purrr::map_lgl(get_length("simulationNbrDays"), equal_to, y = 1) | purrr::map2_lgl(get_length("mainCropSpecies"),
+                                                                                             get_length("simulationNbrDays"), equal_to))) {
+    warning("-- simulationNbrDays and mainCropSpecies should have the same length if simulationNbrDays does not have length 1", call. = FALSE, immediate. = TRUE)
+  }
 
   ## Geometry Errors
   weed.error <- ifelse(any(get_used_un("treeCropDistance") > 0 & get_used_un("treeCropRadius") > 0),
@@ -467,7 +471,6 @@ check_input_values <- function(hip, force) {
                   tree.root.error, EP.error,
                   capillary.error, drainage.error, denitrif.error, watertable.error, dm.error, cap.error,
                   treePlanting.length.error, treePruning.length.error, treeThinning.length.error, rootPruning.length.error,
-                  simuNbrDays.length.error,
                   weed.error, wth.error)
   all.errors <- paste0(all.errors[!(all.errors == "") & !is.na(all.errors)], collapse = "\n")
   if(all.errors != errors) stop(all.errors, call. = FALSE)
