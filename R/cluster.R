@@ -97,6 +97,7 @@ build_cluster_script <- function(hip            = NULL,
     write_line("module purge")
     write_line("module load jre/jre.8_x64")
     write_line(paste0("cd /nfs/work/hisafe/", model.version))
+    if(SEQ) write_line("rm var/*.log*")
     write_line(clean_path(paste0("sh capsis.sh -p script safe.pgms.", launch.call, " ", cluster.path, "/", i, "/", i, ".sim", default.folder, collapse = "\n")))
     close(cluster.script)
   }
@@ -111,6 +112,7 @@ build_cluster_script <- function(hip            = NULL,
                        open        = "wb",
                        encoding    = "UTF-8")
     cat("#!/bin/sh", file = job.script, sep = "\n")
+    cat(paste0("rm /nfs/work/hisafe/", model.version, "/var/*.log*"), file = job.script, sep = "\n")
     purrr::map(paste0("sbatch ", simu.names, ".sh"),
                cat,
                file   = job.script,
