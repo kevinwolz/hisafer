@@ -549,6 +549,7 @@ variable_check <- function(hop, profile, variables, error = FALSE) {
 #' @param light.daily Logical indicating if daily light plots should be made.
 #' @param nitrogen.daily Logical indicating if daily nitrogens plot should be made.
 #' @param water.daily Logical indicating if daily water plots should be made.
+#' @param carbon.increment Logical indicating if daily carbon increment plots should be made.
 #' @export
 #' @family hisafe analysis functions
 #' @examples
@@ -563,15 +564,16 @@ analyze_hisafe <- function(hop,
                            carbon.daily   = TRUE,
                            light.daily    = TRUE,
                            nitrogen.daily = TRUE,
-                           water.daily    = TRUE) {
+                           water.daily    = TRUE,
+                           carbon.increment = TRUE) {
 
   is_hop(hop, error = TRUE)
-  if(!all(is.logical(c(carbon, light, nitrogen, water, light.daily, nitrogen.daily, water.daily)))) {
+  if(!all(is.logical(c(carbon, light, nitrogen, water, light.daily, nitrogen.daily, water.daily, carbon.increment)))) {
     stop("all arguments except for hop must be logicals", call. = FALSE)
   }
 
   annual.cycles.todo <- c("carbon", "light", "nitrogen", "water")[c(carbon, light, nitrogen, water)]
-  daily.cycles.todo  <- c("carbon", "light", "nitrogen", "water")[c(carbon.daily, light.daily, nitrogen.daily, water.daily)]
+  daily.cycles.todo  <- c("carbon", "light", "nitrogen", "water", "carbon-increment")[c(carbon.daily, light.daily, nitrogen.daily, water.daily, carbon.increment)]
 
   dir.create(clean_path(paste0(hop$exp.path, "/analysis/cycles/")), showWarnings = FALSE, recursive = TRUE)
 
