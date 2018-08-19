@@ -706,3 +706,72 @@ join_profiles <- function(hop, profiles, ...) {
   }
   return(out)
 }
+
+#' Get branch pruning dates from a hop
+#' @description Gets branch pruning dates from a hop in a format suitable for supplementing plots.
+#' @return A tibble (data.frame)
+#' @param hop An object of class hop or face.
+#' @param type One of "branch" or "root".
+#' @export
+#' @family hisafe helper functions
+#' @examples
+#' \dontrun{
+#' pruning.dates <- get_pruning_dates(hop)
+#' }
+get_pruning_dates <- function(hop, type = "branch") {
+  is_hop(hop, error = TRUE)
+  profile_check(hop, "tree.info", error = TRUE)
+
+  pruning.data <- hop$tree.info %>%
+    dplyr::filter(idTree == 1)
+
+  if(type == "branch") {
+    pruning.data <- pruning.data %>%
+      dplyr::rename(pruningYears = treePruningYears) %>%
+      dplyr::rename(pruningDays  = treePruningDays)
+  } else if(type == "root") {
+    pruning.data <- pruning.data %>%
+      dplyr::rename(pruningYears = treeRootPruningYears) %>%
+      dplyr::rename(pruningDays  = treeRootPruningDays)
+  } else {
+    stop("type argument must be one of 'branch' or 'root'", call. = FALSE)
+  }
+
+  get_dates <- function(x) {
+    pruningYears <- unlist(x$pruningYears) + x$simulationYearStart - 1 + as.numeric(unlist(x$pruningDays) < x$simulationDayStart)
+    Date <- lubridate::ymd(paste0(pruningYears, "-01-01")) + unlist(x$pruningDays) - 1
+    out <- dplyr::tibble(SimulationName = x$SimulationName, Year = as.integer(pruningYears), Date = Date)
+    return(out)
+  }
+
+  pruning.data <- pruning.data %>%
+    split(seq(nrow(.)))
+  out <- purrr::map_df(pruning.data, get_dates)
+  return(out)
+}
+
+#' Get dates of tree phenological stage changes from a hop
+#' @description Gets dates of tree phenological stage changes from a hop in a format suitable for supplementing plots.
+#' @return A tibble (data.frame)
+#' @param hop An object of class hop or face.
+#' @param tree.ids A numeric vector of the values of idTree to include.
+#' @export
+#' @family hisafe helper functions
+#' @examples
+#' \dontrun{
+#' pheno.dates <- get_pheno_dates(hop)
+#' }
+get_pheno_dates <- function(hop, tree.ids = 1) {
+  is_hop(hop, error = TRUE)
+  profile_check(hop, "trees", error = TRUE)
+  variable_check(hop, "trees", "phenologicalStage", error = TRUE)
+  if(!is.numeric(tree.ids)) stop("tree.ids argument must be a numeric vector", call. = FALSE)
+
+  out <- hop$trees %>%
+    dplyr::filter(idTree %in% tree.ids) %>%
+    dplyr::arrange(SimulationName, idTree, Date) %>%
+    dplyr::mutate(dif = phenologicalStage - c(NA, phenologicalStage[-nrow(.)])) %>%
+    dplyr::filter(dif != 0) %>%
+    dplyr::select(SimulationName, idTree, Year, phenologicalStage, JulianDay, Date)
+  return(out)
+}

@@ -333,10 +333,8 @@ plot_hisafe_cycle_daily <- function(hop,
   }
 
   if(pheno.lines & profile_check(hop, "trees")) {
-    pheno.data <- hop$trees %>%
+    pheno.data <- get_pheno_dates(hop) %>%
       dplyr::filter(Year %in% years) %>%
-      dplyr::select(SimulationName, Year, JulianDay, Date, phenologicalStage) %>%
-      dplyr::distinct(SimulationName, phenologicalStage, .keep_all = TRUE) %>%
       dplyr::mutate(date = lubridate::as_date(lubridate::parse_date_time(paste0("8000-", JulianDay), "%Y-%j")))
     vert.lines <- geom_vline(data = pheno.data, aes(xintercept = date), linetype = "dashed")
   }

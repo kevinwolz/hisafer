@@ -305,6 +305,7 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
     if(length(pld.path) > 1)  stop(paste("there is >1 PLD file present in the simulation directory of:", simu.name, ". Set read.inputs to FALSE."), call. = FALSE)
 
     tree.info <- read_tree_info(path, simu.name)
+
     pld <- read_param_file(pld.path)
     plotWidth          <- as.numeric(pld$PLOT$plotWidth$value)
     plotHeight         <- as.numeric(pld$PLOT$plotHeight$value)
@@ -313,17 +314,15 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
     soilDepth          <- sum(pld$LAYERS$layers$value[[1]]$thick)
     waterTable         <- pld$WATER$waterTable$value
 
-    plot.area.m2 <-
-    plot.area.ha <- plotWidth * plotHeight
-    plot.info <- dplyr::tibble(SimulationName   = simu.name,
-                               plotWidth        = plotWidth,
-                               plotHeight       = plotHeight,
-                               plotAreaM2       = plotWidth * plotHeight,
-                               plotAreaHa       = plotWidth * plotHeight / 10000,
-                               northOrientation = northOrientation,
-                               cellWidth        = cellWidth,
-                               soilDepth        = soilDepth,
-                               waterTable       = waterTable)
+    plot.info <- dplyr::tibble(SimulationName      = simu.name,
+                               plotWidth           = plotWidth,
+                               plotHeight          = plotHeight,
+                               plotAreaM2          = plotWidth * plotHeight,
+                               plotAreaHa          = plotWidth * plotHeight / 10000,
+                               northOrientation    = northOrientation,
+                               cellWidth           = cellWidth,
+                               soilDepth           = soilDepth,
+                               waterTable          = waterTable)
   } else {
     plot.info <- tree.info <- dplyr::tibble()
   }
@@ -467,6 +466,7 @@ read_tree_info <- function(path, simu.name) {
       dplyr::mutate(idTree = 1:nrow(tree.info)) %>%
       dplyr::mutate(SimulationName = rep(simu.name, nrow(tree.info))) %>%
       dplyr::mutate(simulationYearStart = sim$SIMULATION$simulationYearStart$value) %>%
+      dplyr::mutate(simulationDayStart  = sim$SIMULATION$simulationDayStart$value) %>%
       dplyr::select(SimulationName, idTree, dplyr::everything())
     if(!sim$TREE_PRUNING$treePruningYears$commented) {
       tree.info <- tree.info %>%

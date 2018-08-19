@@ -16,6 +16,8 @@ hisafe_profiles()
 }
 \seealso{
 Other hisafe helper functions: \code{\link{copy_hisafe_template}},
+  \code{\link{get_pheno_dates}},
+  \code{\link{get_pruning_dates}},
   \code{\link{hip_params}}, \code{\link{hisafe_info}},
   \code{\link{hop_filter}}, \code{\link{hop_merge}},
   \code{\link{hop_params}}, \code{\link{hop_rename}},
