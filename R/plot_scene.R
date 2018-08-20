@@ -57,7 +57,7 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
       dplyr::select(species, x, y, id)
     num.trees <- nrow(tree.plot.data)
   } else {
-    tree.plot.data <- dplyr::tibble(species = "No trees", x = NA_real_, y = NA_real_)
+    tree.plot.data <- dplyr::tibble(species = "No trees", x = NA_real_, y = NA_real_, id = "")
     num.trees <- 0
   }
   ## Calculate scene dimensions (cell size for plotting is always "1", but more/less cells added and labels adjusted based actual dimensions)
@@ -168,7 +168,7 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
     geom_tile(color = "black", aes(fill = crop)) +
     geom_text(aes(label = idCell)) +
     geom_point(data = tree.plot.data, size = 10, aes(color = species), na.rm = TRUE) +
-    geom_text(data = tree.plot.data, aes(label = id), color = "white") +
+    geom_text(data = tree.plot.data, aes(label = id), color = "white", na.rm = TRUE) +
     scale_color_manual(values = c("black", "grey70", "grey30", "grey50")) +
     scale_fill_manual(values  = c("white", "grey80")) +
     coord_equal() +

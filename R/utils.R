@@ -41,7 +41,12 @@ INCLUDED.TEMPLATE.SUBPATH <- paste0(system.file("extdata", "template_common",  p
 
 remove_whitespace <- function(x) gsub("^\\s+|\\s+$", "", x)
 clean_path        <- function(x) gsub("//", "/", x, fixed = TRUE)
-get_absolute_path <- function(x) clean_path(base::normalizePath(x, mustWork = TRUE))
+get_absolute_path <- function(x) {
+  if(substr(x, 1, 1) == ".") x <- gsub(pattern     = "^\\.",
+                                       replacement = getwd(),
+                                       x           = x)
+  return(clean_path(x))
+}
 
 get_template_path <- function(template) {
   path <- ifelse(template %in% INCLUDED.TEMPLATES,
