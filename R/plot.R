@@ -255,6 +255,7 @@ plot_hisafe_ts <- function(hop,
 #' @param plot.x Either "x" or "y", indicating which axis of the simulation scene should be plotted on the x-axis of the plot.
 #' @param trees Logical indicating if a point should be plotted at the location of each tree.
 #' @param canopies Logical indicating if an elipsoid should be plotted representing the size of each tree canopy.
+#' @param tree.simus Logical indicating whether only simulations containing trees should be plotted.
 #' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.
 #' @export
 #' @importFrom dplyr %>%
@@ -291,6 +292,7 @@ plot_hisafe_monthcells <- function(hop,
                                    plot.x     = "x",
                                    trees      = TRUE,
                                    canopies   = TRUE,
+                                   tree.simus = FALSE,
                                    plot       = TRUE) {
 
   is_hop(hop, error = TRUE)
@@ -310,7 +312,14 @@ plot_hisafe_monthcells <- function(hop,
   if(!all(months %in% hop$monthCells$Month))                stop("one or more values in months is not present in the monthCells profile of hop",     call. = FALSE)
   is_TF(trees)
   is_TF(canopies)
+  is_TF(tree.simus)
   is_TF(plot)
+
+  if(tree.simus) {
+    profile_check(hop, "tree.info", error = TRUE)
+    simu.names <- simu.names[simu.names %in% unique(hop$tree.info$SimulationName)]
+    if(length(simu.names) < 1) stop("simulation filtering resulted in no simulations to plot", call. = FALSE)
+  }
 
   dates <- expand.grid(year = years, month = months, day = 1)
   dates <- lubridate::ymd(paste(dates$year, dates$month, dates$day, sep = "-"))

@@ -19,7 +19,7 @@ diag_hisafe(hop, trees = TRUE, plot = TRUE, climate = TRUE,
 
 \item{cells}{Logical indicating if cells profile diagnostic plots should be made.}
 
-\item{monthCells}{Logical indicating if monthCells profile diagnostic plots should be made.}
+\item{monthCells}{Logical indicating if monthCells profile diagnostic plots should be made (with tree.simus = TRUE).}
 
 \item{annualCells}{Logical indicating if annualCells profile diagnostic plots should be made.}
 

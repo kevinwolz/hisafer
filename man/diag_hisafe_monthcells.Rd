@@ -6,7 +6,7 @@
 \usage{
 diag_hisafe_monthcells(hop, output.path = NULL,
   schemes = c("year.simname", "month.simname", "month.year"),
-  trees = TRUE, canopies = TRUE)
+  trees = TRUE, canopies = TRUE, tree.simus = FALSE)
 }
 \arguments{
 \item{hop}{An object of class "hop" or "face" containing output data from one or more Hi-sAFe simulations.}
@@ -20,6 +20,8 @@ If no value is provided, the experiment/simulation path is read from the hop obj
 \item{trees}{Logical indicating if a point should be plotted at the location of each tree.}
 
 \item{canopies}{Logical indicating if an elipsoid should be plotted representing the size of each tree canopy.}
+
+\item{tree.simus}{Logical indicating whether only simulations containing trees should be plotted.}
 }
 \value{
 Invisibly returns a list of \code{ggplot} objects, grouped into two sublists based on the faceting scheme.

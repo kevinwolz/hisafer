@@ -59,6 +59,7 @@ diag_hisafe_ts <- function(hop, profile, output.path = NULL, ...) {
 #' @param schemes A character vector of the facet schemes to run. Possible schemes are described in Details and have the following names: \code{year.simname}, \code{month.simname}, \code{month.year}.
 #' @param trees Logical indicating if a point should be plotted at the location of each tree.
 #' @param canopies Logical indicating if an elipsoid should be plotted representing the size of each tree canopy.
+#' @param tree.simus Logical indicating whether only simulations containing trees should be plotted.
 #' @export
 #' @importFrom dplyr %>%
 #' @family hisafe diagnostic fucntions
@@ -74,7 +75,8 @@ diag_hisafe_monthcells <- function(hop,
                                    output.path = NULL,
                                    schemes     = c("year.simname", "month.simname", "month.year"),
                                    trees       = TRUE,
-                                   canopies    = TRUE) {
+                                   canopies    = TRUE,
+                                   tree.simus  = FALSE) {
 
   allowed.schemes <- c("year.simname", "month.simname", "month.year")
   is_hop(hop, error = TRUE)
@@ -88,7 +90,7 @@ diag_hisafe_monthcells <- function(hop,
   var.names <- vars_to_diag(hop = hop, profile = "monthCells", last.col = "y")
 
   ## Create plots
-  if("year.simname" %in% schemes){
+  if("year.simname" %in% schemes) {
     plot.dir1 <- paste0(monthcells.path, "year_simname/")
     dir.create(plot.dir1, recursive = TRUE, showWarnings = FALSE)
     plot.list1 <- purrr::map(var.names, plot_hisafe_monthcells,
@@ -99,12 +101,13 @@ diag_hisafe_monthcells <- function(hop,
                              years      = seq(min(hop$monthCells$Year), max(hop$monthCells$Year), 5),
                              months     = 6,
                              trees      = trees,
-                             canopies   = canopies)
+                             canopies   = canopies,
+                             tree.simus = tree.simus)
     file.names <- paste0("monthCells_year_simname_", var.names, ".png")
     purrr::pwalk(list(file.names, plot.list1), ggsave_fitmax, path = plot.dir1, scale = 2)
   } else { plot.list1 <- list() }
 
-  if("month.simname" %in% schemes){
+  if("month.simname" %in% schemes) {
     plot.dir2 <- paste0(monthcells.path, "month_simname/")
     dir.create(plot.dir2, recursive = TRUE, showWarnings = FALSE)
     plot.list2 <- purrr::map(var.names, plot_hisafe_monthcells,
@@ -115,16 +118,22 @@ diag_hisafe_monthcells <- function(hop,
                              years      = round(median(hop$monthCells$Year), 0),
                              months     = 1:12,
                              trees      = trees,
-                             canopies   = canopies)
+                             canopies   = canopies,
+                             tree.simus = tree.simus)
     file.names <- paste0("monthCells_month_simname_", var.names, ".png")
     purrr::pwalk(list(file.names, plot.list2), ggsave_fitmax, path = plot.dir2, scale = 2)
   } else { plot.list2 <- list() }
 
   plot.list3.tog <- list()
-  if("month.year" %in% schemes){
+  if("month.year" %in% schemes) {
     plot.dir3 <- paste0(monthcells.path, "month_year/")
     dir.create(plot.dir3, recursive = TRUE, showWarnings = FALSE)
-    for(sim.name in unique(hop$monthCells$SimulationName)){
+    simus.for.scheme <- unique(hop$monthCells$SimulationName)
+    if(tree.simus) {
+      profile_check(hop, "tree.info", error = TRUE)
+      simus.for.scheme <- simus.for.scheme[simus.for.scheme %in% unique(hop$tree.info$SimulationName)]
+    }
+    for(sim.name in simus.for.scheme) {
       plot.list3 <- purrr::map(var.names, plot_hisafe_monthcells,
                                hop        = hop,
                                colfacet   = "Year",
@@ -133,7 +142,8 @@ diag_hisafe_monthcells <- function(hop,
                                years      = seq(min(hop$monthCells$Year), max(hop$monthCells$Year), 5),
                                months     = 1:12,
                                trees      = trees,
-                               canopies   = canopies)
+                               canopies   = canopies,
+                               tree.simus = tree.simus)
 
       bad.plot.check <- unlist(purrr::map(plot.list3, is.logical))
       plot.list3 <- plot.list3[!bad.plot.check]
@@ -281,7 +291,7 @@ diag_hisafe_voxels <- function(hop, output.path = NULL, ...) {
 #' @param plot Logical indicating if plot profile diagnostic plots should be made.
 #' @param climate Logical indicating if climate profile diagnostic plots should be made.
 #' @param cells Logical indicating if cells profile diagnostic plots should be made.
-#' @param monthCells Logical indicating if monthCells profile diagnostic plots should be made.
+#' @param monthCells Logical indicating if monthCells profile diagnostic plots should be made (with tree.simus = TRUE).
 #' @param annualCells Logical indicating if annualCells profile diagnostic plots should be made.
 #' @param voxels Logical indicating if voxels profile diagnostic plots should be made.
 #' @param ... Other arguments passed to \code{\link{plot_hisafe_ts}}.
@@ -321,7 +331,7 @@ diag_hisafe <- function(hop,
 
   if(monthCells & profile_check(hop, "monthCells")) {
     cat("\n-- Plotting monthCells diagnostics")
-    diag_hisafe_monthcells(hop = hop)
+    diag_hisafe_monthcells(hop = hop, tree.simus = TRUE)
   }
 
   if(voxels & profile_check(hop, "voxels")) {

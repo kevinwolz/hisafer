@@ -8,7 +8,7 @@ plot_hisafe_monthcells(hop, variable = "monthRelativeTotalParIncident",
   colfacet = "SimulationName", rowfacet = "Year", simu.names = "all",
   years = seq(min(hop$monthCells$Year), max(hop$monthCells$Year), 5),
   months = 6, plot.x = "x", trees = TRUE, canopies = TRUE,
-  plot = TRUE)
+  tree.simus = FALSE, plot = TRUE)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -30,6 +30,8 @@ plot_hisafe_monthcells(hop, variable = "monthRelativeTotalParIncident",
 \item{trees}{Logical indicating if a point should be plotted at the location of each tree.}
 
 \item{canopies}{Logical indicating if an elipsoid should be plotted representing the size of each tree canopy.}
+
+\item{tree.simus}{Logical indicating whether only simulations containing trees should be plotted.}
 
 \item{plot}{If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.}
 }
