@@ -49,7 +49,6 @@ get_absolute_path <- function(x) {
     return(y)
   }
   x <- purrr::map_chr(x, gap)
-  x <- paste0(x, "/")
   return(clean_path(x))
 }
 
