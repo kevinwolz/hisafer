@@ -812,7 +812,7 @@ hisafe_snapshot <- function(hop,
                                         voxel.C.alpha = "fineRootCost",
                                         voxel.R.alpha = "totalTreeNitrogenUptake"), ...) {
 
-  if(!requireNamespace(c("gtable", "egg"), quietly = TRUE)) stop("The packages 'gtable' and 'egg' is required for hisafe_snapshot().
+  if(!requireNamespace(c("gtable", "egg"), quietly = TRUE)) stop("The packages 'gtable' and 'egg' are required for hisafe_snapshot().
                                                                  Please install and load them", call. = FALSE)
 
   is_hop(hop, error = TRUE)

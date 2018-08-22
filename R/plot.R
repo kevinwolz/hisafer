@@ -887,8 +887,8 @@ plot_hisafe_bg <- function(hop,
                            sen        = c("fine", "coarse"),
                            plot       = TRUE) {
 
-  if(!requireNamespace("cowplot", quietly = TRUE)) stop("The package 'cowplot' is required by plot_hisafe_bg().
-                                                          Please install and load it", call. = FALSE)
+  if(!requireNamespace(c("gtable", "egg"), quietly = TRUE)) stop("The packages 'gtable' and 'egg' are required for hisafe_snapshot().
+                                                                 Please install and load them", call. = FALSE)
 
   is_hop(hop, error = TRUE)
   profile_check(hop, "trees", error = TRUE)
@@ -912,26 +912,51 @@ plot_hisafe_bg <- function(hop,
 
   base.plot <- ggplot(plot.data, aes(x = Date)) +
     facet_wrap(~SimulationName, nrow = 1) +
-    theme_hisafe_ts()
+    scale_y_continuous(sec.axis = sec_axis(~ ., labels = NULL)) +
+    theme_hisafe_ts() +
+    theme(axis.ticks.length = unit(5, "points"),
+          axis.text.y       = element_text(margin = margin(r = 5, unit = "points")))
 
   root.wt.plot <- base.plot +
-    labs(y = "Root & water table depth (m)") +
+    labs(title = "Root & water table depth",
+         y     = "Depth (m)") +
     geom_line(aes(y = -rootingDepth), size = 2) +
     geom_line(aes(y = waterTableDepth), color = "blue")
 
+  if(any(c("fine", "coarse") %in% sen)) {
+    root.wt.plot <- root.wt.plot +
+      theme(axis.text.x  = element_blank(),
+            axis.title.x = element_blank())
+  } else {
+    root.wt.plot <- root.wt.plot +
+      theme(axis.text.x = element_text(margin = margin(t = 5, unit = "points"), angle = 90, hjust = 1, vjust = 0.5))
+  }
+
   fr.sen.plot <- base.plot +
-    labs(y = "Fine root sen. by anoxia (kg C)") +
+    labs(title = "Fine root senescence by anoxia",
+         y     = "Senescence (kg C)") +
     geom_line(aes(y = carbonFineRootSenAnoxia))
 
+  if("coarse" %in% sen) {
+    fr.sen.plot <- fr.sen.plot +
+      theme(axis.text.x  = element_blank(),
+            axis.title.x = element_blank())
+  } else {
+    fr.sen.plot <- fr.sen.plot +
+      theme(axis.text.x = element_text(margin = margin(t = 5, unit = "points"), angle = 90, hjust = 1, vjust = 0.5))
+  }
+
   cr.sen.plot <- base.plot +
-    labs(y = "Coarse root sen. by anoxia (kg C)") +
-    geom_line(aes(y = carbonCoarseRootSenAnoxia))
+    labs(title = "Coarse root senescence by anoxia",
+         y     = "Senescence (kg C)") +
+    geom_line(aes(y = carbonCoarseRootSenAnoxia)) +
+    theme(axis.text.x = element_text(margin = margin(t = 5, unit = "points"), angle = 90, hjust = 1, vjust = 0.5))
 
   plot.list <- list(root.wt.plot)
   if("fine"   %in% sen) plot.list <- c(plot.list, list(fr.sen.plot))
   if("coarse" %in% sen) plot.list <- c(plot.list, list(cr.sen.plot))
 
-  plot.out <- cowplot::plot_grid(plotlist = plot.list, ncol = 1)
+  plot.out <- egg::ggarrange(plots = plot.list, ncol = 1, draw = FALSE)
 
   if(plot) return(plot.out) else return(plot.data)
 }

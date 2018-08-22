@@ -42,9 +42,14 @@ INCLUDED.TEMPLATE.SUBPATH <- paste0(system.file("extdata", "template_common",  p
 remove_whitespace <- function(x) gsub("^\\s+|\\s+$", "", x)
 clean_path        <- function(x) gsub("//", "/", x, fixed = TRUE)
 get_absolute_path <- function(x) {
-  if(substr(x, 1, 1) == ".") x <- gsub(pattern     = "^\\.",
+  gap <- function(y) {
+    if(substr(y, 1, 1) == ".") y <- gsub(pattern     = "^\\.",
                                        replacement = getwd(),
-                                       x           = x)
+                                       x           = y)
+    return(y)
+  }
+  x <- purrr::map_chr(x, gap)
+  x <- paste0(x, "/")
   return(clean_path(x))
 }
 
