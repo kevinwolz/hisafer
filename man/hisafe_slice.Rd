@@ -5,14 +5,14 @@
 \title{Plot a "sliced" profile of the simulated Hi-sAFe scene}
 \usage{
 hisafe_slice(hop, date, simu.names = "all", tree.ids = "all",
-  plot.x = "x", Y = "all", rel.dates = NULL, height.dates = date,
-  max.soil.depth = NA, vars = list(crown.alpha = "leafArea",
-  trunk.alpha = "carbonLabile", crop.alpha = "lai", yield.alpha = "eai",
-  voxel.alpha = "totalTreeRootDensity", voxel.border = "cropRootDensity",
-  voxel.L.size = "theta", voxel.C.size = "totalTreeCoarseRootBiomass",
-  voxel.R.size = "mineralNitrogenStock", voxel.L.alpha =
-  "totalTreeWaterUptake", voxel.C.alpha = "fineRootCost", voxel.R.alpha =
-  "totalTreeNitrogenUptake"), tree.rel.vars = "SYT",
+  plot.x = "x", Y = "all", scene.shift = 0, rel.dates = NULL,
+  height.dates = date, max.soil.depth = NA, vars = list(crown.alpha =
+  "leafArea", trunk.alpha = "carbonLabile", crop.alpha = "lai", yield.alpha
+  = "eai", voxel.alpha = "totalTreeRootDensity", voxel.border =
+  "cropRootDensity", voxel.L.size = "theta", voxel.C.size =
+  "totalTreeCoarseRootBiomass", voxel.R.size = "mineralNitrogenStock",
+  voxel.L.alpha = "totalTreeWaterUptake", voxel.C.alpha = "fineRootCost",
+  voxel.R.alpha = "totalTreeNitrogenUptake"), tree.rel.vars = "SYT",
   crop.rel.vars = "SY", voxel.rel.vars = "SY", trees = TRUE,
   crops = TRUE, voxels = TRUE, climate = TRUE, mem.max = 0,
   plot.rows = 1)
@@ -30,6 +30,9 @@ hisafe_slice(hop, date, simu.names = "all", tree.ids = "all",
 
 \item{Y}{A numeric vector indicating a subset of cell locations to include when summarizing cell/voxel data.
 If \code{plot.x} is "x", then this refers to the y coordinates of cells. If \code{plot.x} is "y", then this refers to the x coordinates of cells.}
+
+\item{scene.shift}{A number indicating the number of cells to shift the scene -x (if plot.x = "x") or -y (if plot.x = "y") direction.
+Cell rows less than this value will be "flipped" to adjoin the right side of the plot.}
 
 \item{rel.dates}{A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates from which to scale all aesthetics set by \code{vars}.
 In the plot, all aesthetics set by \code{vars} will be scaled to be between the minimum and maximum values across these dates.}

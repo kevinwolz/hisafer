@@ -8,6 +8,8 @@
 #' @param plot.x Either "x" or "y", indicating which axis of the Hi-sAFe scene should be plotted along the x-axis of the plot.
 #' @param Y A numeric vector indicating a subset of cell locations to include when summarizing cell/voxel data.
 #' If \code{plot.x} is "x", then this refers to the y coordinates of cells. If \code{plot.x} is "y", then this refers to the x coordinates of cells.
+#' @param scene.shift A number indicating the number of cells to shift the scene -x (if plot.x = "x") or -y (if plot.x = "y") direction.
+#' Cell rows less than this value will be "flipped" to adjoin the right side of the plot.
 #' @param rel.dates A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates from which to scale all aesthetics set by \code{vars}.
 #' In the plot, all aesthetics set by \code{vars} will be scaled to be between the minimum and maximum values across these dates.
 #' @param height.dates A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates from which the plot height should be determined
@@ -56,6 +58,7 @@ hisafe_slice <- function(hop,
                          tree.ids       = "all",
                          plot.x         = "x",
                          Y              = "all",
+                         scene.shift    = 0,
                          rel.dates      = NULL,
                          height.dates   = date,
                          max.soil.depth = NA,
@@ -87,6 +90,7 @@ hisafe_slice <- function(hop,
   is_TF(crops)
   is_TF(voxels)
   if(!(Y[1] == "all" | all(is.numeric(Y)))) stop("Y argument must be 'all' or a numeric vector", call. = FALSE)
+  if(!(length(scene.shift) == 1 | all(is.numeric(scene.shift)))) stop("flip.alley argument must be a numeric vector of length 1", call. = FALSE)
 
   date <- lubridate::ymd(date)
   if(length(date) != 1) stop("date argument must have length 1", call. = FALSE)
@@ -119,12 +123,12 @@ hisafe_slice <- function(hop,
 
   x.lab <- "X (m)"
   if(plot.x == "y") { # Switch x-y if plot.x == "y"
-    #if(!crops)  stop("crops must be TRUE if plot.x = 'y'",  call. = FALSE)
     x.lab <- "Y (m)"
     for(p in c("tree.info", "cells", "voxels")[c(TRUE, crops, voxels)]) hop[[p]] <- swap_cols(hop[[p]], "x", "y")
     hop$trees     <- swap_cols(hop$trees,     "crownRadiusInterRow", "crownRadiusTreeLine")
     hop$plot.info <- swap_cols(hop$plot.info, "plotWidth",           "plotHeight")
   }
+  for(p in c("tree.info", "cells", "voxels")[c(TRUE, crops, voxels)]) hop <- flip_scene(hop = hop, profile = p, shift = scene.shift)
 
   if(crops) {
     cell.Ys <- dplyr::as_tibble(table(hop$cells$SimulationName, hop$cells$y))[, 1:2] %>%
@@ -241,7 +245,7 @@ hisafe_slice <- function(hop,
     for(i in 1:nrow(hop$tree.info)) {
       if(!is.na(unlist(hop$tree.info$treePruningYears[[i]])[1])) {
         hop$tree.info$tree.pruning.dates[[i]] <- lubridate::ymd(paste0(unlist(hop$tree.info$treePruningYears[[i]]) - 1 - tree.age.at.start +
-                                                                         hop$tree.info$simulationYearStart[i], "-01-01")) + hop$tree.info$treePruningDays[[i]] - 1
+                                                                         hop$tree.info$simulationYearStart[i], "-01-01")) + unlist(hop$tree.info$treePruningDays[[i]]) - 1
       }
       if(!is.na(unlist(hop$tree.info$treeRootPruningYears[[i]])[1])) {
         hop$tree.info$root.pruning.dates[[i]] <- lubridate::ymd(paste0(unlist(hop$tree.info$treeRootPruningYears[[i]]) - 1 - tree.age.at.start +
@@ -1520,4 +1524,19 @@ extract_complete_dates <- function(hop, profile, dates) {
     .$Date
   dates <- dates[dates %in% complete.dates]
   return(dates)
+}
+
+#' Flip scene about cell row
+#' @description Flips scene about cell row for \code{\link{hisafe_slice}}
+#' @param hop An object of class hop.
+#' @param profile Character string of the name of a hop profile.
+#' @param shift The number of cell rows to shift the scene to the left.
+#' @keywords internal
+flip_scene <- function(hop, profile, shift) {
+  shift <- shift * hop$plot.info$cellWidth
+  temp <- hop[[profile]]$x
+  temp <- temp + as.numeric(temp <  shift) * hop$plot.info$plotWidth
+  temp <- temp - as.numeric(temp >= shift) * shift
+  hop[[profile]]$x <- temp
+  return(hop)
 }
