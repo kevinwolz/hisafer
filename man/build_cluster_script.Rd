@@ -8,7 +8,8 @@ build_cluster_script(hip = NULL, simu.names = NULL,
   script.path = NULL, script.name = NULL, simu.prefix = NULL,
   model.version = "Capsis4", launch.call = "ScriptGen",
   default.folder = "", cluster.path, email.type = "END",
-  email = NULL, num.cores = NULL)
+  email = NULL, num.cores = NULL, max.per.node = NULL,
+  mem.spec = NULL)
 }
 \arguments{
 \item{hip}{A hip object. If \code{NULL}, then \code{simu.names} and \code{script.path} are required.}
@@ -37,6 +38,12 @@ Multiple values may be specified in a comma separated list within a single chara
 \item{email}{A character string of the email address to notify with cluster job updates. Use \code{NULL} for no email generation.}
 
 \item{num.cores}{The number of cores to request from the cluster. Use \code{NULL} to make no specification.}
+
+\item{max.per.node}{The maximum numver of tasks allowed per node on the cluster. This allows memory to be allocated to each task.
+Use \code{NULL} to make no specification.}
+
+\item{mem.spec}{An integer indicating the maximum memory use (Mb) permitted for each individual instance of Capsis/Hi-sAFe.
+Use \code{NULL} to make no specification.}
 }
 \value{
 Invisibly returns \code{TRUE}.

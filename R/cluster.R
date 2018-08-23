@@ -16,6 +16,10 @@
 #' Multiple values may be specified in a comma separated list within a single character string (e.g. "BEGIN,END").
 #' @param email A character string of the email address to notify with cluster job updates. Use \code{NULL} for no email generation.
 #' @param num.cores The number of cores to request from the cluster. Use \code{NULL} to make no specification.
+#' @param max.per.node The maximum numver of tasks allowed per node on the cluster. This allows memory to be allocated to each task.
+#' Use \code{NULL} to make no specification.
+#' @param mem.spec An integer indicating the maximum memory use (Mb) permitted for each individual instance of Capsis/Hi-sAFe.
+#' Use \code{NULL} to make no specification.
 #' @export
 #' @family hisafe cluster functions
 #' @examples
@@ -36,7 +40,9 @@ build_cluster_script <- function(hip            = NULL,
                                  cluster.path,
                                  email.type     = "END",
                                  email          = NULL,
-                                 num.cores      = NULL) {
+                                 num.cores      = NULL,
+                                 max.per.node   = NULL,
+                                 mem.spec       = NULL) {
 
   is_hip(hip, error = TRUE)
   if(is.null(hip) & is.null(script.path))                                      stop("must provide hip or script.path",                                call. = FALSE)
@@ -87,6 +93,7 @@ build_cluster_script <- function(hip            = NULL,
     cat("", file = cluster.script, sep = "", append = FALSE)
     write_line("#!/bin/sh")
     if(!is.null(num.cores)) write_line(paste0("#SBATCH -n ", num.cores))
+    if(!is.null(max.per.node)) write_line(paste0("#SBATCH --ntasks-per-node=", max.per.node))
     if(SEQ) write_line(paste0("#SBATCH --array=", min(seqs), "-", max(seqs)))
     write_line("#SBATCH --account=hisafe")
     write_line("#SBATCH --partition=defq")
@@ -98,6 +105,7 @@ build_cluster_script <- function(hip            = NULL,
     write_line("module load jre/jre.8_x64")
     write_line(paste0("cd /nfs/work/hisafe/", model.version))
     if(SEQ) write_line("rm var/*.log*")
+    if(!is.null(mem.spec)) write_line(paste0("sh setmem.sh ", mem.spec))
     write_line(clean_path(paste0("sh capsis.sh -p script safe.pgms.", launch.call, " ", cluster.path, "/", i, "/", i, ".sim", default.folder, collapse = "\n")))
     close(cluster.script)
   }
