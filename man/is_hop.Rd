@@ -30,6 +30,7 @@ Other hisafe helper functions: \code{\link{copy_hisafe_template}},
   \code{\link{hop_rename}}, \code{\link{is_hip}},
   \code{\link{join_profiles}}, \code{\link{profile_check}},
   \code{\link{variable_check}},
+  \code{\link{warn_unequal_lengths}},
   \code{\link{which_profiles}}
 }
 \concept{hisafe helper functions}

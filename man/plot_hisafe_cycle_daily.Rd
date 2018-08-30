@@ -6,12 +6,13 @@
 \usage{
 plot_hisafe_cycle_daily(hop, cycle, years, simu.names = "all",
   tree.ids = "all", doy.lim = c(1, 366), color.palette = NULL,
-  pheno.lines = TRUE, trim = TRUE, plot = TRUE)
+  crop.names = c("Main crop", "Inter crop"), pheno.lines = TRUE,
+  trim = TRUE, plot = TRUE)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
 
-\item{cycle}{One of "carbon", "nitrogen", "water", "light", or "carbon-increment.}
+\item{cycle}{One of "carbon", "nitrogen", "water", "light", "yield", or "carbon-increment.}
 
 \item{years}{A numeric vector of the calendar years to include.
 If more than one year is provided, years are used as facets, and only a single value can be supplied to \code{simu.names}.
@@ -27,6 +28,8 @@ This only applies when \code{cycle} is "carbon".}
 
 \item{color.palette}{A character stirng of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
 If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette.}
+
+\item{crop.names}{A character vector of length 2 containing the names to use in the legend for the mainCrop and interCrop of Hi-sAFe, in that order.}
 
 \item{pheno.lines}{Logical indicating whether or not vertical dashed lines should be plotted on dates of phenoloigical stage changes}
 

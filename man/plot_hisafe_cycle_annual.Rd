@@ -6,12 +6,13 @@
 \usage{
 plot_hisafe_cycle_annual(hop, cycle, simu.names = "all",
   tree.ids = "all", year.lim = c(NA, NA), color.palette = NULL,
+  bar.color = "black", crop.names = c("Main crop", "Inter crop"),
   plot = TRUE)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
 
-\item{cycle}{One of "carbon", "nitrogen", "water", or "light".}
+\item{cycle}{One of "carbon", "nitrogen", "water", "light", or "yield".}
 
 \item{simu.names}{A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.}
 
@@ -21,8 +22,12 @@ This only applies when \code{cycle} is "carbon".}
 \item{year.lim}{A numeric vector of length two providing the \code{c(minimum, maximum)} of calendar years to plot.
 If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.}
 
-\item{color.palette}{A character stirng of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
+\item{color.palette}{A character string of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
 If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette.}
+
+\item{bar.color}{A hex value or R standard color name defining the color to use for bar plot borders}
+
+\item{crop.names}{A character vector of length 2 containing the names to use in the legend for the mainCrop and interCrop of Hi-sAFe, in that order.}
 
 \item{plot}{If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.}
 }

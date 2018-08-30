@@ -410,6 +410,10 @@ hop_merge <- function(...) {
   merged_hop$exp.path  <- NA
 
   class(merged_hop) <- c("hop-group", "hop", class(merged_hop))
+
+  # Check numbers of years and warn if different
+  dum <- warn_unequal_lengths(merged_hop)
+
   return(merged_hop)
 }
 
@@ -774,4 +778,26 @@ get_pheno_dates <- function(hop, tree.ids = 1) {
     dplyr::filter(dif != 0) %>%
     dplyr::select(SimulationName, idTree, Year, phenologicalStage, JulianDay, Date)
   return(out)
+}
+
+#' Provide warning if simulation lengths are unequal
+#' @description  Provides warning if simulation lengths are unequal.
+#' @return A tibble (data.frame) containing the SimulationName and durations in years.
+#' @param hop An object of class hop or a hop-like object.
+#' @family hisafe helper functions
+#' @keywords internal
+warn_unequal_lengths <- function(hop) {
+   year.summary <- hop[[as.numeric(which.max(purrr::map_int(hop[names(hop) %in% DATA.PROFILES], nrow)))]] %>%
+      dplyr::group_by(SimulationName) %>%
+      dplyr::summarize(n = dplyr::n_distinct(Year) - 1) %>%
+      tidyr::unite(label, SimulationName, n, sep = ": ", remove = FALSE)
+    if(length(unique(year.summary$n)) != 1) {
+      year.length.warning <- paste(c("Simulation durations not equal!",
+                                     "  Be careful when comparing simulations.",
+                                     "  Simulation durations:",
+                                     paste("   --", year.summary$label, "years")),
+                                   collapse = "\n")
+      warning(year.length.warning, call. = FALSE)
+    }
+  return(dplyr::select(year.summary, -label))
 }

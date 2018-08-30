@@ -150,21 +150,7 @@ read_hisafe <- function(hip           = NULL,
   }
 
   ## Warn if lengths of all simulations are not equal
-  if(length(simu.names) > 1) {
-    profiles.to.check <- c("trees", "plot", "climate", "cells", "monthCells", "annualCells", "voxels")
-    year.summary <- data[[as.numeric(which.max(purrr::map_int(data[names(data) %in% profiles.to.check], nrow)))]] %>%
-      dplyr::group_by(SimulationName) %>%
-      dplyr::summarize(n = dplyr::n_distinct(Year) - 1) %>%
-      tidyr::unite(label, SimulationName, n, sep = ": ", remove = FALSE)
-    if(length(unique(year.summary$n)) != 1) {
-      year.length.warning <- paste(c("Simulation durations not equal!",
-                                     "  Be careful when comparing simulations.",
-                                     "  Simulation durations:",
-                                     paste("   --", year.summary$label, "years")),
-                                   collapse = "\n")
-      warning(year.length.warning, call. = FALSE)
-    }
-  }
+  dum <- warn_unequal_lengths(data)
 
   data <- hop_filter(hop = data, date.min = date.min, date.max = date.max, dates = dates)
 

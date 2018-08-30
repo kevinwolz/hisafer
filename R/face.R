@@ -43,75 +43,52 @@ create_face <- function(agroforestry, forestry, monocrop, face.path) {
   agroforestry$exp.path <- forestry$exp.path <- monocrop$exp.path <- NULL
 
   # Profile checks
-  nonempty_profiles <- function(x) {
-    nonempty <- NULL
-    for(i in names(x)) {
-      if(nrow(x[[i]]) != 0) nonempty <- c(nonempty, i)
-    }
-    nonempty <- nonempty[!(nonempty %in% c("variables", "tree.info", "exp.plan", "path"))]
-    return(sort(nonempty))
-  }
-  AF.profiles <- nonempty_profiles(agroforestry)
-  FC.profiles <- nonempty_profiles(forestry)
-  CC.profiles <- nonempty_profiles(monocrop)
+  AF.profiles <- which_profiles(agroforestry)
+  FC.profiles <- which_profiles(forestry)
+  CC.profiles <- which_profiles(monocrop)
   common.col <- c(AF.profiles, FC.profiles, CC.profiles)
   common.col <- names(table(common.col)[table(common.col) == 3])[1]
   if(is.na(common.col)) stop("There are no common data profiles with the agroforestry, forestry, and monocrop objects", call. = FALSE)
-  if(!all(identical(AF.profiles[!(AF.profiles %in% c("annualtree", "trees"))], CC.profiles),
-          identical(FC.profiles[!(FC.profiles %in% c("annualtree", "trees"))], CC.profiles),
+  if(!all(identical(AF.profiles[!(AF.profiles %in% c("trees", "tree.info"))], CC.profiles),
+          identical(FC.profiles[!(FC.profiles %in% c("trees", "tree.info"))], CC.profiles),
           identical(AF.profiles, FC.profiles))) {
     profile.error <- c("agroforestry, forestry, and monocrop hops do not contain the same elements. They contain:",
                        paste0("   -- agroforestry: ", paste(AF.profiles, collapse = ", ")),
-                       paste0("   -- forestry:     ",     paste(FC.profiles, collapse = ", ")),
-                       paste0("   -- monocrop:     ",     paste(CC.profiles, collapse = ", ")))
+                       paste0("   -- forestry:     ", paste(FC.profiles, collapse = ", ")),
+                       paste0("   -- monocrop:     ", paste(CC.profiles, collapse = ", ")))
     warning(paste(profile.error, collapse = "\n"), call. = FALSE, immediate. = TRUE)
   }
 
   # Tree checks
-  AG.tree.check <- ifelse(any(unique(table(agroforestry$tree.info$SimulationName)) == 0),
-                          "-- one or more of the agroforestry simulation does/do not contain any trees", "")
-  FC.tree.check <- ifelse(nrow(forestry$tree.info) == 0,
-                          "-- the forestry simulation does/do not contain any trees", "")
-  CC.tree.check <- ifelse((nrow(monocrop$tree.info) > 0 | nrow(monocrop$annualtree) > 0 | nrow(monocrop$trees) > 0),
-                          "-- the monocrop simulation contains trees", "")
+  AG.tree.check <- ifelse(!profile_check(agroforestry, "trees"), "-- one or more of the agroforestry simulation does/do not contain any trees", "")
+  FC.tree.check <- ifelse(!profile_check(forestry,     "trees"), "-- the forestry simulation does not contain any trees", "")
+  CC.tree.check <- ifelse(profile_check(monocrop,      "trees"), "-- the monocrop simulation contains trees", "")
   tree.errors <- c(AG.tree.check, FC.tree.check, CC.tree.check)
   tree.errors <- paste0(tree.errors[!(tree.errors == "")], collapse = "\n")
   if(tree.errors != "") stop(tree.errors, call. = FALSE)
 
   # Edit SimluationNames & add system column
+  AF.simu.names <- unique(agroforestry[[AF.profiles[1]]]$SimulationName)
+  if(length(AF.simu.names) == 1) {
+    agroforestry <- hop_rename(agroforestry,
+                               old.names = AF.simu.names,
+                               new.names = "Agroforestry")
+  }
   forestry <- hop_rename(forestry,
-                              old.names = unique(forestry[[FC.profiles[1]]]$SimulationName),
-                              new.names = "Forestry")
+                         old.names = unique(forestry[[FC.profiles[1]]]$SimulationName),
+                         new.names = "Forestry")
   monocrop <- hop_rename(monocrop,
-                              old.names = unique(monocrop[[CC.profiles[1]]]$SimulationName),
-                              new.names = "Monocrop")
+                         old.names = unique(monocrop[[CC.profiles[1]]]$SimulationName),
+                         new.names = "Monocrop")
   agroforestry <- augment_with_system(agroforestry, "Agroforestry")
   forestry     <- augment_with_system(forestry,     "Forestry")
   monocrop     <- augment_with_system(monocrop,     "Monocrop")
 
   # Merge hops
-  hops <- list(agroforestry, forestry, monocrop)
-  merged_hop <- purrr::pmap(hops, dplyr::bind_rows)
-  merged_hop$variables <- dplyr::distinct(merged_hop$variables)
-
-  # Check numbers of years and warn if different
-  year.summary <- merged_hop[[common.col]] %>%
-    dplyr::group_by(System, SimulationName) %>%
-    dplyr::summarize(n = dplyr::n_distinct(Year)) %>%
-    tidyr::unite(label, System, SimulationName, n, sep = ": ", remove = FALSE)
-  year.summary$label <- gsub("NA: ", "", year.summary$label)
-  if(length(unique(year.summary$n)) != 1) {
-    year.length.warning <- paste(c("Simulation durations not equal!",
-                                   "  Be careful when comparing simulations.",
-                                   "  Simulation durations:",
-                                   paste("   --", year.summary$label, "years")),
-                                 collapse = "\n")
-    warning(year.length.warning, call. = FALSE)
-  }
-
+  merged_hop <- hop_merge(agroforestry, forestry, monocrop)
   merged_hop$exp.path <- face.path
-
   class(merged_hop) <- c("face", "hop-group", "hop", class(merged_hop))
+
   return(merged_hop)
 }
 
@@ -123,11 +100,10 @@ create_face <- function(agroforestry, forestry, monocrop, face.path) {
 #' @param system A character string of the system name to use
 #' @keywords internal
 augment_with_system <- function(hop, system) {
-  profiles.to.check <- names(hop)[!(names(hop) %in% c("variables", "exp.path"))]
-  profiles <- profiles.to.check[purrr::map_lgl(profiles.to.check, function(x) nrow(hop[[x]]) > 0)]
+  profiles <- which_profiles(hop = hop, profiles = FILTERABLE.ELEMENTS)
   for(i in profiles) {
     hop[[i]]$System <- system
-    hop[[i]] <- dplyr::select(hop[[i]], System, everything())
+    hop[[i]] <- dplyr::select(hop[[i]], System, dplyr::everything())
   }
   return(hop)
 }

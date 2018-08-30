@@ -4,10 +4,12 @@
 \alias{get_light_fluxes}
 \title{Get light fluxes from a hop object}
 \usage{
-get_light_fluxes(hop)
+get_light_fluxes(hop, crop.names)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
+
+\item{crop.names}{A character vector of length 2 containing the names to use in the legend for the mainCrop and interCrop of Hi-sAFe, in that order.}
 }
 \value{
 A tibble with extracted and calculated light fluxes.
