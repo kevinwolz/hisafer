@@ -774,8 +774,6 @@ hisafe_slice <- function(hop,
 #' @export
 #' @importFrom dplyr %>%
 #' @import ggplot2
-#' @import egg
-#' @import gtable
 #' @family hisafe visualization functions
 #' @examples
 #' \dontrun{
