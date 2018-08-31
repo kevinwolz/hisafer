@@ -1367,6 +1367,7 @@ create_tile_data <- function(hop, profile, cellWidth) {
 #' @param labels A character vector of labels to use
 #' @keywords internal
 annotator <- function(plots, labels = paste0("(", letters, ")")) {
+  if(!requireNamespace("ggalt", quietly = TRUE)) stop("The package 'ggalt' is required to add plot labels. Please install and load it.", call. = FALSE)
   label <- function(i) ggalt::annotate_textp(x = 0.01, y = 0.99, label = i, size = 15, fontface = 2)
   for(i in 1:length(plots)) {
     plots[[i]] <- plots[[i]] +
