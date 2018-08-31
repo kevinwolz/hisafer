@@ -30,7 +30,9 @@ Other hisafe helper functions: \code{\link{copy_hisafe_template}},
   \code{\link{hop_merge}}, \code{\link{hop_params}},
   \code{\link{hop_rename}}, \code{\link{is_face}},
   \code{\link{is_hip}}, \code{\link{is_hop}},
-  \code{\link{join_profiles}}, \code{\link{profile_check}},
+  \code{\link{join_profiles}},
+  \code{\link{make_rel_years}},
+  \code{\link{profile_check}},
   \code{\link{variable_check}},
   \code{\link{which_profiles}}
 }

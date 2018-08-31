@@ -603,18 +603,6 @@ analyze_hisafe <- function(hop,
 
   dir.create(clean_path(paste0(hop$path, "/analysis/cycles/")), showWarnings = FALSE, recursive = TRUE)
 
-  # ## SIMULATION CYCLES
-  # if(length(annual.cycles.todo) >= 1) {
-  #   cat("\n-- Plotting annual cycles")
-  #   sim.cycle.plots <- purrr::map(annual.cycles.todo,
-  #                                 plot_hisafe_cycle,
-  #                                 hop = hop)
-  #   purrr::walk2(paste0(hop$path, "/analysis/cycles/", annual.cycles.todo, ".png"),
-  #                sim.cycle.plots,
-  #                ggsave_fitmax,
-  #                scale = 2)
-  # }
-
   ## ANNUAL CYCLES
   if(length(annual.cycles.todo) >= 1) {
     cat("\n-- Plotting annual cycles")
@@ -821,4 +809,28 @@ warn_unequal_lengths <- function(hop) {
       warning(year.length.warning, call. = FALSE)
     }
   return(dplyr::select(year.summary, -label))
+}
+
+#' Convert absolute years to relative years in a hop
+#' @description Converts absolute years to relative years (minimum year is year 1) in the Year column of all hop elements.
+#' Does NOT convert dates in the Date column.
+#' @return A hop
+#' @param hop An object of class hop or face.
+#' @param year1 The year that should be treated as year 1. Must be less than or equal to the minimum year in the hop.
+#' @export
+#' @family hisafe helper functions
+#' @examples
+#' \dontrun{
+#' range(hop$trees$Year)
+#' hop.mod <- make_rel_years(hop)
+#' range(hop.mod$trees$Year)
+#' }
+make_rel_years <- function(hop, year1 = NULL) {
+  profiles <- which_profiles(hop = hop, profiles = DATA.PROFILES)
+  if(is.null(year1)) year1 <- min(hop[[profiles[1]]]$Year)
+  for(i in profiles) {
+    #hop[[i]]$Date <- hop[[i]]$Date - lubridate::years(year1) + 1
+    hop[[i]]$Year <- hop[[i]]$Year - year1 + 1
+  }
+  return(hop)
 }

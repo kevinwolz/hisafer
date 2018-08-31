@@ -85,8 +85,7 @@ create_face <- function(agroforestry, forestry, monocrop, face.path) {
   monocrop     <- augment_with_system(monocrop,     "Monocrop")
 
   # Merge hops
-  merged_hop <- hop_merge(agroforestry, forestry, monocrop)
-  merged_hop$path <- face.path
+  merged_hop <- hop_merge(agroforestry, forestry, monocrop, path = face.path)
   class(merged_hop) <- c("face", "hop-group", "hop", class(merged_hop))
 
   return(merged_hop)

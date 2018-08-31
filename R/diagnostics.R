@@ -349,7 +349,7 @@ diag_hisafe <- function(hop,
 #' @param output.path The output.path argument from a diagnostic function
 #' @keywords internal
 diag_output_path <- function(hop, output.path) {
-  if(is.null(output.path)) output.path <- clean_path(paste0(hop$exp.path, "/analysis"))
+  if(is.null(output.path)) output.path <- clean_path(paste0(hop$path, "/analysis"))
   return(output.path)
 }
 
