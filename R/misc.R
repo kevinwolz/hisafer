@@ -368,6 +368,7 @@ hop_filter <- function(hop,
 #' @description Merges multiple hop objects, renaming simulation names if there are duplicates
 #' @return Returns a hop object.
 #' @param ... Any number of individual hop objects to merge.
+#' @param path A character string to be stored in \code{hop$path}.
 #' @export
 #' @importFrom dplyr %>%
 #' @family hisafe helper functions
@@ -375,7 +376,7 @@ hop_filter <- function(hop,
 #' \dontrun{
 #' new_hop <- hop_merge(hop1, hop2, hop3)
 #' }
-hop_merge <- function(...) {
+hop_merge <- function(..., path) {
 
   hops <- list(...)
   if(!all(purrr::map_lgl(hops, is_hop))) stop("one or more supplied objects not of class hop", call. = FALSE)
@@ -391,7 +392,7 @@ hop_merge <- function(...) {
   }
 
   clear_elements <- function(x) {
-    x$exp.path <- NULL
+    x$path <- NULL
     return(x)
   }
 
@@ -407,7 +408,7 @@ hop_merge <- function(...) {
 
   merged_hop$exp.plan  <- dplyr::bind_cols(hip[, "SimulationName"], hip[,  unique.cols], hip[, other.cols])
   merged_hop$exp.plan  <- dplyr::select(merged_hop$exp.plan, "SimulationName", unique.cols)
-  merged_hop$exp.path  <- NA
+  merged_hop$path      <- path
 
   class(merged_hop) <- c("hop-group", "hop", class(merged_hop))
 
@@ -420,7 +421,7 @@ hop_merge <- function(...) {
 #' Check if an object is of class hip
 #' @description Checks if an object is of class hip
 #' @return A logical.
-#' @param x An object to check.
+#' @param hip An object to check.
 #' @export
 #' @family hisafe helper functions
 #' @examples
@@ -440,7 +441,7 @@ is_hip <- function(hip, error = FALSE) {
 #' Check if an object is of class hop
 #' @description Checks if an object is of class hop.
 #' @return A logical.
-#' @param x An object to check.
+#' @param hop An object to check.
 #' @export
 #' @family hisafe helper functions
 #' @examples
@@ -456,6 +457,27 @@ is_hop <- function(hop, error = FALSE) {
     return(check)
   }
 }
+
+#' Check if an object is of class face
+#' @description Checks if an object is of class face.
+#' @return A logical.
+#' @param face An object to check.
+#' @export
+#' @family hisafe helper functions
+#' @examples
+#' \dontrun{
+#' is_face(myface)
+#' }
+is_face <- function(face, error = FALSE) {
+  check <- (is.null(face) | "face" %in% class(face))
+  if(error) {
+    if(!check) stop("face argument not of class face", call. = FALSE)
+    invisible(check)
+  } else {
+    return(check)
+  }
+}
+
 
 #' Check for existiance of profiles in a hop object
 #' @description Checks for existiance of profiles in a hop object
@@ -579,7 +601,7 @@ analyze_hisafe <- function(hop,
   annual.cycles.todo <- c("carbon", "light", "nitrogen", "water")[c(carbon, light, nitrogen, water)]
   daily.cycles.todo  <- c("carbon", "light", "nitrogen", "water", "carbon-increment")[c(carbon.daily, light.daily, nitrogen.daily, water.daily, carbon.increment)]
 
-  dir.create(clean_path(paste0(hop$exp.path, "/analysis/cycles/")), showWarnings = FALSE, recursive = TRUE)
+  dir.create(clean_path(paste0(hop$path, "/analysis/cycles/")), showWarnings = FALSE, recursive = TRUE)
 
   # ## SIMULATION CYCLES
   # if(length(annual.cycles.todo) >= 1) {
@@ -587,7 +609,7 @@ analyze_hisafe <- function(hop,
   #   sim.cycle.plots <- purrr::map(annual.cycles.todo,
   #                                 plot_hisafe_cycle,
   #                                 hop = hop)
-  #   purrr::walk2(paste0(hop$exp.path, "/analysis/cycles/", annual.cycles.todo, ".png"),
+  #   purrr::walk2(paste0(hop$path, "/analysis/cycles/", annual.cycles.todo, ".png"),
   #                sim.cycle.plots,
   #                ggsave_fitmax,
   #                scale = 2)
@@ -599,7 +621,7 @@ analyze_hisafe <- function(hop,
     annual.cycle.plots <- purrr::map(annual.cycles.todo,
                                      plot_hisafe_cycle_annual,
                                      hop = hop)
-    purrr::walk2(paste0(hop$exp.path, "/analysis/cycles/", annual.cycles.todo, "_annual.png"),
+    purrr::walk2(paste0(hop$path, "/analysis/cycles/", annual.cycles.todo, "_annual.png"),
                  annual.cycle.plots,
                  ggsave_fitmax,
                  scale = 2)
@@ -614,7 +636,7 @@ analyze_hisafe <- function(hop,
                                       hop   = hop,
                                       cycle = cycle,
                                       years = "all")
-      purrr::walk2(paste0(hop$exp.path, "/analysis/cycles/", cycle, "_", hop$exp.plan$SimulationName, ".png"),
+      purrr::walk2(paste0(hop$path, "/analysis/cycles/", cycle, "_", hop$exp.plan$SimulationName, ".png"),
                    daily.cycle.plots,
                    ggsave_fitmax,
                    scale = 2)
@@ -644,11 +666,11 @@ write_hop <- function(hop, profiles = "all", output.path = NULL) {
   if(profiles[1] == "all") profiles <- DATA.PROFILES
   if(!all(profiles %in% DATA.PROFILES)) stop(paste0("profiles argument must be 'all' or one or more of ",
                                                     paste(DATA.PROFILES, collapse = ", ")), call. = FALSE)
-  profiles <- which_profiles(hop = hop, profiles = profiles)
+  profiles <- c(which_profiles(hop = hop, profiles = profiles), "metadata")
 
-  if(is.null(output.path) & is.na(hop$exp.path)) stop("output.path argument cannot be NULL if hop$exp.path is NA", call. = FALSE)
-  if(is.null(output.path)) output.path <- hop$exp.path
-  if(!is.character(output.path)) stop("output.path argument must be character string", call. = FALSE)
+  if(is.null(output.path)) {
+    output.path <- hop$path
+  } else if(!is.character(output.path)) stop("output.path argument must be NULL or a character string", call. = FALSE)
 
   dir.create(paste0(output.path, "/analysis/combined_outputs"), recursive = TRUE, showWarnings = FALSE)
   write_profile <- function(profile, hop, output.path) {
@@ -784,7 +806,6 @@ get_pheno_dates <- function(hop, tree.ids = 1) {
 #' @description  Provides warning if simulation lengths are unequal.
 #' @return A tibble (data.frame) containing the SimulationName and durations in years.
 #' @param hop An object of class hop or a hop-like object.
-#' @family hisafe helper functions
 #' @keywords internal
 warn_unequal_lengths <- function(hop) {
    year.summary <- hop[[as.numeric(which.max(purrr::map_int(hop[names(hop) %in% DATA.PROFILES], nrow)))]] %>%

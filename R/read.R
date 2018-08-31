@@ -13,7 +13,7 @@
 #'  \item{tree.info}{ - tree species and location data for each simulation}
 #'  \item{exp.plan}{ - the exp.plan of the hip object that generated the simulations}
 #'  \item{metadata}{ - the metadata of each simulations (path to simulation folders, model versions, run date , run duration)}
-#'  \item{exp.path}{ - the path to the experiment folder}
+#'  \item{path}{ - the path to the experiment/simulation folder}
 #' }
 #' @param hip An object of class "hip". To create a hip object see \code{\link{define_hisafe}}.
 #' If \code{hip} is not provided, then \code{path} is required and the input data for the experiment is read from the experiment
@@ -135,7 +135,7 @@ read_hisafe <- function(hip           = NULL,
   data$monthCells  <- data_tidy(data$monthCells)
   data$annualCells <- data_tidy(data$annualCells)
   data$voxels      <- data_tidy(data$voxels)
-  data$exp.path    <- ifelse(nrow(EXP.PLAN) > 1, path, NA)
+  data$path        <- ifelse(nrow(EXP.PLAN) > 1, path, simu.paths)
 
   ## Assign class designators
   if(length(simu.names) > 1) {

@@ -7,7 +7,7 @@
 #' @param hop An object of class "hop" or "face" containing output data from one or more Hi-sAFe simulations.
 #' @param profile The profile for which to plot a timeseries. One of 'trees', 'plot', 'climate', or 'cells'.
 #' @param output.path A character string indicating the path to the directory where plots should be saved.
-#' Plots aresaved in a subdirectory within this directory named by \code{profile}.
+#' Plots are saved in a subdirectory within this directory named by \code{profile}.
 #' If no value is provided, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis/diagnostics".
 #' @param ... Other arguments passed to \code{\link{plot_hisafe_ts}}.
 #' @export
@@ -349,11 +349,7 @@ diag_hisafe <- function(hop,
 #' @param output.path The output.path argument from a diagnostic function
 #' @keywords internal
 diag_output_path <- function(hop, output.path) {
-  if(is.null(output.path) & "hop-group" %in% class(hop)) {
-    output.path <- clean_path(paste0(hop$exp.path, "/analysis"))
-  } else if(is.null(output.path) & !("hop-group" %in% class(hop))){
-    output.path <- clean_path(paste0(hop$metadata$path, "/analysis"))
-  }
+  if(is.null(output.path)) output.path <- clean_path(paste0(hop$exp.path, "/analysis"))
   return(output.path)
 }
 

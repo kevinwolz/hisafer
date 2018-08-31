@@ -40,7 +40,7 @@ create_face <- function(agroforestry, forestry, monocrop, face.path) {
   multi.errors <- paste0(multi.errors[!(multi.errors == "")], collapse = "\n")
   if(multi.errors != "") stop(multi.errors, call. = FALSE)
 
-  agroforestry$exp.path <- forestry$exp.path <- monocrop$exp.path <- NULL
+  agroforestry$path <- forestry$path <- monocrop$path <- NULL
 
   # Profile checks
   AF.profiles <- which_profiles(agroforestry)
@@ -86,7 +86,7 @@ create_face <- function(agroforestry, forestry, monocrop, face.path) {
 
   # Merge hops
   merged_hop <- hop_merge(agroforestry, forestry, monocrop)
-  merged_hop$exp.path <- face.path
+  merged_hop$path <- face.path
   class(merged_hop) <- c("face", "hop-group", "hop", class(merged_hop))
 
   return(merged_hop)
