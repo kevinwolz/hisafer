@@ -1360,3 +1360,17 @@ create_tile_data <- function(hop, profile, cellWidth) {
   if(nrow(plot.data) == 0) stop("hop filtering resulted in no remaining data to plot", call. = FALSE)
   return(plot.data)
 }
+
+#' Add labels to plot panels
+#' @description Adds labels to upper-right corne of plot panels
+#' @param plots A list of ggplot objects
+#' @param labels A character vector of labels to use
+#' @keywords internal
+annotator <- function(plots, labels = paste0("(", letters, ")")) {
+  label <- function(i) ggalt::annotate_textp(x = 0.01, y = 0.99, label = i, size = 15, fontface = 2)
+  for(i in 1:length(plots)) {
+    plots[[i]] <- plots[[i]] +
+      label(labels[i])
+  }
+  return(plots)
+}

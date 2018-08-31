@@ -729,3 +729,134 @@ get_yields <- function(hop, profile, crop.names) {
                                 labels = c("Trees", crop.names[1])))
   return(out)
 }
+
+#' Plot summary dashboard of daily and annual cycles
+#' @description Plots summary dashboard of daily and annual cycles.
+#' @return Invisibly retruns an egg object.
+#' @param hop An object of class hop or face.
+#' @param daily.years A numeric vector of legnth 1 indicating the year to use for the daily plots.
+#' @param simu.name A character vector of legnth 1 indicating the SimulationName within \code{hop} to plot.
+#' @param cycles A character vector of the cycles to include. Supported cycles include: 'carbon', 'light', 'water', and 'nitrogen.
+#' See \code{\link{plot_hisafe_cycle_annual}} for details of each cycle.
+#' @param crop.names A character vector of length 2 containing the names to use in the legend for the mainCrop and interCrop of Hi-sAFe, in that order.
+#' @param output.path A character string indicating the path to the directory where plots should be saved.
+#' If \code{NULL}, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis".
+#' The plot wil be saved in this directory as "cycles_summary_SimulationName.jpg".
+#' @param plot.labels A character vector of labels to label upper-right corner of plot panels. If \code{NULL}, no labels will be added.
+#' @export
+#' @import ggplot2
+#' @family hisafe analysis functions
+#' @examples
+#' \dontrun{
+#' cycle.plot <- cycle_summary(myhop, 2000)
+#' }
+cycle_summary <- function(hop,
+                          daily.year,
+                          simu.name   = NULL,
+                          cycles      = c("carbon", "light", "water", "nitrogen"),
+                          crop.names  = c("Main crop", "Inter crop"),
+                          output.path = NULL,
+                          plot.labels = NULL) {
+
+  if(!(length(daily.year) == 1 & is.numeric(daily.year))) stop("daily.year argument must be a numeric vector of length 1", call. = FALSE)
+  if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character string",          call. = FALSE)
+  if(!(is.character(plot.labels) | is.null(plot.labels))) stop("plot.labels argument must be a character string",          call. = FALSE)
+
+  if(is.null(simu.name)) {
+    simu.name <- hop$metadata$SimulationName
+    if(length(simu.name) > 1) stop("simu.name must be specfied if hop contains more than one simulation.", call. = FALSE)
+  }
+
+  supported.cycles <- c("carbon", "light", "water", "nitrogen")
+
+  ## CARBON
+  carbon.daily <- plot_hisafe_cycle_daily(hop           = hop,
+                                          simu.names    = simu.name,
+                                          cycle         = "carbon",
+                                          years         = daily.year,
+                                          pheno.lines   = FALSE) +
+    guides(fill = FALSE)
+
+  carbon.annual <- plot_hisafe_cycle_annual(hop        = hop,
+                                            simu.names = simu.name,
+                                            cycle      = "carbon")
+
+  ## LIGHT
+  light.daily <- plot_hisafe_cycle_daily(hop           = hop,
+                                         simu.names    = simu.name,
+                                         cycle         = "light",
+                                         years         = daily.year,
+                                         crop.names    = crop.names,
+                                         pheno.lines   = FALSE) +
+    guides(fill = FALSE)
+
+  light.annual <- plot_hisafe_cycle_annual(hop           = hop,
+                                           simu.names    = simu.name,
+                                           cycle         = "light",
+                                           crop.names    = crop.names,
+                                           bar.color     = "transparent")
+
+  ## WATER
+  water.daily <- plot_hisafe_cycle_daily(hop           = hop,
+                                         simu.names    = simu.name,
+                                         cycle         = "water",
+                                         years         = daily.year,
+                                         crop.names    = crop.names,
+                                         pheno.lines   = FALSE) +
+    guides(fill = FALSE)
+
+  water.annual <- plot_hisafe_cycle_annual(hop        = hop,
+                                           simu.names = simu.name,
+                                           cycle      = "water",
+                                           crop.names = crop.names)
+
+  ## NITROGEN
+  nitrogen.daily <- plot_hisafe_cycle_daily(hop         = hop,
+                                            simu.names  = simu.name,
+                                            cycle       = "nitrogen",
+                                            years       = daily.year,
+                                            crop.names  = crop.names,
+                                            pheno.lines = FALSE) +
+    guides(fill = FALSE)
+
+  nitrogen.annual <- plot_hisafe_cycle_annual(hop        = hop,
+                                              simu.names = simu.name,
+                                              cycle      = "nitrogen",
+                                              crop.names = crop.names)
+
+  ## MERGE & ADD LEGEND
+  plot.list <- list(carbon.daily,   carbon.annual,
+                    light.daily,    light.annual,
+                    water.daily,    water.annual,
+                    nitrogen.daily, nitrogen.annual)[rep(supported.cycles %in% cycles, each = 2)]
+
+  n.plots <- length(plot.list)
+  for(i in 1:n.plots) {
+    if(i %in% c(n.plots-1, n.plots)) {
+      plot.list[[i]] <- plot.list[[i]] +
+        labs(title = NULL) +
+        theme(axis.text.x      = element_text(angle = 0, hjust = 0.5),
+              panel.grid.major = element_blank(),
+              legend.box.just  = "left")
+    } else {
+      plot.list[[i]] <- plot.list[[i]] +
+        labs(title = NULL) +
+        theme(axis.text.x      = element_blank(),
+              axis.title.x     = element_blank(),
+              panel.grid.major = element_blank())
+    }
+  }
+
+  ## ADD LABELS
+  if(!is.null(plot.labels)) plot.list <- annotator(plot.list, labels = plot.labels)
+
+  ## PLOT
+  cycle.plot <- egg::ggarrange(plots = plot.list, ncol = 2, draw = FALSE)
+
+  output.path <- clean_path(paste0(diag_output_path(hop = hop, output.path = output.path), "/"))
+  dir.create(output.path, recursive = TRUE, showWarnings = FALSE)
+
+  ggsave(paste0(output.path, "cycle_summary_", simu.name, ".jpg"), cycle.plot, scale = 2.2, width = 6, height = 1.5 * n.plots / 2)
+
+  invisible(cycle.plot)
+}
