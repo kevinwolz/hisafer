@@ -175,11 +175,8 @@ plot_hisafe_cycle_annual <- function(hop,
           axis.text.x       = element_text(margin = margin(t = 5, unit = "points"), angle = 90, hjust = 1, vjust = 0.5),
           axis.text.y       = element_text(margin = margin(r = 5, unit = "points")))
 
-  #ggsave_fitmax("/Users/kevinwolz/Desktop/water.png", plot.obj, scale = 2)
-  #ggsave_fitmax("/Users/kevinwolz/Desktop/nitrogen.png", plot.obj, scale = 2)
   out.data <- plot.data %>%
-    dplyr::mutate(cycle = cycle) %>%
-    dplyr::mutate_if(is.numeric, abs)
+    dplyr::mutate(cycle = cycle)
 
   if(plot) return(plot.obj) else return(out.data)
 }
@@ -383,8 +380,7 @@ plot_hisafe_cycle_daily <- function(hop,
   if(pheno.lines & profile_check(hop, "trees")) plot.obj <- plot.obj + vert.lines
 
   out.data <- plot.data %>%
-    dplyr::mutate(cycle = cycle) %>%
-    dplyr::mutate_if(is.numeric, abs)
+    dplyr::mutate(cycle = cycle)
 
   #ggsave_fitmax("/Users/kevinwolz/Desktop/nitrogen_daily.png", plot.obj, scale = 2)
   if(plot) return(plot.obj) else return(dplyr::select(out.data, -date))
