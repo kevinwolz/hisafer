@@ -131,11 +131,7 @@ plot_hisafe_ts <- function(hop,
     scale_x_ts  <- scale_x_date(date_labels = "%Y")
   }
 
-  if(facet.simu | facet.year | facet.crop) {
-    theme.extra <- theme(axis.ticks.length = unit(5, "points"),
-                         axis.text.x       = element_text(margin = margin(t = 5, unit = "points"), angle = 90, hjust = 1, vjust = 0.5),
-                         axis.text.y       = element_text(margin = margin(r = 5, unit = "points")))
-  }
+  if(facet.simu | facet.year | facet.crop) theme.extra <- theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
   plot.data  <- hop[[profile]]
 
@@ -922,9 +918,7 @@ plot_hisafe_bg <- function(hop,
   base.plot <- ggplot(plot.data, aes(x = Date)) +
     facet_wrap(~SimulationName, nrow = 1) +
     scale_y_continuous(sec.axis = sec_axis(~ ., labels = NULL)) +
-    theme_hisafe_ts() +
-    theme(axis.ticks.length = unit(5, "points"),
-          axis.text.y       = element_text(margin = margin(r = 5, unit = "points")))
+    theme_hisafe_ts()
 
   root.wt.plot <- base.plot +
     labs(title = "Root & water table depth",
@@ -938,7 +932,7 @@ plot_hisafe_bg <- function(hop,
             axis.title.x = element_blank())
   } else {
     root.wt.plot <- root.wt.plot +
-      theme(axis.text.x = element_text(margin = margin(t = 5, unit = "points"), angle = 90, hjust = 1, vjust = 0.5))
+      theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
   }
 
   fr.sen.plot <- base.plot +
@@ -952,14 +946,14 @@ plot_hisafe_bg <- function(hop,
             axis.title.x = element_blank())
   } else {
     fr.sen.plot <- fr.sen.plot +
-      theme(axis.text.x = element_text(margin = margin(t = 5, unit = "points"), angle = 90, hjust = 1, vjust = 0.5))
+      theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
   }
 
   cr.sen.plot <- base.plot +
     labs(title = "Coarse root senescence by anoxia",
          y     = "Senescence (kg C)") +
     geom_line(aes(y = carbonCoarseRootSenAnoxia)) +
-    theme(axis.text.x = element_text(margin = margin(t = 5, unit = "points"), angle = 90, hjust = 1, vjust = 0.5))
+    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
   plot.list <- list(root.wt.plot)
   if("fine"   %in% sen) plot.list <- c(plot.list, list(fr.sen.plot))

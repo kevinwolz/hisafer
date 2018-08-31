@@ -71,9 +71,10 @@ plot_hisafe_cycle_annual <- function(hop,
   is_hop(hop, error = TRUE)
   if(simu.names[1] == "all") simu.names <- unique(hop$exp.plan$SimulationName)
 
-  if(!(cycle %in% c("carbon", "nitrogen", "water", "light", "yield")))         stop("cycle argument must be one of: carbon, nitrogen, water, light", call. = FALSE)
-  if(!(length(year.lim) == 2 & (is.numeric(year.lim) | all(is.na(year.lim))))) stop("year.lim argument must be a numeric vector of length 2",        call. = FALSE)
-  if(!(length(bar.color) == 1 & is.character(bar.color)))                      stop("bar.plot argument must be a character vector of length 1",      call. = FALSE)
+  if(!(cycle %in% c("carbon", "nitrogen", "water", "light", "yield")))           stop("cycle argument must be one of: carbon, nitrogen, water, light", call. = FALSE)
+  if(!(length(year.lim)   == 2 & (is.numeric(year.lim) | all(is.na(year.lim))))) stop("year.lim argument must be a numeric vector of length 2",        call. = FALSE)
+  if(!(length(bar.color)  == 1 & is.character(bar.color)))                       stop("bar.plot argument must be a character vector of length 1",      call. = FALSE)
+  if(!(length(crop.names) == 2 & is.character(crop.names)))                      stop("crop.names argument must be a character vector of length 2",    call. = FALSE)
   is_TF(plot)
 
   hop <- hop_filter(hop = hop, simu.names = simu.names, tree.ids = tree.ids)
@@ -82,12 +83,14 @@ plot_hisafe_cycle_annual <- function(hop,
 
   if(cycle == "yield") {
     plot.data <- get_yields(hop = hop, profile = METHOD, crop.names = crop.names)
+    geom       <- geom_bar(stat = "identity", color = bar.color)
     plot.title <- "Yield"
     y.lab      <- "Yield (kg ha-1)"
     if(is.null(color.palette)) color.palette <- c("#E69F00", "#009E73")
 
   } else if(cycle == "water") {
     plot.data <- get_water_fluxes(hop = hop, profile = METHOD, crop.names = crop.names)
+    geom       <- geom_bar(stat = "identity", color = bar.color)
     plot.title <- "Water Cycle"
     y.lab      <- "Water flux (mm)"
     if(is.null(color.palette)) color.palette <- c("#D55E00", "#E69F00", "#F0E442", "grey20", "grey40", "grey60", "grey80",
@@ -95,6 +98,7 @@ plot_hisafe_cycle_annual <- function(hop,
 
   } else if(cycle == "nitrogen") {
     plot.data <- get_nitrogen_fluxes(hop = hop, profile = METHOD, crop.names = crop.names)
+    geom       <- geom_bar(stat = "identity", color = bar.color)
     plot.title <- "Nitrogen Cycle"
     y.lab      <- "N flux (kg N ha-1)"
     if(is.null(color.palette)) color.palette <- c("#D55E00", "#E69F00", "#F0E442", "grey20", "grey40", "grey60",
@@ -102,13 +106,17 @@ plot_hisafe_cycle_annual <- function(hop,
 
   } else if(cycle == "light") {
     plot.data  <- get_light_fluxes(hop = hop, crop.names = crop.names)
+    geom       <- list(geom_bar(stat = "identity", aes(color = flux)),
+                       scale_color_manual(values = c("black", "white", "black", "black")),
+                       guides(fill = guide_legend(override.aes = list(color = "black"))))
     plot.title <- "Light Capture"
     y.lab      <- "Intercepted PAR (%)"
-    if(is.null(color.palette)) color.palette <- c("#E69F00", "grey20", "#56B4E9", "#009E73")
+    if(is.null(color.palette)) color.palette <- c("#E69F00", "white", "#56B4E9", "#009E73")
 
   } else if(cycle == "carbon") {
     if(!profile_check(hop, "trees")) return(NULL)
     plot.data  <- get_carbon_pools(hop = hop)
+    geom       <- geom_bar(stat = "identity", color = bar.color)
     plot.title <- "Tree Carbon Pools"
     y.lab      <- "Tree C storage (Mg C ha-1)"
     if(is.null(color.palette)) color.palette <- c("#009E73", "#999999", "#D55E00", "#E69F00", "#56B4E9", "#0072B2", "#F0E442")
@@ -167,20 +175,17 @@ plot_hisafe_cycle_annual <- function(hop,
     facet_simu +
     scale.x +
     scale_y_continuous(sec.axis = sec_axis(~ ., labels = NULL), expand = c(0,0)) +
-    geom_bar(stat = "identity", color = bar.color) +
+    geom +
     scale_fill_manual(values = color.palette) +
     theme_hisafe_ts() +
-    theme(legend.title      = element_blank(),
-          axis.ticks.length = unit(5, "points"),
-          axis.text.x       = element_text(margin = margin(t = 5, unit = "points"), angle = 90, hjust = 1, vjust = 0.5),
-          axis.text.y       = element_text(margin = margin(r = 5, unit = "points")))
+    theme(legend.title = element_blank(),
+          axis.text.x  = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
   out.data <- plot.data %>%
     dplyr::mutate(cycle = cycle)
 
   if(plot) return(plot.obj) else return(out.data)
 }
-
 
 #' Plot daily timeseries of major cycles
 #' @description Plots a daily timeseries of tree carbon pools, water uptake, nitrogen uptake, light capture, or tree carbon incrememnt.
@@ -230,9 +235,12 @@ plot_hisafe_cycle_daily <- function(hop,
   allowed.cycles <- c("carbon", "nitrogen", "water", "light", "yield", "carbon-increment")
 
   is_hop(hop, error = TRUE)
-  if(!(cycle %in% allowed.cycles))                      stop(paste0("cycle argument must be one of: ", paste(allowed.cycles, collapse = ", ")), call. = FALSE)
-  if(!(all(is.numeric(years)) | years[1] == "all"))     stop("years argument must be 'all' or a numeric vector",          call. = FALSE)
-  if(!(length(doy.lim) == 2 & all(doy.lim %in% 1:366))) stop("doy.lim argument must be of length 2 with values in 1:366", call. = FALSE)
+  if(!(cycle %in% allowed.cycles))                          stop(paste0("cycle argument must be one of: ", paste(allowed.cycles, collapse = ", ")), call. = FALSE)
+  if(!(all(is.numeric(years)) | years[1] == "all"))         stop("years argument must be 'all' or a numeric vector",           call. = FALSE)
+  if(!(length(doy.lim)    == 2 & all(doy.lim %in% 1:366)))  stop("doy.lim argument must be of length 2 with values in 1:366",  call. = FALSE)
+  if(!(length(crop.names) == 2 & is.character(crop.names))) stop("crop.names argument must be a character vector of length 2", call. = FALSE)
+  is_TF(pheno.lines)
+  is_TF(trim)
   is_TF(plot)
 
   METHOD <- ifelse(profile_check(hop, "cells"), "cells", "plot")
@@ -282,7 +290,7 @@ plot_hisafe_cycle_daily <- function(hop,
 
   } else if(cycle == "light") {
     plot.data   <- get_light_fluxes(hop = hop, crop.names = crop.names)
-    if(is.null(color.palette)) color.palette <- c("#E69F00", "grey20", "#56B4E9", "#009E73")
+    if(is.null(color.palette)) color.palette <- c("#E69F00", "white", "#56B4E9", "#009E73")
     cycle.geom  <- geom_area(aes(fill = flux), na.rm = TRUE)
     cycle.scale <- scale_fill_manual(values = color.palette)
     pre.title   <- "Light Capture"
@@ -371,11 +379,10 @@ plot_hisafe_cycle_daily <- function(hop,
     facet +
     cycle.geom +
     cycle.scale +
+    guides(fill = guide_legend(override.aes = list(color = "black"))) +
     theme_hisafe_ts() +
-    theme(legend.title      = element_blank(),
-          axis.ticks.length = unit(5, "points"),
-          axis.text.x       = element_text(margin = margin(t = 5, unit = "points"), angle = 90, hjust = 1, vjust = 0.5),
-          axis.text.y       = element_text(margin = margin(r = 5, unit = "points")))
+    theme(legend.title = element_blank(),
+          axis.text.x  = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
   if(pheno.lines & profile_check(hop, "trees")) plot.obj <- plot.obj + vert.lines
 
