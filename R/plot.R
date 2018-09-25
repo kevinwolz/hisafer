@@ -126,6 +126,10 @@ plot_hisafe_ts <- function(hop,
     x.var       <- "fake.date"
     scale_x_ts  <- scale_x_date(date_labels = "%b", expand = c(0,0),
                                 limits = lubridate::as_date(lubridate::parse_date_time(paste0("8000-", doy.lim), "%Y-%j")))
+  } else if(length(years) == 1) {
+    x.var       <- "fake.date"
+    scale_x_ts  <- scale_x_date(date_labels = "%b", expand = c(0,0), date_breaks = "1 month",
+                                limits = lubridate::as_date(lubridate::parse_date_time(paste0("8000-", doy.lim), "%Y-%j")))
   } else {
     x.var <- "Date"
     scale_x_ts  <- scale_x_date(date_labels = "%Y")
