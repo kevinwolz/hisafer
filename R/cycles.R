@@ -111,7 +111,7 @@ plot_hisafe_cycle_annual <- function(hop,
                        guides(fill = guide_legend(override.aes = list(color = "black"))))
     plot.title <- "Light Capture"
     y.lab      <- "Intercepted PAR (%)"
-    if(is.null(color.palette)) color.palette <- c("#E69F00", "white", "#56B4E9", "#009E73")
+    if(is.null(color.palette)) color.palette <- c("#009E73", "white", "#56B4E9", "#E69F00")
 
   } else if(cycle == "carbon") {
     if(!profile_check(hop, "trees")) return(NULL)
@@ -269,7 +269,7 @@ plot_hisafe_cycle_daily <- function(hop,
                                 paste("Uptake -", crop.names[1]))) %>%
       dplyr::mutate(flux = droplevels(flux))
     levels(plot.data$flux) <- c("Trees", "Inter crop", "Main crop")
-    if(is.null(color.palette)) color.palette <- c("#E69F00", "#56B4E9", "#009E73")
+    if(is.null(color.palette)) color.palette <- c("#009E73", "#56B4E9", "#E69F00")
     cycle.geom  <- geom_area(aes(fill = flux), na.rm = TRUE)
     cycle.scale <- scale_fill_manual(values = color.palette)
     pre.title   <- "Water Uptake"
@@ -282,7 +282,7 @@ plot_hisafe_cycle_daily <- function(hop,
                                 paste("Uptake -", crop.names[1]))) %>%
       dplyr::mutate(flux = droplevels(flux))
     levels(plot.data$flux) <- c("Trees", "Inter crop", "Main crop")
-    if(is.null(color.palette)) color.palette <- c("#E69F00", "#56B4E9", "#009E73")
+    if(is.null(color.palette)) color.palette <- c("#009E73", "#56B4E9", "#E69F00")
     cycle.geom  <- geom_area(aes(fill = flux), na.rm = TRUE)
     cycle.scale <- scale_fill_manual(values = color.palette)
     pre.title   <- "Nitrogen Uptake"
@@ -290,7 +290,7 @@ plot_hisafe_cycle_daily <- function(hop,
 
   } else if(cycle == "light") {
     plot.data   <- get_light_fluxes(hop = hop, crop.names = crop.names)
-    if(is.null(color.palette)) color.palette <- c("#E69F00", "white", "#56B4E9", "#009E73")
+    if(is.null(color.palette)) color.palette <- c("#009E73", "white", "#56B4E9", "#E69F00")
     cycle.geom  <- geom_area(aes(fill = flux), na.rm = TRUE)
     cycle.scale <- scale_fill_manual(values = color.palette)
     pre.title   <- "Light Capture"

@@ -6,7 +6,7 @@
 \usage{
 LER(face, cycle = "yield", timescales = c("Annual", "Cumulative"),
   components = c("LER", "Trees", "Crop"), color.palette = c("black",
-  "#E69F00", "#009E73"), size.palette = c(2, 1, 1), hline1 = TRUE,
+  "#009E73", "#E69F00"), size.palette = c(2, 1, 1), hline1 = TRUE,
   ymax = NA, plot = TRUE, ...)
 }
 \arguments{
