@@ -885,3 +885,109 @@ cycle_summary <- function(hop,
 
   invisible(cycle.plot)
 }
+
+#' Calculate water and nitrogen budgets
+#' @description Calculates water and nitrogen budgets
+#' See \code{\link{plot_hisafe_cycle_annual}} for details of each cycle.
+#' @return A data.frame (tibble) containing the budget data.
+#' @param hop An object of class hop or face.
+#' @param cycle A character vector of the cycle to analyze Supported cycles include: 'water', and 'nitrogen.
+#' @param simu.names A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.
+#' @param years A numeric vector of the years within \code{hop} to include. Use "all" to include all available values.
+#' @param save.table Logical indicating whether a table of budget data and calculations should be saved to \code{output.path}.
+#' @param save.plot Logical indicating whether a plot of the budget excess should be saved to \code{output.path}.
+#' @param output.path A character string indicating the path to the directory where plots should be saved.
+#' If \code{NULL}, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis".
+#' The plot wil be saved in this directory as "cycles_summary_SimulationName.jpg".
+#' @export
+#' @import ggplot2
+#' @family hisafe analysis functions
+#' @examples
+#' \dontrun{
+#' water.budget <- cycle_budget(myhop, "water")
+#' }
+cycle_budget <- function(hop,
+                         cycle,
+                         simu.names  = "all",
+                         years       = "all",
+                         save.table  = TRUE,
+                         save.plot   = TRUE,
+                         output.path = NULL) {
+
+  supported.cycles <- c("water", "nitrogen")
+  supported.saves  <- c("table", "plot")
+
+  is_hop(hop, error = TRUE)
+  profile_check(hop, c("cells", "plot"), error = TRUE)
+
+  if(years[1] == "all") years <- unique(hop$cells$Year)
+
+  if(!all(cycle %in% supported.cycles))                   stop(paste0("cycle argument must be one of:", paste(supported.cycles, collapse = ", ")), call. = FALSE)
+  if(!all(is.numeric(years)))                             stop("years argument must be 'all' or a numeric vector",                                 call. = FALSE)
+  if(!all(years %in% unique(hop$cells$Year)))             stop(paste("not all values in years are present in the cells profile"),                  call. = FALSE)
+  if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character string",                                  call. = FALSE)
+  is_TF(save.table)
+  is_TF(save.plot)
+
+  hop <- hop_filter(hop = hop, simu.names = simu.names)
+
+  ## FLUXES
+  flux.raw <- plot_hisafe_cycle_annual(hop = hop, cycle = cycle, plot = FALSE) %>%
+    dplyr::filter(Year %in% years)
+
+  flux.spread <- flux.raw %>%
+    tidyr::spread(key = "flux", value = "value")
+
+  flux <- flux.raw %>%
+    dplyr::summarize(value = sum(value)) %>%
+    dplyr::rename(sum.of.fluxes = value)
+
+  ## STOCK
+  stock <- hop$plot %>%
+    dplyr::filter(JulianDay == 1) %>%
+    dplyr::select(SimulationName, Year, JulianDay, waterStock, mineralNitrogenStock, totalNitrogenHumusStock) %>%
+    dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
+    dplyr::group_by(SimulationName) %>%
+    dplyr::arrange(SimulationName, Year)
+
+  if(cycle == "water") {
+    stock <- stock %>%
+      dplyr::mutate(stockChange = c(diff(waterStock), NA)) %>%
+      dplyr::filter(Year %in% years) %>%
+      dplyr::select(SimulationName, Year, stockChange)
+  } else if(cycle == "nitrogen") {
+    stock <- stock %>%
+      dplyr::mutate(mineralNitrogenStock = mineralNitrogenStock / 1000 / plotAreaHa) %>% # convert g to kg/ha
+      dplyr::mutate(nitrogenStock = mineralNitrogenStock + totalNitrogenHumusStock) %>%
+      dplyr::mutate(stockChange = c(diff(nitrogenStock), NA)) %>%
+      dplyr::filter(Year %in% years) %>%
+      dplyr::select(SimulationName, Year, stockChange)
+  }
+
+  budget.data <- flux.spread %>%
+    dplyr::left_join(flux,  by = c("SimulationName", "Year")) %>%
+    dplyr::left_join(stock, by = c("SimulationName", "Year")) %>%
+    dplyr::mutate(excess.export = sum.of.fluxes + stockChange)
+
+  if(save.table | save.plot) {
+    output.path <- clean_path(paste0(diag_output_path(hop = hop, output.path = output.path), "/budgets/"))
+    dir.create(output.path, recursive = TRUE, showWarnings = FALSE)
+
+    if(save.table) write_csv(budget.data, paste0(output.path, cycle, "_budget.csv"))
+
+    if(save.plot) {
+      plot.obj <- ggplot(budget.data, aes(x = Year, y = excess.export, color = SimulationName, linetype = SimulationName)) +
+        labs(y = paste0("Excess ", cycle, " export from scene")) +
+        geom_line() +
+        geom_point() +
+        scale_color_manual(values    = rep(c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7"), 6)) +
+        scale_linetype_manual(values = rep(1:6, each = 8)) +
+        theme_hisafe_ts()
+      ggsave_fitmax(paste0(output.path, cycle, "_budget_excess.jpg"), plot.obj, scale = 1.5)
+    }
+  }
+
+  return(budget.data)
+}
+
+

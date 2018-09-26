@@ -84,7 +84,7 @@ ggsave_fitmax("water_cycle.png", water.plot)
 \seealso{
 Other hisafe analysis functions: \code{\link{LER_summary}},
   \code{\link{LER}}, \code{\link{analyze_hisafe}},
-  \code{\link{cycle_summary}},
+  \code{\link{cycle_budget}}, \code{\link{cycle_summary}},
   \code{\link{plot_hisafe_cycle_daily}},
   \code{\link{write_hop}}
 }

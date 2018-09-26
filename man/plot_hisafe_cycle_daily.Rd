@@ -57,7 +57,7 @@ ggsave_fitmax("light_capture.png", light.capture.plot)
 \seealso{
 Other hisafe analysis functions: \code{\link{LER_summary}},
   \code{\link{LER}}, \code{\link{analyze_hisafe}},
-  \code{\link{cycle_summary}},
+  \code{\link{cycle_budget}}, \code{\link{cycle_summary}},
   \code{\link{plot_hisafe_cycle_annual}},
   \code{\link{write_hop}}
 }
