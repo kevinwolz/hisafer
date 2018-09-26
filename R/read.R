@@ -446,7 +446,10 @@ read_tree_info <- function(path, simu.name) {
   pld <- read_param_file(pld.path)
   if(!pld$TREE_INITIALIZATION$tree.initialization$commented) {
     tree.info <- pld$TREE_INITIALIZATION$tree.initialization$value[[1]] %>%
-      dplyr::mutate(x = treeX, y = treeY) %>%
+      dplyr::mutate(special.case = treeX == 0 & treeY == 0) %>% # special case when x == 0 & y == 0 : tree is at scene center
+      dplyr::mutate(treeX = treeX + special.case * pld$PLOT$plotWidth$value  / 2) %>%
+      dplyr::mutate(treeY = treeY + special.case * pld$PLOT$plotHeight$value / 2) %>%
+      dplyr::rename(x = treeX, y = treeY) %>%
       dplyr::select(species, x, y)
     tree.info <- tree.info %>%
       dplyr::mutate(idTree = 1:nrow(tree.info)) %>%
