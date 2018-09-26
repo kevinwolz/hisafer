@@ -758,71 +758,96 @@ cycle_summary <- function(hop,
                           output.path = NULL,
                           plot.labels = NULL) {
 
+  supported.cycles <- c("carbon", "light", "water", "nitrogen")
+
+  is_hop(hop, error = TRUE)
   if(!(length(daily.year) == 1 & is.numeric(daily.year))) stop("daily.year argument must be a numeric vector of length 1", call. = FALSE)
   if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character string",          call. = FALSE)
   if(!(is.character(plot.labels) | is.null(plot.labels))) stop("plot.labels argument must be a character string",          call. = FALSE)
+  if(!all(cycles %in% supported.cycles)) stop(paste0("cycles argument must be one or more of:", paste(supported.cycles, collapse = ", ")), call. = FALSE)
 
   if(is.null(simu.name)) {
     simu.name <- hop$metadata$SimulationName
     if(length(simu.name) > 1) stop("simu.name must be specfied if hop contains more than one simulation.", call. = FALSE)
   }
 
-  supported.cycles <- c("carbon", "light", "water", "nitrogen")
+  if(!profile_check(hop, "trees") & "carbon" %in% cycles) cycles <- cycles[cycles != "carbon"] # do not plot carbon cycle for treeless simulations
 
   ## CARBON
-  carbon.daily <- plot_hisafe_cycle_daily(hop           = hop,
-                                          simu.names    = simu.name,
-                                          cycle         = "carbon",
-                                          years         = daily.year,
-                                          pheno.lines   = FALSE) +
-    guides(fill = FALSE)
+  if("carbon" %in% cycles) {
+    carbon.daily <- plot_hisafe_cycle_daily(hop           = hop,
+                                            simu.names    = simu.name,
+                                            cycle         = "carbon",
+                                            years         = daily.year,
+                                            pheno.lines   = FALSE) +
+      guides(fill = FALSE)
 
-  carbon.annual <- plot_hisafe_cycle_annual(hop        = hop,
-                                            simu.names = simu.name,
-                                            cycle      = "carbon")
+    carbon.annual <- plot_hisafe_cycle_annual(hop        = hop,
+                                              simu.names = simu.name,
+                                              cycle      = "carbon")
+  } else {
+    carbon.daily  <- NA
+    carbon.annual <- NA
+  }
 
   ## LIGHT
-  light.daily <- plot_hisafe_cycle_daily(hop           = hop,
-                                         simu.names    = simu.name,
-                                         cycle         = "light",
-                                         years         = daily.year,
-                                         crop.names    = crop.names,
-                                         pheno.lines   = FALSE) +
-    guides(fill = FALSE)
-
-  light.annual <- plot_hisafe_cycle_annual(hop           = hop,
+  if("light" %in% cycles) {
+    light.daily <- plot_hisafe_cycle_daily(hop           = hop,
                                            simu.names    = simu.name,
                                            cycle         = "light",
+                                           years         = daily.year,
                                            crop.names    = crop.names,
-                                           bar.color     = "transparent")
+                                           pheno.lines   = FALSE) +
+      guides(fill = FALSE)
+
+    light.annual <- plot_hisafe_cycle_annual(hop           = hop,
+                                             simu.names    = simu.name,
+                                             cycle         = "light",
+                                             crop.names    = crop.names,
+                                             bar.color     = "transparent")
+  } else {
+    light.daily  <- NA
+    light.annual <- NA
+  }
 
   ## WATER
-  water.daily <- plot_hisafe_cycle_daily(hop           = hop,
-                                         simu.names    = simu.name,
-                                         cycle         = "water",
-                                         years         = daily.year,
-                                         crop.names    = crop.names,
-                                         pheno.lines   = FALSE) +
-    guides(fill = FALSE)
+  if("water" %in% cycles) {
+    water.daily <- plot_hisafe_cycle_daily(hop           = hop,
+                                           simu.names    = simu.name,
+                                           cycle         = "water",
+                                           years         = daily.year,
+                                           crop.names    = crop.names,
+                                           pheno.lines   = FALSE) +
+      guides(fill = FALSE)
 
-  water.annual <- plot_hisafe_cycle_annual(hop        = hop,
-                                           simu.names = simu.name,
-                                           cycle      = "water",
-                                           crop.names = crop.names)
+    water.annual <- plot_hisafe_cycle_annual(hop        = hop,
+                                             simu.names = simu.name,
+                                             cycle      = "water",
+                                             crop.names = crop.names)
+  } else {
+    water.daily  <- NA
+    water.annual <- NA
+  }
 
   ## NITROGEN
-  nitrogen.daily <- plot_hisafe_cycle_daily(hop         = hop,
-                                            simu.names  = simu.name,
-                                            cycle       = "nitrogen",
-                                            years       = daily.year,
-                                            crop.names  = crop.names,
-                                            pheno.lines = FALSE) +
-    guides(fill = FALSE)
+  if("nitrogen" %in% cycles) {
+    nitrogen.daily <- plot_hisafe_cycle_daily(hop         = hop,
+                                              simu.names  = simu.name,
+                                              cycle       = "nitrogen",
+                                              years       = daily.year,
+                                              crop.names  = crop.names,
+                                              pheno.lines = FALSE) +
+      guides(fill = FALSE)
 
-  nitrogen.annual <- plot_hisafe_cycle_annual(hop        = hop,
-                                              simu.names = simu.name,
-                                              cycle      = "nitrogen",
-                                              crop.names = crop.names)
+    nitrogen.annual <- plot_hisafe_cycle_annual(hop        = hop,
+                                                simu.names = simu.name,
+                                                cycle      = "nitrogen",
+                                                crop.names = crop.names)
+  } else {
+    nitrogen.daily  <- NA
+    nitrogen.annual <- NA
+  }
+
 
   ## MERGE & ADD LEGEND
   plot.list <- list(carbon.daily,   carbon.annual,
