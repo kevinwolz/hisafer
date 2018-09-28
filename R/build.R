@@ -48,7 +48,7 @@ build_hisafe <- function(hip,
   ## Write out experiment summary
   paste_together  <- function(x) unlist(purrr::map(x, paste, collapse = ";"))
   exp.plan.to.write <- dplyr::mutate_if(EXP.PLAN, is.list, paste_together)
-  if(summary.files & nrow(EXP.PLAN) > 1) readr::write_csv(exp.plan.to.write, clean_path(paste0(hip$path, "/", exp.name, "_exp_summary.csv")))
+  if(nrow(EXP.PLAN) > 1) readr::write_csv(exp.plan.to.write, clean_path(paste0(hip$path, "/", exp.name, "_exp_summary.csv")))
 
   ## build folder tree & input files for each simulation in experiment
   create_tibble <- function(x) {
