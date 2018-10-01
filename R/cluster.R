@@ -94,7 +94,7 @@ build_cluster_script <- function(hip            = NULL,
     write_line("#!/bin/sh")
     if(!is.null(num.cores)) write_line(paste0("#SBATCH -n ", num.cores))
     if(!is.null(max.per.node)) write_line(paste0("#SBATCH --ntasks-per-node=", max.per.node))
-    if(SEQ) write_line(paste0("#SBATCH --array=", min(seqs), "-", max(seqs)))
+    if(SEQ) write_line(paste0("#SBATCH --array=", compress_batch_array(seqs)))
     write_line("#SBATCH --account=hisafe")
     write_line("#SBATCH --partition=defq")
     if(!is.null(email) & email.type != "NONE") {
@@ -130,4 +130,25 @@ build_cluster_script <- function(hip            = NULL,
   }
 
   invisible(TRUE)
+}
+
+#' Compress a batch array into a character string
+#' @description Compresses a batch array into a character string
+#' @return A character string with continuous sequences seaprated by "-" and non-continuous sequences separated by ",".
+#' @param x A numeric vector containing the batch array values.
+#' @keywords internal
+compress_batch_array <- function(x) {
+  out <- as.character(x[1])
+  L <- length(x)
+  x <- c(x, -9999)
+  for(i in 2:L) {
+    if(x[i] == x[i-1] + 1 & x[i] == x[i+1] - 1) {
+      next
+    } else if(x[i] == x[i-1] + 1) {
+      out <- paste0(out, "-", x[i])
+    } else {
+      out <- paste0(out, ",", x[i])
+    }
+  }
+  return(out)
 }
