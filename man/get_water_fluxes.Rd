@@ -4,7 +4,7 @@
 \alias{get_water_fluxes}
 \title{#' Get water fluxes from a hop object}
 \usage{
-get_water_fluxes(hop, profile, crop.names)
+get_water_fluxes(hop, profile, crop.names, for.plot = TRUE)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
@@ -12,6 +12,8 @@ get_water_fluxes(hop, profile, crop.names)
 \item{profile}{An character string indicating from which profile to pull flux data. Either "cells" or "plot".}
 
 \item{crop.names}{A character vector of length 2 containing the names to use in the legend for the mainCrop and interCrop of Hi-sAFe, in that order.}
+
+\item{for.plot}{A logical indicating whether the fluxes to retreive are for \code{\link{plot_hisafe_cycle_daily}} or not.}
 }
 \value{
 A tibble with extracted and calculated water fluxes.

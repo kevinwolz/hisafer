@@ -4,7 +4,7 @@
 \alias{get_nitrogen_fluxes}
 \title{Get nitrogen fluxes in and out of soil from a hop object}
 \usage{
-get_nitrogen_fluxes(hop, profile, crop.names)
+get_nitrogen_fluxes(hop, profile, crop.names, for.plot = TRUE)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
@@ -12,6 +12,8 @@ get_nitrogen_fluxes(hop, profile, crop.names)
 \item{profile}{An character string indicating from which profile to pull flux data. Either "cells" or "plot".}
 
 \item{crop.names}{A character vector of length 2 containing the names to use in the legend for the mainCrop and interCrop of Hi-sAFe, in that order.}
+
+\item{for.plot}{A logical indicating whether the fluxes to retreive are for \code{\link{plot_hisafe_cycle_daily}} or not.}
 }
 \value{
 A tibble with extracted and calculated nitrogen fluxes.
