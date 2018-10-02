@@ -17,7 +17,7 @@ get_water_fluxes(hop, profile, crop.names)
 A tibble with extracted and calculated water fluxes.
 }
 \description{
-Get water fluxes from a hop object.
+Gets water fluxes from a hop object.
 Used within hisafe cycle functions.
 }
 \keyword{internal}

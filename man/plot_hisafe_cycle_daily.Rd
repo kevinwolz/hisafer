@@ -7,12 +7,13 @@
 plot_hisafe_cycle_daily(hop, cycle, years, simu.names = "all",
   tree.ids = "all", doy.lim = c(1, 366), color.palette = NULL,
   crop.names = c("Main crop", "Inter crop"), pheno.lines = TRUE,
+  branch.pruning.lines = TRUE, root.pruning.lines = TRUE,
   trim = TRUE, plot = TRUE)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
 
-\item{cycle}{One of "carbon", "nitrogen", "water", "light", "yield", or "carbon-increment.}
+\item{cycle}{One of "carbon", "nitrogen", "water", "light", "yield", or "carbon-increment".}
 
 \item{years}{A numeric vector of the calendar years to include.
 If more than one year is provided, years are used as facets, and only a single value can be supplied to \code{simu.names}.
@@ -22,7 +23,7 @@ Use "all" to include all available values.}
 If more than one value is supplied to \code{years}, then a single value must be suppied to \code{simu.names}.}
 
 \item{tree.ids}{A numeric vector indicating a subset of tree ids to plot. Use "all" to include all available values.
-This only applies when \code{cycle} is "carbon".}
+This only applies when \code{cycle} is "carbon". Must only include a single tree id for "carbon-allocation".}
 
 \item{doy.lim}{A numeric vector of length two providing the \code{c(minimum, maximum)} of julian days to plot.}
 
@@ -31,7 +32,11 @@ If \code{NULL}, the default, then the default color palette is a color-blind-fri
 
 \item{crop.names}{A character vector of length 2 containing the names to use in the legend for the mainCrop and interCrop of Hi-sAFe, in that order.}
 
-\item{pheno.lines}{Logical indicating whether or not vertical dashed lines should be plotted on dates of phenoloigical stage changes}
+\item{pheno.lines}{Logical indicating whether or not vertical lines should be plotted on dates of phenoloigical stage changes}
+
+\item{branch.pruning.lines}{Logical indicating whether or not vertical lines should be plotted on dates of branch pruning}
+
+\item{root.pruning.lines}{Logical indicating whether or not vertical lines should be plotted on dates of root pruning}
 
 \item{trim}{Logical indicating whether or not to trim white space before and after the tree growth season when \code{cycle} is "carbon-increment"}
 

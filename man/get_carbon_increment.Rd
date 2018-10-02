@@ -13,7 +13,7 @@ get_carbon_increment(hop)
 A tibble with extracted and calculated carbon increments.
 }
 \description{
-Get tree carbon increment from a hop object.
+Gets tree carbon increment from a hop object.
 Used within hisafe cycle functions.
 }
 \keyword{internal}

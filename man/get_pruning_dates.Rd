@@ -4,12 +4,14 @@
 \alias{get_pruning_dates}
 \title{Get branch pruning dates from a hop}
 \usage{
-get_pruning_dates(hop, type = "branch")
+get_pruning_dates(hop, type = "branch", tree.ids = 1)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
 
 \item{type}{One of "branch" or "root".}
+
+\item{tree.ids}{A numeric vector of the values of idTree to include.}
 }
 \value{
 A tibble (data.frame)

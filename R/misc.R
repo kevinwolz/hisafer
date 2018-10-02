@@ -726,25 +726,25 @@ join_profiles <- function(hop, profiles, ...) {
 #' @return A tibble (data.frame)
 #' @param hop An object of class hop or face.
 #' @param type One of "branch" or "root".
+#' @param tree.ids A numeric vector of the values of idTree to include.
 #' @export
 #' @family hisafe helper functions
 #' @examples
 #' \dontrun{
 #' pruning.dates <- get_pruning_dates(hop)
 #' }
-get_pruning_dates <- function(hop, type = "branch") {
+get_pruning_dates <- function(hop, type = "branch", tree.ids = 1) {
   is_hop(hop, error = TRUE)
   profile_check(hop, "tree.info", error = TRUE)
 
-  pruning.data <- hop$tree.info %>%
-    dplyr::filter(idTree == 1)
+  hop <- hop_filter(hop = hop, tree.ids = tree.ids)
 
   if(type == "branch") {
-    pruning.data <- pruning.data %>%
+    pruning.data <- hop$tree.info %>%
       dplyr::rename(pruningYears = treePruningYears) %>%
       dplyr::rename(pruningDays  = treePruningDays)
   } else if(type == "root") {
-    pruning.data <- pruning.data %>%
+    pruning.data <- hop$tree.info %>%
       dplyr::rename(pruningYears = treeRootPruningYears) %>%
       dplyr::rename(pruningDays  = treeRootPruningDays)
   } else {
@@ -753,8 +753,15 @@ get_pruning_dates <- function(hop, type = "branch") {
 
   get_dates <- function(x) {
     pruningYears <- unlist(x$pruningYears) + x$simulationYearStart - 1 + as.numeric(unlist(x$pruningDays) < x$simulationDayStart)
-    Date <- lubridate::ymd(paste0(pruningYears, "-01-01")) + unlist(x$pruningDays) - 1
-    out <- dplyr::tibble(SimulationName = x$SimulationName, Year = as.integer(pruningYears), Date = Date)
+    if(!is.na(pruningYears[1])) {
+      Date <- lubridate::ymd(paste0(pruningYears, "-01-01")) + unlist(x$pruningDays) - 1
+      out <- dplyr::tibble(SimulationName = x$SimulationName, idTree = x$idTree, Year = as.integer(pruningYears), Date = Date) %>%
+        dplyr::mutate(Month = lubridate::month(Date)) %>%
+        dplyr::mutate(Day   = lubridate::day(Date)) %>%
+        dplyr::select(SimulationName, idTree, Year, Month, Day, Date)
+    } else {
+      out <- dplyr::tibble()
+    }
     return(out)
   }
 
@@ -786,7 +793,7 @@ get_pheno_dates <- function(hop, tree.ids = 1) {
     dplyr::arrange(SimulationName, idTree, Date) %>%
     dplyr::mutate(dif = phenologicalStage - c(NA, phenologicalStage[-nrow(.)])) %>%
     dplyr::filter(dif != 0) %>%
-    dplyr::select(SimulationName, idTree, Year, phenologicalStage, JulianDay, Date)
+    dplyr::select(SimulationName, idTree, Year, Month, Day, Date, JulianDay, phenologicalStage)
   return(out)
 }
 
@@ -796,18 +803,18 @@ get_pheno_dates <- function(hop, tree.ids = 1) {
 #' @param hop An object of class hop or a hop-like object.
 #' @keywords internal
 warn_unequal_lengths <- function(hop) {
-   year.summary <- hop[[as.numeric(which.max(purrr::map_int(hop[names(hop) %in% DATA.PROFILES], nrow)))]] %>%
-      dplyr::group_by(SimulationName) %>%
-      dplyr::summarize(n = dplyr::n_distinct(Year) - 1) %>%
-      tidyr::unite(label, SimulationName, n, sep = ": ", remove = FALSE)
-    if(length(unique(year.summary$n)) != 1) {
-      year.length.warning <- paste(c("Simulation durations not equal!",
-                                     "  Be careful when comparing simulations.",
-                                     "  Simulation durations:",
-                                     paste("   --", year.summary$label, "years")),
-                                   collapse = "\n")
-      warning(year.length.warning, call. = FALSE)
-    }
+  year.summary <- hop[[as.numeric(which.max(purrr::map_int(hop[names(hop) %in% DATA.PROFILES], nrow)))]] %>%
+    dplyr::group_by(SimulationName) %>%
+    dplyr::summarize(n = dplyr::n_distinct(Year) - 1) %>%
+    tidyr::unite(label, SimulationName, n, sep = ": ", remove = FALSE)
+  if(length(unique(year.summary$n)) != 1) {
+    year.length.warning <- paste(c("Simulation durations not equal!",
+                                   "  Be careful when comparing simulations.",
+                                   "  Simulation durations:",
+                                   paste("   --", year.summary$label, "years")),
+                                 collapse = "\n")
+    warning(year.length.warning, call. = FALSE)
+  }
   return(dplyr::select(year.summary, -label))
 }
 

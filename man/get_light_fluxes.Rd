@@ -15,7 +15,7 @@ get_light_fluxes(hop, crop.names)
 A tibble with extracted and calculated light fluxes.
 }
 \description{
-Get light fluxes from a hop object.
+Gets light fluxes from a hop object.
 Used within hisafe cycle functions.
 }
 \keyword{internal}

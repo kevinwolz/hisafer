@@ -17,7 +17,7 @@ get_nitrogen_fluxes(hop, profile, crop.names)
 A tibble with extracted and calculated nitrogen fluxes.
 }
 \description{
-Get nitrogen fluxes in and our of soil from a hop object.
+Gets nitrogen fluxes in and our of soil from a hop object.
 Used within hisafe cycle functions.
 }
 \keyword{internal}

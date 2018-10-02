@@ -13,7 +13,7 @@ get_carbon_pools(hop)
 A tibble with extracted and calculated carbon pools.
 }
 \description{
-Get tree carbon pools from a hop object.
+Gets tree carbon pools from a hop object.
 Used within hisafe cycle functions.
 }
 \keyword{internal}

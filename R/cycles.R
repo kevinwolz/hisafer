@@ -192,19 +192,21 @@ plot_hisafe_cycle_annual <- function(hop,
 #' @return If \code{plot = TRUE}, returns a ggplot object. If \code{plot = FALSE}, returns the data that would create the plot.
 #' If \code{hop} contains more than one simulation, the plot will be faceted by SimulationName.
 #' @param hop An object of class hop or face.
-#' @param cycle One of "carbon", "nitrogen", "water", "light", "yield", or "carbon-increment.
+#' @param cycle One of "carbon", "nitrogen", "water", "light", "yield", or "carbon-increment".
 #' @param years A numeric vector of the calendar years to include.
 #' If more than one year is provided, years are used as facets, and only a single value can be supplied to \code{simu.names}.
 #' Use "all" to include all available values.
 #' @param simu.names A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.
 #' If more than one value is supplied to \code{years}, then a single value must be suppied to \code{simu.names}.
 #' @param tree.ids A numeric vector indicating a subset of tree ids to plot. Use "all" to include all available values.
-#' This only applies when \code{cycle} is "carbon".
+#' This only applies when \code{cycle} is "carbon". Must only include a single tree id for "carbon-allocation".
 #' @param doy.lim A numeric vector of length two providing the \code{c(minimum, maximum)} of julian days to plot.
 #' @param color.palette A character stirng of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
 #' If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette.
 #' @param crop.names A character vector of length 2 containing the names to use in the legend for the mainCrop and interCrop of Hi-sAFe, in that order.
-#' @param pheno.lines Logical indicating whether or not vertical dashed lines should be plotted on dates of phenoloigical stage changes
+#' @param pheno.lines Logical indicating whether or not vertical lines should be plotted on dates of phenoloigical stage changes
+#' @param branch.pruning.lines Logical indicating whether or not vertical lines should be plotted on dates of branch pruning
+#' @param root.pruning.lines Logical indicating whether or not vertical lines should be plotted on dates of root pruning
 #' @param trim Logical indicating whether or not to trim white space before and after the tree growth season when \code{cycle} is "carbon-increment"
 #' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.
 #' @export
@@ -223,16 +225,18 @@ plot_hisafe_cycle_annual <- function(hop,
 plot_hisafe_cycle_daily <- function(hop,
                                     cycle,
                                     years,
-                                    simu.names    = "all",
-                                    tree.ids      = "all",
-                                    doy.lim       = c(1, 366),
-                                    color.palette = NULL,
-                                    crop.names    = c("Main crop", "Inter crop"),
-                                    pheno.lines   = TRUE,
-                                    trim          = TRUE,
-                                    plot          = TRUE) {
+                                    simu.names           = "all",
+                                    tree.ids             = "all",
+                                    doy.lim              = c(1, 366),
+                                    color.palette        = NULL,
+                                    crop.names           = c("Main crop", "Inter crop"),
+                                    pheno.lines          = TRUE,
+                                    branch.pruning.lines = TRUE,
+                                    root.pruning.lines   = TRUE,
+                                    trim                 = TRUE,
+                                    plot                 = TRUE) {
 
-  allowed.cycles <- c("carbon", "nitrogen", "water", "light", "yield", "carbon-increment")
+  allowed.cycles <- c("carbon", "nitrogen", "water", "light", "yield", "carbon-increment", "carbon-allocation")
 
   is_hop(hop, error = TRUE)
   if(!(cycle %in% allowed.cycles))                          stop(paste0("cycle argument must be one of: ", paste(allowed.cycles, collapse = ", ")), call. = FALSE)
@@ -244,7 +248,7 @@ plot_hisafe_cycle_daily <- function(hop,
   is_TF(plot)
 
   METHOD <- ifelse(profile_check(hop, "cells"), "cells", "plot")
-  years.profile <- ifelse(cycle %in% c("carbon", "carbon-increment"), "trees", METHOD)
+  years.profile <- ifelse(cycle %in% c("carbon", "carbon-increment", "carbon-allocation"), "trees", METHOD)
 
   profile_check(hop, years.profile, error = TRUE)
   if(simu.names[1] == "all") simu.names <- unique(hop$exp.plan$SimulationName)
@@ -314,8 +318,18 @@ plot_hisafe_cycle_daily <- function(hop,
     pre.title   <- "Tree Carbon Increment"
     y.lab       <- "Tree C increment (kg C tree-1)"
 
+  } else if(cycle == "carbon-allocation") {
+    if(!profile_check(hop, "trees")) return(NULL)
+    if(length(unique(hop$trees$idTree)) > 1) stop("tree.ids argument can only specify a single tree when cycle argument is 'carbon-allocation'", call. = FALSE)
+    plot.data   <- get_carbon_allocation(hop = hop)
+    if(is.null(color.palette)) color.palette <- c("grey70", "grey30")
+    cycle.geom  <- geom_area(aes(fill = flux), na.rm = TRUE)
+    cycle.scale <- scale_fill_manual(values = color.palette)
+    pre.title   <- "Tree Carbon Allocation"
+    y.lab       <- "Tree C allocation (%)"
+
   } else {
-    stop("cycle argument not supported. Use one of: carbon, nitrogen, water, light, carbon-increment.", call. = FALSE)
+    stop("cycle argument not supported. Use one of: carbon, nitrogen, water, light, carbon-increment, carbon-allocation.", call. = FALSE)
   }
 
   ## Filter plot data & add (fake) date
@@ -325,7 +339,7 @@ plot_hisafe_cycle_daily <- function(hop,
     dplyr::mutate(date = lubridate::as_date(lubridate::parse_date_time(paste0("8000-", JulianDay), "%Y-%j")))
 
   ## Remove white space when cycle = "carbon-increment"
-  if(trim & cycle == "carbon-increment") {
+  if(trim & cycle %in% c("carbon-increment", "carbon-allocation")) {
     date.range <- plot.data %>%
       dplyr::filter(value != 0) %>%
       .$Date %>%
@@ -362,11 +376,23 @@ plot_hisafe_cycle_daily <- function(hop,
 
   }
 
-  if(pheno.lines & profile_check(hop, "trees")) {
-    pheno.data <- get_pheno_dates(hop) %>%
+  if((pheno.lines | branch.pruning.lines | root.pruning.lines) & profile_check(hop, "trees")) {
+    pheno.data <- get_pheno_dates(hop = hop, tree.ids = unique(hop$trees$idTree)) %>%
+      dplyr::mutate(category = "Phenologic shift")
+
+    branch.pruning.data <- get_pruning_dates(hop = hop, type = "branch", tree.ids = unique(hop$trees$idTree)) %>%
+      dplyr::mutate(category = "Branch pruning")
+
+    root.pruning.data <- get_pruning_dates(hop = hop, type = "root", tree.ids = unique(hop$trees$idTree)) %>%
+      dplyr::mutate(category = "Root pruning")
+
+    vert.line.data <- bind_rows(pheno.data, branch.pruning.data, root.pruning.data) %>%
       dplyr::filter(Year %in% years) %>%
-      dplyr::mutate(date = lubridate::as_date(lubridate::parse_date_time(paste0("8000-", JulianDay), "%Y-%j")))
-    vert.lines <- geom_vline(data = pheno.data, aes(xintercept = date), linetype = "dashed")
+      dplyr::mutate(date = lubridate::as_date(lubridate::ymd(paste0("8000-", Month, "-", Day)))) %>%
+      dplyr::filter(category %in% c("Phenologic shift", "Branch pruning", "Root pruning")[c(pheno.lines, branch.pruning.lines, root.pruning.lines)])
+
+    vert.lines <- list(geom_vline(data = vert.line.data, aes(xintercept = date, linetype = category), na.rm = TRUE),
+                       scale_linetype_manual(values = c("dashed", "dotted", "dotdash")))
   }
 
   ## Create plot
@@ -384,7 +410,7 @@ plot_hisafe_cycle_daily <- function(hop,
     theme(legend.title = element_blank(),
           axis.text.x  = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
-  if(pheno.lines & profile_check(hop, "trees")) plot.obj <- plot.obj + vert.lines
+  if((pheno.lines | branch.pruning.lines | root.pruning.lines) & profile_check(hop, "trees")) plot.obj <- plot.obj + vert.lines
 
   out.data <- plot.data %>%
     dplyr::mutate(cycle = cycle)
@@ -394,7 +420,7 @@ plot_hisafe_cycle_daily <- function(hop,
 }
 
 #' #' Get water fluxes from a hop object
-#' @description Get water fluxes from a hop object.
+#' @description Gets water fluxes from a hop object.
 #' Used within hisafe cycle functions.
 #' @return A tibble with extracted and calculated water fluxes.
 #' @param hop An object of class hop or face.
@@ -467,7 +493,7 @@ get_water_fluxes <- function(hop, profile, crop.names) {
 }
 
 #' Get nitrogen fluxes in and out of soil from a hop object
-#' @description Get nitrogen fluxes in and our of soil from a hop object.
+#' @description Gets nitrogen fluxes in and our of soil from a hop object.
 #' Used within hisafe cycle functions.
 #' @return A tibble with extracted and calculated nitrogen fluxes.
 #' @param hop An object of class hop or face.
@@ -545,7 +571,7 @@ get_nitrogen_fluxes <- function(hop, profile, crop.names) {
 }
 
 #' Get light fluxes from a hop object
-#' @description Get light fluxes from a hop object.
+#' @description Gets light fluxes from a hop object.
 #' Used within hisafe cycle functions.
 #' @return A tibble with extracted and calculated light fluxes.
 #' @param hop An object of class hop or face.
@@ -581,7 +607,7 @@ get_light_fluxes <- function(hop, crop.names) {
 }
 
 #' Get tree carbon pools from a hop object
-#' @description Get tree carbon pools from a hop object.
+#' @description Gets tree carbon pools from a hop object.
 #' Used within hisafe cycle functions.
 #' @return A tibble with extracted and calculated carbon pools.
 #' @param hop An object of class hop or face.
@@ -627,7 +653,7 @@ get_carbon_pools <- function(hop) {
 }
 
 #' Get tree carbon increment from a hop object
-#' @description Get tree carbon increment from a hop object.
+#' @description Gets tree carbon increment from a hop object.
 #' Used within hisafe cycle functions.
 #' @return A tibble with extracted and calculated carbon increments.
 #' @param hop An object of class hop or face.
@@ -660,6 +686,32 @@ get_carbon_increment <- function(hop) {
                                            "Fine Roots",
                                            "Coarse Roots",
                                            "Stump")))
+  return(out)
+}
+
+#' Get tree carbon above vs. belowground allocation from a hop object
+#' @description Gets tree carbon above vs. belowground allocation from a hop object.
+#' Used within hisafe cycle functions.
+#' @return A tibble with extracted and calculated carbon above vs. belowground allocation.
+#' @param hop An object of class hop or face.
+#' @importFrom dplyr %>%
+#' @keywords internal
+get_carbon_allocation <- function(hop) {
+  profile_check(hop, "trees", error = TRUE)
+  variable_check(hop, "trees", c("aboveGroundAllocFrac", "belowGroundAllocFrac"), error = TRUE)
+  out <- hop$trees %>%
+    replace(is.na(.), 0) %>%
+    dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay, idTree, aboveGroundAllocFrac, belowGroundAllocFrac) %>%
+    dplyr::select(-idTree) %>%
+    dplyr::group_by(SimulationName, Year, Month, Day, Date, JulianDay) %>%
+    dplyr::summarize_all(sum) %>%
+    dplyr::ungroup() %>%
+    tidyr::gather(key = "flux", value = "value", aboveGroundAllocFrac:belowGroundAllocFrac) %>%
+    dplyr::mutate(flux = factor(flux,
+                                levels = c("aboveGroundAllocFrac",
+                                           "belowGroundAllocFrac"),
+                                labels = c("Aboveground",
+                                           "Belowground")))
   return(out)
 }
 
@@ -943,25 +995,24 @@ cycle_budget <- function(hop,
     dplyr::rename(sum.of.fluxes = value)
 
   ## STOCK
-  stock <- hop$plot %>%
-    dplyr::filter(JulianDay == 1) %>%
-    dplyr::select(SimulationName, Year, JulianDay, waterStock, mineralNitrogenStock, totalNitrogenHumusStock) %>%
-    dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
-    dplyr::group_by(SimulationName) %>%
-    dplyr::arrange(SimulationName, Year)
-
   if(cycle == "water") {
-    stock <- stock %>%
-      dplyr::mutate(stockChange = c(diff(waterStock), NA)) %>%
+    stock <- hop$plot %>%
       dplyr::filter(Year %in% years) %>%
-      dplyr::select(SimulationName, Year, stockChange)
+      dplyr::filter(JulianDay == 1) %>%
+      dplyr::select(SimulationName, Year, waterStock) %>%
+      dplyr::mutate(stockChange = c(diff(waterStock), NA))
+
   } else if(cycle == "nitrogen") {
-    stock <- stock %>%
-      dplyr::mutate(mineralNitrogenStock = mineralNitrogenStock / 1000 / plotAreaHa) %>% # convert g to kg/ha
-      dplyr::mutate(nitrogenStock = mineralNitrogenStock + totalNitrogenHumusStock) %>%
-      dplyr::mutate(stockChange = c(diff(nitrogenStock), NA)) %>%
+    stock <- hop$cells %>%
       dplyr::filter(Year %in% years) %>%
-      dplyr::select(SimulationName, Year, stockChange)
+      dplyr::filter(JulianDay == 1) %>%
+      dplyr::select(SimulationName, Year, mineralNitrogenStock, totalNitrogenHumusStock, nitrogenResidus) %>%
+      dplyr::group_by(SimulationName, Year) %>%
+      dplyr::summarize(mineralNitrogenStock    = mean(mineralNitrogenStock),
+                       totalNitrogenHumusStock = mean(totalNitrogenHumusStock),
+                       nitrogenResidus         = mean(nitrogenResidus) )%>%
+      dplyr::mutate(nitrogenStock = mineralNitrogenStock + totalNitrogenHumusStock + nitrogenResidus) %>%
+      dplyr::mutate(stockChange   = c(diff(nitrogenStock), NA))
   }
 
   budget.data <- flux.spread %>%
@@ -989,5 +1040,3 @@ cycle_budget <- function(hop,
 
   return(budget.data)
 }
-
-
