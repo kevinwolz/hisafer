@@ -345,6 +345,8 @@ hop_filter <- function(hop,
     if(is.na(date.min)) date.min <- min(existing.ranges)
     if(is.na(date.max)) date.max <- max(existing.ranges)
 
+    if(date.max < date.min) stop("date.min must be less than date.max", call. = FALSE)
+
     for(i in profiles) hop[[i]] <- dplyr::filter(hop[[i]], Date %in% seq(date.min, date.max, 1))
   } else if(!is.null(dates)) {
     dates <- lubridate::ymd(dates)
