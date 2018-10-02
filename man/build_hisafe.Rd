@@ -5,7 +5,7 @@
 \title{Build a Hi-sAFe simulation or experiment}
 \usage{
 build_hisafe(hip, files = "all", plot.scene = TRUE,
-  summary.files = TRUE)
+  summary.files = TRUE, stics.diagnostics = FALSE)
 }
 \arguments{
 \item{hip}{An object of class "hip". To create a hip object see \code{\link{define_hisafe}}.}
@@ -16,6 +16,8 @@ Otherwise, select one or more of "sim", "pld", "wth", "tree", "plt", "tec", "par
 \item{plot.scene}{Logical indicating whether \code{\link{plot_hisafe_scene}} should be used to export plots of each scene during the build.}
 
 \item{summary.files}{Logical indicating whether or not to write out summary .CSV files about the experiment and each simulation during the build.}
+
+\item{stics.diagnostics}{Logical indicating whether or not STICS diagnostics files should be exported in the simulation.}
 }
 \value{
 Invisibly returns a list containing the original hip object.

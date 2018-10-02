@@ -5,7 +5,7 @@
 \title{Builds the structure of a Hi-sAFe simulation}
 \usage{
 build_structure(exp.plan, path, profiles, template, files, plot.scene,
-  summary.files)
+  summary.files, stics.diagnostics)
 }
 \arguments{
 \item{exp.plan}{The exp.plan element of a "hip" object, containing a single row.}
@@ -23,6 +23,8 @@ Otherwise, select one or more of "sim", "pld", "wth", "tree", "plt", "tec", "par
 \item{plot.scene}{Logical indicating whether \code{\link{plot_hisafe_scene}} should be used to export plots of each scene during the build.}
 
 \item{summary.files}{Logical indicating whether or not to write out summary .CSV files about the experiment and each simulation during the build.}
+
+\item{stics.diagnostics}{Logical indicating whether or not STICS diagnostics files should be exported in the simulation.}
 }
 \value{
 Invisibly returns a list containing the original hip object and supplied path.

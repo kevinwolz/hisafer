@@ -6,6 +6,7 @@
 #' Otherwise, select one or more of "sim", "pld", "wth", "tree", "plt", "tec", "par", and "pro".
 #' @param plot.scene Logical indicating whether \code{\link{plot_hisafe_scene}} should be used to export plots of each scene during the build.
 #' @param summary.files Logical indicating whether or not to write out summary .CSV files about the experiment and each simulation during the build.
+#' @param stics.diagnostics Logical indicating whether or not STICS diagnostics files should be exported in the simulation.
 #' @export
 #' @importFrom dplyr %>%
 #' @family hisafe build functions
@@ -24,9 +25,10 @@
 #' build_hisafe(myexp)
 #' }
 build_hisafe <- function(hip,
-                         files         = "all",
-                         plot.scene    = TRUE,
-                         summary.files = TRUE) {
+                         files             = "all",
+                         plot.scene        = TRUE,
+                         summary.files     = TRUE,
+                         stics.diagnostics = FALSE) {
   is_hip(hip, error = TRUE)
   is_TF(plot.scene)
 
@@ -70,12 +72,13 @@ build_hisafe <- function(hip,
 
   purrr::walk(hip.list,
               build_structure,
-              path          = hip$path,
-              profiles      = hip$profiles,
-              template      = hip$template,
-              files         = files,
-              plot.scene    = plot.scene,
-              summary.files = summary.files)
+              path              = hip$path,
+              profiles          = hip$profiles,
+              template          = hip$template,
+              files             = files,
+              plot.scene        = plot.scene,
+              summary.files     = summary.files,
+              stics.diagnostics = stics.diagnostics)
 
   if(plot.scene) {
     purrr::walk2(as.list(unique(EXP.PLAN$SimulationName)),
@@ -99,8 +102,9 @@ build_hisafe <- function(hip,
 #' Otherwise, select one or more of "sim", "pld", "wth", "tree", "plt", "tec", "par", and "pro".
 #' @param plot.scene Logical indicating whether \code{\link{plot_hisafe_scene}} should be used to export plots of each scene during the build.
 #' @param summary.files Logical indicating whether or not to write out summary .CSV files about the experiment and each simulation during the build.
+#' @param stics.diagnostics Logical indicating whether or not STICS diagnostics files should be exported in the simulation.
 #' @keywords internal
-build_structure <- function(exp.plan, path, profiles, template, files, plot.scene, summary.files) {
+build_structure <- function(exp.plan, path, profiles, template, files, plot.scene, summary.files, stics.diagnostics) {
 
   TEMPLATE_PARAMS <- get_template_params(template)
   PARAM_NAMES     <- get_param_names(TEMPLATE_PARAMS)
@@ -203,8 +207,8 @@ build_structure <- function(exp.plan, path, profiles, template, files, plot.scen
   sim.path <- list.files(simu.path, ".sim$", full.names = TRUE)
   sim      <- read_param_file(sim.path)
   sim.new  <- edit_param_file(sim, dplyr::select(exp.plan, sim.params.to.edit)) %>%
-    edit_param_element("profileNames", paste0(profiles, collapse = ",")) %>%
-    edit_param_element("exportFrequencies", paste0(SUPPORTED.PROFILES$freqs[match(profiles, SUPPORTED.PROFILES$profiles)], collapse = ","))
+    edit_param_element("profileNames", paste0(c(profiles, "sti"[stics.diagnostics]), collapse = ",")) %>%
+    edit_param_element("exportFrequencies", paste0(c(SUPPORTED.PROFILES$freqs[match(profiles, SUPPORTED.PROFILES$profiles)], c(1)[stics.diagnostics]), collapse = ","))
   write_param_file(sim.new, sim.path)
   dum <- file.rename(sim.path, paste0(simu.path, "/", exp.plan$SimulationName, ".sim"))
 
