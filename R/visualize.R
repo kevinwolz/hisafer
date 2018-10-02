@@ -105,9 +105,9 @@ hisafe_slice <- function(hop,
   voxel.vars <- voxel.vars[!is.na(voxel.vars)]
   tree.vars  <- tree.vars[!is.na(tree.vars)]
 
-  if(nrow(hop$plot.info) == 0) stop("plot.info is unavilable in hop and is required. Use read.inputs = TRUE in read_hisafe().", call. = FALSE)
-  if(nrow(hop$tree.info) == 0) stop("tree.info is unavilable in hop and is required. Use read.inputs = TRUE in read_hisafe().", call. = FALSE)
-  profile_check(hop,  "trees", error = TRUE)
+  profile_check(hop,  "plot.info", error = TRUE)
+  profile_check(hop,  "tree.info", error = TRUE)
+  profile_check(hop,  "trees",     error = TRUE)
   variable_check(hop, "trees", tree.vars, error = TRUE)
 
   crops   <- crops   & profile_check(hop, "cells")

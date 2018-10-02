@@ -243,6 +243,20 @@ check_input_values <- function(hip, force) {
   AVAIL.TECS  <- list.files(clean_path(paste0(avail.path, "/cropInterventions")))
   AVAIL.TREES <- gsub("\\.tree", "", list.files(clean_path(paste0(avail.path, "/treeSpecies"))))
 
+  ## ENSURE INITIALIZATION TABLES ARE FROM CORRECT SOURCES
+  get_table_names <- function(x, check) {
+    get_name <- function(x) unique(x$name)
+    all(unlist(purrr::map(x, get_name)) == check)
+  }
+  tree.table        <- get_used("tree.initialization")
+  root.table        <- get_used("root.initialization")
+  layers.table      <- get_used("layers")
+  layers.init.table <- get_used("layer.initialization")
+  if(!get_table_names(tree.table,        "TreeInit"))  stop("tree.initialization must be specified via tree_init_params()",   call. = FALSE)
+  if(!get_table_names(root.table,        "RootInit"))  stop("root.initialization must be specified via root_init_params()",   call. = FALSE)
+  if(!get_table_names(layers.table,      "Layer"))     stop("layers must be specified via layer_params()",                    call. = FALSE)
+  if(!get_table_names(layers.init.table, "LayerInit")) stop("layer.initialization must be specified via layer_init_params()", call. = FALSE)
+
   ## Initialize Error Message
   errors <-   "Hi-sAFe definition errors:"
 
@@ -426,6 +440,12 @@ check_input_values <- function(hip, force) {
                                     less_than)
   if(!all(rp.depth.check)) warning("-- treeRootPruningDepth is greater than the maximum soil depth", call. = FALSE, immediate. = TRUE)
 
+  ## Tree thinning ids <= number of trees
+  tree.thinning.id.check <- purrr::map2_lgl(get_length("treeThinningIds"),
+                                            purrr::map(get_init_vals("tree.initialization", "species"), length),
+                                            less_than)
+  tree.thinning.id.error <- ifelse(!all(rp.depth.check), "-- one or more values of treeThinningIds is greater than the number of simulated trees", "")
+
   ## Crop Length & Simulation Length Errors
   goes_evenly  <- function(x, y) x > y | y %% x == 0
   if(!all(purrr::map2_lgl(get_length("mainCropSpecies"), get_used("nbSimulations"), goes_evenly))) {
@@ -471,7 +491,7 @@ check_input_values <- function(hip, force) {
                   tree.root.error, EP.error,
                   capillary.error, drainage.error, denitrif.error, watertable.error, dm.error, cap.error,
                   treePlanting.length.error, treePruning.length.error, treeThinning.length.error, rootPruning.length.error,
-                  weed.error, wth.error)
+                  tree.thinning.id.error, weed.error, wth.error)
   all.errors <- paste0(all.errors[!(all.errors == "") & !is.na(all.errors)], collapse = "\n")
   if(all.errors != errors) stop(all.errors, call. = FALSE)
 
