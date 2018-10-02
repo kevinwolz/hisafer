@@ -864,7 +864,7 @@ get_yields <- function(hop, profile, crop.names) {
 #' @param crop.names A character vector of length 2 containing the names to use in the legend for the mainCrop and interCrop of Hi-sAFe, in that order.
 #' @param output.path A character string indicating the path to the directory where plots should be saved.
 #' If \code{NULL}, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis".
-#' The plot wil be saved in this directory as "cycles_summary_SimulationName.jpg".
+#' The plot will be saved in this directory as "cycles_summary_SimulationName.jpg".
 #' @param plot.labels A character vector of labels to label upper-right corner of plot panels. If \code{NULL}, no labels will be added.
 #' @export
 #' @import ggplot2
@@ -1020,8 +1020,8 @@ cycle_summary <- function(hop,
 #' @param save.table Logical indicating whether a table of budget data and calculations should be saved to \code{output.path}.
 #' @param save.plot Logical indicating whether a plot of the budget excess should be saved to \code{output.path}.
 #' @param output.path A character string indicating the path to the directory where plots should be saved.
-#' If \code{NULL}, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis".
-#' The plot wil be saved in this directory as "cycles_summary_SimulationName.jpg".
+#' If \code{NULL}, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis/budgets".
+#' The tables and plots will be saved in this directory.
 #' @export
 #' @importFrom dplyr %>%
 #' @import ggplot2

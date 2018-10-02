@@ -20,7 +20,7 @@ See \code{\link{plot_hisafe_cycle_annual}} for details of each cycle.}
 
 \item{output.path}{A character string indicating the path to the directory where plots should be saved.
 If \code{NULL}, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis".
-The plot wil be saved in this directory as "cycles_summary_SimulationName.jpg".}
+The plot will be saved in this directory as "cycles_summary_SimulationName.jpg".}
 
 \item{plot.labels}{A character vector of labels to label upper-right corner of plot panels. If \code{NULL}, no labels will be added.}
 

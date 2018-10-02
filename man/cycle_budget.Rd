@@ -21,8 +21,8 @@ cycle_budget(hop, cycle, simu.names = "all", years = "all",
 \item{save.plot}{Logical indicating whether a plot of the budget excess should be saved to \code{output.path}.}
 
 \item{output.path}{A character string indicating the path to the directory where plots should be saved.
-If \code{NULL}, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis".
-The plot wil be saved in this directory as "cycles_summary_SimulationName.jpg".}
+If \code{NULL}, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis/budgets".
+The tables and plots will be saved in this directory.}
 }
 \value{
 A data.frame (tibble) containing the budget data.
