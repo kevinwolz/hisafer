@@ -244,18 +244,18 @@ check_input_values <- function(hip, force) {
   AVAIL.TREES <- gsub("\\.tree", "", list.files(clean_path(paste0(avail.path, "/treeSpecies"))))
 
   ## ENSURE INITIALIZATION TABLES ARE FROM CORRECT SOURCES
-  get_table_names <- function(x, check) {
-    get_name <- function(x) unique(x$name)
+  comp_table_names <- function(x, check) {
+    get_name <- function(x) ifelse(is.na(x), check, unique(x$name))
     all(unlist(purrr::map(x, get_name)) == check)
   }
   tree.table        <- get_used("tree.initialization")
   root.table        <- get_used("root.initialization")
   layers.table      <- get_used("layers")
   layers.init.table <- get_used("layer.initialization")
-  if(!get_table_names(tree.table,        "TreeInit"))  stop("tree.initialization must be specified via tree_init_params()",   call. = FALSE)
-  if(!get_table_names(root.table,        "RootInit"))  stop("root.initialization must be specified via root_init_params()",   call. = FALSE)
-  if(!get_table_names(layers.table,      "Layer"))     stop("layers must be specified via layer_params()",                    call. = FALSE)
-  if(!get_table_names(layers.init.table, "LayerInit")) stop("layer.initialization must be specified via layer_init_params()", call. = FALSE)
+  if(!comp_table_names(tree.table,        "TreeInit"))  stop("tree.initialization must be specified via tree_init_params()",   call. = FALSE)
+  if(!comp_table_names(root.table,        "RootInit"))  stop("root.initialization must be specified via root_init_params()",   call. = FALSE)
+  if(!comp_table_names(layers.table,      "Layer"))     stop("layers must be specified via layer_params()",                    call. = FALSE)
+  if(!comp_table_names(layers.init.table, "LayerInit")) stop("layer.initialization must be specified via layer_init_params()", call. = FALSE)
 
   ## Initialize Error Message
   errors <-   "Hi-sAFe definition errors:"
