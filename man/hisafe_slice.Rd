@@ -93,6 +93,7 @@ Plots a "sliced" profile of the simulated Hi-sAFe scene. Requires the ggforce pa
 }
 }
 \seealso{
-Other hisafe visualization functions: \code{\link{hisafe_snapshot}}
+Other hisafe visualization functions: \code{\link{hisafe_root3D}},
+  \code{\link{hisafe_snapshot}}
 }
 \concept{hisafe visualization functions}

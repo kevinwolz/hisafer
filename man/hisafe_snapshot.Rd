@@ -82,6 +82,7 @@ This function creates the raw materials (daily images) for animations/videos of 
 }
 }
 \seealso{
-Other hisafe visualization functions: \code{\link{hisafe_slice}}
+Other hisafe visualization functions: \code{\link{hisafe_root3D}},
+  \code{\link{hisafe_slice}}
 }
 \concept{hisafe visualization functions}
