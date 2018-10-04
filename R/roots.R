@@ -73,9 +73,9 @@ hisafe_root3D <- function(hop,
   
   rsyst <- hop$voxels %>%
     dplyr::filter(Date == date) %>%
-    dplyr::rename_at(paste0("colonisationDirection_", tree.id), dplyr::funs(paste("colonisationDirection"))) %>%
-    dplyr::rename_at(paste0("treeCoarseRootBiomass_", tree.id), dplyr::funs(paste("treeCoarseRootBiomass"))) %>%
-    dplyr::mutate(root.color = .[[color.var]]) %>%
+    dplyr::mutate(colonisationDirection = .[[paste0("colonisationDirection_", tree.id)]]) %>%
+    dplyr::mutate(treeCoarseRootBiomass = .[[paste0("treeCoarseRootBiomass_", tree.id)]]) %>%
+    dplyr::mutate(root.color            = .[[color.var]]) %>%
     dplyr::select(SimulationName, x, y, z, colonisationDirection, treeCoarseRootBiomass, root.color) %>%
     dplyr::filter(treeCoarseRootBiomass > 0) %>%
     dplyr::mutate(z.up   = abs(Z[match(z, Z) - 1] - z)) %>%    
