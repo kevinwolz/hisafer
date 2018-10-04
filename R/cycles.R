@@ -393,7 +393,7 @@ plot_hisafe_cycle_daily <- function(hop,
     root.pruning.data <- get_pruning_dates(hop = hop, type = "root", tree.ids = unique(hop$trees$idTree)) %>%
       dplyr::mutate(category = "Root pruning")
 
-    vert.line.data <- bind_rows(pheno.data, branch.pruning.data, root.pruning.data) %>%
+    vert.line.data <- dplyr::bind_rows(pheno.data, branch.pruning.data, root.pruning.data) %>%
       dplyr::filter(Year %in% years) %>%
       dplyr::mutate(date = lubridate::as_date(lubridate::ymd(paste0("8000-", Month, "-", Day)))) %>%
       dplyr::filter(category %in% c("Phenologic shift", "Branch pruning", "Root pruning")[c(pheno.lines, branch.pruning.lines, root.pruning.lines)])
