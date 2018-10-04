@@ -50,6 +50,7 @@ LER <- function(face,
   cycle.data <- plot_hisafe_cycle_annual(hop        = face,
                                          cycle      = cycle,
                                          plot       = FALSE,
+                                         tidy       = TRUE,
                                          crop.names = c("Crop", "NA"), ...) %>%
     dplyr::ungroup()
 

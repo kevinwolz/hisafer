@@ -7,7 +7,8 @@
 plot_hisafe_cycle_annual(hop, cycle, simu.names = "all",
   tree.ids = "all", year.lim = c(NA, NA), doy.start = 1,
   color.palette = NULL, bar.color = "black",
-  crop.names = c("Main crop", "Inter crop"), plot = TRUE)
+  crop.names = c("Main crop", "Inter crop"), plot = TRUE,
+  tidy = plot)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
@@ -32,6 +33,8 @@ If \code{NULL}, the default, then the default color palette is a color-blind-fri
 \item{crop.names}{A character vector of length 2 containing the names to use in the legend for the mainCrop and interCrop of Hi-sAFe, in that order.}
 
 \item{plot}{If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.}
+
+\item{tidy}{If \code{TRUE}, the summqrized version of the budget is created. Otherwise, a fully expanded budget is created.}
 }
 \value{
 If \code{plot = TRUE}, returns a ggplot object. If \code{plot = FALSE}, returns the data that would create the plot.

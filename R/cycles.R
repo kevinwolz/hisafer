@@ -15,6 +15,7 @@
 #' @param bar.color A hex value or R standard color name defining the color to use for bar plot borders
 #' @param crop.names A character vector of length 2 containing the names to use in the legend for the mainCrop and interCrop of Hi-sAFe, in that order.
 #' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.
+#' @param tidy If \code{TRUE}, the summqrized version of the budget is created. Otherwise, a fully expanded budget is created.
 #' @details Detailed description of the flux components of the nitrogen and water cycles:
 #'
 #' NITROGEN
@@ -68,7 +69,8 @@ plot_hisafe_cycle_annual <- function(hop,
                                      color.palette = NULL,
                                      bar.color     = "black",
                                      crop.names    = c("Main crop", "Inter crop"),
-                                     plot          = TRUE) {
+                                     plot          = TRUE,
+                                     tidy          = plot) {
 
   is_hop(hop, error = TRUE)
   if(simu.names[1] == "all") simu.names <- unique(hop$exp.plan$SimulationName)
@@ -94,7 +96,7 @@ plot_hisafe_cycle_annual <- function(hop,
     if(is.null(color.palette)) color.palette <- c("#E69F00", "#009E73")
 
   } else if(cycle == "water") {
-    plot.data <- get_water_fluxes(hop = hop, profile = METHOD, crop.names = crop.names, for.plot = plot)
+    plot.data <- get_water_fluxes(hop = hop, profile = METHOD, crop.names = crop.names, for.plot = (plot | tidy))
     geom       <- geom_bar(stat = "identity", color = bar.color)
     plot.title <- "Water Cycle"
     y.lab      <- "Water flux (mm)"
@@ -102,7 +104,7 @@ plot_hisafe_cycle_annual <- function(hop,
                                                   "#009E73", "#0072B2", "#56B4E9")
 
   } else if(cycle == "nitrogen") {
-    plot.data <- get_nitrogen_fluxes(hop = hop, profile = METHOD, crop.names = crop.names, for.plot = plot)
+    plot.data <- get_nitrogen_fluxes(hop = hop, profile = METHOD, crop.names = crop.names, for.plot = (plot | tidy))
     geom       <- geom_bar(stat = "identity", color = bar.color)
     plot.title <- "Nitrogen Cycle"
     y.lab      <- "N flux (kg N ha-1)"
