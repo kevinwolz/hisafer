@@ -1,6 +1,6 @@
 #' Read output from one or more Hi-sAFe simulations
 #' @description Reads the designated output profiles from one or more Hi-sAFe simulations
-#' @return An object of class "hop". This is a list of 13 data frames (tibbles):
+#' @return An object of class "hop". This is a list of 12 data frames (tibbles):
 #' \itemize{
 #'  \item{trees}
 #'  \item{plot}
@@ -13,14 +13,14 @@
 #'  \item{tree.info}{ - tree species and location data for each simulation}
 #'  \item{exp.plan}{ - the exp.plan of the hip object that generated the simulations}
 #'  \item{metadata}{ - the metadata of each simulations (path to simulation folders, model versions, run date , run duration)}
-#'  \item{path}{ - the path to the experiment/simulation folder}
+#'  \item{path}{ - the path to the experiment/simulation folders}
 #' }
 #' @param hip An object of class "hip". To create a hip object see \code{\link{define_hisafe}}.
 #' If \code{hip} is not provided, then \code{path} is required and the input data for the experiment is read from the experiment
 #' summary .csv file created when building the experiment.
 #' @param path A character string of the path to the directory containing the Hi-sAFe simulation folders.
 #' If \code{hip} is not provided, then \code{path} is required. If \code{hip} is provided, \code{path} is ignored.
-#' @param simu.names Names of the simulations to read. If "all", the default, then all simulations in the folder are read.
+#' @param simu.names A character vector of the names of the simulations to read. If "all", the default, then all simulations in the folder are read.
 #' @param profiles A character vector of the names of Hi-sAFe output profiles to read.
 #' #' If "all" the default, reads all supported Hi-sAFe output profiles. For currently supported profiles see: \code{\link{hisafe_profiles}}
 #' @param show.progress Logical indicating whether progress messsages should be printed to the console.
@@ -366,15 +366,19 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
 #' Read example Hi-sAFe experiment output
 #' @description Reads in an example Hi-sAFe experiment. For more details see \code{\link{read_hisafe}}.
 #' @return An object of class "hop".
+#' @param simu.names A character vector of the names of the simulations to read. If "all", the default, then all simulations in the folder are read.
 #' @param profiles A character vector of the names of Hi-sAFe output profiles to read.
 #' @param ... Other arguments passed to \code{\link{read_hisafe}}.
 #' @export
-read_hisafe_example <- function(profiles = c("plot", "trees", "climate", "monthCells", "cells"), ...) {
+read_hisafe_example <- function(simu.names = c("monocrop", "agroforestry", "forestry"),
+                                profiles   = c("plot", "plotDetail", "trees", "treesDetail", "cells",  "cellsDetail",
+                                               "voxelsMonth", "climate", "monthCells", "annualCells"), ...) {
 
   if(!all(is.character(profiles))) stop("profiles argument must be a character vector", call. = FALSE)
 
-  hop <- read_hisafe(path     = clean_path(paste0(system.file("extdata", "example_output", package = "hisafer"), "/")),
-                     profiles = profiles, ...)
+  hop <- read_hisafe(path       = clean_path(paste0(system.file("extdata", "example_exp", package = "hisafer"), "/")),
+                     simu.names = simu.names,
+                     profiles   = profiles, ...)
   return(hop)
 }
 

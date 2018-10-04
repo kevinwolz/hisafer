@@ -16,7 +16,7 @@ summary .csv file created when building the experiment.}
 \item{path}{A character string of the path to the directory containing the Hi-sAFe simulation folders.
 If \code{hip} is not provided, then \code{path} is required. If \code{hip} is provided, \code{path} is ignored.}
 
-\item{simu.names}{Names of the simulations to read. If "all", the default, then all simulations in the folder are read.}
+\item{simu.names}{A character vector of the names of the simulations to read. If "all", the default, then all simulations in the folder are read.}
 
 \item{profiles}{A character vector of the names of Hi-sAFe output profiles to read.
 #' If "all" the default, reads all supported Hi-sAFe output profiles. For currently supported profiles see: \code{\link{hisafe_profiles}}}
@@ -39,7 +39,7 @@ If NA, the maximum date in the output data is used. Only used if \code{dates} is
 If \code{NULL}, then \code{date.max} and \code{date.min} are used instad.}
 }
 \value{
-An object of class "hop". This is a list of 13 data frames (tibbles):
+An object of class "hop". This is a list of 12 data frames (tibbles):
 \itemize{
  \item{trees}
  \item{plot}
@@ -52,7 +52,7 @@ An object of class "hop". This is a list of 13 data frames (tibbles):
  \item{tree.info}{ - tree species and location data for each simulation}
  \item{exp.plan}{ - the exp.plan of the hip object that generated the simulations}
  \item{metadata}{ - the metadata of each simulations (path to simulation folders, model versions, run date , run duration)}
- \item{path}{ - the path to the experiment/simulation folder}
+ \item{path}{ - the path to the experiment/simulation folders}
 }
 }
 \description{

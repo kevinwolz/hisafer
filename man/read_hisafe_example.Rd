@@ -4,10 +4,14 @@
 \alias{read_hisafe_example}
 \title{Read example Hi-sAFe experiment output}
 \usage{
-read_hisafe_example(profiles = c("plot", "trees", "climate",
-  "monthCells", "cells"), ...)
+read_hisafe_example(simu.names = c("monocrop", "agroforestry",
+  "forestry"), profiles = c("plot", "plotDetail", "trees", "treesDetail",
+  "cells", "cellsDetail", "voxelsMonth", "climate", "monthCells",
+  "annualCells"), ...)
 }
 \arguments{
+\item{simu.names}{A character vector of the names of the simulations to read. If "all", the default, then all simulations in the folder are read.}
+
 \item{profiles}{A character vector of the names of Hi-sAFe output profiles to read.}
 
 \item{...}{Other arguments passed to \code{\link{read_hisafe}}.}
