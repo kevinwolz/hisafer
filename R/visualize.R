@@ -128,7 +128,7 @@ hisafe_slice <- function(hop,
     hop$trees     <- swap_cols(hop$trees,     "crownRadiusInterRow", "crownRadiusTreeLine")
     hop$plot.info <- swap_cols(hop$plot.info, "plotWidth",           "plotHeight")
   }
-  for(p in c("tree.info", "cells", "voxels")[c(TRUE, crops, voxels)]) hop <- flip_scene(hop = hop, profile = p, shift = scene.shift)
+  for(p in c("tree.info", "cells", "voxels")[c(TRUE, crops, voxels)]) hop <- shift_scene(hop = hop, profile = p, shift = scene.shift)
 
   if(crops) {
     cell.Ys <- dplyr::as_tibble(table(hop$cells$SimulationName, hop$cells$y))[, 1:2] %>%
@@ -179,16 +179,17 @@ hisafe_slice <- function(hop,
                           dates          = date,
                           strip.exp.plan = TRUE)
 
-  crops   <- crops   & nrow(hop.full$cells)   > 0
-  voxels  <- voxels  & nrow(hop.full$voxels)  > 0
-  climate <- climate & nrow(hop.full$plot) > 0
+  trees   <- trees   & profile_check(hop.full, "trees")
+  crops   <- crops   & profile_check(hop.full, "cells")
+  voxels  <- voxels  & profile_check(hop.full, "voxels")
+  climate <- climate & profile_check(hop.full, "plot")
 
   ## VOXEL & CELL MEMORY
   if(voxels & nrow(hop$voxels) == 0) hop$voxels <- add_historic_data(df = hop.full$voxels, dates = date, mem.max = mem.max)
   if(crops  & nrow(hop$cells)  == 0) hop$cells  <- add_historic_data(df = hop.full$cells,  dates = date, mem.max = mem.max)
 
-  crops  <- crops  & nrow(hop$cells) > 0
-  voxels <- voxels & nrow(hop$voxels) > 0
+  crops  <- crops  & profile_check(hop, "cells")
+  voxels <- voxels & profile_check(hop, "voxels")
 
   rect.min.border <- 0.25
   rect.max.border <- 1
@@ -227,7 +228,7 @@ hisafe_slice <- function(hop,
   crop.grouping.symbols  <- rlang::parse_quosures(paste(crop.grouping.strings,  collapse = ";"))
   voxel.grouping.symbols <- rlang::parse_quosures(paste(voxel.grouping.strings, collapse = ";"))
 
-  if(trees | voxels) { # OR voxels because the tree root pruning needs to be calculated when voxels are being plotted.
+  if(trees | voxels) { # OR voxelsbecause the tree root pruning needs to be calculated when voxels are being plotted.
     hop$tree.info <- hop$tree.info %>%
       dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
       dplyr::mutate(special.case = x == 0 & y == 0) %>% # special case when x == 0 & y == 0 : tree is at scene center
@@ -242,28 +243,28 @@ hisafe_slice <- function(hop,
       dplyr::mutate(tree.pruning.prop       = 0) %>%
       dplyr::mutate(tree.pruning.max.height = 0)
 
-    for(i in 1:nrow(hop$tree.info)) {
-      if(!is.na(unlist(hop$tree.info$treePruningYears[[i]])[1])) {
-        hop$tree.info$tree.pruning.dates[[i]] <- lubridate::ymd(paste0(unlist(hop$tree.info$treePruningYears[[i]]) - 1 - tree.age.at.start +
-                                                                         hop$tree.info$simulationYearStart[i], "-01-01")) + unlist(hop$tree.info$treePruningDays[[i]]) - 1
-      }
-      if(!is.na(unlist(hop$tree.info$treeRootPruningYears[[i]])[1])) {
-        hop$tree.info$root.pruning.dates[[i]] <- lubridate::ymd(paste0(unlist(hop$tree.info$treeRootPruningYears[[i]]) - 1 - tree.age.at.start +
-                                                                         hop$tree.info$simulationYearStart[i], "-01-01")) + unlist(hop$tree.info$treeRootPruningDays[[i]]) - 1
-      }
-      hop$tree.info$tree.pruning[i]         <- as.numeric(date %in% hop$tree.info$tree.pruning.dates[[i]])
-      if(hop$tree.info$tree.pruning[i] == 1) {
-        prune.id <- which(hop$tree.info$tree.pruning.dates[[i]] == date)
-        hop$tree.info$tree.pruning.max.height[i] <- unlist(hop$tree.info$treePruningMaxHeight[[i]])[prune.id]
-        hop$tree.info$tree.pruning.prop[i]       <- unlist(hop$tree.info$treePruningProp[[i]])[prune.id]
-      }
-      hop$tree.info$root.pruning[i] <- as.numeric(date %in% hop$tree.info$root.pruning.dates[[i]])
-      if(hop$tree.info$root.pruning[i] == 1) {
-        prune.id <- which(hop$tree.info$root.pruning.dates[[i]] == date)
-        hop$tree.info$root.pruning.depth[i]    <- unlist(hop$tree.info$treeRootPruningDepth[[i]])[prune.id]
-        hop$tree.info$root.pruning.distance[i] <- unlist(hop$tree.info$treeRootPruningDistance[[i]])[prune.id]
-      } else {
-
+    if(profile_check(hop, "trees")) {
+      for(i in 1:nrow(hop$tree.info)) {
+        if(!is.na(unlist(hop$tree.info$treePruningYears[[i]])[1])) {
+          hop$tree.info$tree.pruning.dates[[i]] <- lubridate::ymd(paste0(unlist(hop$tree.info$treePruningYears[[i]]) - 1 - tree.age.at.start +
+                                                                           hop$tree.info$simulationYearStart[i], "-01-01")) + unlist(hop$tree.info$treePruningDays[[i]]) - 1
+        }
+        if(!is.na(unlist(hop$tree.info$treeRootPruningYears[[i]])[1])) {
+          hop$tree.info$root.pruning.dates[[i]] <- lubridate::ymd(paste0(unlist(hop$tree.info$treeRootPruningYears[[i]]) - 1 - tree.age.at.start +
+                                                                           hop$tree.info$simulationYearStart[i], "-01-01")) + unlist(hop$tree.info$treeRootPruningDays[[i]]) - 1
+        }
+        hop$tree.info$tree.pruning[i]         <- as.numeric(date %in% hop$tree.info$tree.pruning.dates[[i]])
+        if(hop$tree.info$tree.pruning[i] == 1) {
+          prune.id <- which(hop$tree.info$tree.pruning.dates[[i]] == date)
+          hop$tree.info$tree.pruning.max.height[i] <- unlist(hop$tree.info$treePruningMaxHeight[[i]])[prune.id]
+          hop$tree.info$tree.pruning.prop[i]       <- unlist(hop$tree.info$treePruningProp[[i]])[prune.id]
+        }
+        hop$tree.info$root.pruning[i] <- as.numeric(date %in% hop$tree.info$root.pruning.dates[[i]])
+        if(hop$tree.info$root.pruning[i] == 1) {
+          prune.id <- which(hop$tree.info$root.pruning.dates[[i]] == date)
+          hop$tree.info$root.pruning.depth[i]    <- unlist(hop$tree.info$treeRootPruningDepth[[i]])[prune.id]
+          hop$tree.info$root.pruning.distance[i] <- unlist(hop$tree.info$treeRootPruningDistance[[i]])[prune.id]
+        }
       }
     }
 
@@ -312,10 +313,11 @@ hisafe_slice <- function(hop,
       dplyr::mutate(L.y = 0) %>%
       dplyr::mutate(R.y = 0) %>%
       dplyr::mutate(T.y = tree.height)
+
     trunk.data <- dplyr::tibble(SimulationName = rep(trunk.data$SimulationName, 3),
-                                Date           = rep(trunk.data$Date, 3),
-                                idTree         = rep(trunk.data$idTree, 3),
-                                trunk.alpha    = rep(trunk.data$trunk.alpha, 3),
+                                Date           = rep(trunk.data$Date,           3),
+                                idTree         = rep(trunk.data$idTree,         3),
+                                trunk.alpha    = rep(trunk.data$trunk.alpha,    3),
                                 x              = c(trunk.data$L.x, trunk.data$R.x, trunk.data$T.x),
                                 y              = c(trunk.data$L.y, trunk.data$R.y, trunk.data$T.y))
 
@@ -353,9 +355,9 @@ hisafe_slice <- function(hop,
       dplyr::summarize(cell.height  = mean(cell.height),
                        yield.height = mean(yield.height),
                        cell.color   = round(median(cell.color)),
-                       crop.alpha   = sum(crop.alpha),
-                       yield.alpha  = sum(yield.alpha),
-                       fert.level   = sum(fert.level)) %>%
+                       crop.alpha   = mean(crop.alpha),
+                       yield.alpha  = mean(yield.alpha),
+                       fert.level   = mean(fert.level)) %>%
       dplyr::ungroup() %>%
       dplyr::mutate(cell.color = factor(cell.color, labels = cell.border.palette[1:length(unique(cell.color))]))
 
@@ -365,9 +367,9 @@ hisafe_slice <- function(hop,
       dplyr::mutate(fert.level  = nitrogenFertilisationMineral + nitrogenFertilisationOrganic) %>%
       dplyr::filter(y %in% Yc) %>%
       dplyr::group_by(SimulationName, Year, Date, x) %>%
-      dplyr::summarize(crop.alpha  = sum(crop.alpha),
-                       yield.alpha = sum(yield.alpha),
-                       fert.level  = sum(fert.level)) %>%
+      dplyr::summarize(crop.alpha  = mean(crop.alpha),
+                       yield.alpha = mean(yield.alpha),
+                       fert.level  = mean(fert.level)) %>%
       dplyr::ungroup() %>%
       dplyr::group_by(!!!crop.grouping.symbols) %>%
       dplyr::summarize(crop.alpha.max  = max(crop.alpha),
@@ -397,7 +399,7 @@ hisafe_slice <- function(hop,
                     voxel.L.size, voxel.C.size, voxel.R.size,
                     voxel.L.alpha, voxel.C.alpha, voxel.R.alpha) %>%
       dplyr::group_by(SimulationName, Year, Date, x, z) %>%
-      dplyr::summarize_all(sum) %>%
+      dplyr::summarize_all(mean) %>%
       dplyr::ungroup()
 
     voxel.max <- hop.full$voxels %>%
@@ -412,14 +414,14 @@ hisafe_slice <- function(hop,
       dplyr::filter(y %in% Yv) %>%
       dplyr::filter(z <= abs(max.soil.depth)) %>%
       dplyr::group_by(SimulationName, Year, Date, x, z) %>%
-      dplyr::summarize(voxel.alpha   = sum(voxel.alpha),
-                       voxel.border  = sum(voxel.border),
-                       voxel.L.size  = sum(voxel.L.size),
-                       voxel.C.size  = sum(voxel.C.size),
-                       voxel.R.size  = sum(voxel.R.size),
-                       voxel.L.alpha = sum(voxel.L.alpha),
-                       voxel.C.alpha = sum(voxel.C.alpha),
-                       voxel.R.alpha = sum(voxel.R.alpha)) %>%
+      dplyr::summarize(voxel.alpha   = mean(voxel.alpha),
+                       voxel.border  = mean(voxel.border),
+                       voxel.L.size  = mean(voxel.L.size),
+                       voxel.C.size  = mean(voxel.C.size),
+                       voxel.R.size  = mean(voxel.R.size),
+                       voxel.L.alpha = mean(voxel.L.alpha),
+                       voxel.C.alpha = mean(voxel.C.alpha),
+                       voxel.R.alpha = mean(voxel.R.alpha)) %>%
       dplyr::ungroup() %>%
       dplyr::group_by(!!!voxel.grouping.symbols) %>%
       dplyr::summarize(voxel.alpha.max   = max(voxel.alpha),
@@ -430,6 +432,11 @@ hisafe_slice <- function(hop,
                        voxel.L.alpha.max = max(voxel.L.alpha),
                        voxel.C.alpha.max = max(voxel.C.alpha),
                        voxel.R.alpha.max = max(voxel.R.alpha))
+
+    replace_nan_0 <- function(x) {
+      x[is.nan(x)] <- 0
+      return(x)
+    }
 
     voxel.data <- voxel %>%
       dplyr::left_join(voxel.max, by = voxel.grouping.strings) %>%
@@ -443,7 +450,11 @@ hisafe_slice <- function(hop,
       dplyr::mutate(voxel.R.alpha  = voxel.R.alpha / voxel.R.alpha.max)  %>%
       dplyr::mutate(voxel.L.border = circle.max.border * as.numeric(voxel.L.size > 0)) %>%
       dplyr::mutate(voxel.C.border = circle.max.border * as.numeric(voxel.C.size > 0)) %>%
-      dplyr::mutate(voxel.R.border = circle.max.border * as.numeric(voxel.R.size > 0))
+      dplyr::mutate(voxel.R.border = circle.max.border * as.numeric(voxel.R.size > 0)) %>%
+      dplyr::mutate_at(dplyr::vars(voxel.alpha,    voxel.border,
+                                   voxel.L.size,   voxel.C.size,   voxel.R.size,
+                                   voxel.L.alpha,  voxel.C.alpha,  voxel.R.alpha,
+                                   voxel.L.border, voxel.C.border, voxel.R.border), replace_nan_0)
   }
 
   if(climate) {
@@ -686,7 +697,7 @@ hisafe_slice <- function(hop,
                                alpha = voxel.R.alpha))
   }
 
-  if(trees | voxels) {
+  if(trees | (voxels & profile_check(hop, "trees"))) {
     plot.obj <- plot.obj +
       ## ROOT PRUNING
       geom_segment(data  = tree.data,
@@ -1530,11 +1541,16 @@ extract_complete_dates <- function(hop, profile, dates) {
 #' @param profile Character string of the name of a hop profile.
 #' @param shift The number of cell rows to shift the scene to the left.
 #' @keywords internal
-flip_scene <- function(hop, profile, shift) {
-  shift <- shift * hop$plot.info$cellWidth
-  temp <- hop[[profile]]$x
-  temp <- temp + as.numeric(temp <  shift) * hop$plot.info$plotWidth
-  temp <- temp - as.numeric(temp >= shift) * shift
-  hop[[profile]]$x <- temp
+shift_scene <- function(hop, profile, shift) {
+  plot.info <- hop$plot.info %>%
+    dplyr::mutate(shift      = shift * cellWidth) %>%
+    dplyr::rename(plot.width = plotWidth) %>% # in case plotWidth is part of exp.plan attached to the hop element
+    dplyr::select(SimulationName, plot.width, shift)
+
+  hop[[profile]]  <- hop[[profile]] %>%
+    dplyr::left_join(plot.info, by = "SimulationName") %>%
+    dplyr::mutate(x = x + as.numeric(x <  shift) * plot.width) %>%
+    dplyr::mutate(x = x - as.numeric(x >= shift) * shift) %>%
+    dplyr::select(-plot.width, -shift)
   return(hop)
 }
