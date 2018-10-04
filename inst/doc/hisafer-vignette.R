@@ -108,9 +108,12 @@ hip <- define_hisafe(path      = "./simulations",
 #  example.path <- "/Users/kevinwolz/Desktop/RESEARCH/ACTIVE_PROJECTS/HI-SAFE/hisafer/inst/extdata/example_exp"
 #  example.profiles <- c("plot", "plotDetail", "trees", "treesDetail", "cells",  "cellsDetail",
 #                        "voxelsMonth", "climate", "monthCells", "annualCells")
-#  mc.hip <- define_hisafe(path = example.path, template = "monocrop"    , SimulationName = "monocrop",     profiles = example.profiles, sticsReport = 1)
-#  af.hip <- define_hisafe(path = example.path, template = "agroforestry", SimulationName = "agroforestry", profiles = example.profiles)
-#  pf.hip <- define_hisafe(path = example.path, template = "forestry",     SimulationName = "forestry",     profiles = example.profiles)
+#  mc.hip <- define_hisafe(path = example.path, template = "monocrop"    , SimulationName = "monocrop",
+#                          profiles = example.profiles, sticsReport = 1, nbSimulations = 7)
+#  af.hip <- define_hisafe(path = example.path, template = "agroforestry", SimulationName = "agroforestry",
+#                          profiles = example.profiles, nbSimulations = 7, lueMax = 1.0)
+#  pf.hip <- define_hisafe(path = example.path, template = "forestry",     SimulationName = "forestry",
+#                          profiles = example.profiles, nbSimulations = 7, lueMax = 1.0)
 #  build_hisafe(hip = mc.hip)
 #  build_hisafe(hip = af.hip)
 #  build_hisafe(hip = pf.hip)
@@ -149,8 +152,10 @@ plot_hisafe_monthcells(hop        = hop,
                        variable   = "monthRelativeDirectParIncident",
                        colfacet   = "Year",
                        rowfacet   = "SimulationName",
-                       years      = 1995:2003,
-                       months     = 7)
+                       years      = 1995:2000,
+                       months     = 7,
+                       trees      = FALSE,
+                       canopies   = FALSE)
 
 ## ---- eval = TRUE, dpi = 250, fig.width = 10-----------------------------
 plot_hisafe_cycle_annual(hop = hop, cycle = "carbon")
@@ -165,26 +170,26 @@ plot_hisafe_cycle_annual(hop = hop, cycle = "water")
 plot_hisafe_cycle_annual(hop = hop, cycle = "light")
 
 ## ---- eval = TRUE, dpi = 250, fig.width = 10-----------------------------
-plot_hisafe_cycle_daily(hop = hop, cycle = "carbon", years = 2003)
+plot_hisafe_cycle_daily(hop = hop, cycle = "carbon", years = 2000)
 
 ## ---- eval = TRUE, dpi = 250, fig.width = 10-----------------------------
-plot_hisafe_cycle_daily(hop = hop, cycle = "nitrogen", years = 2003)
+plot_hisafe_cycle_daily(hop = hop, cycle = "nitrogen", years = 2000)
 
 ## ---- eval = TRUE, dpi = 250, fig.width = 10-----------------------------
-plot_hisafe_cycle_daily(hop = hop, cycle = "water", years = 2003)
+plot_hisafe_cycle_daily(hop = hop, cycle = "water", years = 2000)
 
 ## ---- eval = TRUE, dpi = 250, fig.width = 10-----------------------------
-plot_hisafe_cycle_daily(hop = hop, cycle = "light", years = 2003)
+plot_hisafe_cycle_daily(hop = hop, cycle = "light", years = 2000)
 
 ## ---- eval = TRUE, dpi = 250, fig.width = 10-----------------------------
-plot_hisafe_cycle_daily(hop = hop, cycle = "carbon-increment", years = 2003)
+plot_hisafe_cycle_daily(hop = hop, cycle = "carbon-increment", years = 2000)
 
 ## ---- eval = TRUE, dpi = 250, fig.width = 10-----------------------------
-plot_hisafe_cycle_daily(hop = hop, cycle = "carbon-allocation", years = 2003)
+plot_hisafe_cycle_daily(hop = hop, cycle = "carbon-allocation", years = 2000)
 
 ## ---- eval = TRUE, dpi = 250, fig.width = 10-----------------------------
 summary.out <- cycle_summary(hop         = hop,
-                             daily.year  = 2003,
+                             daily.year  = 2000,
                              cycles      = c("carbon", "light", "water", "nitrogen"),
                              simu.name   = "AF",
                              crop.names  = c("Crop", "Tree line vegetation"))
@@ -195,18 +200,13 @@ hisafe_slice(hop        = hop,
              simu.names = c("AF", "PF"),
              date       = "1999-06-01")
 
-## ---- dpi = 250, fig.width = 20------------------------------------------
-hisafe_slice(hop        = hop,
-             simu.names = c("AF", "PF"),
-             date       = "2003-07-01")
-
 ## ---- dpi = 250, fig.width = 8-------------------------------------------
 visual_legend(hop = hop)
 
 ## ---- eval = FALSE-------------------------------------------------------
 #  hisafe_root3D(hop      = hop,
 #               simu.name = "AF",
-#               date      = "2003-06-01")
+#               date      = "2000-06-01")
 
 ## ---- eval = TRUE--------------------------------------------------------
 face <- create_face(agroforestry = hop_filter(hop, "AF"), 

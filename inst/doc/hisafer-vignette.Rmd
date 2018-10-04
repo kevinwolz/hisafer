@@ -269,9 +269,12 @@ If any Hi-sAFe output profiles specified by `profiles` were not created when Hi-
 example.path <- "/Users/kevinwolz/Desktop/RESEARCH/ACTIVE_PROJECTS/HI-SAFE/hisafer/inst/extdata/example_exp"
 example.profiles <- c("plot", "plotDetail", "trees", "treesDetail", "cells",  "cellsDetail", 
                       "voxelsMonth", "climate", "monthCells", "annualCells")
-mc.hip <- define_hisafe(path = example.path, template = "monocrop"    , SimulationName = "monocrop",     profiles = example.profiles, sticsReport = 1)
-af.hip <- define_hisafe(path = example.path, template = "agroforestry", SimulationName = "agroforestry", profiles = example.profiles)
-pf.hip <- define_hisafe(path = example.path, template = "forestry",     SimulationName = "forestry",     profiles = example.profiles)
+mc.hip <- define_hisafe(path = example.path, template = "monocrop"    , SimulationName = "monocrop",     
+                        profiles = example.profiles, sticsReport = 1, nbSimulations = 7)
+af.hip <- define_hisafe(path = example.path, template = "agroforestry", SimulationName = "agroforestry",
+                        profiles = example.profiles, nbSimulations = 7, lueMax = 1.0)
+pf.hip <- define_hisafe(path = example.path, template = "forestry",     SimulationName = "forestry",     
+                        profiles = example.profiles, nbSimulations = 7, lueMax = 1.0)
 build_hisafe(hip = mc.hip)
 build_hisafe(hip = af.hip)
 build_hisafe(hip = pf.hip)
@@ -354,8 +357,10 @@ plot_hisafe_monthcells(hop        = hop,
                        variable   = "monthRelativeDirectParIncident",
                        colfacet   = "Year",
                        rowfacet   = "SimulationName",
-                       years      = 1995:2003,
-                       months     = 7)
+                       years      = 1995:2000,
+                       months     = 7,
+                       trees      = FALSE,
+                       canopies   = FALSE)
 ```
 
 #### 6.2 Cycle plots
@@ -373,28 +378,28 @@ plot_hisafe_cycle_annual(hop = hop, cycle = "water")
 plot_hisafe_cycle_annual(hop = hop, cycle = "light")
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_daily(hop = hop, cycle = "carbon", years = 2003)
+plot_hisafe_cycle_daily(hop = hop, cycle = "carbon", years = 2000)
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_daily(hop = hop, cycle = "nitrogen", years = 2003)
+plot_hisafe_cycle_daily(hop = hop, cycle = "nitrogen", years = 2000)
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_daily(hop = hop, cycle = "water", years = 2003)
+plot_hisafe_cycle_daily(hop = hop, cycle = "water", years = 2000)
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_daily(hop = hop, cycle = "light", years = 2003)
+plot_hisafe_cycle_daily(hop = hop, cycle = "light", years = 2000)
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_daily(hop = hop, cycle = "carbon-increment", years = 2003)
+plot_hisafe_cycle_daily(hop = hop, cycle = "carbon-increment", years = 2000)
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_daily(hop = hop, cycle = "carbon-allocation", years = 2003)
+plot_hisafe_cycle_daily(hop = hop, cycle = "carbon-allocation", years = 2000)
 ```
 
 You can also create a "dashboard" of the cycles of simulation via `cycle_summary()`:
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
 summary.out <- cycle_summary(hop         = hop,
-                             daily.year  = 2003,
+                             daily.year  = 2000,
                              cycles      = c("carbon", "light", "water", "nitrogen"),
                              simu.name   = "AF",
                              crop.names  = c("Crop", "Tree line vegetation"))
@@ -412,12 +417,6 @@ hisafe_slice(hop        = hop,
              date       = "1999-06-01")
 ```
 
-```{r, dpi = 250, fig.width = 20}
-hisafe_slice(hop        = hop,
-             simu.names = c("AF", "PF"),
-             date       = "2003-07-01")
-```
-
 You can use `hisafe_slice()` even if you do not have the voxels profile within your `hop` object by setting `voxels = FALSE`. You can also customize what you want each aspect of the plot to represent via the `vars` argument. Furthermore, you can switch the direction in which the scene is "sliced" by setting `plot.x = "y"`. This gives you the opportunity to view the 3D scene from both 2D directions.
 
 To see a legend of what everything represents:
@@ -431,7 +430,7 @@ To visualize tree root topology, you can use `hiasfe_root3D()`. You must have th
 ```{r, eval = FALSE}
 hisafe_root3D(hop      = hop,
              simu.name = "AF",
-             date      = "2003-06-01")
+             date      = "2000-06-01")
 ```
 
 #### 6.4 FACE experiments
