@@ -172,6 +172,11 @@ stics_budget_comp <- function(hop,
                       "Priming", "MineralisationPriming")
   }
 
+  if(save.table) {
+    output.path.simu <- clean_path(paste0(diag_output_path(hop = hop, output.path = output.path), "/budgets/"))
+    dir.create(output.path.simu, recursive = TRUE, showWarnings = FALSE)
+  }
+
   OUT <- dplyr::tibble()
   for(simu.name in simu.names) {
     ## HISAFE BUDGET
@@ -193,7 +198,7 @@ stics_budget_comp <- function(hop,
     if(years == "all") YEARS <- hisafe.budget$Year
 
     stics.budget.raw <- purrr::map_df(YEARS, get_stics_budget,
-                                      path         = hop$path,
+                                      path         = ifelse(basename(hop$path) == simu.name, dirname(hop$path), hop$path),
                                       simu.name    = simu.name,
                                       stics.names  = search.names,
                                       start.header = start,
@@ -281,11 +286,7 @@ stics_budget_comp <- function(hop,
       dplyr::arrange(SimulationName, variable, Year)
 
 
-    if(save.table) {
-      output.path.simu <- clean_path(paste0(diag_output_path(hop = hop, output.path = output.path), "/budgets/"))
-      dir.create(output.path.simu, recursive = TRUE, showWarnings = FALSE)
-      readr::write_csv(out, paste0(output.path.simu, "stics_", cycle, "_budget_comp_", simu.name, ".csv"))
-    }
+    if(save.table) readr::write_csv(out, paste0(output.path.simu, "stics_", cycle, "_budget_comp_", simu.name, ".csv"))
 
     OUT <- dplyr::bind_rows(OUT, out)
   }
