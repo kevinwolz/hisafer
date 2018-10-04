@@ -1,0 +1,40 @@
+Script: splashscreen was desactivated
+-> OS/JVM/memory: linux/64/16384m
+Logger capsis writes in: /nfs/work/hisafe/Capsis4/var/capsis.log.2
+Capsis 4.2.5, (c) 2000-2018 F. de Coligny, N. Beudez, S. Dufour-Kowalski (INRA-AMAP) and the Capsis modellers
+Capsis comes with ABSOLUTELY NO WARRANTY
+The core of the Capsis platform (packages capsis.*) is free software 
+and you are welcome to redistribute it under certain conditions. 
+Some components in other packages may not be free. See licence files.
+
+Logger extensionManager writes in: /nfs/work/hisafe/Capsis4/var/extensionManager.log.2
+Capsis 4.2.5-12697 with pilot capsis.script.Pilot: correct boot at 4 Oct 2018 16:07:34 CEST
+Working dir: /nfs/work/hisafe/Capsis4
+
+Launching script safe.pgms.ScriptGen...
+pldFileName=/lustre/lecomtei/tests/example_exp/forestry/forestry.pld
+weatherFile=/lustre/lecomtei/tests/example_exp/forestry/weather.wth
+mainCropSpeciesFileName=/lustre/lecomtei/tests/example_exp/forestry/cropSpecies/baresoil.plt
+******* Simulation 1
+
+******* Simulation 2
+
+******* Simulation 3
+
+******* Simulation 4
+
+******* Simulation 5
+
+******* Simulation 6
+
+******* Simulation 7
+
+******* Simulation 8
+
+******* Simulation 9
+
+******* Simulation 10
+
+
+Duration of simulation in seconds = 686
+END of Simulation

@@ -1,0 +1,140 @@
+## DURUM WHEAT ALLUR (BLE DUR)
+
+## SOIL MANAGEMENT
+nbjres = 1
+nbjtrav = 1
+
+## RESIDUE INCORPORATION TABLE
+#julres	coderes	qres	Crespc	CsurNres	Nminres	eaures
+299	1	1	42	15	0	0
+
+## TILLAGE TABLE
+#jultrav	profres	proftrav
+299	30	30
+
+## SOWING OPTIONS
+iplt0 = 300
+profsem = 3
+densitesem = 268
+variete = 1
+codetradtec = 2
+interrang = 0
+orientrang = 0
+codedecisemis = 2
+nbjmaxapressemis = 30
+nbjseuiltempref = 15
+
+## STAGE FORCING
+codestade = 2
+ilev = 999
+iamf = 388
+ilax = 999
+isen = 999
+ilan = 999
+iflo = 483
+idrp = 483
+imat = 999
+irec = 999
+irecbutoir = 700
+
+## IRRIGATIONS
+effirr = 1
+codecalirrig = 2
+ratiol = 0
+dosimx = 40
+doseirrigmin = 20
+codedateappH2O = 2
+nap = 0
+codlocirrig = 1
+locirrig = 0
+
+## IRRIGATION TABLE
+
+## FERTILIZATIONS
+profmes = 120
+engrais = 2
+concirr = 0
+codedateappN = 2
+codefracappN = 1
+Qtot_N = 100
+napN = 3
+codlocferti = 1
+locferti = 0
+
+## FERTILIZATION TABLE
+#julapN	qte
+400	30
+420	50
+470	80
+
+## HARVEST OPTIONS
+ressuite = stubble+roots
+codceuille = 1
+nbceuille = 1
+cadencerec = 7
+codrecolte = 2
+codeaumin = 2
+h2ograinmin = 0.6
+h2ograinmax = 0.16
+sucrerec = 0.25
+CNgrainrec = 0.06
+huilerec = 0.07
+coderecolteassoc = 2
+codedecirecolte = 2
+nbjmaxapresrecolte = 15
+
+## CUTTING INTERVENTIONS
+codefauche = 2
+mscoupemini = 0
+codemodfauche = 1
+hautcoupedefaut = 0
+stadecoupedf = rec
+nbcoupe = 0
+nbinterventions = 0
+
+## CUTTING TABLE
+
+## OTHER INTERVENTIONS
+codepaillage = 1
+couvermulchplastique = 0
+albedomulchplastique = 0
+codrognage = 1
+largrogne = 0.55
+hautrogne = 1.4
+biorognem = 0.2
+codcalrogne = 1
+julrogne = 200
+margerogne = 0.2
+codeclaircie = 1
+juleclair = 190
+nbinfloecl = 2.5
+codeffeuil = 1
+codhauteff = 2
+codcaleffeuil = 2
+laidebeff = 0.9
+effeuil = 0.5
+juleffeuil = 213
+laieffeuil = 0.5
+codetaille = 1
+jultaille = 320
+codepalissage = 1
+hautmaxtec = 0.7
+largtec = 0.5
+codabri = 1
+transplastic = 0.7
+surfouvre1 = 0.1
+julouvre2 = 40
+surfouvre2 = 0.5
+julouvre3 = 120
+surfouvre3 = 0.7
+codeDST = 2
+dachisel = 1.1
+dalabour = 1.3
+rugochisel = 0.005
+rugolabour = 0.05
+codeDSTtass = 2
+profhumsemoir = 30
+dasemis = 1.6
+profhumrecolteuse = 30
+darecolte = 1.6
+codeDSTnbcouche = 2

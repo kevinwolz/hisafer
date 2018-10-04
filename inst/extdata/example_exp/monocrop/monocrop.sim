@@ -1,0 +1,54 @@
+## SIMULATION
+nbSimulations = 10
+simulationYearStart = 1994
+simulationDayStart = 185
+simulationNbrDays = 365
+saveProjectOption = 0
+#projectFileName = none.prj
+debugMode = 0
+sticsReport = 1
+
+## CROP ROTATION
+mainCropSpecies = durum-wheat-restinclieres.plt
+interCropSpecies = durum-wheat-restinclieres.plt
+mainCropItk = durum-wheat.tec
+interCropItk = durum-wheat.tec
+treeCropDistance = 0
+treeCropRadius = 0
+
+## EXPORTS
+profileNames = plot,plotDetail,trees,treesDetail,cells,cellsDetail,voxelsMonth,climate,monthCells,annualCells
+exportFrequencies = 1,1,1,1,1,1,30,1,30,365
+
+## TORIC SYMETRY
+toricXp = 1
+toricXn = 1
+toricYp = 1
+toricYn = 1
+
+## TREE PLANTING
+#treePlantingYears = 1
+#treePlantingDays = 290
+
+## TREE PRUNING
+#treePruningYears = 2,4,6,8,10,12,14,16,18,20,22,24,26,28,30
+#treePruningDays = 365,365,365,365,365,365,365,365,365,365,365,365,365,365,365
+#treePruningProp = 0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3
+#treePruningMaxHeight = 4,4,4,4,4,4,4,4,4,4,4,4,4,4,4
+#treeDensityReduction = 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+
+## TREE THINNING
+#treeThinningIds = 1
+#treeThinningYears = 10
+#treeThinningDays = 365
+
+## TREE ROOT PRUNING
+#treeRootPruningYears = 1
+#treeRootPruningDays = 365
+#treeRootPruningDistance = 1.5
+#treeRootPruningDepth = 1
+
+## TREE LITTER INCORPORATION IN SOIL
+treesLeafLitterIncorporated = 1
+treesRootLitterIncorporated = 1
+treesDeepRootLitterIncorporated = 1
