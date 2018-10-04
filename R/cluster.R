@@ -76,7 +76,7 @@ build_cluster_script <- function(hip            = NULL,
   if(!is.null(simu.prefix)) {
     SEQ <- TRUE
     seqs <- as.numeric(gsub(simu.prefix, "", simu.names))
-  } else if(all(grepl(paste0(simu.prefix.guess, "_[0-9]+$"), simu.names) & map_dbl(simu.names.split, length) > 1)) {
+  } else if(all(grepl(paste0(simu.prefix.guess, "_[0-9]+$"), simu.names) & purrr::map_dbl(simu.names.split, length) > 1)) {
     SEQ <- TRUE
     seqs <- as.numeric(purrr::map_chr(simu.names.split, 2))
     simu.prefix <- paste0(simu.prefix.guess, "_")
