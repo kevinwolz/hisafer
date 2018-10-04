@@ -1,5 +1,5 @@
 ---
-title: "Introduction to hisafer 1.0.0"
+title: "Introduction to hisafer 1.5.0"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{hisafer}
@@ -246,48 +246,52 @@ run_hisafe(path        = "./simulations/lue"
 ### 4. READ output data
 Hi-sAFe can generate quite a lot of output data. All of this data is created within a set of text files, which can be difficult to navigate without hisafer. During this step, hisafer reads all of this output data into R for easy manipulation and analysis. To read Hi-sAFe output data use `read_hisafe()`. The only required input is a `hip` object or, alternatively, a `path` to the directory containing the simulation folders can by manually provided. You can also specify a subset of simulations to read via `simu.names`. Finally, you can specify which Hi-sAFe output profiles to read in using `profiles`. While the default is to read all profiles, you may not want to read, for example, the large "cells" or "voxels" profiles if you simply want to analyze daily plot data. 
 
-The resulting object created by `read_hisafe()` is an obeject of class "hop" (for "Hi-sAFe OutPut"). This is a list of 16 data frames (tibbles): 
+The resulting object created by `read_hisafe()` is an obeject of class "hop" (for "Hi-sAFe OutPut"). This is a list of 12 data frames (tibbles): 
 
-- `annualTrees`
-- `annualCells`
-- `annualPlot`
 - `trees`
 - `plot`
 - `climate`
-- `monthCells`
 - `cells`
+- `monthCells`
+- `annualCells`
 - `voxels`
-- `variables` - variable descriptions and units from all profiles
-- `plot.info` - plot geometry data for each simulation
-- `tree.info` - tree species and location data for each simulation
+- `plot.info` - general plot data for each simulation
+- `tree.info` - general tree species data for each simulation
 - `exp.plan` - the `exp.plan` of the hip object that generated the simulation
-- `path` - the paths to the simulation folders
-- `exp.path` - the path to the experiment folder
+- `metadata` - the metadata of each simulations (path to simulation folders, model versions, run date , run duration)
+- `path` - the path to the experiment/simulation folders
 
 If any Hi-sAFe output profiles specified by `profiles` were not created when Hi-sAFe was run, a warning will notify you. For any profiles not created by Hi-sAFe or not selected for reading, the associated list components will be empty tibbles.
 
 *WARNING: Depending on the number of simulations, length of simulations, and which output profiles are specified, reading in Hi-sAFe data can take some time!*
 
-To read our previous experiment on **lueMax** we will use `read_hisafe()` as follows: 
-
-```{r, eval = FALSE}
-hop <- read_hisafe(hip      = hip, 
-                   profiles = c("plot", "trees", "climate", "monthCells", "cells", "voxels"))
+```{r, echo = FALSE, eval = FALSE}
+example.path <- "/Users/kevinwolz/Desktop/RESEARCH/ACTIVE_PROJECTS/HI-SAFE/hisafer/inst/extdata/example_exp"
+example.profiles <- c("plot", "plotDetail", "trees", "treesDetail", "cells",  "cellsDetail", 
+                      "voxelsMonth", "climate", "monthCells", "annualCells")
+mc.hip <- define_hisafe(path = example.path, template = "monocrop"    , SimulationName = "monocrop",     profiles = example.profiles, sticsReport = 1)
+af.hip <- define_hisafe(path = example.path, template = "agroforestry", SimulationName = "agroforestry", profiles = example.profiles)
+pf.hip <- define_hisafe(path = example.path, template = "forestry",     SimulationName = "forestry",     profiles = example.profiles)
+build_hisafe(hip = mc.hip)
+build_hisafe(hip = af.hip)
+build_hisafe(hip = pf.hip)
+build_cluster_script(simu.names    = c("monocrop", "agroforestry", "forestry"),
+                     hip           = NULL,
+                     script.path   = example.path,
+                     cluster.path  = paste0("/lustre/lecomtei/tests/example_exp/"),
+                     email.type    = "NONE")
 ```
 
-```{r, echo = FALSE}
-#hisafer_example_hop <- read_hisafe(path       = "/Users/kevinwolz/Desktop/RESEARCH/ACTIVE_PROJECTS/HI-SAFE/vignette_output/lue", 
-#                                   simu.names = c("Sim_1", "Sim_2"), 
-#                                   profiles   = c("plot", "trees", "climate", "monthCells", "cells", "voxels"))
-#save(hisafer_example_hop, file = "/Users/kevinwolz/Desktop/hisafer_example_hop.Rdata")
-#devtools::use_data(hisafer_example_hop)
-hop  <- hisafer_example_hop
+To read in the example experiment included in hisafer, we will use `read_hisafe_example()` as follows: 
+
+```{r}
+hop.raw <- hop <- read_hisafe_example()
 ```
 
-Once you have the `hop` object, you can easily access any of the data within using the `$` operator. For example, to access the "plot" data of the experiment:
+Once you have the `hop` object, you can easily access any of the data within using the `$` operator. For example, to access the "metadata" data of the experiment:
 
-```{r, eval = FALSE}
-hop$plot
+```{r, eval = TRUE}
+hop$metadata
 ```
 
 To learn about the output variables contained in the `hop` object, use `hop_params()`. Analagous to `hip_params()` during the Define phase, `hop_params()` displays the definitions and units of the output variables. 
@@ -296,8 +300,8 @@ Sometimes, you will realize that the values of **SimulationName** that you provi
 
 ```{r}
 hop <- hop_rename(hop       = hop,
-                  old.names = paste0("Sim_", 1:2),
-                  new.names = paste0("lue-", hop$exp.plan$lueMax))
+                  old.names = c("monocrop", "agroforestry", "forestry"),
+                  new.names = c("MC", "AF", "PF"))
 ```
 
 
@@ -350,7 +354,7 @@ plot_hisafe_monthcells(hop        = hop,
                        variable   = "monthRelativeDirectParIncident",
                        colfacet   = "Year",
                        rowfacet   = "SimulationName",
-                       years      = 2:9,
+                       years      = 1995:2003,
                        months     = 7)
 ```
 
@@ -380,6 +384,22 @@ plot_hisafe_cycle_daily(hop = hop, cycle = "water", years = 2003)
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
 plot_hisafe_cycle_daily(hop = hop, cycle = "light", years = 2003)
 ```
+```{r, eval = TRUE, dpi = 250, fig.width = 10}
+plot_hisafe_cycle_daily(hop = hop, cycle = "carbon-increment", years = 2003)
+```
+```{r, eval = TRUE, dpi = 250, fig.width = 10}
+plot_hisafe_cycle_daily(hop = hop, cycle = "carbon-allocation", years = 2003)
+```
+
+You can also create a "dashboard" of the cycles of simulation via `cycle_summary()`:
+```{r, eval = TRUE, dpi = 250, fig.width = 10}
+summary.out <- cycle_summary(hop         = hop,
+                             daily.year  = 2003,
+                             cycles      = c("carbon", "light", "water", "nitrogen"),
+                             simu.name   = "AF",
+                             crop.names  = c("Crop", "Tree line vegetation"))
+summary.out
+```
 
 You can also easily apply the various analyze functions and write the output plots to the disk using the shortcut function `analyze_hisafe()`.
 
@@ -387,25 +407,32 @@ You can also easily apply the various analyze functions and write the output plo
 The most important visualization tool in hisafer is `hisafe_slice()` which "slices" through the 3D Hi-sAFe scene to create a 2D projection.
 
 ```{r, dpi = 250, fig.width = 20}
-hisafe_slice(hop  = hop,
-             date = "2003-06-01")
+hisafe_slice(hop        = hop,
+             simu.names = c("AF", "PF"),
+             date       = "1999-06-01")
+```
+
+```{r, dpi = 250, fig.width = 20}
+hisafe_slice(hop        = hop,
+             simu.names = c("AF", "PF"),
+             date       = "2003-07-01")
 ```
 
 You can use `hisafe_slice()` even if you do not have the voxels profile within your `hop` object by setting `voxels = FALSE`. You can also customize what you want each aspect of the plot to represent via the `vars` argument. Furthermore, you can switch the direction in which the scene is "sliced" by setting `plot.x = "y"`. This gives you the opportunity to view the 3D scene from both 2D directions.
 
-```{r, dpi = 250, fig.width = 20}
-hisafe_slice(hop    = hop,
-             plot.x = "y",
-             date   = "2003-06-01")
-```
-
 To see a legend of what everything represents:
-
 ```{r, dpi = 250, fig.width = 8}
 visual_legend(hop = hop)
 ```
 
 These plots from `hisafe_slice()` can be combined with plots from `plot_hisafe_cells()` using `hisafe_snapshot()` to export daily "snapshot" images of the Hi-sAFe simulations. These images can then be combined into a video/gif to visualize the simulations in real time!
+
+To visualize tree root topology, you can use `hiasfe_root3D()`. You must have the `rgl` library installed and functional to do so!
+```{r, eval = FALSE}
+hisafe_root3D(hop      = hop,
+             simu.name = "AF",
+             date      = "2003-06-01")
+```
 
 #### 6.4 FACE experiments
 One very special case of analyzing Hi-sAFe simulations occurs when you want to compare one or more agroforestry simulations with a forestry control simulation and a monocrop control simulation. hisafer refers to this type of experiment as a "FACE" (Forestry-Agroforestry-Crop Experiment). The first step in this special analysis is to create a `face` object, which is a modified `hop` objects that merges three individual `hop` objects of the respective systems:
@@ -414,23 +441,22 @@ One very special case of analyzing Hi-sAFe simulations occurs when you want to c
 - forestry
 - monocrop
 
-To create a `face` object, use `create_face()`and supply the three required `hop` objects along with a path to a diretory where you want all FACE analyses to be saved. The agroforestry `hop` can contain any number of agroforestry simulations, but the forestry `hop` and monocrop `hop` can only contain a single simulation each. 
-
-```{r, echo = FALSE, eval = FALSE}
-#load(paste0(system.file("extdata", "vignette_output", package = "hisafer"), "/vignette_face.Rdata"))
-face <- hisafer_example_face
-```
-
-```{r, eval = FALSE}
-face <- create_face(agroforestry = AF.hop, 
-                    forestry     = FC.hop, 
-                    monocrop     = CC.hop, 
-                    face.path    = "./simulations")
+To create a `face` object, use `create_face()`and supply the three required `hop` objects along with a path to a diretory where you want all FACE analyses to be saved. The agroforestry `hop` can contain any number of agroforestry simulations, but the forestry `hop` and monocrop `hop` can only contain a single simulation each. Since we already have those three systems within one hop, we will have to use hop_filter(). 
+```{r, eval = TRUE}
+face <- create_face(agroforestry = hop_filter(hop, "AF"), 
+                    forestry     = hop_filter(hop, "PF"), 
+                    monocrop     = hop_filter(hop, "MC"), 
+                    face.path    = ".")
 ```
 
 Once you have a `face` object, the most common analysis is to calculate the various LER metrics of the agroforestry systems. You can do this using `LER()`.
-```{r, eval = FALSE}
+```{r, eval = TRUE, dpi = 250, fig.width = 10}
 LER(face = face)
+```
+
+Beyond LER in terms of yield components, you can also calculate LER in terms of light, water, and nitrogen balances.
+```{r, eval = TRUE, dpi = 250, fig.width = 10}
+LER(face = face, cycle = "light")
 ```
 
 Furthermore, just as for normal `hop` objects, you can also use `plot_hisafe_cycle_annual()` and `plot_hisafe_cycle_daily()` to compare the simulations in a `face` object. 
@@ -440,6 +466,16 @@ plot_hisafe_cycle_annual(hop = face, cycle = "carbon")
 ```{r, eval = FALSE}
 plot_hisafe_cycle_annual(hop = face, cycle = "light")
 ```
+
+For a complete, publication-ready summary figure of LER, you can use `LER_summary()`.
+```{r, eval = TRUE, dpi = 250, fig.width = 10}
+ler.out <- LER_summary(face = face)
+
+ler.out
+```
+
+#### 6.5 Budgets
+Ensuring that the water and nitrogen budgets are closed isn't necessary every time you run a simulation, but it is very important if you are pushing the limits of Hi-sAFe with new functionality or complex management interventions. To check the basic Hi-sAFe water and nitrogen budgets, use `hiasfe_budget()`. To compare the Hi-sAFe-calculated budget with the STICS-calculated budget, use `stics_budget_comp()`. projection.
 
 ### Notes
 *hisafer utilizes the tidyverse approach to R programming and data manipulation. While most consequences of this approach are behind the scenes, one obvious example to users is that outputs from most hisafer functions are tibbles rather than simple data frames. This has little practical impact on your use of hisafer, but should improve your overall experience.*
