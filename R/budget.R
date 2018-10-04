@@ -184,7 +184,7 @@ stics_budget_comp <- function(hop,
                                    cycle       = cycle,
                                    doy.start   = "sim",
                                    simu.names  = simu.name,
-                                   years       = "all",
+                                   years       = years,
                                    save.table  = FALSE,
                                    save.plot   = FALSE,
                                    output.path = output.path) %>%
@@ -195,7 +195,7 @@ stics_budget_comp <- function(hop,
     flux.names   <- names(hisafe.budget)[!(names(hisafe.budget) %in% c("SimulationName", "Year", "cycle", "model", stock.names, bad.names))]
 
     ## STICS BUDGET
-    if(years == "all") YEARS <- hisafe.budget$Year
+    if(years[1] == "all") YEARS <- hisafe.budget$Year else YEARS <- years
 
     stics.budget.raw <- purrr::map_df(YEARS, get_stics_budget,
                                       path         = ifelse(basename(hop$path) == simu.name, dirname(hop$path), hop$path),
@@ -279,7 +279,6 @@ stics_budget_comp <- function(hop,
       dplyr::bind_rows(dplyr::mutate(stics.budget, model = "stics")) %>%
       tidyr::gather(key = "variable", value = "value", -SimulationName, -Year, -cycle, -model) %>%
       tidyr::spread(key = "model", value = "value") %>%
-      dplyr::mutate(hisafe = round(hisafe)) %>%
       dplyr::mutate(hiasfe.stics.diff = hisafe - stics) %>%
       dplyr::mutate(variable = factor(variable, levels = c(flux.names, "sum.of.fluxes", stock.names, "totalStock", "stockChange", "excess.export"))) %>%
       dplyr::select(cycle, dplyr::everything()) %>%
@@ -314,37 +313,61 @@ get_stics_budget <- function(year,
 
   if(!requireNamespace("ggforce", quietly = TRUE)) stop("The package 'stringr' is required for stics_budget_comp(). Please install and load it.", call. = FALSE)
 
-  stics.file.path <- paste0(path, "/", simu.name, "/output-", simu.name, "/rapport_001_", year, ".bil")
+  file.paths <- list.files(path       = paste0(path, "/", simu.name, "/output-", simu.name),
+                           pattern    = paste0("rapport_[0-9][0-9][0-9]_", year, ".bil"),
+                           full.names = TRUE)
 
-  if(!file.exists(stics.file.path)) stop(paste0("The STICS output .bil file does not exist for ", simu.name, " ", year,
-                                               ". To export STICS .bil files, use sticsReport = 1 when defining a simulation."), call. = FALSE)
+  OUT <- dplyr::tibble()
+  for(stics.file.path in file.paths) {
+    if(!file.exists(stics.file.path)) stop(paste0("The STICS output .bil file does not exist for ", simu.name, " ", year,
+                                                  ". To export STICS .bil files, use sticsReport = 1 when defining a simulation."), call. = FALSE)
 
-  dum <- scan(file     = stics.file.path,
-              what     = "character",
-              encoding = "latin1",
-              sep      = "\n",
-              quiet    = TRUE) %>%
-    stringr::str_replace_all("immobilis\\.",        "immobilis") %>%
-    stringr::str_replace_all("volatilis\\.",        "volatilis") %>%
-    stringr::str_replace_all("fertil\\.",           "fertil") %>%
-    stringr::str_replace_all("Priming \\(PE\\)",    "Priming") %>%
-    stringr::str_replace_all("Mineralisation - PE", "MineralisationPriming") %>%
-    write(file = stics.file.path)
+    idCell <- stringr::str_extract(stics.file.path, "_[0-9][0-9][0-9]_") %>%
+      stringr::str_extract("[0-9][0-9][0-9]") %>%
+      as.numeric()
 
-  stics.file <- scan(file     = stics.file.path,
-                     what     = "character",
-                     encoding = "latin1",
-                     sep      = ".",
-                     quiet    = TRUE) %>%
-    .[which(. == start.header):(which(. == end.header) - 1)]
+    dum <- scan(file     = stics.file.path,
+                what     = "character",
+                encoding = "latin1",
+                sep      = "\n",
+                quiet    = TRUE) %>%
+      stringr::str_replace_all("immobilis\\.",        "immobilis") %>%
+      stringr::str_replace_all("volatilis\\.",        "volatilis") %>%
+      stringr::str_replace_all("fertil\\.",           "fertil") %>%
+      stringr::str_replace_all("Priming \\(PE\\)",    "Priming") %>%
+      stringr::str_replace_all("Mineralisation - PE", "MineralisationPriming") %>%
+      write(file = stics.file.path)
 
-  values <- purrr::map(paste0("^ *", stics.names, ".*[0-9]*"), stringr::str_extract, string = stics.file) %>%
-    purrr::map(function(x) x[!is.na(x)]) %>%
-    purrr::map(stringr::str_extract, pattern = "-*[0-9]+$") %>%
-    purrr::map(function(x) ifelse(length(x) == 0, NA_character_, x)) %>%
-    unlist() %>%
-    as.numeric()
+    stics.file <- scan(file     = stics.file.path,
+                       what     = "character",
+                       encoding = "latin1",
+                       sep      = ".",
+                       quiet    = TRUE)
 
-  out <- dplyr::tibble(SimulationName = simu.name, Year = year, category = stics.names, value = values)
-  return(out)
+    if(!(start.header %in% stics.file)) {
+      stop(paste0("The STICS output .bil file for ", simu.name, " ", year, " (idCell ", idCell,
+                  ") does not contain budget data. This is likely because this cell is bare soil. ",
+                  "get_stics_budget() does not work with bare soil cells.Please select different years."), call. = FALSE)
+    }
+
+    stics.file <- stics.file %>%
+      .[which(. == start.header):(which(. == end.header) - 1)]
+
+    values <- purrr::map(paste0("^ *", stics.names, ".*[0-9]*"), stringr::str_extract, string = stics.file) %>%
+      purrr::map(function(x) x[!is.na(x)]) %>%
+      purrr::map(stringr::str_extract, pattern = "-*[0-9]+$") %>%
+      purrr::map(function(x) ifelse(length(x) == 0, NA_character_, x)) %>%
+      unlist() %>%
+      as.numeric()
+
+    out <- dplyr::tibble(SimulationName = simu.name, Year = year, idCell = idCell, category = stics.names, value = values)
+    OUT <- dplyr::bind_rows(OUT, out)
+  }
+
+  OUT <- OUT %>%
+    dplyr::group_by(SimulationName, Year, category) %>%
+    dplyr::summarize(value = mean(value)) %>%
+    dplyr::ungroup()
+
+  return(OUT)
 }
