@@ -843,3 +843,26 @@ make_rel_years <- function(hop, year1 = NULL) {
   }
   return(hop)
 }
+
+#' Shift Year column based on a provided JulianDay
+#' @description Shifts Year column based on a provided JulianDay.
+#' @return A hop object.
+#' @param hop An object of class hop or a hop-like object.
+#' @param doy.start The JulianDay [1-365] on which to start the annual cycle accounting. Use 'sim' to specify the starting JulianDay of the simulation.
+#' @keywords internal
+shift_year <- function(hop, doy.start) {
+  profiles <- which_profiles(hop = hop, profiles = DATA.PROFILES)
+  if(doy.start == "sim") {
+    profile_check(hop, "plot.info", error = TRUE)
+    plot.info <- dplyr::select(hop$plot.info, SimulationName, simulationDayStart)
+    for (i in profiles) hop[[i]] <- dplyr::left_join(hop[[i]], plot.info, by = "SimulationName")
+  } else {
+    for(i in profiles) hop[[i]]$simulationDayStart <- doy.start
+  }
+  for(i in profiles) {
+    hop[[i]]$Year <- hop[[i]]$Year - as.numeric(hop[[i]]$JulianDay < hop[[i]]$simulationDayStart)
+    hop[[i]]$simulationDayStart <- NULL
+  }
+
+  return(hop)
+}

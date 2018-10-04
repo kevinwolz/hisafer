@@ -40,9 +40,9 @@ cycle.plot <- cycle_summary(myhop, 2000)
 \seealso{
 Other hisafe analysis functions: \code{\link{LER_summary}},
   \code{\link{LER}}, \code{\link{analyze_hisafe}},
-  \code{\link{cycle_budget}},
+  \code{\link{hisafe_budget}},
   \code{\link{plot_hisafe_cycle_annual}},
   \code{\link{plot_hisafe_cycle_daily}},
-  \code{\link{write_hop}}
+  \code{\link{stics_budget_comp}}, \code{\link{write_hop}}
 }
 \concept{hisafe analysis functions}

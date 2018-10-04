@@ -5,9 +5,9 @@
 \title{Plot annual barchart of major cycles}
 \usage{
 plot_hisafe_cycle_annual(hop, cycle, simu.names = "all",
-  tree.ids = "all", year.lim = c(NA, NA), color.palette = NULL,
-  bar.color = "black", crop.names = c("Main crop", "Inter crop"),
-  plot = TRUE)
+  tree.ids = "all", year.lim = c(NA, NA), doy.start = 1,
+  color.palette = NULL, bar.color = "black",
+  crop.names = c("Main crop", "Inter crop"), plot = TRUE)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
@@ -21,6 +21,8 @@ This only applies when \code{cycle} is "carbon".}
 
 \item{year.lim}{A numeric vector of length two providing the \code{c(minimum, maximum)} of calendar years to plot.
 If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.}
+
+\item{doy.start}{The JulianDay [1-365] on which to start the annual cycle accounting. Use 'sim' to specify the starting JulianDay of the simulation.}
 
 \item{color.palette}{A character string of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
 If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette.}
@@ -84,8 +86,8 @@ ggsave_fitmax("water_cycle.png", water.plot)
 \seealso{
 Other hisafe analysis functions: \code{\link{LER_summary}},
   \code{\link{LER}}, \code{\link{analyze_hisafe}},
-  \code{\link{cycle_budget}}, \code{\link{cycle_summary}},
+  \code{\link{cycle_summary}}, \code{\link{hisafe_budget}},
   \code{\link{plot_hisafe_cycle_daily}},
-  \code{\link{write_hop}}
+  \code{\link{stics_budget_comp}}, \code{\link{write_hop}}
 }
 \concept{hisafe analysis functions}

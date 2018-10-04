@@ -9,6 +9,7 @@
 #' This only applies when \code{cycle} is "carbon".
 #' @param year.lim A numeric vector of length two providing the \code{c(minimum, maximum)} of calendar years to plot.
 #' If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.
+#' @param doy.start The JulianDay [1-365] on which to start the annual cycle accounting. Use 'sim' to specify the starting JulianDay of the simulation.
 #' @param color.palette A character string of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
 #' If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette.
 #' @param bar.color A hex value or R standard color name defining the color to use for bar plot borders
@@ -63,6 +64,7 @@ plot_hisafe_cycle_annual <- function(hop,
                                      simu.names    = "all",
                                      tree.ids      = "all",
                                      year.lim      = c(NA, NA),
+                                     doy.start     = 1,
                                      color.palette = NULL,
                                      bar.color     = "black",
                                      crop.names    = c("Main crop", "Inter crop"),
@@ -73,11 +75,14 @@ plot_hisafe_cycle_annual <- function(hop,
 
   if(!(cycle %in% c("carbon", "nitrogen", "water", "light", "yield")))           stop("cycle argument must be one of: carbon, nitrogen, water, light", call. = FALSE)
   if(!(length(year.lim)   == 2 & (is.numeric(year.lim) | all(is.na(year.lim))))) stop("year.lim argument must be a numeric vector of length 2",        call. = FALSE)
+  if(!(length(doy.start)  == 1 & (is.numeric(doy.start) | doy.start == "sim")))  stop("doy.start argument must be an integer in [1,365] or 'sim'",     call. = FALSE)
+  if(!(doy.start %in% 1:365 | doy.start == "sim"))                               stop("doy.start argument must be an integer in [1,365] or 'sim'",     call. = FALSE)
   if(!(length(bar.color)  == 1 & is.character(bar.color)))                       stop("bar.plot argument must be a character vector of length 1",      call. = FALSE)
   if(!(length(crop.names) == 2 & is.character(crop.names)))                      stop("crop.names argument must be a character vector of length 2",    call. = FALSE)
   is_TF(plot)
 
-  hop <- hop_filter(hop = hop, simu.names = simu.names, tree.ids = tree.ids)
+  hop <- hop_filter(hop = hop, simu.names = simu.names, tree.ids = tree.ids) %>%
+    shift_year(doy.start = doy.start)
 
   METHOD <- ifelse(profile_check(hop, "cells"), "cells", "plot")
 
@@ -555,7 +560,7 @@ get_nitrogen_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
                       deposition     = -nitrogenRain,
                       fixation       = -nitrogenFixation,
                       watertable     = -nitrogenAddedByWaterTable,
-                      upatakeTree    = nitrogenUptakeByTrees,
+                      uptakeTree     = nitrogenUptakeByTrees,
                       uptakeMain     = nitrogenUptake * as.numeric(cropType == "mainCrop") + nitrogenFixation,
                       uptakeInter    = nitrogenUptake * as.numeric(cropType == "interCrop"),
                       gaseous        = nitrogenVolatilisation + nitrogenVolatilisationOrganic + nitrogenDenitrification,
@@ -566,7 +571,7 @@ get_nitrogen_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
                       crop.litter    = -cropNitrogenLeafLitter + -cropNitrogenRootLitter) %>%
         dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay,
                       fertilization, irrigation, deposition, fixation, watertable,
-                      upatakeTree, uptakeMain, uptakeInter, gaseous, leaching, runoff, tree.litter, crop.litter)
+                      uptakeTree, uptakeMain, uptakeInter, gaseous, leaching, runoff, tree.litter, crop.litter)
     } else {
       out <- hop$cells %>%
         replace(is.na(.), 0) %>%
@@ -575,10 +580,9 @@ get_nitrogen_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
                       irrigation             = -nitrogenIrrigation,
                       deposition             = -nitrogenRain,
                       fixation               = -nitrogenFixation,
-                      fixation.uptake        = nitrogenFixation,
                       watertable             = -nitrogenAddedByWaterTable,
-                      upatakeTree            = nitrogenUptakeByTrees,
-                      uptakeMain             = nitrogenUptake * as.numeric(cropType == "mainCrop"),
+                      uptakeTree             = nitrogenUptakeByTrees,
+                      uptakeMain             = nitrogenUptake * as.numeric(cropType == "mainCrop") + nitrogenFixation,
                       uptakeInter            = nitrogenUptake * as.numeric(cropType == "interCrop"),
                       volatilization.mineral = nitrogenVolatilisation,
                       volatilization.organic = nitrogenVolatilisationOrganic,
@@ -593,8 +597,8 @@ get_nitrogen_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
                       crop.leaf.litter       = -cropNitrogenLeafLitter,
                       crop.root.litter       = -cropNitrogenRootLitter) %>%
         dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay,
-                      fertilization.mineral, fertilization.organic, irrigation, deposition, fixation, fixation.uptake, watertable,
-                      upatakeTree, uptakeMain, uptakeInter, volatilization.mineral, volatilization.organic, nitrification,
+                      fertilization.mineral, fertilization.organic, irrigation, deposition, fixation, watertable,
+                      uptakeTree, uptakeMain, uptakeInter, volatilization.mineral, volatilization.organic, nitrification,
                       leaching.bottom, leaching.artificial, leaching.watertable, runoff, tree.leaf.litter, tree.root.litter, crop.leaf.litter, crop.root.litter)
     }
 
@@ -611,7 +615,7 @@ get_nitrogen_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
   if(for.plot) {
     out <- out %>%
       dplyr::mutate(flux = factor(flux,
-                                  levels = c("upatakeTree",
+                                  levels = c("uptakeTree",
                                              "uptakeInter",
                                              "uptakeMain",
                                              "gaseous",
@@ -1007,118 +1011,4 @@ cycle_summary <- function(hop,
   ggsave(paste0(output.path, "cycle_summary_", simu.name, ".jpg"), cycle.plot, scale = 2.2, width = 6, height = 1.5 * n.plots / 2)
 
   invisible(cycle.plot)
-}
-
-#' Calculate water and nitrogen budgets
-#' @description Calculates water and nitrogen budgets
-#' See \code{\link{plot_hisafe_cycle_annual}} for details of each cycle.
-#' @return A data.frame (tibble) containing the budget data.
-#' @param hop An object of class hop or face.
-#' @param cycle A character vector of the cycle to analyze Supported cycles include: 'water', and 'nitrogen.
-#' @param simu.names A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.
-#' @param years A numeric vector of the years within \code{hop} to include. Use "all" to include all available values.
-#' @param save.table Logical indicating whether a table of budget data and calculations should be saved to \code{output.path}.
-#' @param save.plot Logical indicating whether a plot of the budget excess should be saved to \code{output.path}.
-#' @param output.path A character string indicating the path to the directory where plots should be saved.
-#' If \code{NULL}, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis/budgets".
-#' The tables and plots will be saved in this directory.
-#' @export
-#' @importFrom dplyr %>%
-#' @import ggplot2
-#' @family hisafe analysis functions
-#' @examples
-#' \dontrun{
-#' water.budget <- cycle_budget(myhop, "water")
-#' }
-cycle_budget <- function(hop,
-                         cycle,
-                         simu.names  = "all",
-                         years       = "all",
-                         save.table  = TRUE,
-                         save.plot   = TRUE,
-                         output.path = NULL) {
-
-  supported.cycles <- c("water", "nitrogen")
-  supported.saves  <- c("table", "plot")
-
-  is_hop(hop, error = TRUE)
-  profile_check(hop, c("cells", "plot"), error = TRUE)
-
-  if(years[1] == "all") years <- unique(hop$cells$Year)
-
-  if(!all(cycle %in% supported.cycles))                   stop(paste0("cycle argument must be one of:", paste(supported.cycles, collapse = ", ")), call. = FALSE)
-  if(!all(is.numeric(years)))                             stop("years argument must be 'all' or a numeric vector",                                 call. = FALSE)
-  if(!all(years %in% unique(hop$cells$Year)))             stop(paste("not all values in years are present in the cells profile"),                  call. = FALSE)
-  if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character string",                                  call. = FALSE)
-  is_TF(save.table)
-  is_TF(save.plot)
-
-  hop <- hop_filter(hop = hop, simu.names = simu.names)
-
-  ## FLUXES
-  flux.raw <- plot_hisafe_cycle_annual(hop = hop, cycle = cycle, plot = FALSE) %>%
-    dplyr::filter(Year %in% years)
-
-  flux.spread <- flux.raw %>%
-    tidyr::spread(key = "flux", value = "value")
-
-  flux <- flux.raw %>%
-    dplyr::summarize(value = sum(value)) %>%
-    dplyr::rename(sum.of.fluxes = value)
-
-  ## STOCK
-  stock <- hop$cells %>%
-    dplyr::filter(Year %in% years) %>%
-    dplyr::filter(JulianDay == 1)
-
-  if(cycle == "water") {
-    variable_check(hop = hop, profile = "cells", variables = "waterStock")
-    stock <- stock %>%
-      dplyr::select(SimulationName, Year, waterStock) %>%
-      dplyr::group_by(SimulationName, Year) %>%
-      dplyr::summarize(waterStock = mean(waterStock)) %>%
-      dplyr::mutate(stockChange = c(diff(waterStock), NA))
-
-  } else if(cycle == "nitrogen") {
-    variable_check(hop = hop, profile = "cells", variables = c("mineralNitrogenStock", "activeNitrogenHumusStock", "inactiveNitrogenHumusStock",
-                                                               "nitrogenResidus", "nitrogenMicrobes", "nitrogenMicrobesMulch"))
-    stock <- stock %>%
-      dplyr::select(SimulationName, Year, mineralNitrogenStock, activeNitrogenHumusStock, inactiveNitrogenHumusStock,
-                    nitrogenResidus, nitrogenMicrobes, nitrogenMicrobesMulch) %>%
-      dplyr::group_by(SimulationName, Year) %>%
-      dplyr::summarize(mineralNitrogenStock       = mean(mineralNitrogenStock),
-                       activeNitrogenHumusStock   = mean(activeNitrogenHumusStock),
-                       inactiveNitrogenHumusStock = mean(inactiveNitrogenHumusStock),
-                       nitrogenResidus            = mean(nitrogenResidus),
-                       nitrogenMicrobes           = mean(nitrogenMicrobes),
-                       nitrogenMicrobesMulch      = mean(nitrogenMicrobesMulch)) %>%
-      dplyr::mutate(nitrogenStock = mineralNitrogenStock + activeNitrogenHumusStock + inactiveNitrogenHumusStock +
-                      nitrogenResidus + nitrogenMicrobes + nitrogenMicrobesMulch) %>%
-      dplyr::mutate(stockChange = c(diff(nitrogenStock), NA))
-  }
-
-  budget.data <- flux.spread %>%
-    dplyr::left_join(flux,  by = c("SimulationName", "Year")) %>%
-    dplyr::left_join(stock, by = c("SimulationName", "Year")) %>%
-    dplyr::mutate(excess.export = sum.of.fluxes + stockChange)
-
-  if(save.table | save.plot) {
-    output.path <- clean_path(paste0(diag_output_path(hop = hop, output.path = output.path), "/budgets/"))
-    dir.create(output.path, recursive = TRUE, showWarnings = FALSE)
-
-    if(save.table) readr::write_csv(budget.data, paste0(output.path, cycle, "_budget.csv"))
-
-    if(save.plot) {
-      plot.obj <- ggplot(budget.data, aes(x = Year, y = excess.export, color = SimulationName, linetype = SimulationName)) +
-        labs(y = paste0("Excess ", cycle, " export from scene")) +
-        geom_line() +
-        geom_point() +
-        scale_color_manual(values    = rep(c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7"), 6)) +
-        scale_linetype_manual(values = rep(1:6, each = 8)) +
-        theme_hisafe_ts()
-      ggsave_fitmax(paste0(output.path, cycle, "_budget_excess.jpg"), plot.obj, scale = 1.5)
-    }
-  }
-
-  return(budget.data)
 }

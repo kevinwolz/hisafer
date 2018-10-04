@@ -292,6 +292,7 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
 
     tree.info <- read_tree_info(path, simu.name)
 
+    sim <- read_param_file(sim.path)
     pld <- read_param_file(pld.path)
     plotWidth          <- as.numeric(pld$PLOT$plotWidth$value)
     plotHeight         <- as.numeric(pld$PLOT$plotHeight$value)
@@ -299,6 +300,7 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
     cellWidth          <- as.numeric(pld$PLOT$cellWidth$value)
     soilDepth          <- sum(pld$LAYERS$layers$value[[1]]$thick)
     waterTable         <- pld$WATER$waterTable$value
+    simulationDayStart <- sim$SIMULATION$simulationDayStart$value[1]
 
     plot.info <- dplyr::tibble(SimulationName      = simu.name,
                                plotWidth           = plotWidth,
@@ -308,7 +310,8 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
                                northOrientation    = northOrientation,
                                cellWidth           = cellWidth,
                                soilDepth           = soilDepth,
-                               waterTable          = waterTable)
+                               waterTable          = waterTable,
+                               simulationDayStart  = simulationDayStart)
   } else {
     plot.info <- tree.info <- dplyr::tibble()
   }

@@ -29,8 +29,9 @@ write_hop(myhop)
 \seealso{
 Other hisafe analysis functions: \code{\link{LER_summary}},
   \code{\link{LER}}, \code{\link{analyze_hisafe}},
-  \code{\link{cycle_budget}}, \code{\link{cycle_summary}},
+  \code{\link{cycle_summary}}, \code{\link{hisafe_budget}},
   \code{\link{plot_hisafe_cycle_annual}},
-  \code{\link{plot_hisafe_cycle_daily}}
+  \code{\link{plot_hisafe_cycle_daily}},
+  \code{\link{stics_budget_comp}}
 }
 \concept{hisafe analysis functions}
