@@ -1,0 +1,5 @@
+
+# allSteps	currentStep	frequency	frequencyBegin	frequencyValue	period	periodTo	periodFrom	rootStepToExport
+true	false	false	0	0	false	0	0	false
+# subject	variables	exportAll	cellIds	depths
+SafeVoxel	{SafeVoxel-costMark;SafeVoxel-waterMark;SafeVoxel-nitrogenMark;SafeVoxel-totalMark;SafeVoxel-fineRootCostMax;SafeVoxel-waterEfficiencyMax;SafeVoxel-nitrogenEfficiencyMax;SafeVoxel-coefCost0;SafeVoxel-coefWater0;SafeVoxel-coefNitrogen0;SafeVoxel-coefCost1;SafeVoxel-coefWater1;SafeVoxel-coefNitrogen1;SafeVoxel-proportion;SafeVoxel-T1threshold;SafeVoxel-T2threshold;SafeVoxel-T3threshold;SafeVoxel-L;SafeVoxel-L0;SafeVoxel-L1;SafeVoxel-L2;SafeVoxel-Lmin;SafeVoxel-Lmax;SafeVoxel-voxelFilling;SafeVoxel-neighboursColonisedNumber;SafeVoxel-nitrogenAvailableForBoth;SafeVoxel-nitrogenAvailableForCrops;SafeVoxel-nitrogenAvailableForTrees;SafeVoxel-fineRootTotalInvestment;SafeVoxel-bulkDensityFineSoil;SafeVoxel-fieldCapacityFineSoil;SafeVoxel-fieldCapacityStone;SafeVoxel-wiltingPointFineSoil;SafeVoxel-wiltingPointStone;SafeVoxel-thetaFineSoil;SafeVoxel-thetaStone;SafeVoxel-waterPotentialThetaFineSoil;SafeVoxel-waterStockFineSoil;SafeVoxel-volumeFineSoil}	true	{}	{}

@@ -1,0 +1,54 @@
+## SIMULATION 
+nbSimulations = 24
+simulationYearStart = 1994
+simulationDayStart = 185
+simulationNbrDays = 365
+saveProjectOption = 0
+#projectFileName = none.prj
+debugMode = 0
+sticsReport = 0
+
+## CROP ROTATION
+mainCropSpecies = durum-wheat-restinclieres.plt,durum-wheat-restinclieres.plt,durum-wheat-restinclieres.plt,rape.plt,durum-wheat-restinclieres.plt,durum-wheat-restinclieres.plt,rape.plt,durum-wheat-restinclieres.plt,durum-wheat-restinclieres.plt,durum-wheat-restinclieres.plt,durum-wheat-restinclieres.plt,rape.plt,durum-wheat-restinclieres.plt,durum-wheat-restinclieres.plt,durum-wheat-restinclieres.plt,winter-pea.plt,durum-wheat-restinclieres.plt,durum-wheat-restinclieres.plt,winter-pea.plt,durum-wheat-restinclieres.plt,durum-wheat-restinclieres.plt,winter-pea.plt,durum-wheat-restinclieres.plt,durum-wheat-restinclieres.plt
+interCropSpecies = durum-wheat-restinclieres.plt
+mainCropItk = R1994-1995.tec,R1995-1996.tec,R1996-1997.tec,R1997-1998.tec,R1998-1999.tec,R1999-2000.tec,R2000-2001.tec,R2001-2002.tec,R2002-2003.tec,R2003-2004.tec,R2004-2005.tec,R2005-2006.tec,R2006-2007.tec,R2007-2008.tec,R2008-2009.tec,R2009-2010.tec,R2010-2011.tec,R2011-2012.tec,R2012-2013.tec,R2013-2014.tec,R2014-2015.tec,R2015-2016.tec,R2016-2017.tec,R2017-2018.tec
+interCropItk = durum-wheat-restinclieres.tec
+treeCropDistance = 0
+treeCropRadius = 0
+
+## EXPORTS
+profileNames = annualplot,annualtree,annualcrop,plot,trees,cells
+exportFrequencies = 365,365,365,1,1,1
+
+## TORIC SYMETRY
+toricXp = 1
+toricXn = 1
+toricYp = 1
+toricYn = 1
+
+## TREE PLANTING
+#treePlantingYears = 1
+#treePlantingDays = 290
+
+## TREE PRUNING
+#treePruningYears = 2,4,6,8,10,12,14,16,18,20,22,24,26,28,30
+#treePruningDays = 365,365,365,365,365,365,365,365,365,365,365,365,365,365,365
+#treePruningProp = 0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3
+#treePruningMaxHeight = 4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0
+#treeDensityReduction = 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+
+## TREE THINNING
+#treeThinningIds = 1
+#treeThinningYears = 10
+#treeThinningDays = 365
+
+## TREE ROOT PRUNING
+#treeRootPruningYears = 1
+#treeRootPruningDays = 365
+#treeRootPruningDistance = 1.5
+#treeRootPruningDepth = 1.0
+
+## TREE LITTER INCORPORATION IN SOIL
+treesLeafLitterIncorporated = 1
+treesRootLitterIncorporated = 1
+treesDeepRootLitterIncorporated = 1

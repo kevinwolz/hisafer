@@ -1,0 +1,54 @@
+## SIMULATION 
+nbSimulations = 27
+simulationYearStart = 1991 
+simulationDayStart = 1
+simulationNbrDays = 365
+saveProjectOption = 0
+#projectFileName = none.prj
+debugMode = 0
+sticsReport = 0
+
+## CROP ROTATION
+mainCropSpecies = fescue.plt
+interCropSpecies = baresoil.plt,baresoil.plt,fescue.plt,fescue.plt,fescue.plt,fescue.plt,fescue.plt,fescue.plt,fescue.plt,fescue.plt,fescue.plt,fescue.plt,fescue.plt,fescue.plt,fescue.plt,fescue.plt,fescue.plt,fescue.plt,fescue.plt,fescue.plt,fescue.plt,fescue.plt,fescue.plt,fescue.plt,fescue.plt,fescue.plt,fescue.plt
+mainCropItk = fescue.tec
+interCropItk = baresoil.tec,baresoil.tec,fescue.tec,fescue.tec,fescue.tec,fescue.tec,fescue.tec,fescue.tec,fescue.tec,fescue.tec,fescue.tec,fescue.tec,fescue.tec,fescue.tec,fescue.tec,fescue.tec,fescue.tec,fescue.tec,fescue.tec,fescue.tec,fescue.tec,fescue.tec,fescue.tec,fescue.tec,fescue.tec,fescue.tec,fescue.tec
+treeCropDistance = 0.5
+treeCropRadius = 0
+
+## EXPORTS
+profileNames = annualplot,annualtree,annualcrop,plot,trees,cells
+exportFrequencies = 365,365,365,1,1,1
+
+## TORIC SYMETRY
+toricXp = 1
+toricXn = 1
+toricYp = 1
+toricYn = 1
+
+## TREE PLANTING
+treePlantingYears = 1
+treePlantingDays = 40
+
+## TREE PRUNING
+treePruningYears = 3,4,5,6,7,8,9,10,11,12,13,14,15
+treePruningDays = 215,215,215,215,215,215,215,215,215,215,215,215,215
+treePruningProp = 1,1,1,1,1,1,1,1,1,1,1,1,1
+treePruningMaxHeight = 0.7,1,1.2,1.4,1.6,1.6,1.7,2,2.1,2.2,2.3,2.4,2.5
+treeDensityReduction = 0,0,0,0,0,0,0,0,0,0,0,0,0
+
+## TREE THINNING
+#treeThinningIds = 1
+#treeThinningYears = 10
+#treeThinningDays = 365
+
+## TREE ROOT PRUNING
+#treeRootPruningYears = 1
+#treeRootPruningDays = 365
+#treeRootPruningDistance = 1.5
+#treeRootPruningDepth = 1.0
+
+## TREE LITTER INCORPORATION IN SOIL
+treesLeafLitterIncorporated = 1
+treesRootLitterIncorporated = 1
+treesDeepRootLitterIncorporated = 1

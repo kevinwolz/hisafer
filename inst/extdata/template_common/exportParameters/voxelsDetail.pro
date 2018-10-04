@@ -1,0 +1,5 @@
+
+# allSteps	currentStep	frequency	frequencyBegin	frequencyValue	period	periodTo	periodFrom	rootStepToExport
+true	false	false	0	0	false	0	0	false
+# subject	variables	exportAll	cellIds	depths
+SafeVoxel	{SafeVoxel-volume;SafeVoxel-bulkDensity;SafeVoxel-fieldCapacity;SafeVoxel-wiltingPoint;SafeVoxel-waterStock;SafeVoxel-waterPotentialTheta;SafeVoxel-nitrogenNh4Stock;SafeVoxel-nitrogenNo3Stock;SafeVoxel-isSaturated;SafeVoxel-saturationDuration;SafeVoxel-evaporation;SafeVoxel-treeWaterUptake;SafeVoxel-treeNitrogenUptake;SafeVoxel-treeCarbonCoarseRootSen;SafeVoxel-treeCarbonFineRootSen;SafeVoxel-treeNitrogenCoarseRootSen;SafeVoxel-treeNitrogenFineRootSen;SafeVoxel-totalTreeCarbonCoarseRootSen;SafeVoxel-totalTreeCarbonFineRootSen;SafeVoxel-totalTreeNitrogenCoarseRootSen;SafeVoxel-totalTreeNitrogenFineRootSen;SafeVoxel-nitrogenRootSenStock;SafeVoxel-nMinFromRootSen;SafeVoxel-waterEfficiency;SafeVoxel-nitrogenEfficiency;SafeVoxel-additionalRootToVoxel}	true	{}	{}

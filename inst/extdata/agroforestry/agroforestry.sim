@@ -1,0 +1,54 @@
+## SIMULATION 
+nbSimulations = 10
+simulationYearStart = 1994
+simulationDayStart = 185
+simulationNbrDays = 365
+saveProjectOption = 0
+#projectFileName = none.prj
+debugMode = 0
+sticsReport = 0
+
+## CROP ROTATION
+mainCropSpecies = durum-wheat-restinclieres.plt
+interCropSpecies = baresoil.plt
+mainCropItk = durum-wheat.tec
+interCropItk = baresoil.tec
+treeCropDistance = 0.5
+treeCropRadius = 0
+
+## EXPORTS
+profileNames = annualplot,annualtree,annualcrop,plot,trees,cells
+exportFrequencies = 365,365,365,1,1,1
+
+## TORIC SYMETRY
+toricXp = 1
+toricXn = 1
+toricYp = 1
+toricYn = 1
+
+## TREE PLANTING
+treePlantingYears = 1
+treePlantingDays = 40
+
+## TREE PRUNING
+#treePruningYears = 2,4,6,8,10,12,14,16,18,20
+#treePruningDays = 365,365,365,365,365,365,365,365,365,365
+#treePruningProp = 0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3
+#treePruningMaxHeight = 4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0
+#treeDensityReduction = 0,0,0,0,0,0,0,0,0,0
+
+## TREE THINNING
+#treeThinningIds = 1
+#treeThinningYears = 10
+#treeThinningDays = 365
+
+## TREE ROOT PRUNING
+#treeRootPruningYears = 1
+#treeRootPruningDays = 365
+#treeRootPruningDistance = 1.5
+#treeRootPruningDepth = 1.0
+
+## TREE LITTER INCORPORATION IN SOIL
+treesLeafLitterIncorporated = 1
+treesRootLitterIncorporated = 1
+treesDeepRootLitterIncorporated = 1
