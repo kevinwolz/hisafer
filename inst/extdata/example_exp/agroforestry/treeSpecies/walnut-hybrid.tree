@@ -44,7 +44,7 @@ wettability = 0.1
 transpirationCoefficient = 2.9
 
 ## C ALLOCATION
-lueMax = 0.87
+lueMax = 1
 leafAgeForLueMax = 60
 leafSenescenceTimeConstant = 7.81e-05
 lueStressMethod = 1

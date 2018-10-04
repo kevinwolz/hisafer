@@ -1,5 +1,5 @@
 ## SIMULATION
-nbSimulations = 10
+nbSimulations = 7
 simulationYearStart = 1994
 simulationDayStart = 185
 simulationNbrDays = 365
