@@ -533,7 +533,7 @@ plot_hisafe_annualcells <- function(hop,
 #' @param simu.names A character string containing the SimulationNames to include. Use "all" to include all available values.
 #' @param plot.x Either "x" or "y", indicating which axis of the simulation scene should be plotted on the x-axis of the plot.
 #' @param N.arrow A character string indicating the color of the north arrow. Sting must be a valid color name passed to ggplot2.
-#' Use \code{FALSE} to not plot the north arrow.
+#' Use \code{NA} to not plot the north arrow.
 #' @param trees Logical indicating if a point should be plotted at the location of each tree.
 #' @param canopies Logical indicating if an elipsoid should be plotted representing the size of each tree canopy.
 #' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.
@@ -576,7 +576,7 @@ plot_hisafe_cells <- function(hop,
 
   if(length(variable) > 1)       stop("variable argument must be a character vector of length 1", call. = FALSE)
   if(!(plot.x %in% c("x", "y"))) stop("plot.x must be one of 'x' or 'y'",                         call. = FALSE)
-  if(!((is.character(N.arrow) | isFALSE(N.arrow)) & length(N.arrow) == 1)) stop("N.arrow argument must be a character vector of length 1", call. = FALSE)
+  if(!((is.character(N.arrow) | is.na(N.arrow)) & length(N.arrow) == 1)) stop("N.arrow argument must be a character vector of length 1", call. = FALSE)
   is_TF(trees)
   is_TF(canopies)
   is_TF(plot)
@@ -655,7 +655,7 @@ plot_hisafe_cells <- function(hop,
     facet_cells <- geom_blank()
   }
 
-  if(is.character(N.arrow) & nrow(hop$plot.info) > 0) {
+  if(!is.na(N.arrow) & profile_check(hop, "plot.info")) {
     north <- geom_spoke(data = hop$plot.info, aes(x      = cellWidth / 2,
                                                   y      = cellWidth / 2,
                                                   angle  = -(northOrientation - 90) * pi / 180,
@@ -1286,8 +1286,8 @@ add_phantom_trees <- function(tree.data) {
 #' @param plot.x The plot.x argument from the tile plot function
 #' @keywords internal
 create_tree_data <- function(hop, trees, canopies, plot.x) {
-  if(!(nrow(hop$tree.info) > 0 & nrow(hop$plot.info) > 0)) warning("tree.info or plot.info is unavilable in hop and is required if trees or canopies is TRUE. Use read.inputs = TRUE in read_hisafe().", call. = FALSE)
-  if((trees | canopies) & nrow(hop$tree.info) > 0 & nrow(hop$plot.info) > 0){
+  if(!(profile_check(hop, "tree.info") & profile_check(hop, "plot.info"))) warning("tree.info or plot.info is unavilable in hop and is required if trees or canopies is TRUE. Use read.inputs = TRUE in read_hisafe().", call. = FALSE)
+  if((trees | canopies) & profile_check(hop, "tree.info") & profile_check(hop, "plot.info")){
     tree.data <- hop$tree.info %>%
       dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
       dplyr::mutate(special.case = x == 0 & y == 0) %>% # special case when x == 0 & y == 0 : tree is at scene center

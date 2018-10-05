@@ -26,7 +26,7 @@ In the plot, \code{variable} will be scaled to be between the minimum and maximu
 \item{plot.x}{Either "x" or "y", indicating which axis of the simulation scene should be plotted on the x-axis of the plot.}
 
 \item{N.arrow}{A character string indicating the color of the north arrow. Sting must be a valid color name passed to ggplot2.
-Use \code{FALSE} to not plot the north arrow.}
+Use \code{NA} to not plot the north arrow.}
 
 \item{trees}{Logical indicating if a point should be plotted at the location of each tree.}
 
