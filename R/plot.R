@@ -927,8 +927,8 @@ plot_hisafe_bg <- function(hop,
   root.wt.plot <- base.plot +
     labs(title = "Root & water table depth",
          y     = "Depth (m)") +
-    geom_line(aes(y = -rootingDepth), size = 2) +
-    geom_line(aes(y = waterTableDepth), color = "blue")
+    geom_line(aes(y = -rootingDepth), size = 2, na.rm = TRUE) +
+    geom_line(aes(y = waterTableDepth), color = "blue", na.rm = TRUE)
 
   if(any(c("fine", "coarse") %in% sen)) {
     root.wt.plot <- root.wt.plot +
@@ -942,7 +942,7 @@ plot_hisafe_bg <- function(hop,
   fr.sen.plot <- base.plot +
     labs(title = "Fine root senescence by anoxia",
          y     = "Senescence (kg C)") +
-    geom_line(aes(y = carbonFineRootSenAnoxia))
+    geom_line(aes(y = carbonFineRootSenAnoxia), na.rm = TRUE)
 
   if("coarse" %in% sen) {
     fr.sen.plot <- fr.sen.plot +
@@ -956,7 +956,7 @@ plot_hisafe_bg <- function(hop,
   cr.sen.plot <- base.plot +
     labs(title = "Coarse root senescence by anoxia",
          y     = "Senescence (kg C)") +
-    geom_line(aes(y = carbonCoarseRootSenAnoxia)) +
+    geom_line(aes(y = carbonCoarseRootSenAnoxia), na.rm = TRUE) +
     theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
   plot.list <- list(root.wt.plot)
