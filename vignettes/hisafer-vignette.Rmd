@@ -363,6 +363,11 @@ plot_hisafe_monthcells(hop        = hop,
                        canopies   = FALSE)
 ```
 
+To understand the dynamics of the water table on root mortality, use `plot_hisafe_bg()`:
+```{r, eval = TRUE, dpi = 250, fig.width = 10}
+plot_hisafe_bg(hop = hop, simu.names = c("PF", "AF"))
+```
+
 #### 6.2 Cycle plots
 You can also compare the major Hi-sAFe "cycles" among your simulations by using `plot_hisafe_cycle_annual()` and `plot_hisafe_cycle_daily()`. Supported "cycles" include carbon, water, nitrogen, and light. 
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
