@@ -254,7 +254,7 @@ stics_budget_comp <- function(hop,
                       irrigation                 = -irrigation,
                       leaching.artificial        = leaching.in.mole.drains,
                       leaching.bottom            = leaching,
-                      nitrification              = N2.and.N2O.losses,
+                      denitrification            = N2.and.N2O.losses,
                       uptakeMain                 = N.uptake,
                       volatilization.mineral     = fertiliser.N.volatilis,
                       volatilization.organic     = manure.N.volatilis,
@@ -316,6 +316,8 @@ get_stics_budget <- function(year,
   file.paths <- list.files(path       = paste0(path, "/", simu.name, "/output-", simu.name),
                            pattern    = paste0("rapport_[0-9][0-9][0-9]_", year, ".bil"),
                            full.names = TRUE)
+  if(length(file.paths) == 0) stop(paste0("No .bil files found for ", simu.name, " ", year,
+                                         ". To export STICS .bil files, use sticsReport = 1 when defining a simulation."), call. = FALSE)
 
   OUT <- dplyr::tibble()
   for(stics.file.path in file.paths) {

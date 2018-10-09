@@ -92,7 +92,7 @@ plot_hisafe_cycle_annual <- function(hop,
     plot.data <- get_yields(hop = hop, profile = METHOD, crop.names = crop.names)
     geom       <- geom_bar(stat = "identity", color = bar.color)
     plot.title <- "Yield"
-    y.lab      <- "Yield (kg ha-1)"
+    y.lab      <- bquote("Yield (kg "*ha^-1*")")
     if(is.null(color.palette)) color.palette <- c("#E69F00", "#009E73")
 
   } else if(cycle == "water") {
@@ -107,9 +107,9 @@ plot_hisafe_cycle_annual <- function(hop,
     plot.data <- get_nitrogen_fluxes(hop = hop, profile = METHOD, crop.names = crop.names, for.plot = (plot | tidy))
     geom       <- geom_bar(stat = "identity", color = bar.color)
     plot.title <- "Nitrogen Cycle"
-    y.lab      <- "N flux (kg N ha-1)"
+    y.lab      <- bquote("N flux (kg N "*ha^-1*")")
     if(is.null(color.palette)) color.palette <- c("#D55E00", "#E69F00", "#F0E442", "grey20", "grey40", "grey60",
-                                                  "#009E73", "#0072B2", "#56B4E9", "#4F2F4F", "black", "#CC79A7", "white")
+                                                  "#009E73", "#4F2F4F", "#0072B2", "white", "black", "#CC79A7", "#56B4E9")
 
   } else if(cycle == "light") {
     plot.data  <- get_light_fluxes(hop = hop, crop.names = crop.names)
@@ -125,7 +125,7 @@ plot_hisafe_cycle_annual <- function(hop,
     plot.data  <- get_carbon_pools(hop = hop)
     geom       <- geom_bar(stat = "identity", color = bar.color)
     plot.title <- "Tree Carbon Pools"
-    y.lab      <- "Tree C storage (Mg C ha-1)"
+    y.lab      <- bquote("Tree C storage (Mg C "*ha^-1*")")
     if(is.null(color.palette)) color.palette <- c("#009E73", "#999999", "#D55E00", "#E69F00", "#56B4E9", "#0072B2", "#F0E442")
 
   } else {
@@ -271,7 +271,7 @@ plot_hisafe_cycle_daily <- function(hop,
     cycle.geom  <- geom_area(aes(fill = flux), na.rm = TRUE)
     cycle.scale <- scale_color_manual(values = color.palette)
     pre.title   <- "Yield"
-    y.lab       <- "Yield (kg ha-1)"
+    y.lab       <- bquote("Yield (kg "*ha^-1*")")
 
   } else if(cycle == "water") {
     plot.data <- get_water_fluxes(hop = hop, profile = METHOD, crop.names = crop.names, for.plot = plot) %>%
@@ -297,7 +297,7 @@ plot_hisafe_cycle_daily <- function(hop,
     cycle.geom  <- geom_area(aes(fill = flux), na.rm = TRUE)
     cycle.scale <- scale_fill_manual(values = color.palette)
     pre.title   <- "Nitrogen Uptake"
-    y.lab       <- "Nitrogen uptake (kg N ha-1)"
+    y.lab       <- bquote("Nitrogen uptake (kg N "*ha^-1*")")
 
   } else if(cycle == "light") {
     plot.data   <- get_light_fluxes(hop = hop, crop.names = crop.names)
@@ -314,7 +314,7 @@ plot_hisafe_cycle_daily <- function(hop,
     cycle.geom  <- geom_area(aes(fill = flux), na.rm = TRUE)
     cycle.scale <- scale_fill_manual(values = color.palette)
     pre.title   <- "Tree Carbon Pools"
-    y.lab       <- "Tree C storage (Mg C ha-1)"
+    y.lab       <- bquote("Tree C storage (Mg C "*ha^-1*")")
 
   } else if(cycle == "carbon-increment") {
     if(!profile_check(hop, "trees")) return(NULL)
@@ -323,7 +323,7 @@ plot_hisafe_cycle_daily <- function(hop,
     cycle.geom  <- geom_area(aes(fill = flux), na.rm = TRUE)
     cycle.scale <- scale_fill_manual(values = color.palette)
     pre.title   <- "Tree Carbon Increment"
-    y.lab       <- "Tree C increment (kg C tree-1)"
+    y.lab       <- bquote("Tree C increment (kg C "*tree^-1*")")
 
   } else if(cycle == "carbon-allocation") {
     if(!profile_check(hop, "trees")) return(NULL)
@@ -591,7 +591,7 @@ get_nitrogen_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
                       uptakeInter               = nitrogenUptake * as.numeric(cropType == "interCrop"),
                       volatilization.mineral    = nitrogenVolatilisation,
                       volatilization.organic    = nitrogenVolatilisationOrganic,
-                      nitrification             = nitrogenDenitrification,
+                      denitrification             = nitrogenDenitrification,
                       leaching.bottom           = nitrogenLeachingBottom,
                       leaching.artificial       = nitrogenLeachingArtificial,
                       leaching.watertable       = nitrogenLeachingWaterTable,
@@ -603,7 +603,7 @@ get_nitrogen_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
                       crop.root.litter          = -cropNitrogenRootLitter) %>%
         dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay,
                       fertilization.mineral, fertilization.organic, irrigation, deposition, fixation, watertable, nitrogen.uptake.sat.trees, nitrogen.uptake.sat.crop,
-                      uptakeTree, uptakeMain, uptakeInter, volatilization.mineral, volatilization.organic, nitrification,
+                      uptakeTree, uptakeMain, uptakeInter, volatilization.mineral, volatilization.organic, denitrification,
                       leaching.bottom, leaching.artificial, leaching.watertable, runoff, tree.leaf.litter, tree.root.litter, crop.leaf.litter, crop.root.litter)
     }
 
@@ -627,12 +627,12 @@ get_nitrogen_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
                                              "runoff",
                                              "leaching",
                                              "fertilization",
-                                             "irrigation",
-                                             "deposition",
                                              "fixation",
+                                             "irrigation",
+                                             "watertable",
                                              "tree.litter",
                                              "crop.litter",
-                                             "watertable"),
+                                             "deposition"),
                                   labels = c("Uptake - Trees",
                                              paste("Uptake -", crop.names[2]),
                                              paste("Uptake -", crop.names[1]),
@@ -640,12 +640,12 @@ get_nitrogen_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
                                              "Run-off",
                                              "Leaching",
                                              "Fertilization",
-                                             "Irrigation",
-                                             "Deposition",
                                              "Fixation",
+                                             "Irrigation",
+                                             "Water table",
                                              "Tree litter",
                                              "Crop litter",
-                                             "Water table")))
+                                             "Deposition")))
   }
   return(out)
 }
