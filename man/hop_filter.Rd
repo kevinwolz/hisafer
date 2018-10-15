@@ -4,8 +4,9 @@
 \alias{hop_filter}
 \title{Filter a hop object by SimulationName, Date, and idTree}
 \usage{
-hop_filter(hop, simu.names = "all", tree.ids = "all", date.min = NA,
-  date.max = NA, dates = NULL, strip.exp.plan = FALSE)
+hop_filter(hop, simu.names = "all", tree.ids = "all", years = "all",
+  months = "all", date.min = NA, date.max = NA, dates = NULL,
+  strip.exp.plan = FALSE)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
@@ -13,6 +14,10 @@ hop_filter(hop, simu.names = "all", tree.ids = "all", date.min = NA,
 \item{simu.names}{A character vector of the SimulationNames to keep. If "all", no filtering occurs.}
 
 \item{tree.ids}{A numeric vector of the tree ids to keep. If "all", no filtering occurs.}
+
+\item{years}{A numeric vector of the years to keep. If "all", no filtering occurs.}
+
+\item{months}{A numeric vector of the months to keep. If "all", no filtering occurs.}
 
 \item{date.min}{A character string of the minimum date to keep, in the format "YYYY-MM-DD" or of class Date.
 If NA, the minimum date in \code{hop} is used. Only used if \code{dates} is \code{NULL}.}

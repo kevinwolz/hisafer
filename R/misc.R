@@ -284,6 +284,8 @@ hop_rename <- function(hop, old.names, new.names) {
 #' @param hop An object of class hop or face.
 #' @param simu.names A character vector of the SimulationNames to keep. If "all", no filtering occurs.
 #' @param tree.ids A numeric vector of the tree ids to keep. If "all", no filtering occurs.
+#' @param years A numeric vector of the years to keep. If "all", no filtering occurs.
+#' @param months A numeric vector of the months to keep. If "all", no filtering occurs.
 #' @param date.min A character string of the minimum date to keep, in the format "YYYY-MM-DD" or of class Date.
 #' If NA, the minimum date in \code{hop} is used. Only used if \code{dates} is \code{NULL}.
 #' @param date.max A character string of the maximum date to keep, in the format "YYYY-MM-DD" or of class Date.
@@ -301,12 +303,16 @@ hop_rename <- function(hop, old.names, new.names) {
 hop_filter <- function(hop,
                        simu.names     = "all",
                        tree.ids       = "all",
+                       years          = "all",
+                       months         = "all",
                        date.min       = NA,
                        date.max       = NA,
                        dates          = NULL,
                        strip.exp.plan = FALSE) {
   is_hop(hop, error = TRUE)
   if(!all(is.character(simu.names)))                                        stop("simu.names argument must be 'all' or a character vector",  call. = FALSE)
+  if(!(years[1]    == "all" | all(is.numeric(years))))                      stop("years argument must be 'all' or a numeric vector",         call. = FALSE)
+  if(!(months[1]   == "all" | all(is.numeric(months))))                     stop("months argument must be 'all' or a numeric vector",        call. = FALSE)
   if(!(tree.ids[1] == "all" | all(is.numeric(tree.ids))))                   stop("tree.ids argument must be 'all' or a numeric vector",      call. = FALSE)
 
   date_check <- function(x) is.character(x) | is.na(x) |  "Date" %in% class(x)
@@ -333,24 +339,31 @@ hop_filter <- function(hop,
     }
   }
 
+  time.profiles <- which_profiles(hop = hop, profiles = DATA.PROFILES)
+
+  ## Year
+  if(years[1]  != "all") for(i in time.profiles) hop[[i]] <- dplyr::filter(hop[[i]], Year  %in% years)
+
+  ## Month
+  if(months[1] != "all") for(i in time.profiles) hop[[i]] <- dplyr::filter(hop[[i]], Month %in% months)
+
   ## Date
-  profiles <- which_profiles(hop = hop, profiles = DATA.PROFILES)
   if(is.null(dates) & (!is.na(date.min) | !is.na(date.max))) {
     date.min <- lubridate::ymd(date.min)
     date.max <- lubridate::ymd(date.max)
 
     get_date_range <- function(profile, h) range(h[[profile]]$Date)
-    existing.ranges <- purrr::map(profiles, get_date_range, hop) %>%
+    existing.ranges <- purrr::map(time.profiles, get_date_range, hop) %>%
       do.call(what = "c")
     if(is.na(date.min)) date.min <- min(existing.ranges)
     if(is.na(date.max)) date.max <- max(existing.ranges)
 
     if(date.max < date.min) stop("date.min must be less than date.max", call. = FALSE)
 
-    for(i in profiles) hop[[i]] <- dplyr::filter(hop[[i]], Date %in% seq(date.min, date.max, 1))
+    for(i in time.profiles) hop[[i]] <- dplyr::filter(hop[[i]], Date %in% seq(date.min, date.max, 1))
   } else if(!is.null(dates)) {
     dates <- lubridate::ymd(dates)
-    for(i in profiles) hop[[i]] <- dplyr::filter(hop[[i]], Date %in% dates)
+    for(i in time.profiles) hop[[i]] <- dplyr::filter(hop[[i]], Date %in% dates)
   }
 
   ## STRIP EXP PLAN VARS

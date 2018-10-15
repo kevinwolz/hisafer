@@ -44,8 +44,8 @@ ler.plot <- summary_LER(face, "./")
 Other hisafe analysis functions: \code{\link{LER}},
   \code{\link{analyze_hisafe}},
   \code{\link{cycle_summary}}, \code{\link{hisafe_budget}},
-  \code{\link{plot_hisafe_cycle_annual}},
-  \code{\link{plot_hisafe_cycle_daily}},
+  \code{\link{plot_hisafe_cycle_bar}},
+  \code{\link{plot_hisafe_cycle_ts}},
   \code{\link{stics_budget_comp}}, \code{\link{write_hop}}
 }
 \concept{hisafe analysis functions}

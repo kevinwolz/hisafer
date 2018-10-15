@@ -14,7 +14,7 @@ cycle_summary(hop, daily.year, simu.name = NULL, cycles = c("carbon",
 \item{simu.name}{A character vector of legnth 1 indicating the SimulationName within \code{hop} to plot.}
 
 \item{cycles}{A character vector of the cycles to include. Supported cycles include: 'carbon', 'light', 'water', and 'nitrogen.
-See \code{\link{plot_hisafe_cycle_annual}} for details of each cycle.}
+See \code{\link{plot_hisafe_cycle_bar}} for details of each cycle.}
 
 \item{crop.names}{A character vector of length 2 containing the names to use in the legend for the mainCrop and interCrop of Hi-sAFe, in that order.}
 
@@ -41,8 +41,8 @@ cycle.plot <- cycle_summary(myhop, 2000)
 Other hisafe analysis functions: \code{\link{LER_summary}},
   \code{\link{LER}}, \code{\link{analyze_hisafe}},
   \code{\link{hisafe_budget}},
-  \code{\link{plot_hisafe_cycle_annual}},
-  \code{\link{plot_hisafe_cycle_daily}},
+  \code{\link{plot_hisafe_cycle_bar}},
+  \code{\link{plot_hisafe_cycle_ts}},
   \code{\link{stics_budget_comp}}, \code{\link{write_hop}}
 }
 \concept{hisafe analysis functions}

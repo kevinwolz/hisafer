@@ -4,16 +4,19 @@
 \alias{hisafe_budget}
 \title{Calculate water and nitrogen budgets}
 \usage{
-hisafe_budget(hop, cycle, doy.start = "sim", simu.names = "all",
-  years = "all", save.table = TRUE, save.plot = TRUE,
-  output.path = NULL)
+hisafe_budget(hop, cycle, freq = "year", doy.start = "sim",
+  simu.names = "all", years = "all", months = "all",
+  save.table = TRUE, save.plot = TRUE, output.path = NULL)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
 
 \item{cycle}{A character vector of the cycle to analyze Supported cycles include: 'water', and 'nitrogen.}
 
-\item{doy.start}{The JulianDay [1-365] on which to start the annual cycle accounting. Use 'sim' to specify the starting JulianDay of the simulation.}
+\item{freq}{One of "year", "month", "day".}
+
+\item{doy.start}{The JulianDay [1-365] on which to start the annual cycle accounting. Use 'sim' to specify the starting JulianDay of the simulation.
+Only used if \code{freq} is "year".}
 
 \item{simu.names}{A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.}
 
@@ -32,7 +35,7 @@ A data.frame (tibble) containing the budget data.
 }
 \description{
 Calculates water and nitrogen budgets
-See \code{\link{plot_hisafe_cycle_annual}} for details of each cycle.
+See \code{\link{plot_hisafe_cycle_bar}} for details of each cycle.
 }
 \examples{
 \dontrun{
@@ -43,8 +46,8 @@ water.budget <- hisafe_budget(myhop, "water")
 Other hisafe analysis functions: \code{\link{LER_summary}},
   \code{\link{LER}}, \code{\link{analyze_hisafe}},
   \code{\link{cycle_summary}},
-  \code{\link{plot_hisafe_cycle_annual}},
-  \code{\link{plot_hisafe_cycle_daily}},
+  \code{\link{plot_hisafe_cycle_bar}},
+  \code{\link{plot_hisafe_cycle_ts}},
   \code{\link{stics_budget_comp}}, \code{\link{write_hop}}
 }
 \concept{hisafe analysis functions}

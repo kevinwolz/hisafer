@@ -13,7 +13,7 @@ get_nitrogen_fluxes(hop, profile, crop.names, for.plot = TRUE)
 
 \item{crop.names}{A character vector of length 2 containing the names to use in the legend for the mainCrop and interCrop of Hi-sAFe, in that order.}
 
-\item{for.plot}{A logical indicating whether the fluxes to retreive are for \code{\link{plot_hisafe_cycle_daily}} or not.}
+\item{for.plot}{A logical indicating whether the fluxes to retreive are for \code{\link{plot_hisafe_cycle_ts}} or not.}
 }
 \value{
 A tibble with extracted and calculated nitrogen fluxes.
