@@ -1,10 +1,12 @@
 #' Calculate water and nitrogen budgets
 #' @description Calculates water and nitrogen budgets
-#' See \code{\link{plot_hisafe_cycle_annual}} for details of each cycle.
+#' See \code{\link{plot_hisafe_cycle_bar}} for details of each cycle.
 #' @return A data.frame (tibble) containing the budget data.
 #' @param hop An object of class hop or face.
 #' @param cycle A character vector of the cycle to analyze Supported cycles include: 'water', and 'nitrogen.
+#' @param freq One of "year", "month", "day".
 #' @param doy.start The JulianDay [1-365] on which to start the annual cycle accounting. Use 'sim' to specify the starting JulianDay of the simulation.
+#' Only used if \code{freq} is "year".
 #' @param simu.names A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.
 #' @param years A numeric vector of the years within \code{hop} to include. Use "all" to include all available values.
 #' @param save.table Logical indicating whether a table of budget data and calculations should be saved to \code{output.path}.
@@ -22,9 +24,11 @@
 #' }
 hisafe_budget <- function(hop,
                           cycle,
+                          freq        = "year",
                           doy.start   = "sim",
                           simu.names  = "all",
                           years       = "all",
+                          months      = "all",
                           save.table  = TRUE,
                           save.plot   = TRUE,
                           output.path = NULL) {
@@ -33,53 +37,62 @@ hisafe_budget <- function(hop,
   supported.saves  <- c("table", "plot")
 
   is_hop(hop, error = TRUE)
-  profile_check(hop, c("cells", "plot"), error = TRUE)
+  profile_check(hop = hop, profile = "cells", error = TRUE)
 
   if(years[1] == "all") years <- unique(hop$cells$Year)
+  freq <- tolower(freq)
 
   if(!all(cycle %in% supported.cycles))                   stop(paste0("cycle argument must be one of:", paste(supported.cycles, collapse = ", ")), call. = FALSE)
+  if(!(freq  %in% c("year", "month", "day")))             stop("freq argument must be one of: year, month, day",                                   call. = FALSE)
   if(!all(is.numeric(years)))                             stop("years argument must be 'all' or a numeric vector",                                 call. = FALSE)
   if(!all(years %in% unique(hop$cells$Year)))             stop(paste("not all values in years are present in the cells profile"),                  call. = FALSE)
   if(!(is.character(output.path) | is.null(output.path))) stop("output.path argument must be a character string",                                  call. = FALSE)
   is_TF(save.table)
   is_TF(save.plot)
 
-  hop <- hop_filter(hop = hop, simu.names = simu.names)
+  hop <- hop_filter(hop        = hop,
+                    simu.names = simu.names,
+                    years      = years,
+                    months     = months)
+
+  group.cols <- c("SimulationName", "Date")
 
   ## FLUXES
-  flux.raw <- plot_hisafe_cycle_annual(hop = hop, cycle = cycle, doy.start = doy.start, plot = FALSE) %>%
-    dplyr::filter(Year %in% years)
+  flux.raw <- plot_hisafe_cycle_bar(hop       = hop,
+                                    cycle     = cycle,
+                                    freq      = freq,
+                                    doy.start = ifelse(freq == "year", doy.start, 1),
+                                    plot      = FALSE) %>%
+    dplyr::select(cycle, SimulationName, Date, flux, value)
 
   flux.spread <- flux.raw %>%
     tidyr::spread(key = "flux", value = "value")
 
   flux <- flux.raw %>%
+    dplyr::group_by_at(group.cols) %>%
     dplyr::summarize(value = sum(value)) %>%
     dplyr::rename(sum.of.fluxes = value)
 
   ## STOCK
-  if(doy.start != "sim") hop$plot.info$simulationDayStart <- doy.start
-  stock <- hop$cells %>%
-    dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
-    dplyr::filter(Year %in% years) %>%
-    dplyr::filter(JulianDay == simulationDayStart)
-
   if(cycle == "water") {
-    variable_check(hop = hop, profile = "cells", variables = "waterStock")
-    stock <- stock %>%
-      dplyr::select(SimulationName, Year, waterStock) %>%
-      dplyr::group_by(SimulationName, Year) %>%
-      dplyr::summarize(waterStock = mean(waterStock)) %>%
-      dplyr::mutate(totalStock = waterStock) %>%
-      dplyr::mutate(stockChange = c(diff(totalStock), NA))
+    profile_check(hop  = hop, profile = "climate", error = TRUE)
+    variable_check(hop = hop, profile = "cells",   variables = c("waterStock", "mulchWaterStock"),  error = TRUE)
+    variable_check(hop = hop, profile = "climate", variables = "stockedSnow",                       error = TRUE)
+    stock <- hop$cells %>%
+      dplyr::select(SimulationName, Date, waterStock, mulchWaterStock) %>%
+      dplyr::group_by_at(group.cols) %>%
+      dplyr::summarize(waterStock      = mean(waterStock),
+                       mulchWaterStock = mean(mulchWaterStock)) %>%
+      dplyr::left_join(dplyr::select(hop$climate, SimulationName, Date, stockedSnow), by = group.cols) %>%
+      dplyr::mutate(totalStock = waterStock + stockedSnow + mulchWaterStock)
 
   } else if(cycle == "nitrogen") {
     variable_check(hop = hop, profile = "cells", variables = c("mineralNitrogenStock", "activeNitrogenHumusStock", "inactiveNitrogenHumusStock",
-                                                               "nitrogenResidus", "nitrogenMicrobes", "nitrogenMicrobesMulch"))
-    stock <- stock %>%
-      dplyr::select(SimulationName, Year, mineralNitrogenStock, activeNitrogenHumusStock, inactiveNitrogenHumusStock,
+                                                               "nitrogenResidus", "nitrogenMicrobes", "nitrogenMicrobesMulch"), error = TRUE)
+    stock <- hop$cells %>%
+      dplyr::select(SimulationName, Date, mineralNitrogenStock, activeNitrogenHumusStock, inactiveNitrogenHumusStock,
                     nitrogenResidus, nitrogenMulch, nitrogenMicrobes, nitrogenMicrobesMulch) %>%
-      dplyr::group_by(SimulationName, Year) %>%
+      dplyr::group_by_at(group.cols) %>%
       dplyr::summarize(mineralNitrogenStock       = mean(mineralNitrogenStock),
                        activeNitrogenHumusStock   = mean(activeNitrogenHumusStock),
                        inactiveNitrogenHumusStock = mean(inactiveNitrogenHumusStock),
@@ -87,30 +100,48 @@ hisafe_budget <- function(hop,
                        nitrogenMulch              = mean(nitrogenMulch),
                        nitrogen.microbes          = mean(nitrogenMicrobes) + mean(nitrogenMicrobesMulch)) %>%
       dplyr::mutate(totalStock = mineralNitrogenStock + activeNitrogenHumusStock + inactiveNitrogenHumusStock +
-                      nitrogenResidus + nitrogenMulch + nitrogen.microbes) %>%
-      dplyr::mutate(stockChange = c(diff(totalStock), NA))
+                      nitrogenResidus + nitrogenMulch + nitrogen.microbes)
+  }
+
+  stock.times <- flux %>%
+    dplyr::ungroup() %>%
+    dplyr::select(SimulationName, Date)
+
+  stock <- stock %>%
+    dplyr::mutate(totalStockStart = c(NA, totalStock[1:(length(totalStock)-1)])) %>%
+    dplyr::mutate(totalStockEnd   = totalStock) %>%
+    dplyr::select(-totalStock) %>%
+    dplyr::inner_join(stock.times, by = group.cols)
+
+  if(freq == "day") {
+    stock <- stock %>%
+      dplyr::mutate(stockChange = totalStockEnd - totalStockStart)
+  } else {
+    stock <- stock %>%
+      dplyr::mutate(stockChange   = c(diff(totalStockStart), NA)) %>%
+      dplyr::mutate(totalStockEnd = c(totalStockStart[2:length(totalStockStart)], NA))
   }
 
   budget.data <- flux.spread %>%
-    dplyr::left_join(flux,  by = c("SimulationName", "Year")) %>%
-    dplyr::left_join(stock, by = c("SimulationName", "Year")) %>%
-    dplyr::mutate(excess.export = sum.of.fluxes + stockChange)
+    dplyr::left_join(flux,  by = group.cols) %>%
+    dplyr::left_join(stock, by = group.cols) %>%
+    dplyr::mutate(excess.export = sum.of.fluxes + stockChange) %>%
+    dplyr::arrange(SimulationName, Date)
 
   if(save.table | save.plot) {
     output.path <- clean_path(paste0(diag_output_path(hop = hop, output.path = output.path), "/budgets/"))
     dir.create(output.path, recursive = TRUE, showWarnings = FALSE)
 
-    if(save.table) readr::write_csv(budget.data, paste0(output.path, "hisafe_", cycle, "_budget.csv"))
+    if(save.table) readr::write_csv(budget.data, paste0(output.path, "hisafe_", cycle, "_budget_", freq, ".csv"))
 
     if(save.plot) {
-      plot.obj <- ggplot(budget.data, aes(x = Year, y = excess.export, color = SimulationName, linetype = SimulationName)) +
+      plot.obj <- ggplot(budget.data, aes(x = Date, y = excess.export)) +
+        facet_wrap(~SimulationName) +
         labs(y = paste0("Excess ", cycle, " export from scene")) +
-        geom_line(na.rm = TRUE) +
+        geom_line(na.rm  = TRUE) +
         geom_point(na.rm = TRUE) +
-        scale_color_manual(values    = rep(c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7"), 6)) +
-        scale_linetype_manual(values = rep(1:6, each = 8)) +
         theme_hisafe_ts()
-      ggsave_fitmax(paste0(output.path, "hisafe_", cycle, "_budget_excess.jpg"), plot.obj, scale = 1.5)
+      ggsave_fitmax(paste0(output.path, "hisafe_", cycle, "_budget_excess_", freq, ".jpg"), plot.obj, scale = 1.5)
     }
   }
 
@@ -146,7 +177,7 @@ stics_budget_comp <- function(hop,
   profile_check(hop, "cells", error = TRUE)
   if(simu.names == "all") simu.names <- hop$metadata$SimulationName
 
-  stock.names  <- c("waterStock",
+  stock.names  <- c("waterStock", "stockedSnow", "mulchWaterStock",
                     "mineralNitrogenStock", "activeNitrogenHumusStock", "inactiveNitrogenHumusStock", "nitrogenResidus", "nitrogenMulch", "nitrogen.microbes")
   bad.names    <- c("sum.of.fluxes", "totalStock", "stockChange", "excess.export")
 
@@ -182,17 +213,20 @@ stics_budget_comp <- function(hop,
     ## HISAFE BUDGET
     hisafe.budget <- hisafe_budget(hop         = hop,
                                    cycle       = cycle,
+                                   freq        = "year",
                                    doy.start   = "sim",
                                    simu.names  = simu.name,
                                    years       = years,
                                    save.table  = FALSE,
                                    save.plot   = FALSE,
                                    output.path = output.path) %>%
-      dplyr::mutate(model = "hisafe")
+      dplyr::mutate(model = "hisafe") %>%
+      dplyr::mutate(Year  = lubridate::year(Date)) %>%
+      dplyr::select(cycle, SimulationName, Year, dplyr::everything(), -Date)
 
     hisafe.names <- names(hisafe.budget)
     stock.names  <- stock.names[stock.names %in% names(hisafe.budget)]
-    flux.names   <- names(hisafe.budget)[!(names(hisafe.budget) %in% c("SimulationName", "Year", "cycle", "model", stock.names, bad.names))]
+    flux.names   <- names(hisafe.budget)[!(names(hisafe.budget) %in% c("SimulationName", "Year", "Date", "cycle", "model", stock.names, bad.names))]
 
     ## STICS BUDGET
     if(years[1] == "all") YEARS <- hisafe.budget$Year else YEARS <- years
@@ -218,7 +252,9 @@ stics_budget_comp <- function(hop,
                       uptakeInter               = NA,
                       water.added.by.watertable = NA,
                       water.uptake.sat.crop     = NA,
-                      water.uptake.sat.trees    = NA) %>%
+                      water.uptake.sat.trees    = NA,
+                      stockedSnow               = NA,
+                      mulchWaterStock           = NA) %>%
         dplyr::mutate(capilary.rise       = -capillary.rise,
                       crop.interception   = leaf.interception,
                       drainage.artificial = mole.drainage,
@@ -238,13 +274,16 @@ stics_budget_comp <- function(hop,
         dplyr::mutate(initial.mineral.N = initial.soil.NH4  + initial.soil.NO3) %>%
         dplyr::mutate(final.mineral.N   = final.soil.NH4    + final.soil.NO3) %>%
         dplyr::mutate(N.uptake          = N.uptake.exported + N.uptake.returned) %>%
-        dplyr::mutate(leaching.watertable = NA,
-                      runoff              = NA,
-                      tree.leaf.litter    = NA,
-                      tree.root.litter    = NA,
-                      uptakeTree         = NA,
-                      uptakeInter         = NA,
-                      watertable          = NA) %>%
+        dplyr::mutate(leaching.watertable       = NA,
+                      #runoff                  = NA, # STICS CURRENTLY DOES NOT INCLUDE THIS
+                      tree.leaf.litter          = NA,
+                      tree.shallow.root.litter  = NA,
+                      tree.deep.root.litter     = NA,
+                      uptakeTree                = NA,
+                      uptakeInter               = NA,
+                      watertable                = NA,
+                      nitrogen.uptake.sat.crop  = NA,
+                      nitrogen.uptake.sat.trees = NA) %>%
         dplyr::mutate(crop.leaf.litter           = -Added.Crop.residues + -Added.Fallen.leaves + -Added.Trimmed.leaves,
                       crop.root.litter           = -Added.Roots,
                       deposition                 = -rain,
@@ -317,7 +356,7 @@ get_stics_budget <- function(year,
                            pattern    = paste0("rapport_[0-9][0-9][0-9]_", year, ".bil"),
                            full.names = TRUE)
   if(length(file.paths) == 0) stop(paste0("No .bil files found for ", simu.name, " ", year,
-                                         ". To export STICS .bil files, use sticsReport = 1 when defining a simulation."), call. = FALSE)
+                                          ". To export STICS .bil files, use sticsReport = 1 when defining a simulation."), call. = FALSE)
 
   OUT <- dplyr::tibble()
   for(stics.file.path in file.paths) {
