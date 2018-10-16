@@ -98,9 +98,10 @@ hisafe_budget <- function(hop,
                        inactiveNitrogenHumusStock = mean(inactiveNitrogenHumusStock),
                        nitrogenResidus            = mean(nitrogenResidus),
                        nitrogenMulch              = mean(nitrogenMulch),
-                       nitrogen.microbes          = mean(nitrogenMicrobes) + mean(nitrogenMicrobesMulch)) %>%
+                       nitrogen.microbes          = mean(nitrogenMicrobes),
+                       nitrogen.microbes.mulch    = mean(nitrogenMicrobesMulch)) %>%
       dplyr::mutate(totalStock = mineralNitrogenStock + activeNitrogenHumusStock + inactiveNitrogenHumusStock +
-                      nitrogenResidus + nitrogenMulch + nitrogen.microbes)
+                      nitrogenResidus + nitrogenMulch + nitrogen.microbes + nitrogen.microbes.mulch)
   }
 
   stock.times <- flux %>%
@@ -122,11 +123,16 @@ hisafe_budget <- function(hop,
       dplyr::mutate(totalStockEnd = c(totalStockStart[2:length(totalStockStart)], NA))
   }
 
-  budget.data <- flux.spread %>%
+  plot.data <- flux.spread %>%
     dplyr::left_join(flux,  by = group.cols) %>%
     dplyr::left_join(stock, by = group.cols) %>%
-    dplyr::mutate(excess.export = sum.of.fluxes + stockChange) %>%
-    dplyr::arrange(SimulationName, Date)
+    dplyr::mutate(excess.export = sum.of.fluxes + stockChange)
+
+  budget.data <- plot.data %>%
+    dplyr::arrange(SimulationName, Date) %>%
+    dplyr::mutate_all(as.character) %>%
+    dplyr::mutate_all(str_replace, pattern = "^0$", replacement = "") %>%
+    dplyr::mutate(Date = lubridate::ymd(Date))
 
   if(save.table | save.plot) {
     output.path <- clean_path(paste0(diag_output_path(hop = hop, output.path = output.path), "/budgets/"))
@@ -135,7 +141,7 @@ hisafe_budget <- function(hop,
     if(save.table) readr::write_csv(budget.data, paste0(output.path, "hisafe_", cycle, "_budget_", freq, ".csv"))
 
     if(save.plot) {
-      plot.obj <- ggplot(budget.data, aes(x = Date, y = excess.export)) +
+      plot.obj <- ggplot(plot.data, aes(x = Date, y = excess.export)) +
         facet_wrap(~SimulationName) +
         labs(y = paste0("Excess ", cycle, " export from scene")) +
         geom_line(na.rm  = TRUE) +
@@ -222,6 +228,8 @@ stics_budget_comp <- function(hop,
                                    output.path = output.path) %>%
       dplyr::mutate(model = "hisafe") %>%
       dplyr::mutate(Year  = lubridate::year(Date)) %>%
+      dplyr::mutate(N2.and.N2O.losses = denitrification + nitrification) %>%
+      dplyr::select(-denitrification, -nitrification) %>%
       dplyr::select(cycle, SimulationName, Year, dplyr::everything(), -Date)
 
     hisafe.names <- names(hisafe.budget)
@@ -293,7 +301,6 @@ stics_budget_comp <- function(hop,
                       irrigation                 = -irrigation,
                       leaching.artificial        = leaching.in.mole.drains,
                       leaching.bottom            = leaching,
-                      denitrification            = N2.and.N2O.losses,
                       uptakeMain                 = N.uptake,
                       volatilization.mineral     = fertiliser.N.volatilis,
                       volatilization.organic     = manure.N.volatilis,

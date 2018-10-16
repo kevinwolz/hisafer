@@ -24,7 +24,7 @@
 #'  \item{"Uptake - Trees"}{ - nitrogen uptake by trees}
 #'  \item{"Uptake - Inter crop"}{ - nitrogen uptake by main crop}
 #'  \item{"Uptake - Main crop"}{ - nitrogen uptake by inter crop}
-#'  \item{"Gaseous losses"}{ - gaseous nitrogen losses via denitrification & volatilization of mineral/organic fertilizer inputs}
+#'  \item{"Gaseous losses"}{ - gaseous nitrogen losses via nitrification, denitrification, and volatilization of mineral/organic fertilizer inputs}
 #'  \item{"Run-off"}{ - nitrogen contained in rain water (wet deposition) that runs off the scene}
 #'  \item{"Leaching"}{ - nitrate leaching via the (1) bottom of the scene, (2) artificial drainage pipes, and (3) losses to the water table when the nirate concentration in the water table is lower than the nitrate concentration of voxels that it saturates}
 #'  \item{"Fertilization"}{ - mineral nitrogen added by both mineral & organic fertilizers, plus organic nitrogen added by organic fetilizers}
@@ -516,6 +516,11 @@ get_water_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
       dplyr::group_by(SimulationName, Year, Month, Day, Date, JulianDay) %>%
       dplyr::summarize_all(mean) %>% # mean of all cells in scene
       dplyr::ungroup() %>%
+      dplyr::group_by(SimulationName) %>%
+      dplyr::mutate(uptakeTree  = c(NA, uptakeTree[1 :(length(uptakeTree)  - 1)]), # Hi-sAFe uses the water extraction from day j-1 to impact day j
+                    uptakeMain  = c(NA, uptakeMain[1 :(length(uptakeMain)  - 1)]),
+                    uptakeInter = c(NA, uptakeInter[1:(length(uptakeInter) - 1)])) %>%
+      dplyr::ungroup() %>%
       tidyr::gather(key = "flux", value = "value", -(SimulationName:JulianDay))
 
   } else {
@@ -567,8 +572,8 @@ get_nitrogen_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
     variable_check(hop, "cells",
                    c("cropType", "nitrogenFertilisationMineral", "nitrogenFertilisationOrganic", "nitrogenIrrigation", "nitrogenRain", "nitrogenFixation",
                      "nitrogenUptakeByTrees", "nitrogenUptakeInSaturationByTrees", "nitrogenUptakeInSaturationByCrop", "nitrogenUptake",
-                     "nitrogenVolatilisation", "nitrogenVolatilisationOrganic", "nitrogenDenitrification", "nitrogenLeachingBottom",
-                     "nitrogenLeachingArtificial", "nitrogenLeachingWaterTable",
+                     "nitrogenVolatilisation", "nitrogenVolatilisationOrganic", "nitrogenDenitrification", "nitrogenLossNitrification",
+                     "nitrogenLeachingBottom", "nitrogenLeachingArtificial", "nitrogenLeachingWaterTable",
                      "treeNitrogenLeafLitter", "treeNitrogenFineRootLitter", "treeNitrogenCoarseRootLitter",
                      "treeNitrogenFineRootDeepLitter", "treeNitrogenCoarseRootDeepLitter",
                      "cropNitrogenLeafLitter", "cropNitrogenRootLitter"),
@@ -585,7 +590,7 @@ get_nitrogen_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
                       uptakeTree     = nitrogenUptakeByTrees,
                       uptakeMain     = nitrogenUptake * as.numeric(cropType == "mainCrop") + nitrogenFixation,
                       uptakeInter    = nitrogenUptake * as.numeric(cropType == "interCrop"),
-                      gaseous        = nitrogenVolatilisation + nitrogenVolatilisationOrganic + nitrogenDenitrification,
+                      gaseous        = nitrogenVolatilisation + nitrogenVolatilisationOrganic + nitrogenDenitrification + nitrogenLossNitrification,
                       leaching       = nitrogenLeachingBottom + nitrogenLeachingArtificial + nitrogenLeachingWaterTable,
                       #runoff         = nitrogenRunOff, # STICS CURRENTLY DOES NOT INCLUDE THIS
                       tree.litter    = -treeNitrogenLeafLitter + -treeNitrogenFineRootLitter + -treeNitrogenCoarseRootLitter +
@@ -610,19 +615,20 @@ get_nitrogen_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
                       uptakeInter               = nitrogenUptake * as.numeric(cropType == "interCrop"),
                       volatilization.mineral    = nitrogenVolatilisation,
                       volatilization.organic    = nitrogenVolatilisationOrganic,
-                      denitrification             = nitrogenDenitrification,
+                      nitrification             = nitrogenLossNitrification,
+                      denitrification           = nitrogenDenitrification,
                       leaching.bottom           = nitrogenLeachingBottom,
                       leaching.artificial       = nitrogenLeachingArtificial,
                       leaching.watertable       = nitrogenLeachingWaterTable,
                       #runoff                    = nitrogenRunOff, # STICS CURRENTLY DOES NOT INCLUDE THIS
                       tree.leaf.litter          = -treeNitrogenLeafLitter,
-                      tree.shallow.root.litter  = -treeNitrogenFineRootLitter + -treeNitrogenCoarseRootLitter,
+                      tree.shallow.root.litter  = -treeNitrogenFineRootLitter     + -treeNitrogenCoarseRootLitter,
                       tree.deep.root.litter     = -treeNitrogenFineRootDeepLitter + -treeNitrogenCoarseRootDeepLitter,
                       crop.leaf.litter          = -cropNitrogenLeafLitter,
                       crop.root.litter          = -cropNitrogenRootLitter) %>%
         dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay,
                       fertilization.mineral, fertilization.organic, irrigation, deposition, fixation, watertable, nitrogen.uptake.sat.trees, nitrogen.uptake.sat.crop,
-                      uptakeTree, uptakeMain, uptakeInter, volatilization.mineral, volatilization.organic, denitrification,
+                      uptakeTree, uptakeMain, uptakeInter, volatilization.mineral, volatilization.organic, nitrification, denitrification,
                       leaching.bottom, leaching.artificial, leaching.watertable, tree.leaf.litter, tree.shallow.root.litter, tree.deep.root.litter,
                       crop.leaf.litter, crop.root.litter) #runoff,
     }

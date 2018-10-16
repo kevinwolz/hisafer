@@ -53,7 +53,7 @@ NITROGEN
  \item{"Uptake - Trees"}{ - nitrogen uptake by trees}
  \item{"Uptake - Inter crop"}{ - nitrogen uptake by main crop}
  \item{"Uptake - Main crop"}{ - nitrogen uptake by inter crop}
- \item{"Gaseous losses"}{ - gaseous nitrogen losses via denitrification & volatilization of mineral/organic fertilizer inputs}
+ \item{"Gaseous losses"}{ - gaseous nitrogen losses via nitrification, denitrification, and volatilization of mineral/organic fertilizer inputs}
  \item{"Run-off"}{ - nitrogen contained in rain water (wet deposition) that runs off the scene}
  \item{"Leaching"}{ - nitrate leaching via the (1) bottom of the scene, (2) artificial drainage pipes, and (3) losses to the water table when the nirate concentration in the water table is lower than the nitrate concentration of voxels that it saturates}
  \item{"Fertilization"}{ - mineral nitrogen added by both mineral & organic fertilizers, plus organic nitrogen added by organic fetilizers}
