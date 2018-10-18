@@ -88,20 +88,21 @@ hisafe_budget <- function(hop,
 
   } else if(cycle == "nitrogen") {
     variable_check(hop = hop, profile = "cells", variables = c("mineralNitrogenStock", "activeNitrogenHumusStock", "inactiveNitrogenHumusStock",
-                                                               "nitrogenResidus", "nitrogenMicrobes", "nitrogenMicrobesMulch"), error = TRUE)
+                                                               "nitrogenResidus", "nitrogenMicrobes", "nitrogenMicrobesMulch", "nitrogenDeepRootResidu"), error = TRUE)
     stock <- hop$cells %>%
       dplyr::select(SimulationName, Date, mineralNitrogenStock, activeNitrogenHumusStock, inactiveNitrogenHumusStock,
-                    nitrogenResidus, nitrogenMulch, nitrogenMicrobes, nitrogenMicrobesMulch) %>%
+                    nitrogenResidus, nitrogenMulch, nitrogenMicrobes, nitrogenMicrobesMulch, nitrogenDeepRootResidu) %>%
       dplyr::group_by_at(group.cols) %>%
       dplyr::summarize(mineralNitrogenStock       = mean(mineralNitrogenStock),
                        activeNitrogenHumusStock   = mean(activeNitrogenHumusStock),
                        inactiveNitrogenHumusStock = mean(inactiveNitrogenHumusStock),
                        nitrogenResidus            = mean(nitrogenResidus),
                        nitrogenMulch              = mean(nitrogenMulch),
-                       nitrogen.microbes          = mean(nitrogenMicrobes),
-                       nitrogen.microbes.mulch    = mean(nitrogenMicrobesMulch)) %>%
+                       nitrogenMicrobes           = mean(nitrogenMicrobes),
+                       nitrogenMicrobesMulch      = mean(nitrogenMicrobesMulch),
+                       nitrogenDeepRootResidu     = mean(nitrogenDeepRootResidu)) %>%
       dplyr::mutate(totalStock = mineralNitrogenStock + activeNitrogenHumusStock + inactiveNitrogenHumusStock +
-                      nitrogenResidus + nitrogenMulch + nitrogen.microbes + nitrogen.microbes.mulch)
+                      nitrogenResidus + nitrogenMulch + nitrogenMicrobes + nitrogenMicrobesMulch + nitrogenDeepRootResidu)
   }
 
   stock.times <- flux %>%
@@ -123,25 +124,28 @@ hisafe_budget <- function(hop,
       dplyr::mutate(totalStockEnd = c(totalStockStart[2:length(totalStockStart)], NA))
   }
 
-  plot.data <- flux.spread %>%
+  budget.data <- flux.spread %>%
     dplyr::left_join(flux,  by = group.cols) %>%
     dplyr::left_join(stock, by = group.cols) %>%
     dplyr::mutate(excess.export = sum.of.fluxes + stockChange)
 
-  budget.data <- plot.data %>%
-    dplyr::arrange(SimulationName, Date) %>%
-    dplyr::mutate_all(as.character) %>%
-    dplyr::mutate_all(str_replace, pattern = "^0$", replacement = "") %>%
-    dplyr::mutate(Date = lubridate::ymd(Date))
-
   if(save.table | save.plot) {
+
     output.path <- clean_path(paste0(diag_output_path(hop = hop, output.path = output.path), "/budgets/"))
     dir.create(output.path, recursive = TRUE, showWarnings = FALSE)
 
-    if(save.table) readr::write_csv(budget.data, paste0(output.path, "hisafe_", cycle, "_budget_", freq, ".csv"))
+    if(save.table) {
+      cleaned.char.data <- budget.data %>%
+        dplyr::arrange(SimulationName, Date) %>%
+        dplyr::mutate_all(as.character) %>%
+        dplyr::mutate_all(str_replace, pattern = "^0$", replacement = "") %>%
+        dplyr::mutate(Date = lubridate::ymd(Date))
+
+      readr::write_csv(cleaned.char.data, paste0(output.path, "hisafe_", cycle, "_budget_", freq, ".csv"))
+    }
 
     if(save.plot) {
-      plot.obj <- ggplot(plot.data, aes(x = Date, y = excess.export)) +
+      plot.obj <- ggplot(budget.data, aes(x = Date, y = excess.export)) +
         facet_wrap(~SimulationName) +
         labs(y = paste0("Excess ", cycle, " export from scene")) +
         geom_line(na.rm  = TRUE) +
@@ -184,8 +188,9 @@ stics_budget_comp <- function(hop,
   if(simu.names == "all") simu.names <- hop$metadata$SimulationName
 
   stock.names  <- c("waterStock", "stockedSnow", "mulchWaterStock",
-                    "mineralNitrogenStock", "activeNitrogenHumusStock", "inactiveNitrogenHumusStock", "nitrogenResidus", "nitrogenMulch", "nitrogen.microbes")
-  bad.names    <- c("sum.of.fluxes", "totalStock", "stockChange", "excess.export")
+                    "mineralNitrogenStock", "activeNitrogenHumusStock", "inactiveNitrogenHumusStock",
+                    "nitrogenResidus", "nitrogenMulch", "nitrogen.microbes", "nitrogenDeepRootResidu")
+  bad.names    <- c("sum.of.fluxes", "totalStockStart", "totalStockEnd", "totalStock", "stockChange", "excess.export")
 
   if(cycle == "water") {
     start <- "WATER BALANCE  (mm)"
@@ -228,13 +233,7 @@ stics_budget_comp <- function(hop,
                                    output.path = output.path) %>%
       dplyr::mutate(model = "hisafe") %>%
       dplyr::mutate(Year  = lubridate::year(Date)) %>%
-      dplyr::mutate(N2.and.N2O.losses = denitrification + nitrification) %>%
-      dplyr::select(-denitrification, -nitrification) %>%
       dplyr::select(cycle, SimulationName, Year, dplyr::everything(), -Date)
-
-    hisafe.names <- names(hisafe.budget)
-    stock.names  <- stock.names[stock.names %in% names(hisafe.budget)]
-    flux.names   <- names(hisafe.budget)[!(names(hisafe.budget) %in% c("SimulationName", "Year", "Date", "cycle", "model", stock.names, bad.names))]
 
     ## STICS BUDGET
     if(years[1] == "all") YEARS <- hisafe.budget$Year else YEARS <- years
@@ -291,7 +290,8 @@ stics_budget_comp <- function(hop,
                       uptakeInter               = NA,
                       watertable                = NA,
                       nitrogen.uptake.sat.crop  = NA,
-                      nitrogen.uptake.sat.trees = NA) %>%
+                      nitrogen.uptake.sat.trees = NA,
+                      nitrogenDeepRootResidu    = NA) %>%
         dplyr::mutate(crop.leaf.litter           = -Added.Crop.residues + -Added.Fallen.leaves + -Added.Trimmed.leaves,
                       crop.root.litter           = -Added.Roots,
                       deposition                 = -rain,
@@ -310,7 +310,17 @@ stics_budget_comp <- function(hop,
                       nitrogenResidus            = Soil.residues.pool,
                       nitrogenMulch              = Mulch.residues.pool,
                       nitrogen.microbes          = Zymogeneous.biomass.pool)
+
+      hisafe.budget <- hisafe.budget %>% # combine denitrification + nitrification to match stics output
+        dplyr::mutate(N2.and.N2O.losses = denitrification + nitrification) %>%
+        dplyr::mutate(nitrogen.microbes = nitrogenMicrobes + nitrogenMicrobesMulch) %>%
+        dplyr::select(-denitrification, -nitrification, -nitrogenMicrobes, -nitrogenMicrobesMulch)
+
     }
+
+    hisafe.names <- names(hisafe.budget)
+    stock.names  <- stock.names[stock.names %in% hisafe.names]
+    flux.names   <- hisafe.names[!(hisafe.names %in% c("SimulationName", "Year", "Date", "cycle", "model", stock.names, bad.names))]
 
     stics.budget <- stics.budget %>%
       dplyr::select_at(c("model", "cycle", "SimulationName", "Year", flux.names, stock.names)) %>%
