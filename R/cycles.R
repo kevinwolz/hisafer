@@ -316,7 +316,7 @@ plot_hisafe_cycle_ts <- function(hop,
     cycle.geom  <- geom_area(aes(fill = flux), na.rm = TRUE)
     cycle.scale <- scale_fill_manual(values = color.palette)
     pre.title   <- "Nitrogen Uptake"
-    y.lab       <- bquote("Nitrogen uptake (kg N "*ha^-1*")")
+    y.lab       <- bquote("N uptake (kg N "*ha^-1*")")
 
   } else if(cycle == "light") {
     plot.data   <- get_light_fluxes(hop = hop, crop.names = crop.names)
@@ -517,9 +517,9 @@ get_water_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
       dplyr::summarize_all(mean) %>% # mean of all cells in scene
       dplyr::ungroup() %>%
       dplyr::group_by(SimulationName) %>%
-      dplyr::mutate(uptakeTree  = c(NA, uptakeTree[1 :(length(uptakeTree)  - 1)]), # Hi-sAFe uses the water extraction from day j-1 to impact day j
-                    uptakeMain  = c(NA, uptakeMain[1 :(length(uptakeMain)  - 1)]),
-                    uptakeInter = c(NA, uptakeInter[1:(length(uptakeInter) - 1)])) %>%
+      # dplyr::mutate(uptakeTree  = c(NA, uptakeTree[1 :(length(uptakeTree)  - 1)]), # Hi-sAFe uses the water extraction from day j-1 to impact day j
+      #               uptakeMain  = c(NA, uptakeMain[1 :(length(uptakeMain)  - 1)]),
+      #               uptakeInter = c(NA, uptakeInter[1:(length(uptakeInter) - 1)])) %>%
       dplyr::ungroup() %>%
       tidyr::gather(key = "flux", value = "value", -(SimulationName:JulianDay))
 
