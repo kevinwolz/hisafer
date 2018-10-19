@@ -6,7 +6,8 @@
 \usage{
 analyze_hisafe(hop, carbon = TRUE, light = TRUE, nitrogen = TRUE,
   water = TRUE, carbon.daily = TRUE, light.daily = TRUE,
-  nitrogen.daily = TRUE, water.daily = TRUE, carbon.increment = TRUE)
+  nitrogen.daily = TRUE, water.daily = TRUE, carbon.increment = TRUE,
+  carbon.allocation = TRUE)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
@@ -28,6 +29,8 @@ analyze_hisafe(hop, carbon = TRUE, light = TRUE, nitrogen = TRUE,
 \item{water.daily}{Logical indicating if daily water plots should be made.}
 
 \item{carbon.increment}{Logical indicating if daily carbon increment plots should be made.}
+
+\item{carbon.allocation}{Logical indicating if daily carbon allocation plots should be made.}
 }
 \value{
 Invisibly returns \code{hop}.

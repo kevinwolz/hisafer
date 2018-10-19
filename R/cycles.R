@@ -218,7 +218,7 @@ plot_hisafe_cycle_bar <- function(hop,
 #' @return If \code{plot = TRUE}, returns a ggplot object. If \code{plot = FALSE}, returns the data that would create the plot.
 #' If \code{hop} contains more than one simulation, the plot will be faceted by SimulationName.
 #' @param hop An object of class hop or face.
-#' @param cycle One of "carbon", "nitrogen", "water", "light", "yield", or "carbon-increment".
+#' @param cycle One of "carbon", "nitrogen", "water", "light", "yield" "carbon-increment", or "carbon-allocation".
 #' @param years A numeric vector of the calendar years to include.
 #' If more than one year is provided, years are used as facets, and only a single value can be supplied to \code{simu.names}.
 #' Use "all" to include all available values.

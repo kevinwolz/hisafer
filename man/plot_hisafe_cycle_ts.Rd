@@ -13,7 +13,7 @@ plot_hisafe_cycle_ts(hop, cycle, years, simu.names = "all",
 \arguments{
 \item{hop}{An object of class hop or face.}
 
-\item{cycle}{One of "carbon", "nitrogen", "water", "light", "yield", or "carbon-increment".}
+\item{cycle}{One of "carbon", "nitrogen", "water", "light", "yield" "carbon-increment", or "carbon-allocation".}
 
 \item{years}{A numeric vector of the calendar years to include.
 If more than one year is provided, years are used as facets, and only a single value can be supplied to \code{simu.names}.
