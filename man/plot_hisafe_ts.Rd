@@ -10,7 +10,7 @@ plot_hisafe_ts(hop, variables, profile, cumulative = FALSE,
   color.palette = NA, linetype.palette = NA, aes.cols = list(color =
   "SimulationName", linetype = "SimulationName"), facet.simu = FALSE,
   facet.year = FALSE, facet.crop = FALSE, crop.points = FALSE,
-  plot = TRUE)
+  plot = TRUE, save = FALSE, output.path = NULL)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -54,6 +54,13 @@ If \code{NA}, the default, then solid lines are used for all simulations. The de
 Only applies when \code{profile} is 'plot'.}
 
 \item{plot}{If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.}
+
+\item{save}{If \code{FALSE}, the default, a ggplot object is returned.
+If \code{TRUE}, a ggplot object is returned invisibly and the plot is saved to \code{output.path}.}
+
+\item{output.path}{A character string indicating the path to the directory where plots should be saved.
+If \code{NULL}, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis/misc".
+The tables and plots will be saved in this directory.}
 }
 \value{
 If \code{plot = TRUE}, returns a ggplot object, otherwise the data that would create the plot is returned.

@@ -28,6 +28,11 @@
 #' @param crop.points Logical indicating if points should be plotted as well, with point shape desgnating the main crop name.
 #' Only applies when \code{profile} is 'plot'.
 #' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.
+#' @param save If \code{FALSE}, the default, a ggplot object is returned.
+#' If \code{TRUE}, a ggplot object is returned invisibly and the plot is saved to \code{output.path}.
+#' @param output.path A character string indicating the path to the directory where plots should be saved.
+#' If \code{NULL}, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis/misc".
+#' The tables and plots will be saved in this directory.
 #' @export
 #' @importFrom dplyr %>%
 #' @import ggplot2
@@ -61,7 +66,9 @@ plot_hisafe_ts <- function(hop,
                            facet.year       = FALSE,
                            facet.crop       = FALSE,
                            crop.points      = FALSE,
-                           plot             = TRUE) {
+                           plot             = TRUE,
+                           save             = FALSE,
+                           output.path      = NULL) {
 
   allowed.profiles  <- c("trees", "plot", "climate", "cells")
   tree.profiles     <- "trees"
@@ -237,7 +244,16 @@ plot_hisafe_ts <- function(hop,
     plot.out <- plot.obj[[1]]
   }
 
-  if(plot) return(plot.out) else return(dplyr::select(plot.data, -fake.date))
+  if(plot & save) {
+    output.path <- clean_path(paste0(diag_output_path(hop = hop, output.path = output.path), "/misc/"))
+    dir.create(output.path, recursive = TRUE, showWarnings = FALSE)
+    ggsave_fitmax(paste0(output.path, profile, "_", paste(variables, collapse = "-"), ".png"), plot.out, scale = 1.5)
+    invisible(plot.out)
+  } else if(plot) {
+    return(plot.out)
+  } else {
+    return(dplyr::select(plot.data, -fake.date))
+  }
 }
 
 #' Tile plot of Hi-sAFe monthCells output variable
