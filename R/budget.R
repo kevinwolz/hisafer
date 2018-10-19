@@ -145,9 +145,10 @@ hisafe_budget <- function(hop,
     }
 
     if(save.plot) {
+      units <- ifelse(cycle == "water", "mm", "kg N ha-1")
       plot.obj <- ggplot(budget.data, aes(x = Date, y = excess.export)) +
         facet_wrap(~SimulationName) +
-        labs(y = paste0("Excess ", cycle, " export from scene")) +
+        labs(y = paste0("Excess ", cycle, " export from scene (", units, ")")) +
         geom_line(na.rm  = TRUE) +
         geom_point(na.rm = TRUE) +
         theme_hisafe_ts()
