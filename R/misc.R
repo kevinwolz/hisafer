@@ -622,7 +622,7 @@ analyze_hisafe <- function(hop,
   if(length(annual.cycles.todo) >= 1) {
     cat("\n-- Plotting annual cycles")
     annual.cycle.plots <- purrr::map(annual.cycles.todo,
-                                     plot_hisafe_cycle_annual,
+                                     plot_hisafe_cycle_bar,
                                      hop = hop)
     purrr::walk2(paste0(hop$path, "/analysis/cycles/", annual.cycles.todo, "_annual.png"),
                  annual.cycle.plots,
@@ -635,7 +635,7 @@ analyze_hisafe <- function(hop,
     cat("\n-- Plotting daily cycles")
     for(cycle in daily.cycles.todo) {
       daily.cycle.plots <- purrr::map(hop$exp.plan$SimulationName,
-                                      plot_hisafe_cycle_daily,
+                                      plot_hisafe_cycle_ts,
                                       hop   = hop,
                                       cycle = cycle,
                                       years = "all")
