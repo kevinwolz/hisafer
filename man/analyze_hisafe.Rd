@@ -7,7 +7,7 @@
 analyze_hisafe(hop, carbon = TRUE, light = TRUE, nitrogen = TRUE,
   water = TRUE, carbon.daily = TRUE, light.daily = TRUE,
   nitrogen.daily = TRUE, water.daily = TRUE, carbon.increment = TRUE,
-  carbon.allocation = TRUE)
+  carbon.allocation = TRUE, tree.ids = "all")
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
@@ -31,6 +31,9 @@ analyze_hisafe(hop, carbon = TRUE, light = TRUE, nitrogen = TRUE,
 \item{carbon.increment}{Logical indicating if daily carbon increment plots should be made.}
 
 \item{carbon.allocation}{Logical indicating if daily carbon allocation plots should be made.}
+
+\item{tree.ids}{A numeric vector indicating a subset of tree ids to plot. Use "all" to include all available values.
+This only applies for carbon-related plots.}
 }
 \value{
 Invisibly returns \code{hop}.

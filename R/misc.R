@@ -592,6 +592,8 @@ variable_check <- function(hop, profile, variables, error = FALSE) {
 #' @param water.daily Logical indicating if daily water plots should be made.
 #' @param carbon.increment Logical indicating if daily carbon increment plots should be made.
 #' @param carbon.allocation Logical indicating if daily carbon allocation plots should be made.
+#' @param tree.ids A numeric vector indicating a subset of tree ids to plot. Use "all" to include all available values.
+#' This only applies for carbon-related plots.
 #' @export
 #' @family hisafe analysis functions
 #' @examples
@@ -608,7 +610,8 @@ analyze_hisafe <- function(hop,
                            nitrogen.daily = TRUE,
                            water.daily    = TRUE,
                            carbon.increment  = TRUE,
-                           carbon.allocation = TRUE) {
+                           carbon.allocation = TRUE,
+                           tree.ids          = "all") {
 
   is_hop(hop, error = TRUE)
   if(!all(is.logical(c(carbon, light, nitrogen, water, light.daily, nitrogen.daily, water.daily, carbon.increment, carbon.allocation)))) {
@@ -627,7 +630,8 @@ analyze_hisafe <- function(hop,
     cat("\n-- Plotting annual cycles")
     annual.cycle.plots <- purrr::map(annual.cycles.todo,
                                      plot_hisafe_cycle_bar,
-                                     hop = hop)
+                                     hop      = hop,
+                                     tree.ids = tree.ids)
     purrr::walk2(paste0(hop$path, "/analysis/cycles/", annual.cycles.todo, "_annual.png"),
                  annual.cycle.plots,
                  ggsave_fitmax,
@@ -640,9 +644,10 @@ analyze_hisafe <- function(hop,
     for(cycle in daily.cycles.todo) {
       daily.cycle.plots <- purrr::map(hop$exp.plan$SimulationName,
                                       plot_hisafe_cycle_ts,
-                                      hop   = hop,
-                                      cycle = cycle,
-                                      years = "all")
+                                      hop      = hop,
+                                      cycle    = cycle,
+                                      years    = "all",
+                                      tree.ids = tree.ids)
       purrr::walk2(paste0(hop$path, "/analysis/cycles/", cycle, "_", hop$exp.plan$SimulationName, ".png"),
                    daily.cycle.plots,
                    ggsave_fitmax,
