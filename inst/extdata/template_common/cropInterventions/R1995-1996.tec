@@ -24,7 +24,7 @@ nbjmaxapressemis = 30
 nbjseuiltempref = 15
 
 ## STAGE FORCING
-codestade = 1
+codestade = 2
 ilev = 999
 iamf = 999
 ilax = 999
