@@ -5,9 +5,9 @@
 \title{Tile plot of Hi-sAFe cells output variable}
 \usage{
 plot_hisafe_cells(hop, variable, dates, start.date = NULL,
-  rel.dates = NULL, simu.names = "all", plot.x = "x",
+  rel.dates = NULL, simu.names = "all", X = NA, plot.x = "x",
   N.arrow = "#000000", trees = TRUE, canopies = TRUE, plot = TRUE,
-  mem.max = 0, for.anim = FALSE)
+  mem.max = 0, for.anim = FALSE, cumu.scale = TRUE)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -23,9 +23,11 @@ In the plot, \code{variable} will be scaled to be between the minimum and maximu
 
 \item{simu.names}{A character string containing the SimulationNames to include. Use "all" to include all available values.}
 
+\item{X}{A numeric vector of the x values of the cells to include. If \code{NA}, the default, then all x values are used.}
+
 \item{plot.x}{Either "x" or "y", indicating which axis of the simulation scene should be plotted on the x-axis of the plot.}
 
-\item{N.arrow}{A character string indicating the color of the north arrow. Sting must be a valid color name passed to ggplot2.
+\item{N.arrow}{A character string indicating the color of the north arrow. String must be a valid color name passed to ggplot2.
 Use \code{NA} to not plot the north arrow.}
 
 \item{trees}{Logical indicating if a point should be plotted at the location of each tree.}
@@ -38,6 +40,9 @@ Use \code{NA} to not plot the north arrow.}
 for cell data when no data is available for a given date within \code{hop}.}
 
 \item{for.anim}{If \code{TRUE}, the plot formatting is simplified for use in animations.}
+
+\item{cumu.scale}{If \code{TRUE}, the color scale is determined by all dates from \code{start.date} to \code{dates}.
+If \code{FALSE}, the color scale is determined only by \code{rel.dates}. Only applies when \code{start.dates} is not \code{NULL}.}
 }
 \value{
 Returns a ggplot object.

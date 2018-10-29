@@ -551,8 +551,9 @@ plot_hisafe_annualcells <- function(hop,
 #' @param rel.dates A character vector (in the format "YYYY-MM-DD") or a vector of class Date of the dates from which to scale \code{variable}.
 #' In the plot, \code{variable} will be scaled to be between the minimum and maximum values of \code{variable} across these dates.
 #' @param simu.names A character string containing the SimulationNames to include. Use "all" to include all available values.
+#' @param X A numeric vector of the x values of the cells to include. If \code{NA}, the default, then all x values are used.
 #' @param plot.x Either "x" or "y", indicating which axis of the simulation scene should be plotted on the x-axis of the plot.
-#' @param N.arrow A character string indicating the color of the north arrow. Sting must be a valid color name passed to ggplot2.
+#' @param N.arrow A character string indicating the color of the north arrow. String must be a valid color name passed to ggplot2.
 #' Use \code{NA} to not plot the north arrow.
 #' @param trees Logical indicating if a point should be plotted at the location of each tree.
 #' @param canopies Logical indicating if an elipsoid should be plotted representing the size of each tree canopy.
@@ -560,6 +561,8 @@ plot_hisafe_annualcells <- function(hop,
 #' @param mem.max An integer specifying the maximum number of days into the past to search
 #' for cell data when no data is available for a given date within \code{hop}.
 #' @param for.anim If \code{TRUE}, the plot formatting is simplified for use in animations.
+#' @param cumu.scale If \code{TRUE}, the color scale is determined by all dates from \code{start.date} to \code{dates}.
+#' If \code{FALSE}, the color scale is determined only by \code{rel.dates}. Only applies when \code{start.dates} is not \code{NULL}.
 #' @export
 #' @importFrom dplyr %>%
 #' @import ggplot2
@@ -582,25 +585,30 @@ plot_hisafe_cells <- function(hop,
                               start.date = NULL,
                               rel.dates  = NULL,
                               simu.names = "all",
+                              X          = NA,
                               plot.x     = "x",
                               N.arrow    = "#000000",
                               trees      = TRUE,
                               canopies   = TRUE,
                               plot       = TRUE,
                               mem.max    = 0,
-                              for.anim   = FALSE) {
+                              for.anim   = FALSE,
+                              cumu.scale = TRUE) {
 
   is_hop(hop, error = TRUE)
   profile_check(hop,  "cells", error = TRUE)
   variable_check(hop, "cells", variable, error = TRUE)
 
-  if(length(variable) > 1)       stop("variable argument must be a character vector of length 1", call. = FALSE)
-  if(!(plot.x %in% c("x", "y"))) stop("plot.x must be one of 'x' or 'y'",                         call. = FALSE)
+  if(length(variable) > 1)             stop("variable argument must be a character vector of length 1", call. = FALSE)
+  if(!(all(is.na(X)) | is.numeric(X))) stop("X must be numeric",                                        call. = FALSE)
+  if(!(plot.x %in% c("x", "y")))       stop("plot.x must be one of 'x' or 'y'",                         call. = FALSE)
   if(!((is.character(N.arrow) | is.na(N.arrow)) & length(N.arrow) == 1)) stop("N.arrow argument must be a character vector of length 1", call. = FALSE)
   is_TF(trees)
   is_TF(canopies)
   is_TF(plot)
   is_TF(for.anim)
+
+  if(!is.na(X[1])) hop$cells <- hop$cells %>% dplyr::filter(x %in% X)
 
   if(!is.null(start.date)) {
     hop.full <- hop_filter(hop            = hop,
@@ -614,7 +622,10 @@ plot_hisafe_cells <- function(hop,
       dplyr::group_by(SimulationName, idCell) %>%
       dplyr::mutate_at(variable, cumsum) %>%
       dplyr::ungroup()
+
     hop <- hop.full
+    if(!cumu.scale) hop.full <- hop_filter(hop = hop.full, dates = rel.dates)
+
   } else {
     hop.full <- hop_filter(hop            = hop,
                            simu.names     = simu.names,
@@ -810,9 +821,9 @@ plot_hisafe_voxels <- function(hop,
 
   if(nrow(hop$plot.info) == 0)                                      stop("plot.info is unavilable in hop and is required",           call. = FALSE)
   if(length(variable) > 1)                                          stop("variable argument must be a character vector of length 1", call. = FALSE)
-  if(!(all(is.na(X)) | is.numeric(X)))                              stop("X must be numeric",                                        call. = FALSE)
-  if(!(all(is.na(Y)) | is.numeric(Y)))                              stop("Y must be numeric",                                        call. = FALSE)
-  if(!(all(is.na(Z)) | is.numeric(Z)))                              stop("Z must be numeric",                                        call. = FALSE)
+  if(!(all(is.na(X[1])) | is.numeric(X)))                           stop("X must be numeric",                                        call. = FALSE)
+  if(!(all(is.na(Y[1])) | is.numeric(Y)))                           stop("Y must be numeric",                                        call. = FALSE)
+  if(!(all(is.na(Z[1])) | is.numeric(Z)))                           stop("Z must be numeric",                                        call. = FALSE)
   if(!((summarize.by %in% c("x", "y", "z")) | is.na(summarize.by))) stop("summarize.by must be one of 'x', 'y', or 'z'",             call. = FALSE)
   if(!(all(is.na(vline.dates)) | is.character(vline.dates)))        stop("vline.dates must be a character vector",                   call. = FALSE)
   is_TF(facet.simu)
