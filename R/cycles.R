@@ -89,6 +89,8 @@ plot_hisafe_cycle_bar <- function(hop,
   if(!(length(crop.names) == 2 & is.character(crop.names)))                      stop("crop.names argument must be a character vector of length 2",    call. = FALSE)
   is_TF(plot)
 
+  pre.filter <- profile_check(hop, "cells")
+
   hop <- hop_filter(hop        = hop,
                     simu.names = simu.names,
                     tree.ids   = tree.ids,
@@ -97,6 +99,10 @@ plot_hisafe_cycle_bar <- function(hop,
                     date.min   = date.min,
                     date.max   = date.max) %>%
     shift_year(doy.start = doy.start)
+
+  post.filter <- profile_check(hop, "cells")
+
+  if(pre.filter & !post.filter) stop("no data remaining in hop$cells after filtering via years/months/date.min/date.max arguments", call. = FALSE)
 
   METHOD <- ifelse(profile_check(hop, "cells"), "cells", "plot")
 
