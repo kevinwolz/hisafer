@@ -9,8 +9,9 @@ plot_hisafe_ts(hop, variables, profile, cumulative = FALSE,
   date.min = NA, date.max = NA, doy.lim = c(1, 365),
   color.palette = NA, linetype.palette = NA, aes.cols = list(color =
   "SimulationName", linetype = "SimulationName"), facet.simu = FALSE,
-  facet.year = FALSE, facet.crop = FALSE, crop.points = FALSE,
-  plot = TRUE, save = FALSE, output.path = NULL)
+  facet.year = FALSE, facet.crop = FALSE, intercrop = TRUE,
+  crop.points = FALSE, plot = TRUE, save = FALSE,
+  output.path = NULL)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -49,6 +50,8 @@ If \code{NA}, the default, then solid lines are used for all simulations. The de
 \item{facet.year}{A logical indicating whether the plot should be faceted by year. This helps with seeing finer level detail.}
 
 \item{facet.crop}{A logical indicating whether the plot should be faceted by cropType (mainCrop vs. interCrop). Only applies when \code{profile} is 'cells'.}
+
+\item{intercrop}{A logical indicating whether the plot should include the interCrop cropType. Only applies when \code{profile} is 'cells'.}
 
 \item{crop.points}{Logical indicating if points should be plotted as well, with point shape desgnating the main crop name.
 Only applies when \code{profile} is 'plot'.}

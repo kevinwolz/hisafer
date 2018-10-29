@@ -25,6 +25,7 @@
 #' @param facet.simu A logical indicating whether the plot should be faceted by SimulationName This helps when values among simulations are overplotted.
 #' @param facet.year A logical indicating whether the plot should be faceted by year. This helps with seeing finer level detail.
 #' @param facet.crop A logical indicating whether the plot should be faceted by cropType (mainCrop vs. interCrop). Only applies when \code{profile} is 'cells'.
+#' @param intercrop A logical indicating whether the plot should include the interCrop cropType. Only applies when \code{profile} is 'cells'.
 #' @param crop.points Logical indicating if points should be plotted as well, with point shape desgnating the main crop name.
 #' Only applies when \code{profile} is 'plot'.
 #' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.
@@ -65,6 +66,7 @@ plot_hisafe_ts <- function(hop,
                            facet.simu       = FALSE,
                            facet.year       = FALSE,
                            facet.crop       = FALSE,
+                           intercrop        = TRUE,
                            crop.points      = FALSE,
                            plot             = TRUE,
                            save             = FALSE,
@@ -145,6 +147,8 @@ plot_hisafe_ts <- function(hop,
   if(facet.simu | facet.year | facet.crop) theme.extra <- theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
   plot.data  <- hop[[profile]]
+
+  if(!intercrop & profile == "cells") plot.data <- plot.data %>% dplyr::filter(cropType == "mainCrop")
 
   if(profile == "cells") {
     if(facet.crop) {
