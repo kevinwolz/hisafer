@@ -999,6 +999,163 @@ plot_hisafe_bg <- function(hop,
   if(plot) return(plot.out) else return(plot.data)
 }
 
+#' Plot crop temperature and temperature stress regions
+#' @description Plots histograms of crop temperature and relevant temperature stress regions.
+#' If \code{type} is 'lue', then \code{hop$cells$cropTemperature} (mean crop temperature) is shown in relation to tempStressLue (FTEMP in STICS) regions.
+#' If \code{type} is 'reprod', then \code{hop$cells$cropMinTemperature} (min crop temperature) and \code{hop$cells$cropMaxTemperature} (max crop temperature)
+#' are shown in relation to tempStressGrainFilling (FTEMPREMP in STICS) regions.
+#' @return A ggplot object.
+#' @param hop An object of class hop.
+#' @param simu.name A character string of the SimulationName to plot. Only one simulation can be plotted.
+#' @param years A numeric vector of the years within \code{hop} to include. Use "all" to include all available values.
+#' @param months A numeric vector of the months within \code{hop} to include. Use "all" to include all available values.
+#' Only applies if \code{type} is 'lue'. If \code{type} is 'reprod', then all days during which grain filling occurs are used.
+#' @param cell.ids A numeric vector of the values of idCell within \code{hop} to include. Use "all" to include all available values.
+#' @param facet.year A logical indicating whether the plot should be faceted by year. This helps with seeing finer level detail.
+#' @param facet.month A logical indicating whether the plot should be faceted by month. Only applies if \code{type} is 'lue'.
+#' @param temin Minimum threshold temperature for growth in biomass. Only applies if \code{type} is 'lue'.
+#' @param teopt Optimum temperature for growth in biomass. Only applies if \code{type} is 'lue'.
+#' @param teoptbis Optimum temperature for growth in biomass (if plateau between \code{teopt} and \code{teoptbis}). Only applies if \code{type} is 'lue'.
+#' @param temax Maximum threshold temperature for growth in biomass. Only applies if \code{type} is 'lue'.
+#' @param tminremp Minimum temperature for grain filling. Only applies if \code{type} is 'reprod'.
+#' @param tmaxremp Maximum temperature for grain filling. Only applies if \code{type} is 'reprod'.
+#' @param shade.color A character vector of length 3 indicating the shading colors of the various stress regions.
+#' Strings must be a valid color name passed to ggplot2.
+#' @export
+#' @importFrom dplyr %>%
+#' @import ggplot2
+#' @family hisafe plot functions
+#' @examples
+#' \dontrun{
+#' plot_hisafe_tempstress(hop, "Sim_1")
+#' }
+plot_hisafe_tstress <- function(hop,
+                                simu.name,
+                                type        = "lue",
+                                years       = "all",
+                                months      = "all",
+                                cell.ids    = "all",
+                                facet.year  = TRUE,
+                                facet.month = TRUE,
+                                temin       = 0,
+                                teopt       = 10,
+                                teoptbis    = 20,
+                                temax       = 40,
+                                tminremp    = 0,
+                                tmaxremp    = 30,
+                                shade.color = c("grey50", "grey70", "white")) {
+
+  is_hop(hop, error = TRUE)
+  profile_check(hop, "cells", error = TRUE)
+
+  if(!(length(simu.name)   == 1 & is.character(simu.name)))   stop("simu.name argument must be a character vector of length 1",   call. = FALSE)
+  if(!(length(shade.color) == 3 & is.character(shade.color))) stop("shade.color argument must be a character vector of length 3", call. = FALSE)
+  if(!(years[1]    == "all" | is.numeric(years)))             stop("years argument must be 'all' or a numeric vector",            call. = FALSE)
+  if(!(months[1]   == "all" | is.numeric(months)))            stop("months argument must be 'all' or a numeric vector",           call. = FALSE)
+  if(!(cell.ids[1] == "all" | is.numeric(cell.ids)))          stop("cell.ids argument must be 'all' or a numeric vector",         call. = FALSE)
+  is_TF(facet.year)
+  is_TF(facet.month)
+  t.check <- purrr::map_lgl(c(temin, teopt, teoptbis, temax, tminremp, tmaxremp), function(x) length(x) ==  1 & is.numeric(x))
+  if(!all(t.check)) stop("all temperature stress arguments must be numeric vectors of length 1", call. = FALSE)
+
+  if(cell.ids == "all") cell.ids <- unique(hop$cells$idCell)
+
+  if(type == "lue") {
+    variable_check(hop, "cells", c("lai", "cropTemperature"), error = TRUE)
+    filter_func <- function(x) dplyr::filter(x, lai > 0)
+    shaded.boxes <- dplyr::tibble(lower    = c(-Inf,  temin, teopt,    teoptbis, temax),
+                                  upper    = c(temin, teopt, teoptbis, temax,    Inf),
+                                  fill.col = c("Full stress", "Gradual decline", "No stress", "Gradual decline", "Full stress"))
+  } else if(type == "reprod") {
+    variable_check(hop, "cells", c("grainBiomass", "phenologicStage", "cropMinTemperature", "cropMaxTemperature"), error = TRUE)
+    months <- "all"
+    filter_func <- function(x) dplyr::filter(x, grainBiomass > 0 & !(phenologicStage %in% 10:12))
+    shaded.boxes <- dplyr::tibble(lower    = c(-Inf,     tminremp, tmaxremp),
+                                  upper    = c(tminremp, tmaxremp, Inf),
+                                  fill.col = c("Full stress", "No stress", "Full stress"))
+    shade.color <- shade.color[c(1,3)]
+  } else {
+    stop("type argument must be 'lue' or 'reprod'", call. = FALSE)
+  }
+
+  plot.data <- hop %>%
+    hop_filter(simu.names = simu.name,
+               years      = years,
+               months     = months) %>%
+    .$cells %>%
+    dplyr::filter(idCell %in% cell.ids) %>%
+    filter_func() %>%
+    dplyr::group_by(SimulationName, Year, Month, Day, Date)
+
+  if(type == "lue") {
+    plot.data <- plot.data %>%
+      dplyr::summarize(cropTemperature = mean(cropTemperature)) %>%
+      tidyr::gather(key = "metric", value = "temp", cropTemperature) %>%
+      dplyr::mutate(metric = factor(metric, labels = "Crop mean temp"))
+
+    x.lab <- "Mean crop temperature (C)"
+    y.lab <- "# of days during growing season"
+    LIMS <- c(min(temin, min(plot.data$temp)), max(temax, max(plot.data$temp)))
+    color.guide <- guides(color = FALSE)
+
+  } else if(type == "reprod") {
+    plot.data <- plot.data %>%
+      dplyr::summarize(cropMinTemperature = mean(cropMinTemperature),
+                       cropMaxTemperature = mean(cropMaxTemperature)) %>%
+      tidyr::gather(key = "metric", value = "temp", cropMinTemperature, cropMaxTemperature) %>%
+      dplyr::mutate(metric = factor(metric,
+                                    levels = c("cropMinTemperature", "cropMaxTemperature"),
+                                    labels = c("Min temp", "Max temp")))
+
+    x.lab <- "Min/Max crop temperature (C)"
+    y.lab <- "# of days during grain filling"
+    LIMS <- c(min(tminremp, min(plot.data$temp)), max(tmaxremp, max(plot.data$temp)))
+    color.guide <- geom_blank()
+  }
+
+  facet.year  <- facet.year  & length(unique(plot.data$Year))  > 1
+  facet.month <- facet.month & length(unique(plot.data$Month)) > 1 & type == "lue"
+
+  if(facet.year & facet.month) {
+    facet <- facet_grid(Month ~ Year)
+  } else if(facet.year) {
+    facet <- facet_wrap(~Year)
+  } else if(facet.month) {
+    facet <- facet_wrap(~Month)
+  } else {
+    facet <- geom_blank()
+  }
+
+  if(facet.year & facet.month) {
+    title.text <- ""
+  } else if(facet.year & months[1] != "all") {
+    title.text <- paste("Month:", paste(months, collapse = ","))
+  } else if(facet.month & years[1] != "all") {
+    title.text <- paste("Year:",  paste(years,  collapse = ","))
+  } else {
+    title.text <- ""
+  }
+
+  plot.obj <- ggplot(plot.data) +
+    facet +
+    labs(title = title.text,
+         x     = x.lab,
+         y     = y.lab,
+         fill  = "",
+         color = "") +
+    scale_x_continuous(limits = LIMS) +
+    scale_y_continuous(expand = c(0, 0)) +
+    geom_rect(data = shaded.boxes, aes(xmin = lower, xmax = upper, fill = fill.col), ymin = -Inf, ymax = Inf, na.rm = TRUE) +
+    geom_histogram(aes(x = temp, color = metric), binwidth = 1, fill = "black", position = "stack", na.rm = TRUE) +
+    scale_fill_manual(values = shade.color) +
+    guides(fill  = guide_legend(override.aes=list(color = "black"))) +
+    color.guide +
+    scale_color_manual(values = c("black", "red")) +
+    theme_hisafe_ts()
+
+  return(plot.obj)
+}
+
 #' Save ggplot to correctly-shaped image file
 #' @description When a ggplot has a fixed panel aspect ratio, it can be a pain to find the right dimensions for the whole plot
 #' (including axes, margins, legends, etc) when saving it to a fixed-size graphical device. ggsave_fitmax takes a ggplot
