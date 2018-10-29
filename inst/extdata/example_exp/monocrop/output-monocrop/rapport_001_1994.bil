@@ -44,15 +44,15 @@
    Vegetative stages
  ger calculated (stage BBCH =                                 3 nov        1994   102.939072       102.939072       0.00000000    
  lev calculated (stage BBCH =                                14 nov        1994   154.392502       257.331573       2.01449540E-04
- amf calculated (stage BBCH =                                17 mar        1995   781.915161       1039.24670       1.51515818    
- lax calculated (stage BBCH =                                 5 apr        1995   200.426910       1239.67358       3.03511548    
- lan calculated (stage BBCH =                                22 may        1995   609.631653       1849.30518       0.00000000    
+ amf calculated (stage BBCH =                                17 mar        1995   779.115601       1036.44714       1.51486027    
+ lax calculated (stage BBCH =                                 5 apr        1995   200.438507       1236.88562       3.01781225    
+ lan calculated (stage BBCH =                                22 may        1995   609.446350       1846.33203       0.00000000    
    Reproductive stages
- flo calculated (stage BBCH =                                12 may        1995   1678.36731       1678.36731    
- drp calculated (stage BBCH =                                13 may        1995   14.4166260       1692.78394       1.00033581    
- mat calculated (stage BBCH =                                10 jun        1995   530.739746       2223.52368       0.00000000    
- debdes calculated (stage BBCH =                             11 jun        1995   20.2602539       2243.78394       0.00000000    
- rec calculated (stage BBCH =                                18 jun        1995   185.953979       2409.47754       0.00000000    
+ flo calculated (stage BBCH =                                12 may        1995   1675.49878       1675.49878    
+ drp calculated (stage BBCH =                                13 may        1995   14.3125000       1689.81128       1.00093389    
+ mat calculated (stage BBCH =                                10 jun        1995   530.746643       2220.55786       0.00000000    
+ debdes calculated (stage BBCH =                             11 jun        1995   20.2533569       2240.81128       0.00000000    
+ rec calculated (stage BBCH =                                18 jun        1995   185.958496       2406.51636       0.00000000    
 
     Length of cycle : 234 days
    Method of harvest : all plant harvest
@@ -62,14 +62,14 @@
  3. GROWTH AND COMPONENTS OF YIELD
  *****************************************
      18-jun-1995
-   Aerial biomass at harvest (0% water)  =   15.97 t/ha
-   Yield grain or fruit   (0% water)       =    5.32 t/ha
-   Yield grain or fruit (16.% water)       =    6.29 t/ha
+   Aerial biomass at harvest (0% water)  =   15.93 t/ha
+   Yield grain or fruit   (0% water)       =    5.30 t/ha
+   Yield grain or fruit (16.% water)       =    6.28 t/ha
 
-   Number of grains or fruits              =  11813. /m2
+   Number of grains or fruits              =  11768. /m2
    Plant density                         =   254.6 /m2
    Weight of grain, fruit (16.% water)   =     0.056 g
-   Growth rate (lag phase)           =    16.9 mg/m2/j
+   Growth rate (lag phase)           =    16.8 mg/m2/j
 
    Number of emerged leaves              =    10
    Number of hot      or cold days       =     0
@@ -78,8 +78,8 @@
    Quantity of N in the crop             =    162. kg/ha
    Quantity of N in the grain and fruit  =     97. kg/ha
 
-   N content of entire plant             =  1.01 % DM
-   N content of grain, fruit             =  1.82 % DM
+   N content of entire plant             =  1.02 % DM
+   N content of grain, fruit             =  1.83 % DM
    Protein content of grain, fruit       =  10.4 % DM
 
    Nitrogen fertiliser efficiency        = 0.51
@@ -95,8 +95,8 @@
 
 4. WATER and NITROGEN BALANCE over the crop life
 ************************************************
-                             Sum of Maximal ET (eos+eop) =  303. mm
-                             Sum of AET =  303. mm
+                             Sum of Maximal ET (eos+eop) =  302. mm
+                             Sum of AET =  302. mm
                              Sum of Soil Ev. =  156. mm
                              Sum of TRansp.  =  147. mm
                              Sum of Rain + Irrigation   =  599. mm
@@ -105,7 +105,7 @@
      Maximum rooting depth     =  168. cm
 
   Mean STRESS indices :                swfac   turfac   inns   tcult-tair  exofac    etr/etm    etm/etr
-   vegetative phase    (lev-drp)       1.00      1.00      0.89      0.02      0.00      1.00      0.90
+   vegetative phase    (lev-drp)       1.00      1.00      0.87      0.02      0.00      1.00      0.90
    reproductive phase  (drp-mat)       1.00      1.00      0.62      1.15      0.00      1.00      1.00
 
    Frost damage on leaves : before AMF    36.%    after AMF   0.%
@@ -113,10 +113,10 @@
 
 5. WATER, NITROGEN, CARBON BALANCE over the whole simulation period  (365 days)
 *******************************************************************************
-   Normalised days at 15.degrees C :    Humus = 309.      Residues =   0.
+   Normalised days at 15.degrees C :    Humus = 308.      Residues =   0.
    Potential mineralisation rate = 0.25 kg N/ha/day   or 2.49% per year
 WATER BALANCE  (mm)
-     initial water content    680.        final water content      659.
+     initial water content    680.        final water content      660.
      rain                    1029.        evaporation              329.
      irrigation                 0.        transpiration            147.
      capillary rise            -0.        runoff                   148.
@@ -133,11 +133,11 @@ MINERAL NITROGEN BALANCE (kg N/ha)
                                           N uptake exported         129.
                                           N uptake returned          33.
      initial soil NH4           0.        final soil NH4              0.
-     initial soil NO3          51.        final soil NO3             28.
+     initial soil NO3          51.        final soil NO3             27.
      rain                      21.        leaching                   15.
      irrigation                 0.        leaching in mole drains     0.
      fertiliser               160.        fertiliser N immobilis.    31.
-     symbiotic fixation         0.        fertiliser N volatilis.    33.
+     symbiotic fixation         0.        fertiliser N volatilis.    32.
      humus mineralisation      76.        manure N volatilis.         0.
      residue mineralisation   -24.        N2 and N2O losses          15.
      -----------------------------        -----------------------------
@@ -159,23 +159,23 @@ ORGANIC NITROGEN BALANCE (kg N/ha)
      TOTAL INITIAL              3749.        TOTAL FINAL             3721.
 
 ORGANIC CARBON BALANCE   (kg C/ha)
-     Active humified pool      15616.                               14927.
+     Active humified pool      15616.                               14928.
      Inert humified pool       29000.                               29000.
-     Zymogeneous biomass pool      0.                                 932.
-     Soil residues pool            0.                                 396.
-     Mulch residues pool           0.                                 839.
+     Zymogeneous biomass pool      0.                                 939.
+     Soil residues pool            0.                                 409.
+     Mulch residues pool           0.                                 837.
      Fertiliser Immobilised        0.
      Added organic fertil.       420.
-     Added Crop residues        1567.
-     Added Roots                1307.
+     Added Crop residues        1563.
+     Added Roots                1334.
      Added Fallen leaves           0.        Priming (PE)               0.
-     Added Trimmed leaves          0.        Mineralisation - PE     1396.
+     Added Trimmed leaves          0.        Mineralisation - PE     1399.
      -------------------------------        -----------------------------
-     TOTAL INITIAL             47910.        TOTAL FINAL            47490.
+     TOTAL INITIAL             47932.        TOTAL FINAL            47512.
 
-Heterotrophic Respiration (kg C/ha): Residues =  678.
-                                     Humus    =  718.
-                                     Total    = 1396.
+Heterotrophic Respiration (kg C/ha): Residues =  682.
+                                     Humus    =  717.
+                                     Total    = 1399.
 
 Cumulative N2O emissions  (kg N/ha): nitrification      =  0.15
                                      denitrification    =  0.00

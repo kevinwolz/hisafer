@@ -1,20 +1,20 @@
 Script: splashscreen was desactivated
 -> OS/JVM/memory: linux/64/16384m
-Logger capsis writes in: /nfs/work/hisafe/Capsis4/var/capsis.log.2
+Logger capsis writes in: /nfs/work/hisafe/Capsis4/var/capsis.log
 Capsis 4.2.5, (c) 2000-2018 F. de Coligny, N. Beudez, S. Dufour-Kowalski (INRA-AMAP) and the Capsis modellers
 Capsis comes with ABSOLUTELY NO WARRANTY
 The core of the Capsis platform (packages capsis.*) is free software 
 and you are welcome to redistribute it under certain conditions. 
 Some components in other packages may not be free. See licence files.
 
-Logger extensionManager writes in: /nfs/work/hisafe/Capsis4/var/extensionManager.log.2
-Capsis 4.2.5-12697 with pilot capsis.script.Pilot: correct boot at 4 Oct 2018 22:17:44 CEST
+Logger extensionManager writes in: /nfs/work/hisafe/Capsis4/var/extensionManager.log.1
+Capsis 4.2.5-12697 with pilot capsis.script.Pilot: correct boot at 29 Oct 2018 10:57:58 CET
 Working dir: /nfs/work/hisafe/Capsis4
 
 Launching script safe.pgms.ScriptGen...
-pldFileName=/lustre/lecomtei/tests/example_exp/monocrop/monocrop.pld
-weatherFile=/lustre/lecomtei/tests/example_exp/monocrop/weather.wth
-mainCropSpeciesFileName=/lustre/lecomtei/tests/example_exp/monocrop/cropSpecies/durum-wheat-restinclieres.plt
+pldFileName=/lustre/lecomtei/tests/example_exp/agroforestry/agroforestry.pld
+weatherFile=/lustre/lecomtei/tests/example_exp/agroforestry/weather.wth
+mainCropSpeciesFileName=/lustre/lecomtei/tests/example_exp/agroforestry/cropSpecies/durum-wheat-restinclieres.plt
 ******* Simulation 1
 
 ******* Simulation 2
@@ -30,5 +30,5 @@ mainCropSpeciesFileName=/lustre/lecomtei/tests/example_exp/monocrop/cropSpecies/
 ******* Simulation 7
 
 
-Duration of simulation in seconds = 249
+Duration of simulation in seconds = 1035
 END of Simulation

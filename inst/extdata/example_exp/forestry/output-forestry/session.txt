@@ -5,5 +5,5 @@ Version = 3.5
 Stics = 8.5
 
 Capsis = 4.2.4
-Start of simulation = 2018-10-04 22:17:43
-Duration of simulation in seconds = 446
+Start of simulation = 2018-10-29 10:57:58
+Duration of simulation in seconds = 470
