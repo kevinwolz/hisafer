@@ -1,7 +1,6 @@
 ## ---- eval = FALSE-------------------------------------------------------
 #  install.packages("devtools")
-#  library(devtools)
-#  install_github("kevinwolz/hisafer")
+#  devtools::install_github("kevinwolz/hisafer")
 
 ## ------------------------------------------------------------------------
 library(hisafer)
@@ -138,8 +137,7 @@ hop <- hop_rename(hop       = hop,
 hop <- hop_filter(hop        = hop,
                   simu.names = "all",
                   tree.ids   = "all",
-                  date.min   = "1995-01-01",
-                  date.max   = "2004-01-01")
+                  date.min   = "1995-01-01")
 
 ## ---- dpi = 250, fig.width = 10------------------------------------------
 plot_hisafe_ts(hop        = hop, 
@@ -158,34 +156,37 @@ plot_hisafe_monthcells(hop        = hop,
                        canopies   = FALSE)
 
 ## ---- eval = TRUE, dpi = 250, fig.width = 10-----------------------------
-plot_hisafe_cycle_annual(hop = hop, cycle = "carbon")
+plot_hisafe_bg(hop = hop, simu.names = c("PF", "AF"))
+
+## ---- eval = TRUE, dpi = 250, fig.height = 10----------------------------
+plot_hisafe_cycle_bar(hop = hop, cycle = "carbon")
 
 ## ---- eval = TRUE, dpi = 250, fig.width = 10-----------------------------
-plot_hisafe_cycle_annual(hop = hop, cycle = "nitrogen")
+plot_hisafe_cycle_bar(hop = hop, cycle = "nitrogen")
 
 ## ---- eval = TRUE, dpi = 250, fig.width = 10-----------------------------
-plot_hisafe_cycle_annual(hop = hop, cycle = "water")
+plot_hisafe_cycle_bar(hop = hop, cycle = "water")
 
 ## ---- eval = TRUE, dpi = 250, fig.width = 10-----------------------------
-plot_hisafe_cycle_annual(hop = hop, cycle = "light")
+plot_hisafe_cycle_bar(hop = hop, cycle = "light")
 
 ## ---- eval = TRUE, dpi = 250, fig.width = 10-----------------------------
-plot_hisafe_cycle_daily(hop = hop, cycle = "carbon", years = 2000)
+plot_hisafe_cycle_ts(hop = hop, cycle = "carbon", years = 2000)
 
 ## ---- eval = TRUE, dpi = 250, fig.width = 10-----------------------------
-plot_hisafe_cycle_daily(hop = hop, cycle = "nitrogen", years = 2000)
+plot_hisafe_cycle_ts(hop = hop, cycle = "nitrogen", years = 2000)
 
 ## ---- eval = TRUE, dpi = 250, fig.width = 10-----------------------------
-plot_hisafe_cycle_daily(hop = hop, cycle = "water", years = 2000)
+plot_hisafe_cycle_ts(hop = hop, cycle = "water", years = 2000)
 
 ## ---- eval = TRUE, dpi = 250, fig.width = 10-----------------------------
-plot_hisafe_cycle_daily(hop = hop, cycle = "light", years = 2000)
+plot_hisafe_cycle_ts(hop = hop, cycle = "light", years = 2000)
 
 ## ---- eval = TRUE, dpi = 250, fig.width = 10-----------------------------
-plot_hisafe_cycle_daily(hop = hop, cycle = "carbon-increment", years = 2000)
+plot_hisafe_cycle_ts(hop = hop, cycle = "carbon-increment", years = 2000)
 
 ## ---- eval = TRUE, dpi = 250, fig.width = 10-----------------------------
-plot_hisafe_cycle_daily(hop = hop, cycle = "carbon-allocation", years = 2000)
+plot_hisafe_cycle_ts(hop = hop, cycle = "carbon-allocation", years = 2000)
 
 ## ---- eval = TRUE, dpi = 250, fig.width = 10-----------------------------
 summary.out <- cycle_summary(hop         = hop,
@@ -212,7 +213,7 @@ visual_legend(hop = hop)
 face <- create_face(agroforestry = hop_filter(hop, "AF"), 
                     forestry     = hop_filter(hop, "PF"), 
                     monocrop     = hop_filter(hop, "MC"), 
-                    face.path    = ".")
+                    face.path    = hop$path)
 
 ## ---- eval = TRUE, dpi = 250, fig.width = 10-----------------------------
 LER(face = face)
@@ -220,14 +221,20 @@ LER(face = face)
 ## ---- eval = TRUE, dpi = 250, fig.width = 10-----------------------------
 LER(face = face, cycle = "light")
 
-## ---- eval = FALSE-------------------------------------------------------
-#  plot_hisafe_cycle_annual(hop = face, cycle = "carbon")
-
-## ---- eval = FALSE-------------------------------------------------------
-#  plot_hisafe_cycle_annual(hop = face, cycle = "light")
+## ---- eval = TRUE, dpi = 250, fig.width = 10-----------------------------
+plot_hisafe_cycle_bar(hop = hop, cycle = "water", freq = "month", years = 2000)
 
 ## ---- eval = TRUE, dpi = 250, fig.width = 10-----------------------------
-ler.out <- LER_summary(face = face)
+plot_hisafe_cycle_bar(hop = hop, cycle = "water", freq = "day", years = 2000, months = 4:5)
+
+## ---- eval = FALSE-------------------------------------------------------
+#  plot_hisafe_cycle_bar(hop = face, cycle = "carbon")
+
+## ---- eval = FALSE-------------------------------------------------------
+#  plot_hisafe_cycle_bar(hop = face, cycle = "light")
+
+## ---- eval = TRUE, dpi = 250, fig.width = 10-----------------------------
+ler.out <- LER_summary(face = face, nrow = 2)
 
 ler.out
 

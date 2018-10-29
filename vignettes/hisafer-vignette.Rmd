@@ -7,12 +7,11 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-hisafer is an R toolbox for the Hi-sAFe biophysical agroforestry model. It provides functions for defining, building, running, reading, analyzing, plotting, and visualizing Hi-sAFe simulaitons. The first step to using hisafer is to install and load the library, which is currently available from github. You need the devtools package to do this from within R.
+hisafer is an R toolbox for the Hi-sAFe biophysical agroforestry model. It provides functions for defining, building, running, reading, analyzing, plotting, and visualizing Hi-sAFe simulaitons. The first step to using hisafer is to install and load the library, which is currently available on GitHub. You need the `devtools` package to do this from within R.
 
 ```{r, eval = FALSE}
 install.packages("devtools")
-library(devtools)
-install_github("kevinwolz/hisafer")
+devtools::install_github("kevinwolz/hisafer")
 ```
 ```{r}
 library(hisafer)
@@ -25,7 +24,7 @@ hisafer tools are organized via the six main steps of experimentation with Hi-sA
 ### 0. Create a TEMPLATE
 Prior to defining Hi-sAFe simulations, a critical preliminary step is to create a template Hi-sAFe simulation directory. This template will be the foundation of simulations/experiments that you define in the next step. The template directory contains all files available for use when defining simulations/experiments, and the values of parameters in each file are the default values that will be used if other values are not defined in the next step. 
 
-The template directory structure for the latest version of Hi-sAFe (v3.2) has all of the following contained within a single folder:
+The template directory structure for the latest version of Hi-sAFe (v4.0) has all of the following contained within a single folder:
 
 - `template.sim` - the template .SIM file
 - `template.pld` - the template .PLD file
@@ -314,8 +313,7 @@ You may also realize that you want to filter your hop to specific SimulationName
 hop <- hop_filter(hop        = hop,
                   simu.names = "all",
                   tree.ids   = "all",
-                  date.min   = "1995-01-01",
-                  date.max   = "2004-01-01")
+                  date.min   = "1995-01-01")
 ```
 
 Similarly, you may realize that you want to merge several `hop` objects together for collective analysis. This can be done using `hop_merge()`.
@@ -369,36 +367,36 @@ plot_hisafe_bg(hop = hop, simu.names = c("PF", "AF"))
 ```
 
 #### 6.2 Cycle plots
-You can also compare the major Hi-sAFe "cycles" among your simulations by using `plot_hisafe_cycle_annual()` and `plot_hisafe_cycle_daily()`. Supported "cycles" include carbon, water, nitrogen, and light. 
-```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_annual(hop = hop, cycle = "carbon")
+You can also compare the major Hi-sAFe "cycles" among your simulations by using `plot_hisafe_cycle_bar()` and `plot_hisafe_cycle_ts()`. Supported "cycles" include carbon, water, nitrogen, and light. 
+```{r, eval = TRUE, dpi = 250, fig.height = 10}
+plot_hisafe_cycle_bar(hop = hop, cycle = "carbon")
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_annual(hop = hop, cycle = "nitrogen")
+plot_hisafe_cycle_bar(hop = hop, cycle = "nitrogen")
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_annual(hop = hop, cycle = "water")
+plot_hisafe_cycle_bar(hop = hop, cycle = "water")
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_annual(hop = hop, cycle = "light")
+plot_hisafe_cycle_bar(hop = hop, cycle = "light")
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_daily(hop = hop, cycle = "carbon", years = 2000)
+plot_hisafe_cycle_ts(hop = hop, cycle = "carbon", years = 2000)
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_daily(hop = hop, cycle = "nitrogen", years = 2000)
+plot_hisafe_cycle_ts(hop = hop, cycle = "nitrogen", years = 2000)
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_daily(hop = hop, cycle = "water", years = 2000)
+plot_hisafe_cycle_ts(hop = hop, cycle = "water", years = 2000)
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_daily(hop = hop, cycle = "light", years = 2000)
+plot_hisafe_cycle_ts(hop = hop, cycle = "light", years = 2000)
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_daily(hop = hop, cycle = "carbon-increment", years = 2000)
+plot_hisafe_cycle_ts(hop = hop, cycle = "carbon-increment", years = 2000)
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_daily(hop = hop, cycle = "carbon-allocation", years = 2000)
+plot_hisafe_cycle_ts(hop = hop, cycle = "carbon-allocation", years = 2000)
 ```
 
 You can also create a "dashboard" of the cycles of simulation via `cycle_summary()`:
@@ -450,7 +448,7 @@ To create a `face` object, use `create_face()`and supply the three required `hop
 face <- create_face(agroforestry = hop_filter(hop, "AF"), 
                     forestry     = hop_filter(hop, "PF"), 
                     monocrop     = hop_filter(hop, "MC"), 
-                    face.path    = ".")
+                    face.path    = hop$path)
 ```
 
 Once you have a `face` object, the most common analysis is to calculate the various LER metrics of the agroforestry systems. You can do this using `LER()`.
@@ -463,23 +461,32 @@ Beyond LER in terms of yield components, you can also calculate LER in terms of 
 LER(face = face, cycle = "light")
 ```
 
-Furthermore, just as for normal `hop` objects, you can also use `plot_hisafe_cycle_annual()` and `plot_hisafe_cycle_daily()` to compare the simulations in a `face` object. 
+While the defualt summarization level for `plot_hisafe_cycle_bar()` is annual, you can also visualize monthly and even daily patterns.
+```{r, eval = TRUE, dpi = 250, fig.width = 10}
+plot_hisafe_cycle_bar(hop = hop, cycle = "water", freq = "month", years = 2000)
+```
+
+```{r, eval = TRUE, dpi = 250, fig.width = 10}
+plot_hisafe_cycle_bar(hop = hop, cycle = "water", freq = "day", years = 2000, months = 4:5)
+```
+
+Furthermore, just as for normal `hop` objects, you can also use `plot_hisafe_cycle_bar()` and `plot_hisafe_cycle_ts()` to compare the simulations in a `face` object. 
 ```{r, eval = FALSE}
-plot_hisafe_cycle_annual(hop = face, cycle = "carbon")
+plot_hisafe_cycle_bar(hop = face, cycle = "carbon")
 ```
 ```{r, eval = FALSE}
-plot_hisafe_cycle_annual(hop = face, cycle = "light")
+plot_hisafe_cycle_bar(hop = face, cycle = "light")
 ```
 
 For a complete, publication-ready summary figure of LER, you can use `LER_summary()`.
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-ler.out <- LER_summary(face = face)
+ler.out <- LER_summary(face = face, nrow = 2)
 
 ler.out
 ```
 
 #### 6.5 Budgets
-Ensuring that the water and nitrogen budgets are closed isn't necessary every time you run a simulation, but it is very important if you are pushing the limits of Hi-sAFe with new functionality or complex management interventions. To check the basic Hi-sAFe water and nitrogen budgets, use `hiasfe_budget()`. To compare the Hi-sAFe-calculated budget with the STICS-calculated budget, use `stics_budget_comp()`. projection.
+Ensuring that the water and nitrogen budgets are closed isn't necessary every time you run a simulation, but it is very important if you are pushing the limits of Hi-sAFe with new functionality or complex management interventions. To check the basic Hi-sAFe water and nitrogen budgets, use `hisafe_budget()`. To compare the Hi-sAFe-calculated budget with the STICS-calculated budget, use `stics_budget_comp()`.
 
 ### Notes
 *hisafer utilizes the tidyverse approach to R programming and data manipulation. While most consequences of this approach are behind the scenes, one obvious example to users is that outputs from most hisafer functions are tibbles rather than simple data frames. This has little practical impact on your use of hisafer, but should improve your overall experience.*
