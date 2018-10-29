@@ -28,7 +28,7 @@ LER(face, cycle = "yield", timescales = c("Annual", "Cumulative"),
 
 \item{plot}{If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.}
 
-\item{...}{Other arguments passed to \code{\link{plot_hisafe_cycle_annual}}.}
+\item{...}{Other arguments passed to \code{\link{plot_hisafe_cycle_bar}}.}
 }
 \value{
 If \code{plot = TRUE}, returns a ggplot object, otherwise the data that would create the plot is returned.

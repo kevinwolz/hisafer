@@ -10,7 +10,7 @@
 #' @param hline1 A logical indicating whether or not to plot a dotted horizontal line at y = 1.
 #' @param ymax A numeric value for the upper limit of the y-axis. If \code{NA}, the maximum value in the data is use.
 #' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.
-#' @param ... Other arguments passed to \code{\link{plot_hisafe_cycle_annual}}.
+#' @param ... Other arguments passed to \code{\link{plot_hisafe_cycle_bar}}.
 #' @export
 #' @importFrom dplyr %>%
 #' @import ggplot2
@@ -47,11 +47,11 @@ LER <- function(face,
   is_TF(plot)
 
   ## Get flux data
-  cycle.data <- plot_hisafe_cycle_annual(hop        = face,
-                                         cycle      = cycle,
-                                         plot       = FALSE,
-                                         tidy       = TRUE,
-                                         crop.names = c("Crop", "NA"), ...) %>%
+  cycle.data <- plot_hisafe_cycle_bar(hop        = face,
+                                      cycle      = cycle,
+                                      plot       = FALSE,
+                                      tidy       = TRUE,
+                                      crop.names = c("Crop", "NA"), ...) %>%
     dplyr::ungroup()
 
   crop.descrip <- c("Crop",          # yield
