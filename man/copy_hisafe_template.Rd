@@ -4,7 +4,7 @@
 \alias{copy_hisafe_template}
 \title{Copy a Hi-sAFe template to specified location}
 \usage{
-copy_hisafe_template(template, destination, overwrite = TRUE,
+copy_hisafe_template(template, destination, overwrite = FALSE,
   new.name = NULL)
 }
 \arguments{

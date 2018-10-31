@@ -49,12 +49,18 @@ hisafe_info <- function(capsis.path) {
 #' \dontrun{
 #' copy_hisafe_template("agroforestry", "/Users/myname/Desktop/")
 #' }
-copy_hisafe_template <- function(template, destination, overwrite = TRUE, new.name = NULL) {
+copy_hisafe_template <- function(template, destination, overwrite = FALSE, new.name = NULL) {
   template.path        <- get_template_path(template)
   template.subpath     <- get_template_subpath(template)
   template.folder.name <- basename(template.path)
   dum <- file.copy(template.path, destination, recursive = TRUE, overwrite = overwrite)
-  dum <- file.copy(list.files(template.subpath, full.names = TRUE),
+
+  common.files <- list.files(template.subpath, full.names = TRUE)
+
+  ## Do not copy generic wth from /template_common if there was template-specific weather file already copied
+  if(any(grepl("\\.wth$", list.files(template.path)))) common.files <- common.files[!grepl("\\.wth$", common.files)]
+
+  dum <- file.copy(common.files,
                    clean_path(paste0(destination, "/", template.folder.name)),
                    recursive = TRUE,
                    overwrite = overwrite)
