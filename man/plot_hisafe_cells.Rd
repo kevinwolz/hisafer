@@ -5,7 +5,7 @@
 \title{Tile plot of Hi-sAFe cells output variable}
 \usage{
 plot_hisafe_cells(hop, variable, dates, start.date = NULL,
-  rel.dates = NULL, simu.names = "all", X = NA, plot.x = "x",
+  rel.dates = dates, simu.names = "all", X = NA, plot.x = "x",
   N.arrow = "#000000", trees = TRUE, canopies = TRUE, plot = TRUE,
   mem.max = 0, for.anim = FALSE, cumu.scale = TRUE)
 }
