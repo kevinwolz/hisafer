@@ -14,7 +14,6 @@
 #' If \code{FALSE}, a memory specification will not be made, and Capsis/Hi-sAFe will run with defaults.
 #' @param quietly Logical indicating whether status messages should printed to the console.
 #' @export
-#' @importFrom foreach %dopar%
 #' @family hisafe run functions
 #' @examples
 #' \dontrun{
@@ -102,6 +101,8 @@ run_hisafe <- function(hip            = NULL,
     if(!quietly) cat("\nInitializing", length(simu.names), "simulations on", num.cores, "cores")
     cl <- parallel::makeCluster(num.cores)
     doParallel::registerDoParallel(cl)
+
+    `%dopar%` <- foreach::`%dopar%`
     run.log <- foreach::foreach(i = simu.names, .inorder = FALSE) %dopar% call_hisafe(path           = path,
                                                                                       simu.name      = i,
                                                                                       capsis.path    = capsis.path,

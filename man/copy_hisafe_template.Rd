@@ -27,7 +27,7 @@ Copies a Hi-sAFe template to specified location.
 }
 \examples{
 \dontrun{
-copy_hisafe_template("agroforestry_default", "/Users/myname/Desktop/")
+copy_hisafe_template("agroforestry", "/Users/myname/Desktop/")
 }
 }
 \seealso{
