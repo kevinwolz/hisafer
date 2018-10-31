@@ -47,7 +47,7 @@ hisafe_info <- function(capsis.path) {
 #' @family hisafe helper functions
 #' @examples
 #' \dontrun{
-#' copy_hisafe_template("agroforestry_default", "/Users/myname/Desktop/")
+#' copy_hisafe_template("agroforestry", "/Users/myname/Desktop/")
 #' }
 copy_hisafe_template <- function(template, destination, overwrite = TRUE, new.name = NULL) {
   template.path        <- get_template_path(template)

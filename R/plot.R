@@ -362,7 +362,7 @@ plot_hisafe_monthcells <- function(hop,
   avail.vars <- list(SimulationName = simu.names, Year = years, Month = months)
   var.to.check <- vars[!(vars %in% c(rowfacet, colfacet))]
   var.too.long <- length(avail.vars[[var.to.check]]) > 1
-  if(var.too.long) stop("only the variables specfiiced by colfacet and rowfacet can have length greater than one", call. = FALSE)
+  if(var.too.long) stop("only the variables specified by colfacet and rowfacet can have length greater than one", call. = FALSE)
   fixed <- which(!(vars %in% c(colfacet, rowfacet)))
   fixed.var <- ifelse(vars[fixed] == "SimulationName",
                       as.character(avail.vars[[fixed]]),
