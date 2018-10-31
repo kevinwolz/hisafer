@@ -217,7 +217,7 @@ hop_params <- function(variable = "names", search = FALSE, quiet = FALSE) {
       if(search) {
         var.def <- dplyr::filter(OUTPUT.DEFS, stringr::str_detect(tolower(name), tolower(variable[i])))
         if(nrow(var.def) == 0) {
-          if(!quiet) cat("\n\n  --", paste(variable[i], "was not detected in any Hi-sAFe input parameter names"))
+          if(!quiet) cat("\n\n  --", paste(variable[i], "was not detected in any Hi-sAFe output parameter names"))
           next
         }
       } else {
