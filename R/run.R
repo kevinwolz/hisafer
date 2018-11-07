@@ -92,12 +92,14 @@ run_hisafe <- function(hip            = NULL,
     parallel.packages <- c("foreach", "parallel", "doParallel")
     if(!requireNamespace(parallel.packages, quietly = TRUE)) stop("The packages 'foreach', 'parallel', and 'doParallel are required
                                                                   for parallel computing with run_hisafe(). Please install and load them.", call. = FALSE)
-    if(length(simu.names) == 1)        stop("There is only 1 simulation to run. Parallel computing is not possible.", call. = FALSE)
-    if(num.cores > length(simu.names)) stop("num.cores cannot be greater than length(simu.names)",                    call. = FALSE)
 
-    if(is.null(num.cores)) num.cores <- min((parallel::detectCores() - 1), nrow(hip$exp.plan))
-    if(num.cores > parallel::detectCores()) stop(paste("There are only", parallel::detectCores(), "detectable cores on this computer."), call. = FALSE)
-    if(num.cores == 1) stop("There is only 1 detectable core on this computer. Parallel computing is not possible.", call. = FALSE)
+    if(is.null(num.cores)) num.cores <- min((parallel::detectCores() - 1), nrow(hip$exp.plan), length(simu.names))
+    if(length(simu.names) == 1)             stop("There is only 1 simulation to run. Parallel computing is not possible.",                call. = FALSE)
+    if(num.cores > length(simu.names))      stop("num.cores cannot be greater than length(simu.names)",                                   call. = FALSE)
+    if(num.cores > parallel::detectCores()) stop(paste("There are only", parallel::detectCores(), "detectable cores on this computer."),  call. = FALSE)
+    if(num.cores == 1)                      stop("There is only 1 detectable core on this computer. Parallel computing is not possible.", call. = FALSE)
+    if(!is.null(hip)) if(num.cores > nrow(hip$exp.plan)) stop("num.cores cannot be greater than nrow(hip$exp.plan)", call. = FALSE)
+
     if(!quietly) cat("\nInitializing", length(simu.names), "simulations on", num.cores, "cores")
     cl <- parallel::makeCluster(num.cores)
     doParallel::registerDoParallel(cl)
@@ -142,6 +144,7 @@ call_hisafe <- function(path, simu.name, capsis.path, launch.call, default.folde
   if(default.folder != "") default.folder <- paste0(" ", default.folder)
 
   simulationStartTime <- proc.time()[3]
+  if(!dir.exists(paste0(sim.path, "support"))) dir.create(paste0(sim.path, "support"))
   out <- file(paste0(sim.path, "support/", simu.name, "_simulation_log.txt"), open = "w")
   cat("Beginning simulation:", simu.name, file = out)
   if(!quietly) cat("\nBeginning simulation:", simu.name)
