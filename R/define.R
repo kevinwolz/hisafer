@@ -14,7 +14,7 @@
 #' @param path A character string of the path (relative or absolute) to the directory where the simulation/experiment is to be built.
 #' @param exp.name A character string of the name of the experiment folder. Only used if defining more than one simulation.
 #' @param profiles A character vector of Hi-sAFe export profiles to be exported by Hi-sAFe.
-#' If "all" (the default), then all supported profiles will be exported.
+#' If "all" (the default), then the basic set of profiles for all data levels will be exported.
 #' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
 #' hisafer comes with three "default" templates than can be used by specificying specific character strings:
 #' \itemize{
@@ -92,7 +92,7 @@ define_hisafe <- function(path,
   ## Get profile names and check that they are present in template directory
   available.profiles <- get_available_profiles(template)
   if(profiles[1] == "all") {
-    profiles <- available.profiles[!(available.profiles %in% PRIVATE.PROFILES)]
+    profiles <- available.profiles[available.profiles %in% CORE.PROFILES]
   } else if (profiles[1] == "all-private"){
     profiles <- available.profiles
   } else if(!all(profiles %in% available.profiles)) {

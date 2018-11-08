@@ -14,7 +14,7 @@ define_hisafe(path, exp.name = "experiment", profiles = "all",
 \item{exp.name}{A character string of the name of the experiment folder. Only used if defining more than one simulation.}
 
 \item{profiles}{A character vector of Hi-sAFe export profiles to be exported by Hi-sAFe.
-If "all" (the default), then all supported profiles will be exported.}
+If "all" (the default), then the basic set of profiles for all data levels will be exported.}
 
 \item{template}{A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
 hisafer comes with three "default" templates than can be used by specificying specific character strings:

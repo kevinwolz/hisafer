@@ -27,6 +27,7 @@ SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("plot",   "plotDetail",
                                                     "only data for annual DBH of tree 1",
                                                     "only data for annual yield of specific cells"))
 
+CORE.PROFILES       <- c("plot", "trees", "cells", "voxelsMonth", "climate")
 PRIVATE.PROFILES    <- c("voxelsDebug", "voxelsOptim", "annualDBH", "annualCellsYield")
 PUBLIC.PROFILES     <- SUPPORTED.PROFILES$profiles[!(SUPPORTED.PROFILES$profiles %in% PRIVATE.PROFILES)]
 DATA.PROFILES       <- c("plot", "trees", "cells", "voxels", "climate", "monthCells", "annualCells")
