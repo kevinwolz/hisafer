@@ -63,10 +63,13 @@ run_hisafe <- function(hip            = NULL,
   }
   if(!dir.exists(path)) stop("directory specified by path does not exist", call. = FALSE)
 
-  ## Ensure simulation directories exist
-  sims.to.run <- clean_path(paste0(path, "//", simu.names))
+  ## Ensure simulation directories exist but no output folders exist
+  sims.to.run  <- clean_path(paste0(path, "//", simu.names))
+  output.paths <- clean_path(paste0(sims.to.run, "/", "output-", simu.names, "/"))
   if(!all(dir.exists(sims.to.run))) {
-    stop(paste("The following simulations do not exist:", paste(simu.names[!dir.exists(sims.to.run)], collapse = ", ")), call. = FALSE)
+    stop(paste("The following simulations do not exist:",                   paste(simu.names[!dir.exists(sims.to.run)], collapse = ", ")), call. = FALSE)
+  } else if(any(dir.exists(output.paths))) {
+    stop(paste("The following simulations already contain output folders:", paste(simu.names[dir.exists(output.paths)], collapse = ", ")), call. = FALSE)
   }
 
   ## Set allowed memory
