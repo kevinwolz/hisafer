@@ -32,7 +32,7 @@ run_hisafe <- function(hip            = NULL,
                        capsis.path,
                        parallel       = FALSE,
                        num.cores      = NULL,
-                       mem.spec       = TRUE,
+                       mem.spec       = FALSE,
                        quietly        = FALSE,
                        launch.call    = "ScriptGen",
                        default.folder = "") {
@@ -74,7 +74,7 @@ run_hisafe <- function(hip            = NULL,
     if(isTRUE(mem.spec)) {
       if(!requireNamespace(c("memuse", "parallel"), quietly = TRUE)) stop("The packages 'memuse' and 'parallel' are required if mem.spec = TRUE.
                                                                           Please install and load them.", call. = FALSE)
-      mem.spec <- memuse::Sys.meminfo()$totalram@size * 1024 / parallel::detectCores()
+      mem.spec <- round(memuse::Sys.meminfo()$totalram@size * 1024 / parallel::detectCores())
     }
     pre.wd <- getwd()
     setwd(capsis.path)
