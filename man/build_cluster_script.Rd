@@ -7,7 +7,7 @@
 build_cluster_script(hip = NULL, simu.names = NULL,
   script.path = NULL, script.name = NULL, simu.prefix = NULL,
   model.version = "Capsis4", launch.call = "ScriptGen",
-  default.folder = "", cluster.path, email.type = "END",
+  default.folder = "", cluster.path, email.type = "NONE",
   email = NULL, num.cores = NULL, max.per.node = NULL,
   mem.spec = NULL)
 }
