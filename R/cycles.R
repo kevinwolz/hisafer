@@ -160,7 +160,7 @@ plot_hisafe_cycle_bar <- function(hop,
     complete <- plot.data %>%
       dplyr::group_by(SimulationName, Year) %>%
       dplyr::filter(flux == flux[1]) %>%
-      dplyr::summarize(n = n() >= 365)
+      dplyr::summarize(n = dplyr::n() >= 365)
 
     plot.data <- plot.data %>%
       dplyr::left_join(complete, by = c("SimulationName", "Year")) %>%
@@ -174,7 +174,7 @@ plot_hisafe_cycle_bar <- function(hop,
     complete <- plot.data %>%
       dplyr::group_by(SimulationName, Year, Month) %>%
       dplyr::filter(flux == flux[1]) %>%
-      dplyr::summarize(n = n() >= 28)
+      dplyr::summarize(n = dplyr::n() >= 28)
 
     plot.data <- plot.data %>%
       dplyr::left_join(complete, by = c("SimulationName", "Year", "Month")) %>%
@@ -846,7 +846,7 @@ get_yields <- function(hop, profile, crop.names) {
     mainCrop.rel.area <- hop$cells %>%
       dplyr::filter(Date == min(Date)) %>%
       dplyr::group_by(SimulationName, cropType) %>%
-      dplyr::summarize(n = n()) %>%
+      dplyr::summarize(n = dplyr::n()) %>%
       dplyr::mutate(perc = n / sum(n)) %>%
       dplyr::filter(cropType == "mainCrop") %>%
       dplyr::select(-cropType, -n)
