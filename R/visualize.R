@@ -559,7 +559,7 @@ hisafe_slice <- function(hop,
                        x     = x,
                        y     = y)) +
       ## CROWN
-      ggforce::geom_ellipsis(data  = tree.data,
+      ggforce::geom_ellipse(data  = tree.data,
                              fill  = "green",
                              color = "dark green",
                              size  = 0.5,
@@ -1047,7 +1047,7 @@ visual_legend <- function(hop,
                      x     = polygon.x,
                      y     = polygon.y)) +
     ## CROWN
-    ggforce::geom_ellipsis(data  = tree.data,
+    ggforce::geom_ellipse(data  = tree.data,
                            fill  = "green",
                            color = "green",
                            size  = 1,

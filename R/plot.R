@@ -1403,7 +1403,7 @@ add_trees <- function(plot.obj, tree.data, white.boxes, trees, canopies) {
     package.check <- requireNamespace("ggforce", quietly = TRUE)
     if(package.check) {
       plot.obj <- plot.obj +
-        ggforce::geom_ellipsis(data  = tree.data,
+        ggforce::geom_ellipse(data  = tree.data,
                                color = "green",
                                size  = 1,
                                aes(linetype = crown.linetype,
