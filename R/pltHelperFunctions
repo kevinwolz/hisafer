@@ -341,7 +341,9 @@ newpltV2.5fromSTICSV8<-function(pltv8, renaming=c(codeplante="speciesName"), wri
 		result<-c("## STICS PARAMETERS", paste(names(aplat), aplat, sep=" = "))
 		result<-c(result, "", "## VARIETIES")
 		result<-c(result, paste("#ID", paste(names(paramsxml[["cultivar parameters"]]), collapse="\t"), sep="\t"))
-		result<-c(result, paste("1", paste(paramsxml[["cultivar parameters"]], collapse="\t"), sep="\t"))
+		result<-c(result, paste("1", paste(paramsxml[["cultivar parameters"]][1,], collapse="\t"), sep="\t"))
+		if(nrow(paramsxml[["cultivar parameters"]])>1) print(paste("there were several cultivars in the STICS V8 file, only the first one (",
+          paramsxml[["cultivar parameters"]][1,"codevar"],") has been used"))
 		print("Don't forget to add hi-sAFe specific parameters at the end of the file")
 		if (!is.null(writefile)) {
 		  connection<-file(writefile, encoding="latin1")#oblige car sinon les caracteres speciaux passent pas sous mac
