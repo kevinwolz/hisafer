@@ -596,7 +596,8 @@ check_type <- function(variable, exp.plan) {
 
 #' Generate root initialization table for define_hisafe
 #' @description Generates a root initialization table suitable for passing to \code{\link{define_hisafe}}.
-#' Any passed parameters modify the table in the provided template.
+#' The output of this function is always passed to the \code{\link{define_hisafe}} via the \code{root.initialization} argument
+#' (see example below). Any passed parameters modify the table in the provided template.
 #' @return A list containing a Hi-sAFE root initialization table.
 #' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
 #' See \code{\link{define_hisafe}} for more details.
@@ -613,7 +614,9 @@ check_type <- function(variable, exp.plan) {
 #' @family hisafe definition functions
 #' @examples
 #' \dontrun{
-#' root.init <- root_init_params(template = "agroforestry", reps = 2, amount = 1)
+#' hip <- define_hisafe(path = getwd(), template = "agroforestry",
+#'                      root.initialization = root_init_params(template    = "agroforestry",
+#'                                                             paramShape1 = 0.5))
 #' }
 root_init_params <- function(template, reps = 1, ...) {
   supported <- c("shape", "repartition", "paramShape1", "paramShape2", "paramShape3")
@@ -638,9 +641,11 @@ root_init_params <- function(template, reps = 1, ...) {
 
 #' Generate tree initialization table for define_hisafe
 #' @description Generates a tree initialization table suitable for passing to \code{\link{define_hisafe}}.
-#' Any passed parameters modify the table in the provided template.
+#' The output of this function is always passed to the \code{\link{define_hisafe}} via the \code{tree.initialization} argument
+#' (see example below). Any passed parameters modify the table in the provided template.
 #' @return A list containing a Hi-sAFE tree initialization table.
-#' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
+#' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation
+#' folders/files to use.
 #' See \code{\link{define_hisafe}} for more details.
 #' @param ... Any parameters of Hi-sAFe tree initialization table:
 #'  \itemize{
@@ -655,7 +660,9 @@ root_init_params <- function(template, reps = 1, ...) {
 #' @family hisafe definition functions
 #' @examples
 #' \dontrun{
-#' tree.init <- tree_init_params(template = "agroforestry", height = 2)
+#' hip <- define_hisafe(path = getwd(), template = "agroforestry",
+#'                     tree.initialization = tree_init_params(template = "agroforestry",
+#'                                                            height   = 2))
 #' }
 tree_init_params <- function(template, ...) {
   supported <- c("species", "height", "crownBaseHeight", "crownRadius", "treeX", "treeY")
@@ -672,9 +679,11 @@ tree_init_params <- function(template, ...) {
 
 #' Generate soil layer initialization table for define_hisafe
 #' @description Generates a soil layer initialization table suitable for passing to \code{\link{define_hisafe}}.
-#' Any passed parameters modify the table in the provided template.
+#' The output of this function is always passed to the \code{\link{define_hisafe}} via the \code{layer.initialization} argument
+#' (see example below). Any passed parameters modify the table in the provided template.
 #' @return A list containing a Hi-sAFE soil layer initialization table.
-#' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
+#' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation
+#' folders/files to use.
 #' See \code{\link{define_hisafe}} for more details.
 #' @param ... Any parameters of Hi-sAFe soil layer initialization table:
 #'  \itemize{
@@ -687,7 +696,9 @@ tree_init_params <- function(template, ...) {
 #' @family hisafe definition functions
 #' @examples
 #' \dontrun{
-#' layer.init <- layer_init_params(template = "agroforestry", waterContent = 0.3)
+#' hip <- define_hisafe(path = getwd(),
+#'                      layer.initialization = layer_init_params(template         = "agroforestry",
+#'                                                               no3Concentration = c(40, 15, 5, 2, 0)))
 #' }
 layer_init_params <- function(template, ...) {
   supported <- c("waterContent", "no3Concentration", "nh4concentration")
@@ -708,9 +719,11 @@ layer_init_params <- function(template, ...) {
 
 #' Generate soil layer table for define_hisafe
 #' @description Generates a soil layer table suitable for passing to \code{\link{define_hisafe}}.
-#' Any passed parameters modify the table in the provided template.
+#' The output of this function is always passed to the \code{\link{define_hisafe}} via the \code{layers} argument
+#' (see example below). Any passed parameters modify the table in the provided template.
 #' @return A list containing a Hi-sAFE soil layer table.
-#' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
+#' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation
+#' folders/files to use.
 #' See \code{\link{define_hisafe}} for more details.
 #' @param ... Any parameters of Hi-sAFe soil layer table:
 #'  \itemize{
@@ -729,7 +742,9 @@ layer_init_params <- function(template, ...) {
 #' @family hisafe definition functions
 #' @examples
 #' \dontrun{
-#' layers <- layer_params(template = "agroforestry", sand = 20)
+#' hip <- define_hisafe(path = getwd(),
+#'                      layer.initialization = layer_init_params(template     = "agroforestry",
+#'                                                               partSizeSand = 200))
 #' }
 layer_params <- function(template, ...) {
   supported <- c("thick", "sand", "clay", "limeStone", "organicMatter",

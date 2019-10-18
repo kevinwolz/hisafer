@@ -26,11 +26,14 @@ A list containing a Hi-sAFE root initialization table.
 }
 \description{
 Generates a root initialization table suitable for passing to \code{\link{define_hisafe}}.
-Any passed parameters modify the table in the provided template.
+The output of this function is always passed to the \code{\link{define_hisafe}} via the \code{root.initialization} argument
+(see example below). Any passed parameters modify the table in the provided template.
 }
 \examples{
 \dontrun{
-root.init <- root_init_params(template = "agroforestry", reps = 2, amount = 1)
+hip <- define_hisafe(path = getwd(), template = "agroforestry",
+                     root.initialization = root_init_params(template    = "agroforestry",
+                                                            paramShape1 = 0.5))
 }
 }
 \seealso{

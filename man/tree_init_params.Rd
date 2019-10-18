@@ -7,7 +7,8 @@
 tree_init_params(template, ...)
 }
 \arguments{
-\item{template}{A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
+\item{template}{A character string of the path to the directory containing the template set of Hi-sAFe simulation
+folders/files to use.
 See \code{\link{define_hisafe}} for more details.}
 
 \item{...}{Any parameters of Hi-sAFe tree initialization table:
@@ -25,11 +26,14 @@ A list containing a Hi-sAFE tree initialization table.
 }
 \description{
 Generates a tree initialization table suitable for passing to \code{\link{define_hisafe}}.
-Any passed parameters modify the table in the provided template.
+The output of this function is always passed to the \code{\link{define_hisafe}} via the \code{tree.initialization} argument
+(see example below). Any passed parameters modify the table in the provided template.
 }
 \examples{
 \dontrun{
-tree.init <- tree_init_params(template = "agroforestry", height = 2)
+hip <- define_hisafe(path = getwd(), template = "agroforestry",
+                    tree.initialization = tree_init_params(template = "agroforestry",
+                                                           height   = 2))
 }
 }
 \seealso{
