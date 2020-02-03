@@ -11,7 +11,7 @@ hisafer is an R toolbox for the Hi-sAFe biophysical agroforestry model. It provi
 
 ```{r, eval = FALSE}
 install.packages("devtools")
-devtools::install_github("kevinwolz/hisafer", build_vignettes = TRUE)
+devtools::install_github("kevinwolz/hisafer")
 ```
 ```{r}
 library(hisafer)
