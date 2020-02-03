@@ -63,7 +63,7 @@ lueWaterStressResponsiveness = 1
 lueNitrogenStressResponsiveness = 1
 woodCarbonContent = 0.5
 leafCarbonContent = 0.5
-leafMassArea = 0.08	
+leafMassArea = 0.08
 woodDensity = 350
 imbalanceThreshold = 0.1
 rsStressMethod = 1
@@ -94,8 +94,8 @@ leafSenescenceRate = 0
 cRAreaToFRLengthRatio = 0.0000003
 coarseRootAnoxiaResistance = 100
 specificRootLength = 18.2
-rootHalfLife  = 180
-rootAnoxiaHalfLife = 80
+fineRootLifespan = 180
+fineRootAnoxiaLifespan = 80
 colonisationThreshold = 2000
 colonisationFraction = 0.1
 horizontalPreference = 0.5
@@ -107,10 +107,9 @@ coarseRootTopologyType = 1
 
 ## WATER REPARTITION MODULE
 treeRootDiameter = 0.05
-treeRootConductivity = 0.00001 
+treeRootConductivity = 0.00001
 treeAlpha = 0.1
 treeMinTranspirationPotential = -30000
 treeMaxTranspirationPotential = -10000
 treeBufferPotential = 0.05
 treeLongitudinalResistantFactor = 2000
-				
