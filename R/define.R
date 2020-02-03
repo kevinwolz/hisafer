@@ -284,7 +284,7 @@ check_input_values <- function(hip, force) {
   test.exp.plan <- orig.exp.plan %>%
     dplyr::distinct()
 
-  unique.sim.error     <- ifelse(identical(orig.exp.plan, test.exp.plan),
+  unique.sim.error     <- ifelse(nrow(orig.exp.plan) == nrow(test.exp.plan),
                                  "", "-- Each simulaton must be distinct.")
   unique.simname.error <- ifelse(unique(table(unlist(hip$exp.plan$SimulationName))) == 1,
                                  "", "-- SimulationName - each siulation must have a unique name")
