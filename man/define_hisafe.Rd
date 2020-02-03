@@ -17,7 +17,7 @@ define_hisafe(path, exp.name = "experiment", profiles = "all",
 If "all" (the default), then the basic set of profiles for all data levels will be exported.}
 
 \item{template}{A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
-hisafer comes with three "default" templates than can be used by specificying specific character strings:
+hisafer comes with a variety of "default" templates than can be used by specificying specific character strings:
 \itemize{
  \item{"agroforestry"}{ - a simple alley cropping template, with trees spaced at 9m x 13m and a durum wheat alley crop}
  \item{"forestry"}{ - a simple forestry template, with trees spaced at 5m x 7m and an understory of bare soil}

@@ -4,39 +4,33 @@
 \alias{hip_params}
 \title{Display supported Hi-sAFe input parameters}
 \usage{
-hip_params(variable = "names", search = FALSE,
-  template = "agroforestry")
+hip_params(params = "all", search = FALSE, template = "agroforestry")
 }
 \arguments{
-\item{variable}{A character vector of specific Hi-sAFe parameters of which to display details.
+\item{params}{A character vector of specific Hi-sAFe input parameters of which to display details.
 Can also be a regular expression for which to search in Hi-sAFe parameter names.
-If "names", the default, then just the names of Hi-sAFe parameters is printed to the console.
-If "all", then the names, definitions, and units of all Hi-sAFe parameters is printed.}
+If "all", the default, then a data.frame (tibble) containing all Hi-sAFe input parameters is returned.}
 
-\item{search}{Logical indicating whether \code{variable} should be treated as a regular expression and
+\item{search}{Logical indicating whether \code{params} should be treated as a regular expression and
 searched for in the parameter names rather than matched literally.}
 
-\item{template}{A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
-hisafer comes with three "default" templates than can be used by specificying specific character strings:
-\itemize{
- \item{"agroforestry_default"}{ - An agroforestry template based on the calibration simulation of Hi-sAFe using the Restinclieres A2
- walnut-wheat agroforestry plot in Montpellier, France. Spacing is 13m between rows and 8m within rows.}
- \item{"forestry_default"}{ - Walnut plantation forestry at tigher tree spacing of 5m between row and 3m within rows.
- Crop is grass in all cells except for where the tree trunk is. Serves as a forestry control.}
- \item{"monocrop_default"}{ - No trees. A scene with just a single cell of wheat. Serves as a monocrop control.}
-}}
+\item{template}{A character string of the path to the directory containing the template set of Hi-sAFe simulation
+folders/files to use.
+hisafer comes with a variety of "default" templates than can be used by specificying specific character strings.
+See \code{\link{define_hisafe}} for details.}
 }
 \value{
-Invisibly returns an alphebetized character vector of the names of supported Hi-sAFe prameters.
+If \code{params} is "all", the default, then a data.frame (tibble) containing all Hi-sAFe input parameters
+is returned. Otherwise, this data.frame is invisibly returned.
 }
 \description{
 Displays supported Hi-sAFe input parameters, their default values, and their accepted/suggested ranges.
 }
 \examples{
 \dontrun{
-hip_params()            # just for parameter names
-hip_params("cellWidth") # details of cellWidth parameter
-hip_params("all")       # details of all parameters
+hip_params()              # details of all parameters
+hip_params("cellWidth")   # details of cellWidth parameter
+hip_params("paramShape1") # input parameters within tables are also accepted
 }
 }
 \seealso{

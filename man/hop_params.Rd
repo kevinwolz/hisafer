@@ -4,30 +4,29 @@
 \alias{hop_params}
 \title{Display Hi-sAFe output variables}
 \usage{
-hop_params(variable = "names", search = FALSE, quiet = FALSE)
+hop_params(variables = "all", search = FALSE, quiet = FALSE)
 }
 \arguments{
-\item{variable}{A character vector of specific Hi-sAFe output variables of which to display details.
+\item{variables}{A character vector of specific Hi-sAFe output variables of which to display details.
 Can also be a regular expression for which to search in Hi-sAFe output variable names.
-If "names", the default, then just the names of Hi-sAFe output variables is printed to the console.
-If "all", then the names, definitions, and units of all Hi-sAFe output variables is printed.}
+If "all", the default, then a data.frame (tibble) containing all Hi-sAFe output variables is returned.}
 
-\item{search}{Logical indicating whether \code{variable} should be treated as a regular expression and
+\item{search}{Logical indicating whether \code{variables} should be treated as a regular expression and
 searched for in the variable names rather than matched literally.}
 
 \item{quiet}{Logical indicating whether or not to supress output printed to console.}
 }
 \value{
-Invisibly returns an alphebetized character vector of the names of Hi-sAFe output variables
+If \code{variables} is "all", the default, then a data.frame (tibble) containing all Hi-sAFe output variables
+is returned. Otherwise, this data.frame is invisibly returned.
 }
 \description{
 Displays Hi-sAFe output variables, their definitions, and thier units.
 }
 \examples{
 \dontrun{
-hop_params()                 # just for parameter names
+hop_params()                 # details of all variables
 hop_params("carbonBranches") # details of cellWidth parameter
-hop_params("all")            # details of all parameters
 }
 }
 \seealso{
