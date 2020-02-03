@@ -131,8 +131,7 @@ hisafe_slice <- function(hop,
   for(p in c("tree.info", "cells", "voxels")[c(TRUE, crops, voxels)]) hop <- shift_scene(hop = hop, profile = p, shift = scene.shift)
 
   if(crops) {
-    cell.Ys <- dplyr::as_tibble(table(hop$cells$SimulationName, hop$cells$y))[, 1:2] %>%
-      dplyr::rename(SimulationName = Var1, y = Var2) %>%
+    cell.Ys <- dplyr::as_tibble(table(SimulationName = hop$cells$SimulationName, y = hop$cells$y))[, 1:2] %>%
       dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
       dplyr::mutate(cells.Y = as.numeric(y)) %>%
       dplyr::select(SimulationName, cells.Y)
@@ -141,8 +140,7 @@ hisafe_slice <- function(hop,
   }
 
   if(voxels) {
-    voxel.Ys <- dplyr::as_tibble(table(hop$voxels$SimulationName, hop$voxels$y))[, 1:2] %>%
-      dplyr::rename(SimulationName = Var1, y = Var2) %>%
+    voxel.Ys <- dplyr::as_tibble(table(SimulationName = hop$voxels$SimulationName, y = hop$voxels$y))[, 1:2] %>%
       dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
       dplyr::mutate(voxels.Y     = as.numeric(y)) %>%
       dplyr::mutate(voxels.Y.mod = voxels.Y - cellWidth / 2) %>%
@@ -194,7 +192,7 @@ hisafe_slice <- function(hop,
   rect.min.border <- 0.25
   rect.max.border <- 1
   arrow.length    <- min(hop.full$plot.info$cellWidth) / 4
-  arrow.type      <- ggplot2::arrow(length = unit(5, "points"))
+  arrow.type      <- ggplot2::arrow(length = ggplot2::unit(5, "points"))
   arrow.size      <- 1
 
   if(trees & crops) {
