@@ -1420,15 +1420,9 @@ visual_legend <- function(hop,
       dplyr::mutate(y = scale_ab(y, min.y, max.y)) %>%
       dplyr::mutate(f = scale_ab(f, min.f, max.f))
 
-    if(requireNamespace("viridis", quietly = TRUE)) {
-      color.palette <- viridis::scale_fill_viridis(option = "magma")
-    } else {
-      color.palette <- ggplot2::scale_fill_gradient()
-    }
-
     plot.obj <- plot.obj +
       geom_raster(data = mini.cells, aes(x = x, y = y, fill = f)) +
-      color.palette +
+      scale_fill_viridis_c(option = "magma") +
       guides(fill = guide_colourbar(title     = NULL,
                                     barwidth  = 4,
                                     direction = "horizontal",

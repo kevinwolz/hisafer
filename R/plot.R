@@ -383,12 +383,6 @@ plot_hisafe_monthcells <- function(hop,
                                         Y.MIN = 0,
                                         Y.MAX = plotHeight)
 
-  if(requireNamespace("viridis", quietly = TRUE)) {
-    color.palette <- viridis::scale_fill_viridis(option = "magma")
-  } else {
-    color.palette <- ggplot2::scale_fill_gradient()
-  }
-
   plot.obj <- ggplot(plot.data) +
     labs(x     = colfacet,
          y     = rowfacet,
@@ -403,7 +397,7 @@ plot_hisafe_monthcells <- function(hop,
                          ymin = "y",
                          ymax = "ymax",
                          fill = variable)) +
-    color.palette +
+    scale_fill_viridis_c(option = "magma") +
     scale_linetype_identity() +
     guides(fill = guide_colourbar(barwidth    = 15,
                                   barheight   = 1.5,
@@ -501,12 +495,6 @@ plot_hisafe_annualcells <- function(hop,
                                         Y.MIN = 0,
                                         Y.MAX = plotHeight)
 
-  if(requireNamespace("viridis", quietly = TRUE)) {
-    color.palette <- viridis::scale_fill_viridis(option = "magma")
-  } else {
-    color.palette <- ggplot2::scale_fill_gradient()
-  }
-
   plot.obj <- ggplot(plot.data) +
     labs(x     = "SimulationName",
          y     = "Year",
@@ -520,7 +508,7 @@ plot_hisafe_annualcells <- function(hop,
                          ymin = "y",
                          ymax = "ymax",
                          fill = variable)) +
-    color.palette +
+    scale_fill_viridis_c(option = "magma") +
     scale_linetype_identity() +
     guides(fill = guide_colourbar(barwidth    = 15,
                                   barheight   = 1.5,
@@ -722,12 +710,6 @@ plot_hisafe_cells <- function(hop,
                                                 nbin        = 100))
   }
 
-  if(requireNamespace("viridis", quietly = TRUE)) {
-    color.palette <- viridis::scale_fill_viridis(option = "magma", limits = value.range)
-  } else {
-    color.palette <- ggplot2::scale_fill_gradient(limits = value.range)
-  }
-
   plot.obj <- ggplot(plot.data) +
     plot.labs +
     facet_cells +
@@ -737,7 +719,7 @@ plot_hisafe_cells <- function(hop,
                          ymax = "ymax",
                          fill = variable)) +
     north +
-    color.palette +
+    scale_fill_viridis_c(option = "magma", limits = value.range) +
     scale_linetype_identity() +
     plot.guide +
     coord_equal(xlim   = c(0, plotWidth),
