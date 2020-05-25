@@ -1269,6 +1269,7 @@ get_dims <- function(ggobj,
   #	convertUnit(unit(1, "null"), "in", "x", valueOnly=T) == 0
   # is true. Please check that it is before calling this code.
   .null_as_if_inch = function(u){
+    stopifnot(packageVersion("grid") < "4.0")
     if(!grid::is.unit(u)) return(u)
     if(is.atomic(u)){
       if("null" %in% attr(u, "unit")){
@@ -1322,19 +1323,30 @@ get_dims <- function(ggobj,
     stop("Don't know how to get sizes for object of class ", deparse(class(ggobj)))
   }
 
-  stopifnot(grid::convertUnit(unit(1, "null"), "in", "x", valueOnly = TRUE) == 0)
+  stopifnot(grid::convertUnit(grid::unit(1, "null"), "in", "x", valueOnly = TRUE) == 0)
   known_ht = sum(grid::convertHeight(g$heights, units, valueOnly = TRUE))
   known_wd = sum(grid::convertWidth(g$widths,   units, valueOnly = TRUE))
   free_ht  = maxheight - known_ht
   free_wd  = maxwidth  - known_wd
-  all_null_rowhts = (grid::convertHeight(.null_as_if_inch(g$heights),
-                                         "in", valueOnly = TRUE) - grid::convertHeight(g$heights,
-                                                                                       "in", valueOnly = TRUE))
-  all_null_colwds = (grid::convertWidth(.null_as_if_inch(g$widths),
-                                        "in", valueOnly = TRUE) - grid::convertWidth(g$widths,
-                                                                                     "in", valueOnly = TRUE))
-  null_rowhts = all_null_rowhts[all_null_rowhts > 0]
-  null_colwds = all_null_colwds[all_null_colwds > 0]
+
+  if (packageVersion("grid") >= "4.0.0") {
+    null_rowhts <- as.numeric(g$heights[grid::unitType(g$heights) == "null"])
+    null_colwds <- as.numeric(g$widths[grid::unitType(g$widths) == "null"])
+    panel_asps <- (
+      matrix(null_rowhts, ncol = 1)
+      %*% matrix(1 / null_colwds, nrow = 1))
+  } else {
+    all_null_rowhts <- (
+      grid::convertHeight(.null_as_if_inch(g$heights), "in", valueOnly = TRUE)
+      - grid::convertHeight(g$heights, "in", valueOnly = TRUE))
+    all_null_colwds <- (
+      grid::convertWidth(.null_as_if_inch(g$widths), "in", valueOnly = TRUE)
+      - grid::convertWidth(g$widths, "in", valueOnly = TRUE))
+    null_rowhts <- all_null_rowhts[all_null_rowhts > 0]
+    null_colwds <- all_null_colwds[all_null_colwds > 0]
+    panel_asps <- (matrix(null_rowhts, ncol = 1) %*% matrix(1 / null_colwds, nrow = 1))
+  }
+
   panel_asps = matrix(null_rowhts, ncol = 1) %*% matrix(1 / null_colwds, nrow = 1)
   max_rowhts = free_ht/sum(null_rowhts) * null_rowhts
   max_colwds = free_wd/sum(null_colwds) * null_colwds
