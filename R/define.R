@@ -389,7 +389,7 @@ check_input_values <- function(hip, force) {
 
   ## Don't Edit Export Profile Errors
   EP.error <- ifelse(is_mod("profileNames") | is_mod("exportFrequencies"),
-                     "-- profileNames and exportFrequencies cannot be defined using define_hisafe(). Use the 'profiles' argument of build_hisafe().", "")
+                     "-- profileNames and exportFrequencies cannot be defined using define_hisafe(). Use the 'profiles' argument of define_hisafe().", "")
 
   ## STICS parameter dependencies check
   capillary.error <- ifelse((is_mod("capillaryUptake") | is_mod("capillaryUptakeMinWater")) & (all(get_used("capillary") == 0) & all(get_used("macropososity") == 0)),

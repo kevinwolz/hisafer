@@ -1,7 +1,7 @@
 Package: hisafer
 Type: Package
 Title: An R Toolbox for the Hi-sAFe Biophysical Agroforestry Model
-Version: 1.4.21
+Version: 1.4.22
 Author: Kevin J Wolz
 Maintainer: Kevin J Wolz <kevin@savannainstitute.org>
 Description: An R toolbox for the Hi-sAFe biophysical agroforestry model.
