@@ -30,17 +30,23 @@ my.df <- join_profiles(hop, c("trees", "plot"))
 }
 }
 \seealso{
-Other hisafe helper functions: \code{\link{copy_hisafe_template}},
-  \code{\link{get_pheno_dates}},
-  \code{\link{get_pruning_dates}},
-  \code{\link{hip_params}}, \code{\link{hisafe_info}},
-  \code{\link{hisafe_profiles}}, \code{\link{hop_filter}},
-  \code{\link{hop_merge}}, \code{\link{hop_params}},
-  \code{\link{hop_rename}}, \code{\link{is_face}},
-  \code{\link{is_hip}}, \code{\link{is_hop}},
-  \code{\link{make_rel_years}},
-  \code{\link{profile_check}},
-  \code{\link{variable_check}},
-  \code{\link{which_profiles}}
+Other hisafe helper functions: 
+\code{\link{copy_hisafe_template}()},
+\code{\link{get_pheno_dates}()},
+\code{\link{get_pruning_dates}()},
+\code{\link{hip_params}()},
+\code{\link{hisafe_info}()},
+\code{\link{hisafe_profiles}()},
+\code{\link{hop_filter}()},
+\code{\link{hop_merge}()},
+\code{\link{hop_params}()},
+\code{\link{hop_rename}()},
+\code{\link{is_face}()},
+\code{\link{is_hip}()},
+\code{\link{is_hop}()},
+\code{\link{make_rel_years}()},
+\code{\link{profile_check}()},
+\code{\link{variable_check}()},
+\code{\link{which_profiles}()}
 }
 \concept{hisafe helper functions}

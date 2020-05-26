@@ -4,14 +4,29 @@
 \alias{plot_hisafe_ts}
 \title{Plot timeseries of Hi-sAFe output variable}
 \usage{
-plot_hisafe_ts(hop, variables, profile, cumulative = FALSE,
-  simu.names = "all", years = "all", tree.ids = "all",
-  date.min = NA, date.max = NA, doy.lim = c(1, 365),
-  color.palette = NA, linetype.palette = NA, aes.cols = list(color =
-  "SimulationName", linetype = "SimulationName"), facet.simu = FALSE,
-  facet.year = FALSE, facet.crop = FALSE, intercrop = TRUE,
-  crop.points = FALSE, plot = TRUE, save = FALSE,
-  output.path = NULL)
+plot_hisafe_ts(
+  hop,
+  variables,
+  profile,
+  cumulative = FALSE,
+  simu.names = "all",
+  years = "all",
+  tree.ids = "all",
+  date.min = NA,
+  date.max = NA,
+  doy.lim = c(1, 365),
+  color.palette = NA,
+  linetype.palette = NA,
+  aes.cols = list(color = "SimulationName", linetype = "SimulationName"),
+  facet.simu = FALSE,
+  facet.year = FALSE,
+  facet.crop = FALSE,
+  intercrop = TRUE,
+  crop.points = FALSE,
+  plot = TRUE,
+  save = FALSE,
+  output.path = NULL
+)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -88,12 +103,13 @@ ggplot2::ggsave("carbonCoarseRoots.png", daily.plot)
 }
 }
 \seealso{
-Other hisafe plot functions: \code{\link{plot_hisafe_annualcells}},
-  \code{\link{plot_hisafe_bg}},
-  \code{\link{plot_hisafe_cells}},
-  \code{\link{plot_hisafe_monthcells}},
-  \code{\link{plot_hisafe_scene}},
-  \code{\link{plot_hisafe_tstress}},
-  \code{\link{plot_hisafe_voxels}}
+Other hisafe plot functions: 
+\code{\link{plot_hisafe_annualcells}()},
+\code{\link{plot_hisafe_bg}()},
+\code{\link{plot_hisafe_cells}()},
+\code{\link{plot_hisafe_monthcells}()},
+\code{\link{plot_hisafe_scene}()},
+\code{\link{plot_hisafe_tstress}()},
+\code{\link{plot_hisafe_voxels}()}
 }
 \concept{hisafe plot functions}

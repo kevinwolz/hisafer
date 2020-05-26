@@ -4,11 +4,21 @@
 \alias{plot_hisafe_cycle_ts}
 \title{Plot daily timeseries of major cycles}
 \usage{
-plot_hisafe_cycle_ts(hop, cycle, years, simu.names = "all",
-  tree.ids = "all", doy.lim = c(1, 366), color.palette = NULL,
-  crop.names = c("Main crop", "Inter crop"), pheno.lines = TRUE,
-  branch.pruning.lines = TRUE, root.pruning.lines = TRUE,
-  trim = TRUE, plot = TRUE)
+plot_hisafe_cycle_ts(
+  hop,
+  cycle,
+  years,
+  simu.names = "all",
+  tree.ids = "all",
+  doy.lim = c(1, 366),
+  color.palette = NULL,
+  crop.names = c("Main crop", "Inter crop"),
+  pheno.lines = TRUE,
+  branch.pruning.lines = TRUE,
+  root.pruning.lines = TRUE,
+  trim = TRUE,
+  plot = TRUE
+)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
@@ -60,10 +70,14 @@ ggsave_fitmax("light_capture.png", light.capture.plot)
 }
 }
 \seealso{
-Other hisafe analysis functions: \code{\link{LER_summary}},
-  \code{\link{LER}}, \code{\link{analyze_hisafe}},
-  \code{\link{cycle_summary}}, \code{\link{hisafe_budget}},
-  \code{\link{plot_hisafe_cycle_bar}},
-  \code{\link{stics_budget_comp}}, \code{\link{write_hop}}
+Other hisafe analysis functions: 
+\code{\link{LER_summary}()},
+\code{\link{LER}()},
+\code{\link{analyze_hisafe}()},
+\code{\link{cycle_summary}()},
+\code{\link{hisafe_budget}()},
+\code{\link{plot_hisafe_cycle_bar}()},
+\code{\link{stics_budget_comp}()},
+\code{\link{write_hop}()}
 }
 \concept{hisafe analysis functions}

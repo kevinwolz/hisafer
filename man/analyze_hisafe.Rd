@@ -4,10 +4,20 @@
 \alias{analyze_hisafe}
 \title{Shortcut to Hi-sAFe analysis}
 \usage{
-analyze_hisafe(hop, carbon = TRUE, light = TRUE, nitrogen = TRUE,
-  water = TRUE, carbon.daily = TRUE, light.daily = TRUE,
-  nitrogen.daily = TRUE, water.daily = TRUE, carbon.increment = TRUE,
-  carbon.allocation = TRUE, tree.ids = "all")
+analyze_hisafe(
+  hop,
+  carbon = TRUE,
+  light = TRUE,
+  nitrogen = TRUE,
+  water = TRUE,
+  carbon.daily = TRUE,
+  light.daily = TRUE,
+  nitrogen.daily = TRUE,
+  water.daily = TRUE,
+  carbon.increment = TRUE,
+  carbon.allocation = TRUE,
+  tree.ids = "all"
+)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
@@ -47,11 +57,14 @@ analyze_hisafe(myhop)
 }
 }
 \seealso{
-Other hisafe analysis functions: \code{\link{LER_summary}},
-  \code{\link{LER}}, \code{\link{cycle_summary}},
-  \code{\link{hisafe_budget}},
-  \code{\link{plot_hisafe_cycle_bar}},
-  \code{\link{plot_hisafe_cycle_ts}},
-  \code{\link{stics_budget_comp}}, \code{\link{write_hop}}
+Other hisafe analysis functions: 
+\code{\link{LER_summary}()},
+\code{\link{LER}()},
+\code{\link{cycle_summary}()},
+\code{\link{hisafe_budget}()},
+\code{\link{plot_hisafe_cycle_bar}()},
+\code{\link{plot_hisafe_cycle_ts}()},
+\code{\link{stics_budget_comp}()},
+\code{\link{write_hop}()}
 }
 \concept{hisafe analysis functions}

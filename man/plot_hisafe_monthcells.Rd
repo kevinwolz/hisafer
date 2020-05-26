@@ -4,11 +4,20 @@
 \alias{plot_hisafe_monthcells}
 \title{Tile plot of Hi-sAFe monthCells output variable}
 \usage{
-plot_hisafe_monthcells(hop, variable = "monthRelativeTotalParIncident",
-  colfacet = "SimulationName", rowfacet = "Year", simu.names = "all",
+plot_hisafe_monthcells(
+  hop,
+  variable = "monthRelativeTotalParIncident",
+  colfacet = "SimulationName",
+  rowfacet = "Year",
+  simu.names = "all",
   years = seq(min(hop$monthCells$Year), max(hop$monthCells$Year), 5),
-  months = 6, plot.x = "x", trees = TRUE, canopies = TRUE,
-  tree.simus = FALSE, plot = TRUE)
+  months = 6,
+  plot.x = "x",
+  trees = TRUE,
+  canopies = TRUE,
+  tree.simus = FALSE,
+  plot = TRUE
+)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -68,12 +77,13 @@ ggsave_fitmax("monthDirectParIncident.png", tile.plot2)
 }
 }
 \seealso{
-Other hisafe plot functions: \code{\link{plot_hisafe_annualcells}},
-  \code{\link{plot_hisafe_bg}},
-  \code{\link{plot_hisafe_cells}},
-  \code{\link{plot_hisafe_scene}},
-  \code{\link{plot_hisafe_tstress}},
-  \code{\link{plot_hisafe_ts}},
-  \code{\link{plot_hisafe_voxels}}
+Other hisafe plot functions: 
+\code{\link{plot_hisafe_annualcells}()},
+\code{\link{plot_hisafe_bg}()},
+\code{\link{plot_hisafe_cells}()},
+\code{\link{plot_hisafe_scene}()},
+\code{\link{plot_hisafe_tstress}()},
+\code{\link{plot_hisafe_ts}()},
+\code{\link{plot_hisafe_voxels}()}
 }
 \concept{hisafe plot functions}

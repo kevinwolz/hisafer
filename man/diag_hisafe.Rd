@@ -4,9 +4,17 @@
 \alias{diag_hisafe}
 \title{Shortcut to Hi-sAFe diagnostics}
 \usage{
-diag_hisafe(hop, trees = TRUE, plot = TRUE, climate = TRUE,
-  cells = TRUE, monthCells = TRUE, annualCells = FALSE,
-  voxels = TRUE, ...)
+diag_hisafe(
+  hop,
+  trees = TRUE,
+  plot = TRUE,
+  climate = TRUE,
+  cells = TRUE,
+  monthCells = TRUE,
+  annualCells = FALSE,
+  voxels = TRUE,
+  ...
+)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}

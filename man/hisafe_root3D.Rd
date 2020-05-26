@@ -4,11 +4,19 @@
 \alias{hisafe_root3D}
 \title{Create a 3D plot of tree coarse root topology}
 \usage{
-hisafe_root3D(hop, date, simu.name = NULL, tree.id = 1,
+hisafe_root3D(
+  hop,
+  date,
+  simu.name = NULL,
+  tree.id = 1,
   color.var = paste0("treeRootDensity_", tree.id),
-  color.palette = c("#FFFFD4", "#FED98E", "#FE9929", "#D95F0E",
-  "#993404"), bg = "white", grid = FALSE, box = FALSE,
-  output.path = NULL, ...)
+  color.palette = c("#FFFFD4", "#FED98E", "#FE9929", "#D95F0E", "#993404"),
+  bg = "white",
+  grid = FALSE,
+  box = FALSE,
+  output.path = NULL,
+  ...
+)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -60,8 +68,9 @@ root3D(hop = myhop, date = "2000-07-01")
 }
 }
 \seealso{
-Other hisafe visualization functions: \code{\link{hisafe_slice}},
-  \code{\link{hisafe_snapshot}}
+Other hisafe visualization functions: 
+\code{\link{hisafe_slice}()},
+\code{\link{hisafe_snapshot}()}
 }
 \author{
 Gregoire Talbot \email{talbot@mailoo.org}

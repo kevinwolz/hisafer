@@ -4,8 +4,14 @@
 \alias{ggsave_fitmax}
 \title{Save ggplot to correctly-shaped image file}
 \usage{
-ggsave_fitmax(filename, plot, maxheight = 7, maxwidth = maxheight,
-  units = "in", ...)
+ggsave_fitmax(
+  filename,
+  plot,
+  maxheight = 7,
+  maxwidth = maxheight,
+  units = "in",
+  ...
+)
 }
 \arguments{
 \item{filename}{Name for the output image. By default the image format is guesssed from the file extension,

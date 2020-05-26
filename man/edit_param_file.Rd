@@ -19,9 +19,10 @@ Edits parameter files using the exp.plan of a hip object
 Used within \code{\link{build_structure}}.
 }
 \seealso{
-Other hisafe param functions: \code{\link{edit_param_element}},
-  \code{\link{read_param_file}},
-  \code{\link{write_param_file}}
+Other hisafe param functions: 
+\code{\link{edit_param_element}()},
+\code{\link{read_param_file}()},
+\code{\link{write_param_file}()}
 }
 \concept{hisafe param functions}
 \keyword{internal}

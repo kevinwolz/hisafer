@@ -27,11 +27,14 @@ write_hop(myhop)
 }
 }
 \seealso{
-Other hisafe analysis functions: \code{\link{LER_summary}},
-  \code{\link{LER}}, \code{\link{analyze_hisafe}},
-  \code{\link{cycle_summary}}, \code{\link{hisafe_budget}},
-  \code{\link{plot_hisafe_cycle_bar}},
-  \code{\link{plot_hisafe_cycle_ts}},
-  \code{\link{stics_budget_comp}}
+Other hisafe analysis functions: 
+\code{\link{LER_summary}()},
+\code{\link{LER}()},
+\code{\link{analyze_hisafe}()},
+\code{\link{cycle_summary}()},
+\code{\link{hisafe_budget}()},
+\code{\link{plot_hisafe_cycle_bar}()},
+\code{\link{plot_hisafe_cycle_ts}()},
+\code{\link{stics_budget_comp}()}
 }
 \concept{hisafe analysis functions}

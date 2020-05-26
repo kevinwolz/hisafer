@@ -4,8 +4,14 @@
 \alias{plot_hisafe_bg}
 \title{Plot belowground tree root depth & water table}
 \usage{
-plot_hisafe_bg(hop, simu.names = "all", years = "all", tree.ids = 1,
-  sen = c("fine", "coarse"), plot = TRUE)
+plot_hisafe_bg(
+  hop,
+  simu.names = "all",
+  years = "all",
+  tree.ids = 1,
+  sen = c("fine", "coarse"),
+  plot = TRUE
+)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -32,12 +38,13 @@ plot_hisafe_bg(hop)
 }
 }
 \seealso{
-Other hisafe plot functions: \code{\link{plot_hisafe_annualcells}},
-  \code{\link{plot_hisafe_cells}},
-  \code{\link{plot_hisafe_monthcells}},
-  \code{\link{plot_hisafe_scene}},
-  \code{\link{plot_hisafe_tstress}},
-  \code{\link{plot_hisafe_ts}},
-  \code{\link{plot_hisafe_voxels}}
+Other hisafe plot functions: 
+\code{\link{plot_hisafe_annualcells}()},
+\code{\link{plot_hisafe_cells}()},
+\code{\link{plot_hisafe_monthcells}()},
+\code{\link{plot_hisafe_scene}()},
+\code{\link{plot_hisafe_tstress}()},
+\code{\link{plot_hisafe_ts}()},
+\code{\link{plot_hisafe_voxels}()}
 }
 \concept{hisafe plot functions}

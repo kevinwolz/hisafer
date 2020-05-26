@@ -4,8 +4,14 @@
 \alias{stics_budget_comp}
 \title{Compare Hi-sAFe and STICS budget calcualations}
 \usage{
-stics_budget_comp(hop, cycle, simu.names = "all", years = "all",
-  save.table = TRUE, output.path = NULL)
+stics_budget_comp(
+  hop,
+  cycle,
+  simu.names = "all",
+  years = "all",
+  save.table = TRUE,
+  output.path = NULL
+)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
@@ -34,11 +40,14 @@ water.budget.comp <- stics_budget_comp(myhop, "water")
 }
 }
 \seealso{
-Other hisafe analysis functions: \code{\link{LER_summary}},
-  \code{\link{LER}}, \code{\link{analyze_hisafe}},
-  \code{\link{cycle_summary}}, \code{\link{hisafe_budget}},
-  \code{\link{plot_hisafe_cycle_bar}},
-  \code{\link{plot_hisafe_cycle_ts}},
-  \code{\link{write_hop}}
+Other hisafe analysis functions: 
+\code{\link{LER_summary}()},
+\code{\link{LER}()},
+\code{\link{analyze_hisafe}()},
+\code{\link{cycle_summary}()},
+\code{\link{hisafe_budget}()},
+\code{\link{plot_hisafe_cycle_bar}()},
+\code{\link{plot_hisafe_cycle_ts}()},
+\code{\link{write_hop}()}
 }
 \concept{hisafe analysis functions}

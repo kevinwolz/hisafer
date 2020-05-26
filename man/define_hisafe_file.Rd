@@ -4,8 +4,14 @@
 \alias{define_hisafe_file}
 \title{Define a Hi-sAFe experiment from a file}
 \usage{
-define_hisafe_file(file, path, exp.name = "experiment",
-  profiles = "all", template = "agroforestry", force = FALSE)
+define_hisafe_file(
+  file,
+  path,
+  exp.name = "experiment",
+  profiles = "all",
+  template = "agroforestry",
+  force = FALSE
+)
 }
 \arguments{
 \item{file}{A character string of the path to a csv file.
@@ -42,10 +48,11 @@ myexp <- define_hisafe_file("./example_exp.csv")
 }
 }
 \seealso{
-Other hisafe definition functions: \code{\link{define_hisafe}},
-  \code{\link{layer_init_params}},
-  \code{\link{layer_params}},
-  \code{\link{root_init_params}},
-  \code{\link{tree_init_params}}
+Other hisafe definition functions: 
+\code{\link{define_hisafe}()},
+\code{\link{layer_init_params}()},
+\code{\link{layer_params}()},
+\code{\link{root_init_params}()},
+\code{\link{tree_init_params}()}
 }
 \concept{hisafe definition functions}

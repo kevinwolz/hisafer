@@ -4,8 +4,15 @@
 \alias{read_simulation}
 \title{Read output from a single Hi-sAFe simulation}
 \usage{
-read_simulation(simu.name, hip, path, profiles, show.progress, read.inputs,
-  max.size)
+read_simulation(
+  simu.name,
+  hip,
+  path,
+  profiles,
+  show.progress,
+  read.inputs,
+  max.size
+)
 }
 \arguments{
 \item{simu.name}{The \code{SimulationName} of the Hi-sAFe simulation to read. This must be the same as the name of the Hi-sAFe simulation folder.

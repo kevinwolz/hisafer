@@ -4,8 +4,7 @@
 \alias{copy_hisafe_template}
 \title{Copy a Hi-sAFe template to specified location}
 \usage{
-copy_hisafe_template(template, destination, overwrite = FALSE,
-  new.name = NULL)
+copy_hisafe_template(template, destination, overwrite = FALSE, new.name = NULL)
 }
 \arguments{
 \item{template}{A character string of the path to the Hi-sAFe directory structure/files to use as a template
@@ -31,17 +30,23 @@ copy_hisafe_template("agroforestry", "/Users/myname/Desktop/")
 }
 }
 \seealso{
-Other hisafe helper functions: \code{\link{get_pheno_dates}},
-  \code{\link{get_pruning_dates}},
-  \code{\link{hip_params}}, \code{\link{hisafe_info}},
-  \code{\link{hisafe_profiles}}, \code{\link{hop_filter}},
-  \code{\link{hop_merge}}, \code{\link{hop_params}},
-  \code{\link{hop_rename}}, \code{\link{is_face}},
-  \code{\link{is_hip}}, \code{\link{is_hop}},
-  \code{\link{join_profiles}},
-  \code{\link{make_rel_years}},
-  \code{\link{profile_check}},
-  \code{\link{variable_check}},
-  \code{\link{which_profiles}}
+Other hisafe helper functions: 
+\code{\link{get_pheno_dates}()},
+\code{\link{get_pruning_dates}()},
+\code{\link{hip_params}()},
+\code{\link{hisafe_info}()},
+\code{\link{hisafe_profiles}()},
+\code{\link{hop_filter}()},
+\code{\link{hop_merge}()},
+\code{\link{hop_params}()},
+\code{\link{hop_rename}()},
+\code{\link{is_face}()},
+\code{\link{is_hip}()},
+\code{\link{is_hop}()},
+\code{\link{join_profiles}()},
+\code{\link{make_rel_years}()},
+\code{\link{profile_check}()},
+\code{\link{variable_check}()},
+\code{\link{which_profiles}()}
 }
 \concept{hisafe helper functions}

@@ -4,11 +4,23 @@
 \alias{plot_hisafe_tstress}
 \title{Plot crop temperature and temperature stress regions}
 \usage{
-plot_hisafe_tstress(hop, simu.name, type = "lue", years = "all",
-  months = "all", cell.ids = "all", facet.year = TRUE,
-  facet.month = TRUE, temin = 0, teopt = 10, teoptbis = 20,
-  temax = 40, tminremp = 0, tmaxremp = 30,
-  shade.color = c("grey50", "grey70", "white"))
+plot_hisafe_tstress(
+  hop,
+  simu.name,
+  type = "lue",
+  years = "all",
+  months = "all",
+  cell.ids = "all",
+  facet.year = TRUE,
+  facet.month = TRUE,
+  temin = 0,
+  teopt = 10,
+  teoptbis = 20,
+  temax = 40,
+  tminremp = 0,
+  tmaxremp = 30,
+  shade.color = c("grey50", "grey70", "white")
+)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -56,12 +68,13 @@ plot_hisafe_tempstress(hop, "Sim_1")
 }
 }
 \seealso{
-Other hisafe plot functions: \code{\link{plot_hisafe_annualcells}},
-  \code{\link{plot_hisafe_bg}},
-  \code{\link{plot_hisafe_cells}},
-  \code{\link{plot_hisafe_monthcells}},
-  \code{\link{plot_hisafe_scene}},
-  \code{\link{plot_hisafe_ts}},
-  \code{\link{plot_hisafe_voxels}}
+Other hisafe plot functions: 
+\code{\link{plot_hisafe_annualcells}()},
+\code{\link{plot_hisafe_bg}()},
+\code{\link{plot_hisafe_cells}()},
+\code{\link{plot_hisafe_monthcells}()},
+\code{\link{plot_hisafe_scene}()},
+\code{\link{plot_hisafe_ts}()},
+\code{\link{plot_hisafe_voxels}()}
 }
 \concept{hisafe plot functions}

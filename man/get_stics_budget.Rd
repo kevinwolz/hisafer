@@ -4,8 +4,7 @@
 \alias{get_stics_budget}
 \title{Get stics budget values from .bil export files}
 \usage{
-get_stics_budget(year, simu.name, path, stics.names, start.header,
-  end.header)
+get_stics_budget(year, simu.name, path, stics.names, start.header, end.header)
 }
 \arguments{
 \item{year}{Year of the file to extract.}

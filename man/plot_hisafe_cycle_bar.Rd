@@ -4,11 +4,23 @@
 \alias{plot_hisafe_cycle_bar}
 \title{Plot annual barchart of major cycles}
 \usage{
-plot_hisafe_cycle_bar(hop, cycle, freq = "year", simu.names = "all",
-  tree.ids = "all", years = "all", months = "all", date.min = NA,
-  date.max = NA, doy.start = 1, color.palette = NULL,
-  bar.color = "black", crop.names = c("Main crop", "Inter crop"),
-  plot = TRUE, tidy = plot)
+plot_hisafe_cycle_bar(
+  hop,
+  cycle,
+  freq = "year",
+  simu.names = "all",
+  tree.ids = "all",
+  years = "all",
+  months = "all",
+  date.min = NA,
+  date.max = NA,
+  doy.start = 1,
+  color.palette = NULL,
+  bar.color = "black",
+  crop.names = c("Main crop", "Inter crop"),
+  plot = TRUE,
+  tidy = plot
+)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
@@ -89,10 +101,14 @@ ggsave_fitmax("water_cycle.png", water.plot)
 }
 }
 \seealso{
-Other hisafe analysis functions: \code{\link{LER_summary}},
-  \code{\link{LER}}, \code{\link{analyze_hisafe}},
-  \code{\link{cycle_summary}}, \code{\link{hisafe_budget}},
-  \code{\link{plot_hisafe_cycle_ts}},
-  \code{\link{stics_budget_comp}}, \code{\link{write_hop}}
+Other hisafe analysis functions: 
+\code{\link{LER_summary}()},
+\code{\link{LER}()},
+\code{\link{analyze_hisafe}()},
+\code{\link{cycle_summary}()},
+\code{\link{hisafe_budget}()},
+\code{\link{plot_hisafe_cycle_ts}()},
+\code{\link{stics_budget_comp}()},
+\code{\link{write_hop}()}
 }
 \concept{hisafe analysis functions}

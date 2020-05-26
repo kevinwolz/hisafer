@@ -4,9 +4,18 @@
 \alias{read_hisafe}
 \title{Read output from one or more Hi-sAFe simulations}
 \usage{
-read_hisafe(hip = NULL, path = NULL, simu.names = "all",
-  profiles = "all", show.progress = TRUE, read.inputs = TRUE,
-  max.size = 300, date.min = NA, date.max = NA, dates = NULL)
+read_hisafe(
+  hip = NULL,
+  path = NULL,
+  simu.names = "all",
+  profiles = "all",
+  show.progress = TRUE,
+  read.inputs = TRUE,
+  max.size = 300,
+  date.min = NA,
+  date.max = NA,
+  dates = NULL
+)
 }
 \arguments{
 \item{hip}{An object of class "hip". To create a hip object see \code{\link{define_hisafe}}.

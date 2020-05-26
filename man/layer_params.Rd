@@ -40,10 +40,11 @@ hip <- define_hisafe(path = getwd(),
 }
 }
 \seealso{
-Other hisafe definition functions: \code{\link{define_hisafe_file}},
-  \code{\link{define_hisafe}},
-  \code{\link{layer_init_params}},
-  \code{\link{root_init_params}},
-  \code{\link{tree_init_params}}
+Other hisafe definition functions: 
+\code{\link{define_hisafe_file}()},
+\code{\link{define_hisafe}()},
+\code{\link{layer_init_params}()},
+\code{\link{root_init_params}()},
+\code{\link{tree_init_params}()}
 }
 \concept{hisafe definition functions}

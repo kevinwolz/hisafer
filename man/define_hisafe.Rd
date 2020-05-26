@@ -4,9 +4,16 @@
 \alias{define_hisafe}
 \title{Define a Hi-sAFe experiment}
 \usage{
-define_hisafe(path, exp.name = "experiment", profiles = "all",
-  template = "agroforestry", factorial = FALSE, force = FALSE,
-  bulk.pass = NULL, ...)
+define_hisafe(
+  path,
+  exp.name = "experiment",
+  profiles = "all",
+  template = "agroforestry",
+  factorial = FALSE,
+  force = FALSE,
+  bulk.pass = NULL,
+  ...
+)
 }
 \arguments{
 \item{path}{A character string of the path (relative or absolute) to the directory where the simulation/experiment is to be built.}
@@ -93,10 +100,11 @@ lat.orient.exp <- define_hisafe(path = "./",
 }
 }
 \seealso{
-Other hisafe definition functions: \code{\link{define_hisafe_file}},
-  \code{\link{layer_init_params}},
-  \code{\link{layer_params}},
-  \code{\link{root_init_params}},
-  \code{\link{tree_init_params}}
+Other hisafe definition functions: 
+\code{\link{define_hisafe_file}()},
+\code{\link{layer_init_params}()},
+\code{\link{layer_params}()},
+\code{\link{root_init_params}()},
+\code{\link{tree_init_params}()}
 }
 \concept{hisafe definition functions}

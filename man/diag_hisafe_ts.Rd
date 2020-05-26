@@ -36,9 +36,10 @@ diag_hisafe_ts(mydata, "trees")
 }
 }
 \seealso{
-Other hisafe diagnostic fucntions: \code{\link{diag_hisafe_annualcells}},
-  \code{\link{diag_hisafe_cells}},
-  \code{\link{diag_hisafe_monthcells}},
-  \code{\link{diag_hisafe_voxels}}
+Other hisafe diagnostic fucntions: 
+\code{\link{diag_hisafe_annualcells}()},
+\code{\link{diag_hisafe_cells}()},
+\code{\link{diag_hisafe_monthcells}()},
+\code{\link{diag_hisafe_voxels}()}
 }
 \concept{hisafe diagnostic fucntions}

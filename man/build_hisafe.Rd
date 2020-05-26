@@ -4,8 +4,13 @@
 \alias{build_hisafe}
 \title{Build a Hi-sAFe simulation or experiment}
 \usage{
-build_hisafe(hip, files = "all", plot.scene = TRUE,
-  summary.files = TRUE, stics.diagnostics = FALSE)
+build_hisafe(
+  hip,
+  files = "all",
+  plot.scene = TRUE,
+  summary.files = TRUE,
+  stics.diagnostics = FALSE
+)
 }
 \arguments{
 \item{hip}{An object of class "hip". To create a hip object see \code{\link{define_hisafe}}.}

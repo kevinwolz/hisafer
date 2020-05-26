@@ -4,9 +4,15 @@
 \alias{cycle_summary}
 \title{Plot summary dashboard of daily and annual cycles}
 \usage{
-cycle_summary(hop, daily.year, simu.name = NULL, cycles = c("carbon",
-  "light", "water", "nitrogen"), crop.names = c("Main crop",
-  "Inter crop"), output.path = NULL, plot.labels = NULL)
+cycle_summary(
+  hop,
+  daily.year,
+  simu.name = NULL,
+  cycles = c("carbon", "light", "water", "nitrogen"),
+  crop.names = c("Main crop", "Inter crop"),
+  output.path = NULL,
+  plot.labels = NULL
+)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
@@ -38,11 +44,14 @@ cycle.plot <- cycle_summary(myhop, 2000)
 }
 }
 \seealso{
-Other hisafe analysis functions: \code{\link{LER_summary}},
-  \code{\link{LER}}, \code{\link{analyze_hisafe}},
-  \code{\link{hisafe_budget}},
-  \code{\link{plot_hisafe_cycle_bar}},
-  \code{\link{plot_hisafe_cycle_ts}},
-  \code{\link{stics_budget_comp}}, \code{\link{write_hop}}
+Other hisafe analysis functions: 
+\code{\link{LER_summary}()},
+\code{\link{LER}()},
+\code{\link{analyze_hisafe}()},
+\code{\link{hisafe_budget}()},
+\code{\link{plot_hisafe_cycle_bar}()},
+\code{\link{plot_hisafe_cycle_ts}()},
+\code{\link{stics_budget_comp}()},
+\code{\link{write_hop}()}
 }
 \concept{hisafe analysis functions}

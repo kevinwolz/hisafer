@@ -4,8 +4,7 @@
 \alias{call_hisafe}
 \title{Calls Hi-sAFe from command line}
 \usage{
-call_hisafe(path, simu.name, capsis.path, launch.call, default.folder,
-  quietly)
+call_hisafe(path, simu.name, capsis.path, launch.call, default.folder, quietly)
 }
 \arguments{
 \item{path}{A character string of the path to the folder containing the simulation folder. Required if \code{hip} is not provided.}

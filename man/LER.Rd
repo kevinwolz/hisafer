@@ -4,10 +4,18 @@
 \alias{LER}
 \title{Plot LER for yield, light, water, or nitrogen}
 \usage{
-LER(face, cycle = "yield", timescales = c("Annual", "Cumulative"),
-  components = c("LER", "Trees", "Crop"), color.palette = c("black",
-  "#009E73", "#E69F00"), size.palette = c(2, 1, 1), hline1 = TRUE,
-  ymax = NA, plot = TRUE, ...)
+LER(
+  face,
+  cycle = "yield",
+  timescales = c("Annual", "Cumulative"),
+  components = c("LER", "Trees", "Crop"),
+  color.palette = c("black", "#009E73", "#E69F00"),
+  size.palette = c(2, 1, 1),
+  hline1 = TRUE,
+  ymax = NA,
+  plot = TRUE,
+  ...
+)
 }
 \arguments{
 \item{face}{An object of class "face".}
@@ -42,11 +50,14 @@ ler.plot <- LER(hop, "yield")
 }
 }
 \seealso{
-Other hisafe analysis functions: \code{\link{LER_summary}},
-  \code{\link{analyze_hisafe}},
-  \code{\link{cycle_summary}}, \code{\link{hisafe_budget}},
-  \code{\link{plot_hisafe_cycle_bar}},
-  \code{\link{plot_hisafe_cycle_ts}},
-  \code{\link{stics_budget_comp}}, \code{\link{write_hop}}
+Other hisafe analysis functions: 
+\code{\link{LER_summary}()},
+\code{\link{analyze_hisafe}()},
+\code{\link{cycle_summary}()},
+\code{\link{hisafe_budget}()},
+\code{\link{plot_hisafe_cycle_bar}()},
+\code{\link{plot_hisafe_cycle_ts}()},
+\code{\link{stics_budget_comp}()},
+\code{\link{write_hop}()}
 }
 \concept{hisafe analysis functions}

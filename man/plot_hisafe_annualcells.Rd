@@ -4,8 +4,16 @@
 \alias{plot_hisafe_annualcells}
 \title{Tile plot of Hi-sAFe annualCells output variable}
 \usage{
-plot_hisafe_annualcells(hop, variable = "yieldMax", simu.names = "all",
-  years, plot.x = "x", trees = TRUE, canopies = TRUE, plot = TRUE)
+plot_hisafe_annualcells(
+  hop,
+  variable = "yieldMax",
+  simu.names = "all",
+  years,
+  plot.x = "x",
+  trees = TRUE,
+  canopies = TRUE,
+  plot = TRUE
+)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -48,12 +56,13 @@ ggsave_fitmax("yield.png", tile.plot)
 }
 }
 \seealso{
-Other hisafe plot functions: \code{\link{plot_hisafe_bg}},
-  \code{\link{plot_hisafe_cells}},
-  \code{\link{plot_hisafe_monthcells}},
-  \code{\link{plot_hisafe_scene}},
-  \code{\link{plot_hisafe_tstress}},
-  \code{\link{plot_hisafe_ts}},
-  \code{\link{plot_hisafe_voxels}}
+Other hisafe plot functions: 
+\code{\link{plot_hisafe_bg}()},
+\code{\link{plot_hisafe_cells}()},
+\code{\link{plot_hisafe_monthcells}()},
+\code{\link{plot_hisafe_scene}()},
+\code{\link{plot_hisafe_tstress}()},
+\code{\link{plot_hisafe_ts}()},
+\code{\link{plot_hisafe_voxels}()}
 }
 \concept{hisafe plot functions}

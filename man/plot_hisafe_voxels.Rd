@@ -4,10 +4,21 @@
 \alias{plot_hisafe_voxels}
 \title{Tile plot of Hi-sAFe voxels output variable}
 \usage{
-plot_hisafe_voxels(hop, variable, date.min = NA, date.max = NA,
-  simu.names = "all", X = NA, Y = NA, Z = NA, summarize.by = "z",
-  facet.simu = TRUE, facet.z = FALSE, vline.dates = NA,
-  plot = TRUE)
+plot_hisafe_voxels(
+  hop,
+  variable,
+  date.min = NA,
+  date.max = NA,
+  simu.names = "all",
+  X = NA,
+  Y = NA,
+  Z = NA,
+  summarize.by = "z",
+  facet.simu = TRUE,
+  facet.z = FALSE,
+  vline.dates = NA,
+  plot = TRUE
+)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -57,12 +68,13 @@ ggsave_fitmax("tiled_waterAvailable.png", tile.plot)
 }
 }
 \seealso{
-Other hisafe plot functions: \code{\link{plot_hisafe_annualcells}},
-  \code{\link{plot_hisafe_bg}},
-  \code{\link{plot_hisafe_cells}},
-  \code{\link{plot_hisafe_monthcells}},
-  \code{\link{plot_hisafe_scene}},
-  \code{\link{plot_hisafe_tstress}},
-  \code{\link{plot_hisafe_ts}}
+Other hisafe plot functions: 
+\code{\link{plot_hisafe_annualcells}()},
+\code{\link{plot_hisafe_bg}()},
+\code{\link{plot_hisafe_cells}()},
+\code{\link{plot_hisafe_monthcells}()},
+\code{\link{plot_hisafe_scene}()},
+\code{\link{plot_hisafe_tstress}()},
+\code{\link{plot_hisafe_ts}()}
 }
 \concept{hisafe plot functions}

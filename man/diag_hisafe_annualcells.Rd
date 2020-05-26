@@ -4,8 +4,12 @@
 \alias{diag_hisafe_annualcells}
 \title{Plot annualCells diagnostics of Hi-sAFe output}
 \usage{
-diag_hisafe_annualcells(hop, years = seq(min(hop$annualCells$Year),
-  max(hop$annualCells$Year), 5), output.path = NULL, ...)
+diag_hisafe_annualcells(
+  hop,
+  years = seq(min(hop$annualCells$Year), max(hop$annualCells$Year), 5),
+  output.path = NULL,
+  ...
+)
 }
 \arguments{
 \item{hop}{An object of class "hop" or "face" containing output data from one or more Hi-sAFe simulations.}
@@ -35,9 +39,10 @@ diag_hisafe_annualcells(mydata)
 }
 }
 \seealso{
-Other hisafe diagnostic fucntions: \code{\link{diag_hisafe_cells}},
-  \code{\link{diag_hisafe_monthcells}},
-  \code{\link{diag_hisafe_ts}},
-  \code{\link{diag_hisafe_voxels}}
+Other hisafe diagnostic fucntions: 
+\code{\link{diag_hisafe_cells}()},
+\code{\link{diag_hisafe_monthcells}()},
+\code{\link{diag_hisafe_ts}()},
+\code{\link{diag_hisafe_voxels}()}
 }
 \concept{hisafe diagnostic fucntions}

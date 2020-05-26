@@ -4,9 +4,18 @@
 \alias{hisafe_budget}
 \title{Calculate water and nitrogen budgets}
 \usage{
-hisafe_budget(hop, cycle, freq = "year", doy.start = "sim",
-  simu.names = "all", years = "all", months = "all",
-  save.table = TRUE, save.plot = TRUE, output.path = NULL)
+hisafe_budget(
+  hop,
+  cycle,
+  freq = "year",
+  doy.start = "sim",
+  simu.names = "all",
+  years = "all",
+  months = "all",
+  save.table = TRUE,
+  save.plot = TRUE,
+  output.path = NULL
+)
 }
 \arguments{
 \item{hop}{An object of class hop or face.}
@@ -43,11 +52,14 @@ water.budget <- hisafe_budget(myhop, "water")
 }
 }
 \seealso{
-Other hisafe analysis functions: \code{\link{LER_summary}},
-  \code{\link{LER}}, \code{\link{analyze_hisafe}},
-  \code{\link{cycle_summary}},
-  \code{\link{plot_hisafe_cycle_bar}},
-  \code{\link{plot_hisafe_cycle_ts}},
-  \code{\link{stics_budget_comp}}, \code{\link{write_hop}}
+Other hisafe analysis functions: 
+\code{\link{LER_summary}()},
+\code{\link{LER}()},
+\code{\link{analyze_hisafe}()},
+\code{\link{cycle_summary}()},
+\code{\link{plot_hisafe_cycle_bar}()},
+\code{\link{plot_hisafe_cycle_ts}()},
+\code{\link{stics_budget_comp}()},
+\code{\link{write_hop}()}
 }
 \concept{hisafe analysis functions}

@@ -4,19 +4,34 @@
 \alias{hisafe_snapshot}
 \title{Create daily plots combining hisafe_slice() & plot_hisafe_cells()}
 \usage{
-hisafe_snapshot(hop, output.path = NULL,
+hisafe_snapshot(
+  hop,
+  output.path = NULL,
   file.prefix = "HISAFE_Snapshot",
-  cells.var = "relativeTotalParIncident", date.min = NA,
-  date.max = NA, dates = NULL, rel.dates = NULL,
-  simu.names = "all", plot.x = "x", slice = TRUE, trees = TRUE,
-  crops = TRUE, voxels = TRUE, cells = TRUE, complete.only = FALSE,
-  mem.max = 10, device = "png", dpi = 250, vars = list(crown.alpha
-  = "leafArea", trunk.alpha = "carbonLabile", crop.alpha = "lai",
-  yield.alpha = "eai", voxel.alpha = "totalTreeRootDensity", voxel.border =
-  "cropRootDensity", voxel.L.size = "theta", voxel.C.size =
-  "totalTreeCoarseRootBiomass", voxel.R.size = "mineralNitrogenStock",
-  voxel.L.alpha = "totalTreeWaterUptake", voxel.C.alpha = "fineRootCost",
-  voxel.R.alpha = "totalTreeNitrogenUptake"), ...)
+  cells.var = "relativeTotalParIncident",
+  date.min = NA,
+  date.max = NA,
+  dates = NULL,
+  rel.dates = NULL,
+  simu.names = "all",
+  plot.x = "x",
+  slice = TRUE,
+  trees = TRUE,
+  crops = TRUE,
+  voxels = TRUE,
+  cells = TRUE,
+  complete.only = FALSE,
+  mem.max = 10,
+  device = "png",
+  dpi = 250,
+  vars = list(crown.alpha = "leafArea", trunk.alpha = "carbonLabile", crop.alpha =
+    "lai", yield.alpha = "eai", voxel.alpha = "totalTreeRootDensity", voxel.border =
+    "cropRootDensity", voxel.L.size = "theta", voxel.C.size =
+    "totalTreeCoarseRootBiomass", voxel.R.size = "mineralNitrogenStock", voxel.L.alpha =
+    "totalTreeWaterUptake", voxel.C.alpha = "fineRootCost", voxel.R.alpha =
+    "totalTreeNitrogenUptake"),
+  ...
+)
 }
 \arguments{
 \item{hop}{An object of class hop.}
@@ -82,7 +97,8 @@ This function creates the raw materials (daily images) for animations/videos of 
 }
 }
 \seealso{
-Other hisafe visualization functions: \code{\link{hisafe_root3D}},
-  \code{\link{hisafe_slice}}
+Other hisafe visualization functions: 
+\code{\link{hisafe_root3D}()},
+\code{\link{hisafe_slice}()}
 }
 \concept{hisafe visualization functions}

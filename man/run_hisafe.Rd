@@ -4,9 +4,18 @@
 \alias{run_hisafe}
 \title{Run one or more Hi-sAFe simulations}
 \usage{
-run_hisafe(hip = NULL, path = NULL, simu.names = "all", capsis.path,
-  parallel = FALSE, num.cores = NULL, mem.spec = FALSE,
-  quietly = FALSE, launch.call = "ScriptGen", default.folder = "")
+run_hisafe(
+  hip = NULL,
+  path = NULL,
+  simu.names = "all",
+  capsis.path,
+  parallel = FALSE,
+  num.cores = NULL,
+  mem.spec = FALSE,
+  quietly = FALSE,
+  launch.call = "ScriptGen",
+  default.folder = ""
+)
 }
 \arguments{
 \item{hip}{An object of class "hip". Required if \code{path} is not provided.}

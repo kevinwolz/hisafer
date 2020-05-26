@@ -4,9 +4,16 @@
 \alias{LER_summary}
 \title{Plot LER for yield, light, water, or nitrogen}
 \usage{
-LER_summary(face, metrics = c("yield", "light", "water", "nitrogen"),
-  fixed.scale = TRUE, nrow = 4, output.path = NULL,
-  plot.labels = NULL, legend.inside = TRUE, ...)
+LER_summary(
+  face,
+  metrics = c("yield", "light", "water", "nitrogen"),
+  fixed.scale = TRUE,
+  nrow = 4,
+  output.path = NULL,
+  plot.labels = NULL,
+  legend.inside = TRUE,
+  ...
+)
 }
 \arguments{
 \item{face}{An object of class "face".}
@@ -41,11 +48,14 @@ ler.plot <- summary_LER(face, "./")
 }
 }
 \seealso{
-Other hisafe analysis functions: \code{\link{LER}},
-  \code{\link{analyze_hisafe}},
-  \code{\link{cycle_summary}}, \code{\link{hisafe_budget}},
-  \code{\link{plot_hisafe_cycle_bar}},
-  \code{\link{plot_hisafe_cycle_ts}},
-  \code{\link{stics_budget_comp}}, \code{\link{write_hop}}
+Other hisafe analysis functions: 
+\code{\link{LER}()},
+\code{\link{analyze_hisafe}()},
+\code{\link{cycle_summary}()},
+\code{\link{hisafe_budget}()},
+\code{\link{plot_hisafe_cycle_bar}()},
+\code{\link{plot_hisafe_cycle_ts}()},
+\code{\link{stics_budget_comp}()},
+\code{\link{write_hop}()}
 }
 \concept{hisafe analysis functions}
