@@ -125,14 +125,17 @@ define_hisafe <- function(path,
   if(factorial) {
     exp.plan <- dplyr::as_tibble(expand.grid(param.list, stringsAsFactors = FALSE))
   } else if(length(param.list) > 0){
-    lengths <- purrr::map(param.list, length)
-    max.length <- max(unlist(lengths))
-    reps_maker <- function(x) max.length / x
-    check_integers <- function(x) x %% 1 == 0
-    reps.to.make <- purrr::map(lengths, reps_maker)
-    integer.check <- unlist(purrr::map(reps.to.make, check_integers))
-    param.list.filled <- purrr::map2(param.list, reps.to.make, rep.int)
-    exp.plan <- dplyr::as_tibble(param.list.filled)
+    reps.to.make <- param.list %>%
+      purrr::map(length) %>%
+      unlist() %>%
+      (function(x) max(x) / x)
+
+    if(any(reps.to.make %% 1 != 0))
+      stop("If factorial = FALSE, lengths of supplied input parameters must be multiples of each other", call. = FALSE)
+
+    exp.plan <- param.list %>%
+      purrr::map2(reps.to.make, rep.int) %>%
+      dplyr::as_tibble()
   } else {
     exp.plan <- dplyr::tibble(SimulationName = "Sim_1")
   }
