@@ -8,6 +8,7 @@ build_structure(
   exp.plan,
   path,
   profiles,
+  freqs,
   template,
   files,
   plot.scene,
@@ -20,7 +21,9 @@ build_structure(
 
 \item{path}{A character string of the path to the simulation folder.}
 
-\item{profiles}{A character vector of export profiles the simulation to export.}
+\item{profiles}{A character vector of export profiles the simulation should export.}
+
+\item{freqs}{A numeric vector of exportFrequencies of the export profiles.}
 
 \item{template}{A character string of the path to the Hi-sAFe directory structure/files to use as a template
 (or one of the strings signaling a default template)}

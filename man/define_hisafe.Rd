@@ -8,6 +8,7 @@ define_hisafe(
   path,
   exp.name = "experiment",
   profiles = "all",
+  freqs = NULL,
   template = "agroforestry",
   factorial = FALSE,
   force = FALSE,
@@ -22,6 +23,9 @@ define_hisafe(
 
 \item{profiles}{A character vector of Hi-sAFe export profiles to be exported by Hi-sAFe.
 If "all" (the default), then the basic set of profiles for all data levels will be exported.}
+
+\item{freqs}{A numeric vector of export frequencies for the export profiles specified in \code{profiles}.
+if \code{NULL} (the default), then the default export frequences (daily, monthly, annual) are applied to respective profiles.}
 
 \item{template}{A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
 hisafer comes with a variety of "default" templates than can be used by specificying specific character strings:
@@ -66,11 +70,12 @@ Passing \code{NA} to any parameter will "deactivate" the parameter by commenting
 processes such as tree root pruning or branch pruning, but care must be taken to only deactivate parameters that are not mandatory!}
 }
 \value{
-An object of class "hip". This is a list of 4 elements:
+An object of class "hip". This is a list of 5 elements:
 \itemize{
  \item{"exp.plan"}{ - A data frame (tibble) of manipulated Hi-sAFe input parameters, with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.}
  \item{"template"}{ - A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files used.}
  \item{"profiles"}{ - A character vector of the names of the Hi-sAFe export profiles that will be exported by Hi-sAFe.}
+ \item{"freqs"}{ - A numeric vector of the exportFrequencies at which the Hi-sAFe export profiles will be exported by Hi-sAFe.}
  \item{"path"}{ - A character string of the absolute path to the directory where the simulation/experiment is to be built.
 }
 If a relative path is via \code{path}, it is converted to an absolute path to maximize "hip" object versaitility.}

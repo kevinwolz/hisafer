@@ -3,11 +3,12 @@
 #' @details It is strongly recommended to name each simulation in your experiment. This can be done via the \code{SimulationName} parameter.
 #' If no names are provided, then generic names of "Sim_1", "Sim_2", etc. will be generated.
 #' The only additional input parameter that is available but not part of the input files is **weatherFile**, which specifies a path to a .WTH file to use.
-#' @return An object of class "hip". This is a list of 4 elements:
+#' @return An object of class "hip". This is a list of 5 elements:
 #' \itemize{
 #'  \item{"exp.plan"}{ - A data frame (tibble) of manipulated Hi-sAFe input parameters, with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.}
 #'  \item{"template"}{ - A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files used.}
 #'  \item{"profiles"}{ - A character vector of the names of the Hi-sAFe export profiles that will be exported by Hi-sAFe.}
+#'  \item{"freqs"}{ - A numeric vector of the exportFrequencies at which the Hi-sAFe export profiles will be exported by Hi-sAFe.}
 #'  \item{"path"}{ - A character string of the absolute path to the directory where the simulation/experiment is to be built.
 #' }
 #' If a relative path is via \code{path}, it is converted to an absolute path to maximize "hip" object versaitility.}
@@ -15,6 +16,8 @@
 #' @param exp.name A character string of the name of the experiment folder. Only used if defining more than one simulation.
 #' @param profiles A character vector of Hi-sAFe export profiles to be exported by Hi-sAFe.
 #' If "all" (the default), then the basic set of profiles for all data levels will be exported.
+#' @param freqs A numeric vector of export frequencies for the export profiles specified in \code{profiles}.
+#' if \code{NULL} (the default), then the default export frequences (daily, monthly, annual) are applied to respective profiles.
 #' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
 #' hisafer comes with a variety of "default" templates than can be used by specificying specific character strings:
 #' \itemize{
@@ -73,15 +76,23 @@
 define_hisafe <- function(path,
                           exp.name  = "experiment",
                           profiles  = "all",
+                          freqs     = NULL,
                           template  = "agroforestry",
                           factorial = FALSE,
                           force     = FALSE,
                           bulk.pass = NULL, ...) {
 
-  if(!(is.character(exp.name) & length(exp.name) == 1))     stop("exp.name argument must be a character vector of length 1", call. = FALSE)
-  if(!(all(is.character(profiles)) | profiles[1] == "all")) stop("profiles argument must be 'all' or a character vector",    call. = FALSE)
-  if(!(is.character(template) & length(template) == 1))     stop("template argument must be a character vector of length 1", call. = FALSE)
-  if(!(is.null(bulk.pass) | is.list(bulk.pass)))            stop("bulk.pass argument must be a list",                        call. = FALSE)
+  if(!(is.character(exp.name) & length(exp.name) == 1))
+    stop("exp.name argument must be a character vector of length 1", call. = FALSE)
+  if(!(all(is.character(profiles)) | profiles[1] == "all"))
+    stop("profiles argument must be 'all' or a character vector",    call. = FALSE)
+  if(!(all(is.numeric(freqs)) | is.null(freqs)))
+    stop("freqs argument must be NULL or a numeric vector",          call. = FALSE)
+  if(!(is.character(template) & length(template) == 1))
+    stop("template argument must be a character vector of length 1", call. = FALSE)
+  if(!(is.null(bulk.pass) | is.list(bulk.pass)))
+    stop("bulk.pass argument must be a list",                        call. = FALSE)
+
   is_TF(factorial)
   is_TF(force)
 
@@ -93,12 +104,23 @@ define_hisafe <- function(path,
   available.profiles <- get_available_profiles(template)
   if(profiles[1] == "all") {
     profiles <- available.profiles[available.profiles %in% CORE.PROFILES]
-  } else if (profiles[1] == "all-private"){
+  } else if(profiles[1] == "all-private"){
     profiles <- available.profiles
   } else if(!all(profiles %in% available.profiles)) {
     missing.profiles <- profiles[!(profiles %in% available.profiles)]
     stop(paste(c("The following profiles are not available:", missing.profiles), collapse = "\n"), call. = FALSE)
   }
+
+  ## Apply export frequencies from user or internal defaults
+  default.freqs <- SUPPORTED.PROFILES$freqs[match(profiles, SUPPORTED.PROFILES$profiles)]
+  if(is.null(freqs)) {
+    freqs <- default.freqs
+  } else if(length(profiles) != length(freqs)) {
+    stop("profiles and freqs must have the same length", call. = FALSE)
+  } #else if(!all((freqs %% default.freqs) == 0)) {
+    #stop("user-supplied freqs must be multiples of default freqs for each profile (i.e multiples of 1 for daily profies,
+    #     multiples of 30 for monthly profiles, and multiples of 365 for annual profiles)", call. = FALSE)
+  #}
 
   if(factorial) {
     exp.plan <- dplyr::as_tibble(expand.grid(param.list, stringsAsFactors = FALSE))
@@ -124,6 +146,7 @@ define_hisafe <- function(path,
   hip <- list(exp.plan = exp.plan,
               template = template,
               profiles = profiles,
+              freqs    = freqs,
               path     = path)
 
   check_input_values(hip = hip, force = force)
@@ -389,7 +412,8 @@ check_input_values <- function(hip, force) {
 
   ## Don't Edit Export Profile Errors
   EP.error <- ifelse(is_mod("profileNames") | is_mod("exportFrequencies"),
-                     "-- profileNames and exportFrequencies cannot be defined using define_hisafe(). Use the 'profiles' argument of define_hisafe().", "")
+                     "-- profileNames and exportFrequencies must be defined using the 'profiles' and 'freqs'
+                     arguments of define_hisafe(), respectively.", "")
 
   ## STICS parameter dependencies check
   capillary.error <- ifelse((is_mod("capillaryUptake") | is_mod("capillaryUptakeMinWater")) & (all(get_used("capillary") == 0) & all(get_used("macropososity") == 0)),

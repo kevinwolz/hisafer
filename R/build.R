@@ -74,6 +74,7 @@ build_hisafe <- function(hip,
               build_structure,
               path              = hip$path,
               profiles          = hip$profiles,
+              freqs             = hip$freqs,
               template          = hip$template,
               files             = files,
               plot.scene        = plot.scene,
@@ -95,7 +96,8 @@ build_hisafe <- function(hip,
 #' @return Invisibly returns a list containing the original hip object and supplied path.
 #' @param exp.plan The exp.plan element of a "hip" object, containing a single row.
 #' @param path A character string of the path to the simulation folder.
-#' @param profiles A character vector of export profiles the simulation to export.
+#' @param profiles A character vector of export profiles the simulation should export.
+#' @param freqs A numeric vector of exportFrequencies of the export profiles.
 #' @param template A character string of the path to the Hi-sAFe directory structure/files to use as a template
 #' (or one of the strings signaling a default template)
 #' @param files A character string of file types indicating which simulation files to build. Use "all" to write all required simulation files.
@@ -104,7 +106,7 @@ build_hisafe <- function(hip,
 #' @param summary.files Logical indicating whether or not to write out summary .CSV files about the experiment and each simulation during the build.
 #' @param stics.diagnostics Logical indicating whether or not STICS diagnostics files should be exported in the simulation.
 #' @keywords internal
-build_structure <- function(exp.plan, path, profiles, template, files, plot.scene, summary.files, stics.diagnostics) {
+build_structure <- function(exp.plan, path, profiles, freqs, template, files, plot.scene, summary.files, stics.diagnostics) {
 
   TEMPLATE_PARAMS <- get_template_params(template)
   PARAM_NAMES     <- get_param_names(TEMPLATE_PARAMS)
@@ -209,7 +211,7 @@ build_structure <- function(exp.plan, path, profiles, template, files, plot.scen
   sim      <- read_param_file(sim.path)
   sim.new  <- edit_param_file(sim, dplyr::select(exp.plan, sim.params.to.edit)) %>%
     edit_param_element("profileNames", paste0(c(profiles, "sti"[stics.diagnostics]), collapse = ",")) %>%
-    edit_param_element("exportFrequencies", paste0(c(SUPPORTED.PROFILES$freqs[match(profiles, SUPPORTED.PROFILES$profiles)], c(1)[stics.diagnostics]), collapse = ","))
+    edit_param_element("exportFrequencies", paste0(c(freqs, (1)[stics.diagnostics]), collapse = ","))
   write_param_file(sim.new, sim.path)
   dum <- file.rename(sim.path, paste0(simu.path, "/", exp.plan$SimulationName, ".sim"))
 
