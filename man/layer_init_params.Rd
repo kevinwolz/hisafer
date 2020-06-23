@@ -23,7 +23,7 @@ A list containing a Hi-sAFE soil layer initialization table.
 }
 \description{
 Generates a soil layer initialization table suitable for passing to \code{\link{define_hisafe}}.
-The output of this function is always passed to the \code{\link{define_hisafe}} via the \code{layer.initialization} argument
+The output of this function is always passed to \code{\link{define_hisafe}} via the \code{layer.initialization} argument
 (see example below). Any passed parameters modify the table in the provided template.
 }
 \examples{
@@ -39,6 +39,7 @@ Other hisafe definition functions:
 \code{\link{define_hisafe}()},
 \code{\link{layer_params}()},
 \code{\link{root_init_params}()},
-\code{\link{tree_init_params}()}
+\code{\link{tree_init_params}()},
+\code{\link{variety_params}()}
 }
 \concept{hisafe definition functions}

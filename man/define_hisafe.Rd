@@ -61,9 +61,10 @@ There are three methods for passing parameters to \code{define_hisafe}, one for 
  a simulation can be defined by wrapping one or more numeric vectors within a list.
  For a single simulation, use \code{parameterName = list(c(value1, value2, ...))}.
  For an experiment, use \code{parameterName = list(c(value1, value2, ...), c(value3, value4, ...))}.}
- \item{"tables"}{ - There are four parameter tables within the .pld file (layers, layer.initialization, tree.initialization, root.initialization).
+ \item{"tables"}{ - There are four parameter tables within the .pld file (layers, layer.initialization, tree.initialization, root.initialization)
+ and one parameter table with the .plt file (varieties) that are supported.
  To define prameters within these tables, use the helper functions
- \code{\link{layer_params}}, \code{\link{layer_init_params}}, \code{\link{tree_init_params}}, and \code{\link{root_init_params}}.
+ \code{\link{layer_params}}, \code{\link{layer_init_params}}, \code{\link{tree_init_params}}, \code{\link{root_init_params}}, and \code{\link{variety_params}}.
  These functions create a list of data frames (tibbles).}
 }
 Passing \code{NA} to any parameter will "deactivate" the parameter by commenting it out in the resulting Hi-sAFe parameter file. This can be useful to deactivate
@@ -110,6 +111,7 @@ Other hisafe definition functions:
 \code{\link{layer_init_params}()},
 \code{\link{layer_params}()},
 \code{\link{root_init_params}()},
-\code{\link{tree_init_params}()}
+\code{\link{tree_init_params}()},
+\code{\link{variety_params}()}
 }
 \concept{hisafe definition functions}

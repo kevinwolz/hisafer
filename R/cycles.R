@@ -236,7 +236,7 @@ plot_hisafe_cycle_bar <- function(hop,
 #' @param color.palette A character stirng of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
 #' If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette.
 #' @param crop.names A character vector of length 2 containing the names to use in the legend for the mainCrop and interCrop of Hi-sAFe, in that order.
-#' @param pheno.lines Logical indicating whether or not vertical lines should be plotted on dates of phenoloigical stage changes
+#' @param pheno.lines Logical indicating whether or not vertical lines should be plotted on dates of tree phenoloigical stage changes
 #' @param branch.pruning.lines Logical indicating whether or not vertical lines should be plotted on dates of branch pruning
 #' @param root.pruning.lines Logical indicating whether or not vertical lines should be plotted on dates of root pruning
 #' @param trim Logical indicating whether or not to trim white space before and after the tree growth season when \code{cycle} is "carbon-increment"

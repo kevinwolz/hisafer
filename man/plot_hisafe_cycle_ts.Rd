@@ -42,7 +42,7 @@ If \code{NULL}, the default, then the default color palette is a color-blind-fri
 
 \item{crop.names}{A character vector of length 2 containing the names to use in the legend for the mainCrop and interCrop of Hi-sAFe, in that order.}
 
-\item{pheno.lines}{Logical indicating whether or not vertical lines should be plotted on dates of phenoloigical stage changes}
+\item{pheno.lines}{Logical indicating whether or not vertical lines should be plotted on dates of tree phenoloigical stage changes}
 
 \item{branch.pruning.lines}{Logical indicating whether or not vertical lines should be plotted on dates of branch pruning}
 

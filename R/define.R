@@ -623,7 +623,7 @@ check_type <- function(variable, exp.plan) {
 
 #' Generate root initialization table for define_hisafe
 #' @description Generates a root initialization table suitable for passing to \code{\link{define_hisafe}}.
-#' The output of this function is always passed to the \code{\link{define_hisafe}} via the \code{root.initialization} argument
+#' The output of this function is always passed to \code{\link{define_hisafe}} via the \code{root.initialization} argument
 #' (see example below). Any passed parameters modify the table in the provided template.
 #' @return A list containing a Hi-sAFE root initialization table.
 #' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
@@ -668,7 +668,7 @@ root_init_params <- function(template, reps = 1, ...) {
 
 #' Generate tree initialization table for define_hisafe
 #' @description Generates a tree initialization table suitable for passing to \code{\link{define_hisafe}}.
-#' The output of this function is always passed to the \code{\link{define_hisafe}} via the \code{tree.initialization} argument
+#' The output of this function is always passed to \code{\link{define_hisafe}} via the \code{tree.initialization} argument
 #' (see example below). Any passed parameters modify the table in the provided template.
 #' @return A list containing a Hi-sAFE tree initialization table.
 #' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation
@@ -706,7 +706,7 @@ tree_init_params <- function(template, ...) {
 
 #' Generate soil layer initialization table for define_hisafe
 #' @description Generates a soil layer initialization table suitable for passing to \code{\link{define_hisafe}}.
-#' The output of this function is always passed to the \code{\link{define_hisafe}} via the \code{layer.initialization} argument
+#' The output of this function is always passed to \code{\link{define_hisafe}} via the \code{layer.initialization} argument
 #' (see example below). Any passed parameters modify the table in the provided template.
 #' @return A list containing a Hi-sAFE soil layer initialization table.
 #' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation
@@ -746,7 +746,7 @@ layer_init_params <- function(template, ...) {
 
 #' Generate soil layer table for define_hisafe
 #' @description Generates a soil layer table suitable for passing to \code{\link{define_hisafe}}.
-#' The output of this function is always passed to the \code{\link{define_hisafe}} via the \code{layers} argument
+#' The output of this function is always passed to \code{\link{define_hisafe}} via the \code{layers} argument
 #' (see example below). Any passed parameters modify the table in the provided template.
 #' @return A list containing a Hi-sAFE soil layer table.
 #' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation
@@ -770,8 +770,8 @@ layer_init_params <- function(template, ...) {
 #' @examples
 #' \dontrun{
 #' hip <- define_hisafe(path = getwd(),
-#'                      layer.initialization = layer_init_params(template     = "agroforestry",
-#'                                                               partSizeSand = 200))
+#'                      layers = layer_params(template     = "agroforestry",
+#'                                            partSizeSand = 200))
 #' }
 layer_params <- function(template, ...) {
   supported <- c("thick", "sand", "clay", "limeStone", "organicMatter",
@@ -788,6 +788,65 @@ layer_params <- function(template, ...) {
     dplyr::mutate(stoneType = format(stoneType, nsmall = 0, trim = TRUE))
 
   if(nrow(out) > 5) stop(paste("Hi-sAFe supports a maximum of 5 soil layers"), call. = FALSE)
+
+  return(list(out))
+}
+
+#' Generate variety table for define_hisafe
+#' @description Generates a variety table suitable for passing to \code{\link{define_hisafe}}.
+#' The output of this function is always passed to \code{\link{define_hisafe}} via the \code{varieties} argument
+#' (see example below). Any passed parameters modify the table in the provided template.
+#' @return A list containing a Hi-sAFE variety table.
+#' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation
+#' folders/files to use.
+#' See \code{\link{define_hisafe}} for more details.
+#' @param ... Any parameters of Hi-sAFe variety table:
+#'  \itemize{
+#'  \item{"ID"}{}
+#'  \item{"codevar"}{}
+#'  \item{"stlevamf"}{}
+#'  \item{"stamflax"}{}
+#'  \item{"stlevdrp"}{}
+#'  \item{"stflodrp"}{}
+#'  \item{"stdrpdes"}{}
+#'  \item{"pgrainmaxi"}{}
+#'  \item{"adens"}{}
+#'  \item{"croirac"}{}
+#'  \item{"durvieF"}{}
+#'  \item{"jvc"}{}
+#'  \item{"sensiphot"}{}
+#'  \item{"stlaxsen"}{}
+#'  \item{"stsenlan"}{}
+#'  \item{"nbgrmax"}{}
+#'  \item{"stdrpmat"}{}
+#'  \item{"afruitpot"}{}
+#'  \item{"dureefruit"}{}
+#' }
+#' @export
+#' @importFrom dplyr %>%
+#' @family hisafe definition functions
+#' @examples
+#' \dontrun{
+#' hip <- define_hisafe(path = getwd(),
+#'                      varieties = variety_params(template = "monocrop",
+#'                                                 croirac  = 0.1))
+#' }
+variety_params <- function(template, ...) {
+  supported <- c("ID", "codevar", "stlevamf", "stamflax", "stlevdrp", "stflodrp", "stdrpdes",
+                 "pgrainmaxi", "adens", "croirac", "durvieF", "jvc", "sensiphot", "stlaxsen",
+                 "stsenlan", "nbgrmax", "stdrpmat", "afruitpot", "dureefruit")
+  out <- modify_table(args           = list(...),
+                      supported.args = supported,
+                      numeric.args   = supported[supported != "codevar"],
+                      character.args = "codevar",
+                      positive.args  = supported[!(supported %in% c("codevar", "adens"))],
+                      perc.args      = NULL,
+                      table.name     = "varieties",
+                      template       = template) %>%
+    dplyr::mutate_at(.vars = dplyr::vars(ID, stlevamf, stamflax, stlevdrp, stflodrp, stdrpdes,
+                                         durvieF, jvc,stlaxsen, stsenlan, nbgrmax, stdrpmat), .funs = function(x) format(x, nsmall = 0, trim = TRUE)) %>%
+    dplyr::mutate_at(.vars = dplyr::vars(croirac, sensiphot, afruitpot, dureefruit), .funs = function(x) format(x, nsmall = 2, trim = TRUE)) %>%
+    dplyr::mutate_at(.vars = dplyr::vars(pgrainmaxi, adens), .funs = function(x) format(x, nsmall = 5, trim = TRUE))
 
   return(list(out))
 }

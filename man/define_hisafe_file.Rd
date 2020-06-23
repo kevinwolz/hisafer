@@ -53,6 +53,7 @@ Other hisafe definition functions:
 \code{\link{layer_init_params}()},
 \code{\link{layer_params}()},
 \code{\link{root_init_params}()},
-\code{\link{tree_init_params}()}
+\code{\link{tree_init_params}()},
+\code{\link{variety_params}()}
 }
 \concept{hisafe definition functions}
