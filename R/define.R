@@ -16,8 +16,10 @@
 #' @param exp.name A character string of the name of the experiment folder. Only used if defining more than one simulation.
 #' @param profiles A character vector of Hi-sAFe export profiles to be exported by Hi-sAFe.
 #' If "all" (the default), then the basic set of profiles for all data levels will be exported.
-#' @param freqs A numeric vector of export frequencies for the export profiles specified in \code{profiles}.
+#' @param freqs A numeric vector of export frequencies (days) for the export profiles specified in \code{profiles}.
 #' if \code{NULL} (the default), then the default export frequences (daily, monthly, annual) are applied to respective profiles.
+#' Export frequencies can be any positive integer. Special values include 30, which triggers export on the first day of each month,
+#' and 365, which triggers export on the first day of each January.
 #' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
 #' hisafer comes with a variety of "default" templates than can be used by specificying specific character strings:
 #' \itemize{
@@ -48,9 +50,10 @@
 #'  a simulation can be defined by wrapping one or more numeric vectors within a list.
 #'  For a single simulation, use \code{parameterName = list(c(value1, value2, ...))}.
 #'  For an experiment, use \code{parameterName = list(c(value1, value2, ...), c(value3, value4, ...))}.}
-#'  \item{"tables"}{ - There are four parameter tables within the .pld file (layers, layer.initialization, tree.initialization, root.initialization).
+#'  \item{"tables"}{ - There are four parameter tables within the .pld file (layers, layer.initialization, tree.initialization, root.initialization)
+#'  and one parameter table with the .plt file (varieties) that are supported.
 #'  To define prameters within these tables, use the helper functions
-#'  \code{\link{layer_params}}, \code{\link{layer_init_params}}, \code{\link{tree_init_params}}, and \code{\link{root_init_params}}.
+#'  \code{\link{layer_params}}, \code{\link{layer_init_params}}, \code{\link{tree_init_params}}, \code{\link{root_init_params}}, and \code{\link{variety_params}}.
 #'  These functions create a list of data frames (tibbles).}
 #' }
 #' Passing \code{NA} to any parameter will "deactivate" the parameter by commenting it out in the resulting Hi-sAFe parameter file. This can be useful to deactivate
@@ -117,10 +120,9 @@ define_hisafe <- function(path,
     freqs <- default.freqs
   } else if(length(profiles) != length(freqs)) {
     stop("profiles and freqs must have the same length", call. = FALSE)
-  } #else if(!all((freqs %% default.freqs) == 0)) {
-    #stop("user-supplied freqs must be multiples of default freqs for each profile (i.e multiples of 1 for daily profies,
-    #     multiples of 30 for monthly profiles, and multiples of 365 for annual profiles)", call. = FALSE)
-  #}
+  } else if(!all((freqs %% 1) == 0 & freqs > 0)) {
+    stop("freqs must positive integers", call. = FALSE)
+  }
 
   if(factorial) {
     exp.plan <- dplyr::as_tibble(expand.grid(param.list, stringsAsFactors = FALSE))

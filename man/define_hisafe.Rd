@@ -24,8 +24,10 @@ define_hisafe(
 \item{profiles}{A character vector of Hi-sAFe export profiles to be exported by Hi-sAFe.
 If "all" (the default), then the basic set of profiles for all data levels will be exported.}
 
-\item{freqs}{A numeric vector of export frequencies for the export profiles specified in \code{profiles}.
-if \code{NULL} (the default), then the default export frequences (daily, monthly, annual) are applied to respective profiles.}
+\item{freqs}{A numeric vector of export frequencies (days) for the export profiles specified in \code{profiles}.
+if \code{NULL} (the default), then the default export frequences (daily, monthly, annual) are applied to respective profiles.
+Export frequencies can be any positive integer. Special values include 30, which triggers export on the first day of each month,
+and 365, which triggers export on the first day of each January.}
 
 \item{template}{A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
 hisafer comes with a variety of "default" templates than can be used by specificying specific character strings:
