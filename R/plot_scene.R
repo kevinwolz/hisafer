@@ -80,19 +80,8 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
   if(num.trees > 0) {
     ## Determine interCrop cells
     create_range    <- function(x, tcd)   c(x - tcd, x + tcd)
-    roundup         <- function(from, to) ceiling(from / to) * to
-    rounddown       <- function(from, to) floor(from   / to) * to
-    round_if_needed <- function(x, cw){
-      if(all(x %% cw == 0)){
-        out <- x
-      } else {
-        out <- c(rounddown(x[1], cw), roundup(x[2], cw))
-      }
-      return(out)
-    }
-    which_inside    <- function(boundaries, x.vals) {
-      unique(x.vals[x.vals > boundaries[1] & x.vals < boundaries[2]])
-    }
+    round_to_cell   <- function(x) c(floor(x[1]), ceiling(x[2]))
+    which_inside    <- function(boundaries, x.vals) unique(x.vals[x.vals > boundaries[1] & x.vals < boundaries[2]])
     check_x_runover <- function(boundaries) {
       low.inside <- high.inside <- NULL
       if(any(unlist(boundaries) < 0)) {
@@ -119,24 +108,36 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
     }
 
     if(get_used("treeCropDistance") > 0) {
-      xs <- as.list(tree.plot.data$x)
-      boundaries <- purrr::map(xs, create_range, get_used("treeCropDistance"))
-      boundaries <- purrr::map(boundaries, round_if_needed, get_used("cellWidth"))
-      x.inside   <- unlist(purrr::map(boundaries, which_inside, plot.data$x))
-      if(toric.x.both) x.inside <- c(x.inside, check_x_runover(boundaries)) # if toric symetry is on, check for intercrop runover across toric symmetry
-      plot.data$crop[which(plot.data$x %in% x.inside)] <- interCropSpecies
-    } else if(get_used("treeCropRadius") > 0) {
-      xs <- as.list(tree.plot.data$x)
-      x.boundaries <- purrr::map(xs, create_range, get_used("treeCropRadius"))
-      x.boundaries <- purrr::map(x.boundaries, round_if_needed, get_used("cellWidth"))
-      x.inside     <- unlist(purrr::map(x.boundaries, which_inside, plot.data$x))
-      if(toric.x.both) x.inside <- c(x.inside, check_x_runover(x.boundaries)) # if toric symetry is on, check for intercrop runover across toric symmetry
+      boundaries <- as.list(tree.plot.data$x) %>%
+        purrr::map(create_range, get_used("treeCropDistance") / get_used("cellWidth")) %>%
+        purrr::map(round_to_cell)
 
-      ys <- as.list(tree.plot.data$y)
-      y.boundaries <- purrr::map(ys, create_range, get_used("treeCropRadius"))
-      y.boundaries <- purrr::map(y.boundaries, round_if_needed, get_used("cellWidth"))
-      y.inside     <- unlist(purrr::map(y.boundaries, which_inside, plot.data$y))
-      if(toric.y.both) y.inside <- c(y.inside, check_y_runover(y.boundaries)) # if toric symetry is on, check for intercrop runover across toric symmetry
+      x.inside <- boundaries %>%
+        purrr::map(which_inside, plot.data$x) %>%
+        unlist() %>%
+        c(., check_x_runover(boundaries)[toric.x.both]) # if toric symetry is on, check for intercrop runover across toric symmetry
+
+      plot.data$crop[which(plot.data$x %in% x.inside)] <- interCropSpecies
+
+    } else if(get_used("treeCropRadius") > 0) {
+
+      x.boundaries <- as.list(tree.plot.data$x) %>%
+        purrr::map(create_range, get_used("treeCropRadius") / get_used("cellWidth")) %>%
+        purrr::map(round_to_cell)
+
+      x.inside <- x.boundaries %>%
+        purrr::map(which_inside, plot.data$x) %>%
+        unlist() %>%
+        c(., check_x_runover(x.boundaries)[toric.x.both]) # if toric symetry is on, check for intercrop runover across toric symmetry
+
+      y.boundaries <- as.list(tree.plot.data$y) %>%
+        purrr::map(create_range, get_used("treeCropRadius") / get_used("cellWidth")) %>%
+        purrr::map(round_to_cell)
+
+      y.inside <- y.boundaries %>%
+        purrr::map(which_inside, plot.data$y) %>%
+        unlist() %>%
+        c(., check_y_runover(y.boundaries)[toric.y.both]) # if toric symetry is on, check for intercrop runover across toric symmetry
 
       cells.inside <- expand.grid(x.inside, y.inside) %>%
         dplyr::rename(x = Var1, y = Var2) %>%
