@@ -45,7 +45,7 @@ write_weather <- function(data, path) {
   if(file.exists(path))                             stop("file specfied by path already exists", call. = FALSE)
 
   readr::write_delim(x         = data,
-                     path      = path,
+                     file      = path,
                      delim     = "\t",
                      col_names = FALSE)
 }
