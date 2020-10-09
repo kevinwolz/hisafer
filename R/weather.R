@@ -16,7 +16,11 @@ read_weather <- function(path) {
                                      stringsAsFactors = FALSE,
                                      comment.char     = "#",
                                      encoding         = "latin1"))
-  names(wth) <- c("doy", "year", "month", "day", "Tmax", "Tmin", "RHmax", "RHmin", "Rg", "precip", "wind", "watertable", "CO2")
+  names(wth) <- c(c("doy", "year", "month", "day", "Tmax", "Tmin", "RHmax", "RHmin",
+                  "Rg", "precip", "wind", "watertable", "CO2"), "trueyear"[ncol(wth) == 14])
+
+  if(!("trueyear" %in% names(wth))) wth$trueyear <- NA
+
   return(wth)
 }
 
@@ -31,12 +35,14 @@ read_weather <- function(path) {
 #' write_weather(wth, "./my_site_modified.wth")
 #' }
 write_weather <- function(data, path) {
-  required.names <- c("doy", "year", "month", "day", "Tmax", "Tmin", "RHmax", "RHmin", "Rg", "precip", "wind", "watertable", "CO2")
+  required.names <- c("doy", "year", "month", "day", "Tmax", "Tmin", "RHmax", "RHmin",
+                      "Rg", "precip", "wind", "watertable", "CO2", "trueyear")
 
-  if(!any(c("tbl", "data.frame") %in% class(data))) stop("data must be of class data.frame or tibble",                                    call. = FALSE)
-  if(!identical(names(data), required.names))       stop(paste("names of data columns must be:", paste(required.names, collapse = ", ")), call. = FALSE)
-  if(!(str_sub(path, -3, -1) %in% c("WTH", "wth"))) stop("path must point to a file with extension .wth or .WTH",                         call. = FALSE)
-  if(file.exists(path))                             stop("file specfied by path already exists",                                          call. = FALSE)
+  if(!any(c("tbl", "data.frame") %in% class(data))) stop("data must be of class data.frame or tibble", call. = FALSE)
+  if(!identical(names(data), required.names))       stop(paste("names of data columns must be:",
+                                                               paste(required.names, collapse = ", ")), call. = FALSE)
+  if(!(str_sub(path, -3, -1) %in% c("WTH", "wth"))) stop("path must point to a file with extension .wth or .WTH", call. = FALSE)
+  if(file.exists(path))                             stop("file specfied by path already exists", call. = FALSE)
 
   readr::write_delim(x         = data,
                      path      = path,

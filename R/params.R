@@ -266,7 +266,7 @@ get_param_names <- function(x) {
   pld.names    <- unlist(purrr::map(x$pld,    names), use.names = FALSE)
   tree.names   <- unlist(purrr::map(x$tree,   names), use.names = FALSE)
   crop.names   <- unlist(purrr::map(x$crop,   names), use.names = FALSE)
-  tec.names    <- unlist(purrr::map(x$tec,   names),  use.names = FALSE)
+  tec.names    <- unlist(purrr::map(x$tec,    names), use.names = FALSE)
   hisafe.names <- unlist(purrr::map(x$hisafe, names), use.names = FALSE)
   stics.names  <- unlist(purrr::map(x$stics,  names), use.names = FALSE)
   return(list(sim = sim.names, pld = pld.names, tree = tree.names, crop = crop.names, tec = tec.names, hisafe = hisafe.names, stics = stics.names))

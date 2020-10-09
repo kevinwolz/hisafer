@@ -245,13 +245,13 @@ fixmaxveg = 30.00000
 fixmaxgr = 9.50000
 
 ## HISAFE PARAMETERS
-cropRootDiameter = 0.005
+cropRootDiameter = 0.04
 cropRootConductivity = 0.00001
 cropAlpha = 0.2
 cropMinTranspirationPotential = -27000
-cropMaxTranspirationPotential = -2000
 cropBufferPotential = 0.05
 cropLongitudinalResistantFactor = 50
+cropHarmonicWeightedMean = 1
 
 ## VARIETIES
 #ID	codevar	stlevamf	stamflax	stlevdrp	stflodrp	stdrpdes	pgrainmaxi	adens	croirac	durvieF	jvc	sensiphot	stlaxsen	stsenlan	nbgrmax	stdrpmat	afruitpot	dureefruit

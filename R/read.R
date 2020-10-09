@@ -426,6 +426,9 @@ read_hisafe_output_file <- function(profile, simu.name){
     dat <- dat %>%
       dplyr::filter(Year != 0) %>%
       dplyr::mutate(Date = lubridate::dmy(Date)) # convert Date column into date class
+
+    if("SimulationDate" %in% names(dat)) dat <- dplyr::select(dat, -SimulationDate)
+
     if(nrow(dat) == 0) {
       warning(paste0(basename(profile), " exists but contains no data"), call. = FALSE)
     } else if(unique(dat$SimulationName) != simu.name) {

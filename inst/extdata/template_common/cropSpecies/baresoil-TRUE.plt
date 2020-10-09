@@ -246,9 +246,9 @@ cropRootDiameter = 0.0
 cropRootConductivity = 0.0
 cropAlpha = 0.1
 cropMinTranspirationPotential = 0
-cropMaxTranspirationPotential = 0
 cropBufferPotential = 0.0
 cropLongitudinalResistantFactor = 0
+cropHarmonicWeightedMean = 1
 
 ## VARIETIES
 #ID	codevar	stlevamf	stamflax	stlevdrp	stflodrp	stdrpdes	pgrainmaxi	adens	croirac	durvieF	jvc	sensiphot	stlaxsen	stsenlan	nbgrmax	stdrpmat	afruitpot	dureefruit
