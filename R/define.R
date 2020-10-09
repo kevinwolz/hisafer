@@ -100,6 +100,8 @@ define_hisafe <- function(path,
   is_TF(force)
 
   path          <- get_absolute_path(path)
+  if(!path.exists(path)) stop("path does not exist", call. = FALSE)
+
   param.list    <- list(...)
   if(!is.null(bulk.pass)) param.list <- c(param.list, bulk.pass)
 
