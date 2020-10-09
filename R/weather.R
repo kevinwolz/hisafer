@@ -19,7 +19,7 @@ read_weather <- function(path) {
   names(wth) <- c(c("doy", "year", "month", "day", "Tmax", "Tmin", "RHmax", "RHmin",
                   "Rg", "precip", "wind", "watertable", "CO2"), "trueyear"[ncol(wth) == 14])
 
-  if(!("trueyear" %in% names(wth))) wth$trueyear <- NA
+  if(!("trueyear" %in% names(wth))) wth$trueyear <- NA_integer_
 
   return(wth)
 }
@@ -41,7 +41,7 @@ write_weather <- function(data, path) {
   if(!any(c("tbl", "data.frame") %in% class(data))) stop("data must be of class data.frame or tibble", call. = FALSE)
   if(!identical(names(data), required.names))       stop(paste("names of data columns must be:",
                                                                paste(required.names, collapse = ", ")), call. = FALSE)
-  if(!(str_sub(path, -3, -1) %in% c("WTH", "wth"))) stop("path must point to a file with extension .wth or .WTH", call. = FALSE)
+  if(!(substr(path, nchar(path)-2, nchar(path)) %in% c("WTH", "wth"))) stop("path must point to a file with extension .wth or .WTH", call. = FALSE)
   if(file.exists(path))                             stop("file specfied by path already exists", call. = FALSE)
 
   readr::write_delim(x         = data,
