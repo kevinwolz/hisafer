@@ -113,3 +113,4 @@ treeMinTranspirationPotential = -30000
 treeMaxTranspirationPotential = -10000
 treeBufferPotential = 0.05 
 treeLongitudinalResistantFactor = 50
+treeHarmonicWeightedMean = 1

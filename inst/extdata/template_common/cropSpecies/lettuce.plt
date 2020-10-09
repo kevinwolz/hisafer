@@ -242,13 +242,13 @@ stadebbchrec = 99
 stadebbchfindorm = -99
 
 ## HISAFE PARAMETERS
-cropRootDiameter = 0.02
+cropRootDiameter = 0.04
 cropRootConductivity = 0.00001
 cropAlpha = 0.1
 cropMinTranspirationPotential = -15000
-cropMaxTranspirationPotential = -5000
-cropBufferPotential = 0.05
+cropHarmonicWeightedMean = 1cropBufferPotential = 0.05
 cropLongitudinalResistantFactor = 50
+cropHarmonicWeightedMean = 1
 
 ## VARIETIES
 #ID	codevar	stlevamf	stamflax	stlevdrp	stflodrp	stdrpdes	pgrainmaxi	adens	croirac	durvieF	jvc	sensiphot	stlaxsen	stsenlan	nbgrmax	stdrpmat	afruitpot	dureefruit

@@ -20,7 +20,6 @@ bangst = 0.62
 priestleyTaylorCoeff = 1.26
 sigma = 5.67e-8
 gamma = 0.65
-harmonicWeightedMean = 1
 integrationStep = 0.1
 maxPhiPF = 6
 
