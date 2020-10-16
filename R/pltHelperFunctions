@@ -1,0 +1,470 @@
+#' Read plt file from STICS version 5.1
+#' @description Reads in plt file from STICS version 5.1 : text files formatted strangely (this function always keeps all the parameters, even if they are for formalisms that are not used)
+#' @param file name of the .plt file to read 
+#' @return a list of modules (named in French), each module being a named list of parameters (except module 'variétal", which is a data.frame)
+#' @examples 
+#' \dontrun{
+#' wheatfromSTICS5<-readpltSTICS5("STICSV5_Ble.plt")
+#' }
+readpltSTICS5<-function(file){
+  optionsinit<-getOption("stringsAsFactors")
+		toto<-readLines(file, encoding="latin1")
+		toto<-strsplit(toto, split=":", fixed=TRUE)
+		toto<-rapply(toto, function(x) gsub("^\\s+|\\s+$", "", x), classes="character", how="replace") #on enleve les tabs, leading et trailing blanks
+		resultat<-list()
+		debutsforma<-which(unlist(lapply(toto, "[[",1))=="F")
+		debutsforma<-c(debutsforma, length(toto)+1)
+		for (i in 1:(length(debutsforma)-1)){ #pour chaque formalisme
+			formalisme<-toto[[debutsforma[i]]][2]
+			if (formalisme != "variétal"){
+				parametresforma<-numeric()
+				for (j in (debutsforma[i]+1):(debutsforma[i+1]-1)) { #pour chaque ligne a l interieur du formalisme
+						split<-strsplit(toto[[j]][length(toto[[j]])], split="  ", fixed=TRUE)[[1]] #on prend ce qui est apres le : (s il y e na un) et on split par double espace (on prend [[1]] pour que soit pas liste)
+						if (length(split)==1) split<-strsplit(split,split=" ", fixed=TRUE)[[1]] #si pas de double espace, on split par espace
+						param<-gsub("^\\s+|\\s+$", "",split[[length(split)]]) #on enleve les tabs, leading et trailing blanks
+						names(param)<-split[[1]]
+						parametresforma<-c(parametresforma, param)
+				}
+				nouveauformalisme<-list(parametresforma)
+				names(nouveauformalisme)<-formalisme
+			} else { #varietal
+				print(i)
+				nbvarietes<-suppressWarnings(as.numeric(unlist(lapply(strsplit(toto[[debutsforma[i]+1]][2],split="                      "), "[[", 2))))
+				nomsvarietes<-unlist(lapply(strsplit(unlist(lapply(toto[(debutsforma[i]+2):(debutsforma[i]+nbvarietes+1)],"[[",2)), split=" "), "[[",1))
+				dfvarietes<-list()
+				for (j in (debutsforma[i]+2+nbvarietes):(debutsforma[i+1]-1)) { #pour chaque ligne de parametre varietal)
+					split<-strsplit(toto[[j]][length(toto[[j]])], split="  ", fixed=TRUE)[[1]] #on prend ce qui est apres le : (s il y e na un) et on split par double espace (on prend [[1]] pour que soit pas liste)
+					if (length(split)==1) split<-strsplit(split,split=" ", fixed=TRUE)[[1]] #si pas de double espace, on split par espace
+					param<-gsub("^\\s+|\\s+$", "",split[[length(split)]]) #on enleve les tabs, leading et trailing blanks
+					if(split[[1]]=="codevar") varieteactuelle<-param
+					names(param)<-varieteactuelle
+					dfvarietes[[ split[[1]] ]]<-c(dfvarietes[[ split[[1]] ]], param)
+				}
+				nouveauformalisme<-list(variétal=as.data.frame(dfvarietes))
+			}
+			resultat<-c(resultat,nouveauformalisme)
+		}
+		options(stringsAsFactors=optionsinit)
+		return(resultat)
+	}
+
+
+#' Helper function for readpltSTICS8
+#' @param pliste element to read
+#' @param prefix prefix to add to the name of the parameter
+#' @return named element (character or numeric)
+lectureparam<-function(pliste, prefix="") {
+		x<-pliste$text
+		names(x)<-ifelse(prefix=="", pliste$".attrs"["nom"], paste(prefix, pliste$".attrs"["nom"], sep="."))
+		return(x)
+	}
+#' Helper function for readpltSTICS8
+lectureoption<-function(pliste) {
+		nomoption<-unname(pliste$".attrs"["nomParam"])
+		valeurchoix<-unname(pliste$".attrs"["choix"])	
+		names(valeurchoix)<-nomoption
+		pliste<-pliste[1:(length(pliste)-1)]
+		bonchoix<- unname(unlist(lapply(pliste, function(x) {if (class(x) == "list") return(x$'.attrs'["code"]== valeurchoix) else return(x["code"]==valeurchoix)})))
+		resultat<-c(valeurchoix, do.call(lectureliste, args=list(pliste=pliste[bonchoix][[1]], nomparent=nomoption)))
+		return(resultat)
+}
+#' Helper function for readpltSTICS8
+lecturetv<-function(pliste) {
+		toto<-pliste[names(pliste)=="variete"]
+		nbvar<-length(toto)
+		resultat<-data.frame()
+		for (i in 1:length(toto))	{
+			nomparent<-unname(toto[[i]]$".attrs"["nom"])
+			resultat<-rbind(resultat, cbind(data.frame(codevar=nomparent), as.data.frame(t(as.matrix(lecturevariete(toto[[i]]))))))
+		}
+		rownames(resultat)<-resultat$codevar
+		#pliste<-pliste[[1]] #we read only the first cultivar
+		#if (nbvar>1) print(paste("attention! lectureXML ne lit que la premiere variété (il y en avait ", nbvar))
+		#resultat<-lectureliste(pliste[[i]], nomparent=nomparent)
+		return(list(resultat))
+	}
+#' Helper function for readpltSTICS8
+lectureoptionv<-function(pliste){
+		resultat<-lectureliste(pliste)
+		return(resultat)
+	}
+#' Helper function for readpltSTICS8
+lecturevariete<-function(pliste) {
+		resultat<-lectureliste(pliste)
+		return(resultat)
+	}
+#' Helper function for readpltSTICS8
+lectureliste<-function(pliste, nomparent="", prefix="") {
+		resultat<-character(0)
+		for (i in 1:length(pliste)) {
+			if (class(pliste[i])!="list") {} else {
+				if (names(pliste)[i]=="param") resultat<-c(resultat, lectureparam(pliste[[i]])) else {
+					if (names(pliste)[i]=="option") resultat<-c(resultat, lectureoption(pliste[[i]])) else {
+						if (names(pliste)[i]==".attrs") {} else {
+							if (names(pliste)[i]=="tv") {resultat<-c(resultat, lecturetv(pliste[[i]]))} else {
+								if (names(pliste)[i]=="optionv") {resultat<-c(resultat, lectureoptionv(pliste[[i]]))} else {
+									print(paste("lecture de", names(pliste)[i], "pas encore codée (dans", nomparent,")"))
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return(resultat)
+	}
+	
+#' Read plt file from STICS version 8
+#' read in plt file in format STICS V8 (xml file)
+#' @param file name of the .plt file to read 
+#' @param keepall if keepall is TRUE, keeps all parameters, if keepall is FALSE, keeps only parameters for options that are chosen + all cultivar parameters
+#'
+#' @return a list of modules (named in English), each module being a named list of parameters (except module "cultivar parameters", which is copied as is (TO DO: check what it is))
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' acaloufromSTICS<-readpltSTICS8("STICSV8_DurumWheat_ACALOU_plt.xml")
+#' }
+readpltSTICS8<-function(file, keepall=FALSE){ #keepall= garde toutes les valeurs, memes celles de formalismes pas utilises
+  optionsinit<-getOption("stringsAsFactors")
+  options(stringsAsFactors=FALSE)
+		toto<-gsub("^\\s+|\\s+$", "", readLines(file, encoding="latin1")) #enlever les tabs 
+		toto<-toto[-c(1,2)] #enlever les 2 premieres lignes
+		debutsforma<-which(substr(toto,1, 11)=="<formalisme")
+		finsforma<-which(substr(toto,1, 12)=="</formalisme")
+		resultat<-list()
+		for (i in 1:length(debutsforma)){ #pour chaque formalisme
+			formalisme<-gsub(pattern='"', replacement="", gsub(pattern=">", replacement="", strsplit(toto[debutsforma[i]],split="nom=", fixed=TRUE)[[1]][[2]]))
+			if (keepall) { #garde tout
+				parametresforma<-numeric()
+				for (j in (debutsforma[i]+1):(finsforma[i]-1)) { #pour chaque ligne a l interieur du formalisme
+						quoi<-strsplit(toto[j], split=" ", fixed=TRUE)[[1]][1]
+						if (quoi=="<param") {
+							param<-strsplit(gsub(pattern=">", replacement="<", toto[j]), split="<", fixed=TRUE)[[1]][3]
+							names(param)<-strsplit(strsplit(toto[j], split="nom=", fixed=TRUE)[[1]][2], split='"', fixed=TRUE)[[1]][2]
+						} else if (quoi=="<option") {
+							param<-strsplit(strsplit(toto[j], split="choix=", fixed=TRUE)[[1]][2], split='"', fixed=TRUE)[[1]][2]
+							names(param)<-strsplit(strsplit(toto[j], split="nomParam=", fixed=TRUE)[[1]][2], split='"', fixed=TRUE)[[1]][2]
+						}
+						parametresforma<-c(parametresforma, param)
+				}
+				
+			} else { #garde pas tout
+				library("XML") #easier
+				node<-parseXMLAndAdd(txt=paste(toto[(debutsforma[i]+1):(finsforma[i]-1)], collapse="\n"))
+				liste<-xmlToList(node)
+				parametresforma<-lectureliste(liste)
+			}
+			nouveauformalisme<-list(parametresforma)
+			names(nouveauformalisme)<-formalisme
+			resultat<-c(resultat,nouveauformalisme)
+			resultat$"cultivar parameters"<-resultat$"cultivar parameters"[[1]]
+		}
+		options(stringsAsFactors=optionsinit)
+		return(resultat)
+}
+
+#' Read plt file from hi-sAFe version 2.5
+#' read crop parameter file from hisafe (flat text file)
+#'
+#' @param file  name of the .plt file to read 
+#' @param templatev8 name of a .plt file of STICS version 8, used to organise the parameters into modules, to help subsequent comparisons between files
+#'
+#' @return a list of modules (named in English), each module being a named list of parameters (except module 'cultivar parameters', which is copied as it is (TO DO: check what it is))
+#' @examples
+#' \dontrun{
+#' defaultdurumplt<-readplthisAFe("hisafeV2_durum-wheat.plt", templatev8="STICSV8_DurumWheat_ACALOU_plt.xml")
+#' }
+readplthisAFe<-function(file, templatev8) {
+  optionsinit<-getOption("stringsAsFactors")
+  options(stringsAsFactors=FALSE)
+		#il faut un templatev8 car les parametres sont organises par formalismes dans mon format, mais pas dans la liste a plat de la nouvelle version de Hisafe
+		template<-readpltSTICS8(templatev8, keepall=TRUE)
+		localisations<-character(0)
+		for (forma in names(template)) {
+			#a cause de keepall=TRUE, on a parfois des noms en double
+			template[[forma]]<-template[[forma]][!duplicated(names(template[[forma]]))]
+			noms<-names(template[[forma]])
+			loc<-rep(forma, length(noms)) ; names(loc)<-noms
+			template[[forma]][1:length(noms)]<-NA
+			localisations<-c(localisations, loc)
+		}
+		toto<-readLines(file, encoding="latin1")
+
+		#on repere les parametres varietaux
+		varietesfrom<-which(toto=="## VARIETIES")
+		if (length(varietesfrom)==0) {
+		  options(stringsAsFactors=optionsinit)
+		  stop("Can't find the varietal parameters in", file, ", check that they start with a line saying '## VARIETIES'")
+		} 
+		paramhisafefrom<-which(toto=="## HISAFE PARAMETERS")
+		if (length(paramhisafefrom)==0) warning("Can't find the hisafe specific parameters in", file, ", check that they start with a line saying '## HISAFE PARAMETERS'")
+		if (length(paramhisafefrom)==1 & paramhisafefrom>varietesfrom) nblignesvar<-min(which(toto[(varietesfrom+1):length(toto)]%in% c("", "## HISAFE PARAMETERS" )))-1 else nblignesvar<-max(which(toto[(varietesfrom+1):length(toto)] !=""))
+		paramvar <- read.table(file, header=FALSE, sep="\t", skip=varietesfrom+1, nrows=nblignesvar-1)
+		names(paramvar)<-unlist(strsplit(toto[varietesfrom+1], split="\t"))
+		rownames(paramvar)<-paramvar$codevar
+		
+		#on enleve les lignes de commentaires
+		toto<-toto[toto!=""]
+		toto<-unlist(lapply(strsplit(toto, split="#"), "[[", 1))
+		toto<-toto[toto!=""]
+		#on garde que ceux qui ont une valeur (on gerera plus tard les parametres culturaux qui sont donnees sous forme de tableau)
+		toto<-toto[grepl(pattern="=", x=toto)]
+		#on separe les noms et les valeurs
+		toto<-strsplit(toto, split="=", fixed=TRUE)
+		toto<-rapply(toto, function(x) gsub("^\\s+|\\s+$", "", x), classes="character", how="replace") #on enleve les tabs, leading et trailing blanks
+		noms<-unlist(lapply(toto, "[[", 1))
+		valeurs<-unlist(lapply(toto, "[[", 2))
+		lignesdupliquees<-toto[duplicated(toto)]
+		nomsdupliquesavecvaleursdifferentes<-toto[duplicated(noms) & !duplicated(toto)]
+		if (length(lignesdupliquees)>0) print(paste("Warning, lines", paste(lignesdupliquees, collapse=" ; "), "are duplicated"))
+		if (length(nomsdupliquesavecvaleursdifferentes)>0) {
+			print(paste("Warning, the following parameters are present several times, with different values:"))
+			dupli<-toto[noms %in% noms[duplicated(noms) & !duplicated(toto)]]
+			dupli<-as.data.frame(t(as.matrix(as.data.frame(dupli))))
+			names(dupli)<-c("nom", "valeur")
+			rownames(dupli)<-NULL
+			print(dupli[order(dupli$nom),])
+		}
+		#on remplace les valeurs dans le template par les bonnes valeurs
+		newformalisms<-character(0)
+		for(i in 1:length(noms)) {
+			if (noms[i] %in% names(localisations)) {
+				template[[ localisations[ noms[i] ] ]] [noms[i]]<-valeurs[i]
+			} else {
+			  newformalisms<-c(newformalisms, noms[i])
+				template$newformalisms[noms[i]]<-valeurs[i]
+			}
+		}
+		if (length(newformalisms)>0) print(paste("Warning: parameters", paste(newformalisms, collapse=", "), "are not in the template of stics V8: they will be stored in module 'newformalisms'"))
+		
+		#on ajoute les parametres varietaux de la premiere variete
+		template$"cultivar parameters"<-paramvar
+		options(stringsAsFactors=optionsinit)
+		return(template)
+}
+
+# Exports a plt file for hi-sAFe version 1 from STICS V8
+#' Exports a plt file for hi-sAFe version 1 from STICS V8 (xml file)
+#' the warnings of this function haven't been translated in english because it shouldn't be used anymore
+#' @param pltv8 name of the parameter file from STICS V8 (xml format) to translate
+#' @param templatev5 template of plt file for hi-sAFe V1 (flat format)
+#' @param writefile if NULL, no file is written, otherwise the name of the plt file to save 
+#' @return character vector (1 element per line of the exported file)
+#' @seealso \code{\link{newpltV2.5fromSTICSV8}} for export to the latest version
+#' @examples
+#' \dontrun{
+#' pltACALOUforHisafe<-newpltV1fromSTICSV8(pltv8="STICSV8_DurumWheat_ACALOU_plt.xml", templatev5="STICSV5_template_mainCrop.plt")
+#' }
+newpltV1fromSTICSV8<-function(pltv8, templatev5, writefile=NULL) {
+  optionsinit<-getOption("stringsAsFactors")
+  options(stringsAsFactors=FALSE)
+		toto<-readLines(templatev5, encoding="latin1")
+		paramsxml<-readpltSTICS8(pltv8)
+		renommages<-c("phyllotherme", "ratiodurvieI", "nbjgrain", "allocfrmax", "stdrpnou")
+		names(renommages)<-c("plastochrone", "durvieI", "nbjgrains", "allocamx", "sdrpnou")
+		#"codtefcroi" n existe jamais
+		#codesymbiose n existe jamais
+		#hunod
+		result<-character(0)
+		for (line in 1:length(toto)){
+			split<-strsplit(toto[line],split="%", fixed=TRUE)[[1]]
+			if (length(split)>1){#il y avait un parametre, indique par %
+				#on cherche le parametre dans pltv8
+				paramname<-split[2]
+				paramval<-unlist(unname(paramsxml))[paramname]
+				if (is.na(paramval)) {#donc pas de parametre
+					if (paramname %in% names(renommages)) {
+						ligne<-paste(split[1], unlist(unname(paramsxml))[renommages[paramname]][1], sep="")
+						result<-c(result, ligne)
+					} else { #param n est pas dans la version 8
+						if (paramname=="codtefcroi") {
+							ligne<-paste(split[1], 1, sep="")
+							result<-c(result, ligne) 
+							print(paste("attention: le parametre codtefcroi (ligne ", line, ") n'a pas été trouvé dans le fichier version8, il a ete fixe a 1 par defaut", sep=""))
+						} else if (paramname=="codesymbiose") {
+							ligne<-paste(split[1], 2, sep="")
+							result<-c(result, ligne) 
+							print(paste("attention: le parametre codesymbiose (ligne ", line, ") n'a pas été trouvé dans le fichier version8, il a ete fixe a 2 par defaut", sep=""))
+						} else if (paramname=="hunod") {
+							ligne<-paste(split[1], 1.5, sep="")
+							result<-c(result, ligne) 
+							print(paste("attention: le parametre hunod (ligne ", line, ") n'a pas été trouvé dans le fichier version8, il a ete fixe a 1.5 par defaut", sep=""))
+						} else	{
+							print(paste("attention: le parametre ", paramname, " (ligne ", line, ") n'a pas été trouvé dans le fichier version8", sep=""))
+							result<-c(result, toto[line])
+						}
+					}
+				} else {
+					if (length(paramval)>1) print(paste("attention: il y a plusieurs valeurs possibles pour le parametre", paramname, "on a pris le premier mais il faut verifier"))
+					ligne<-paste(split[1], paramval[1], sep="")
+					result<-c(result, ligne)
+				}
+			} else { #pas de % donc pas de parametre
+				result<-c(result, toto[line])
+			}
+		}
+		print("ne pas oublier de changer le nom de la culture")
+		print("ATENTION: dans le template, il n y avait qu une variete, donc le nouveau fichier ne contient que la premiere variete (ne pas oublier de changer son nom")
+		if (!is.null(writefile)) {
+		  connection<-file(writefile, encoding="latin1")#oblige car sinon les caracteres speciaux passent pas sous mac
+		  write(result,file=connection)
+		  close(connection)
+		}
+		options(stringsAsFactors=optionsinit)
+		return(result)
+}
+
+# Exports plt file for Hi-sAFe version >2.5 from STICS V8
+#' Title
+#' Exports plt file for Hi-sAFe version >2.5 from STICS V8 (xml file)
+#' @param pltv8 name of the parameter file from STICS V8 (xml format) to translate
+#' @param renaming changes of the parameter names from STICS to HisAFe (examples of parameters that changed named between versions:
+#' renaming<-c("speciesName", "phyllotherme", "ratiodurvieI", "nbjgrain", "allocfrmax", "stdrpnou")
+#' names(renaming)<-c("codeplante", "plastochrone", "durvieI", "nbjgrains", "allocamx", "sdrpnou"))
+#' you probably don't need to change this parameter
+#' @param writefile if NULL, no file is written, otherwise the name of the plt file to save 
+#' @return character vector (1 element per line of the exported file)
+#' @seealso \code{\link{readpltSTICS5}} \code{\link{readpltSTICS8}} \code{\link{readplthisAFe}} for functions to read in parameter files
+#' @examples 
+#' \dontrun{
+#' pltACALOUforHisafe<-newpltV2.5fromSTICSV8("STICSV8_DurumWheat_ACALOU_plt.xml")
+#' }
+newpltV2.5fromSTICSV8<-function(pltv8, renaming=c(codeplante="speciesName"), writefile=NULL) {
+  optionsinit<-getOption("stringsAsFactors")
+  options(stringsAsFactors=FALSE)
+		paramsxml<-readpltSTICS8(pltv8, keepall=FALSE)
+		aplat<-unlist(unname(paramsxml[setdiff(names(paramsxml), "cultivar parameters")]))
+		if (sum(duplicated(names(aplat)))>0) {print(paste("Warning: there are duplicated parameter names:", paste(names(aplat)[duplicated(names(aplat))], collapse = ",")))}
+		names(aplat)[names(aplat) %in% names(renaming)]<-renaming[names(aplat)[names(aplat) %in% names(renaming)]]
+		result<-c("## STICS PARAMETERS", paste(names(aplat), aplat, sep=" = "))
+		result<-c(result, "", "## VARIETIES")
+		result<-c(result, paste("#ID", paste(names(paramsxml[["cultivar parameters"]]), collapse="\t"), sep="\t"))
+		result<-c(result, paste("1", paste(paramsxml[["cultivar parameters"]][1,], collapse="\t"), sep="\t"))
+		if(nrow(paramsxml[["cultivar parameters"]])>1) print(paste("there were several cultivars in the STICS V8 file, only the first one (",
+          paramsxml[["cultivar parameters"]][1,"codevar"],") has been used"))
+		print("Don't forget to add hi-sAFe specific parameters at the end of the file")
+		if (!is.null(writefile)) {
+		  connection<-file(writefile, encoding="latin1")#oblige car sinon les caracteres speciaux passent pas sous mac
+		  write(result,file=connection)
+		  close(connection)
+		}
+		options(stringsAsFactors=optionsinit)
+		return(result)
+	}
+
+
+#' Comparison of 2 plt files
+#'
+#' @param x parameter list (imported with one of the readplt functions)
+#' @param y parameter list (imported with one of the readplt functions)
+#' @param xenglish are the module names in english in the first plt ? (if FALSE, they are in French)
+#' @param yenglish are the module names in english in the second plt ? (if FALSE, they are in French)
+#' @param show should the differences be printed on screen?
+#' @param namex name to give the the first column (corresponding to the first plt)
+#' @param namey name to give the the second column (corresponding to the second plt)
+#' @param onlydifferent should only parameters that have different values between the 2 files be printed? (by default, the function also returns the one that are missing in one of the files, but this options can be usefull if one of the plt files was read from STICS (or from a translation of STICS) with keepall=TRUE: parameters from options that are not used will be present in the file)
+#' @param french should the module names be in french in the output ?
+#' @param renaming character vector of changes of parameter names between different versions of STICS and hisafe, you probably don't need to change this
+#' @param frenchnames named vector of french names of modules (named with the english names), you probably don't need to change this
+#' @return a data.frame with 
+#' @seealso \code{\link{readpltSTICS5}} \code{\link{readpltSTICS8}} \code{\link{readplthisAFe}} for functions to read in parameter files
+#' @examples
+#' \dontrun{
+#' compareplt(readpltSTICS8("STICSV8_DurumWheat_ACALOU_plt.xml"), readplthisAFe("hisafeV2_durum-wheat.plt", templatev8="STICSV8_DurumWheat_ACALOU_plt.xml"))
+#' }
+#' 
+compareplt<-function(x,y,xenglish=TRUE, yenglish=TRUE, show=FALSE, namex="x", namey="y", onlydifferent=FALSE, french=FALSE,
+                     renaming=c(plastochrone="phyllotherme", durvieI= "ratiodurvieI", nbjgrains="nbjgrain", allocamx="allocfrmax", sdrpnou="stdrpnou"),
+                     frenchnames=c("plant name and group"="nom plante" ,"phasic development"="développement" ,"emergence and starting"="début de végétation", 
+                                   "leaves"="feuillage", "radiation interception"="interception du rayonnement", 
+                                   "shoot biomass growth"="croissance en biomasse", "partitioning of biomass in organs"="repartition entre organes", 
+                                   "yield formation"="croissance et rendement", "roots"="racines", "frost"="gel", "water"="eau", "nitrogen"="azote", "cultivar parameters"="variétal")){
+  optionsinit<-getOption("stringsAsFactors")
+  options(stringsAsFactors=FALSE)
+  if (xenglish & ! yenglish) names(x)[names(x) %in% names(frenchnames)]<-frenchnames[names(x)[names(x) %in% names(frenchnames)]]
+		if (!xenglish & yenglish) names(y)[names(y) %in% names(frenchnames)]<-frenchnames[names(y)[names(y) %in% names(frenchnames)]]
+    if (french) {
+      names(x)[names(x) %in% names(frenchnames)]<-frenchnames[names(x)[names(x) %in% names(frenchnames)]]
+      names(y)[names(y) %in% names(frenchnames)]<-frenchnames[names(y)[names(y) %in% names(frenchnames)]]
+    } else {
+      english<-names(frenchnames)
+      names(english)<-frenchnames
+      names(x)[names(x) %in% names(english)]<-english[names(x)[names(x) %in% names(english)]]
+      names(y)[names(y) %in% names(english)]<-english[names(y)[names(y) %in% names(english)]]
+    }
+		if (show) for (forma in union(names(x), names(y))) {
+			print(paste("###########################", forma, "###########################"))
+			
+			parametres<-intersect(names(x[[forma]]), names(y[[forma]]))
+			df<-data.frame(parametre=parametres, x=unlist(x[[forma]][parametres]), y=unlist(y[[forma]][parametres]), stringsAsFactors =FALSE)
+			differents<-df[suppressWarnings(
+			  (!is.na(as.numeric(df$x)) & !is.na(as.numeric(df$y)) & as.numeric(df$x)!=as.numeric(df$y)
+			  | (is.na(as.numeric(df$x)) & is.na(as.numeric(df$y)) & df$x!=df$y)
+			 )),]
+			if(nrow(differents)>0) {print("different:"); print(differents)}
+
+			manquants<-setdiff(names(y[[forma]]), names(x[[forma]]))
+			if(length(manquants)>0) {print("missing in x"); print(y[[forma]][manquants])}
+
+			manquants<-setdiff(names(x[[forma]]), names(y[[forma]]))
+			if(length(manquants)>0) {print("missing in y"); print(x[[forma]][manquants])}
+		}
+		dfx<-data.frame()
+		for(forma in setdiff(names(x), c("variétal", "cultivar parameters"))) for (paramname in names(x[[forma]])) dfx<-rbind(dfx, data.frame(module=forma, parameter=paramname, value=unlist(x[[forma]][paramname]), stringsAsFactors =FALSE))
+		dfx[!is.na(suppressWarnings(as.numeric(dfx[,3]))),3]<-as.numeric(dfx[!suppressWarnings(is.na(as.numeric(dfx[,3]))),3])
+		names(dfx)[3]<-namex
+		dfx$parameter[dfx$parameter %in% names(renaming)]<-renaming[dfx$parameter[dfx$parameter %in% names(renaming)]]
+		dfy<-data.frame()
+		for(forma in setdiff(names(y), c("variétal", "cultivar parameters"))) for (paramname in names(y[[forma]])) dfy<-rbind(dfy, data.frame(module=forma, parameter=paramname, value=unlist(y[[forma]][paramname]),stringsAsFactors =FALSE))
+		dfy[!suppressWarnings(is.na(as.numeric(dfy[,3]))),3]<-as.numeric(dfy[!suppressWarnings(is.na(as.numeric(dfy[,3]))),3])
+		names(dfy)[3]<-namey
+		dfy$parameter[dfy$parameter %in% names(renaming)]<-renaming[dfy$parameter[dfy$parameter %in% names(renaming)]]
+		
+		#on ajoute les comparaisons de varietes
+		varietesx<-x[[intersect(names(x), c("variétal", "cultivar parameters"))]]
+		varietesy<-y[[intersect(names(y), c("variétal", "cultivar parameters"))]]
+		parametresvarietaux<-union(setdiff(names(varietesx), "codevar"),setdiff(names(varietesy), "codevar"))
+		varietespossibles<-union(varietesx$codevar, varietesy$codevar)
+		varietespresentespartout<-intersect(varietesx$codevar, varietesy$codevar)
+		presencevar<-data.frame(
+			module=intersect(names(x), c("variétal", "cultivar parameters")), 
+			parameter="codevar", 
+			valuex=varietesx[varietespossibles, "codevar"],
+			valuey=varietesy[varietespossibles, "codevar"], stringsAsFactors =FALSE
+		)
+		names(presencevar)[c(3,4)]<-c(namex, namey)
+		reshx<-unlist(reshape(cbind(varietesx, data.frame(origine=namex)), direction="wide", timevar="codevar", v.names=setdiff(names(varietesx), "codevar"), idvar="origine"))
+		reshy<-unlist(reshape(cbind(varietesy, data.frame(origine=namey)), direction="wide", timevar="codevar", v.names=setdiff(names(varietesy), "codevar"), idvar="origine"))
+		toutescombin<-paste(rep(parametresvarietaux, each=length(varietespresentespartout)),rep(varietespresentespartout, times=length(parametresvarietaux)), sep=".")
+		if (length(toutescombin)>0) {
+		  comparvar<-data.frame(
+  			module=intersect(names(x), c("variétal", "cultivar parameters")), 
+  			parameter=toutescombin, 
+  			valuex=unname(reshx[toutescombin]),
+  			valuey=unname(reshy[toutescombin]), stringsAsFactors =FALSE)
+		  comparvar[!is.na(suppressWarnings(as.numeric(comparvar[,3]))),3]<-as.numeric(comparvar[!suppressWarnings(is.na(as.numeric(comparvar[,3]))),3])
+		  comparvar[!is.na(suppressWarnings(as.numeric(comparvar[,4]))),4]<-as.numeric(comparvar[!suppressWarnings(is.na(as.numeric(comparvar[,4]))),4])
+		  names(comparvar)[c(3,4)]<-c(namex, namey)
+		} else {
+		  print("only cultivars with the same name (codevar) can be compared")
+		  comparvar<-data.frame()
+		}
+		
+				
+		comparaison<-rbind(merge(dfx, dfy, all=TRUE), presencevar, comparvar)
+		#on garde que ce qui est different
+		comparaison<-comparaison[
+			(is.na(comparaison[,3]) & !is.na(comparaison[,4]))
+			| (!is.na(comparaison[,3]) & is.na(comparaison[,4]))
+			| (!is.na(comparaison[,3]) & !is.na(comparaison[,4]) & comparaison[,3]!=comparaison[,4])
+		,]
+
+		comparaison$difference<-ifelse(is.na(comparaison[,3]), paste("missing", namex, sep=""), ifelse(is.na(comparaison[,4]), paste("missing", namey, sep=""), "different"))
+		comparaison<-comparaison[order(comparaison$module,comparaison$difference),]
+		if (onlydifferent) comparaison<-comparaison[comparaison$difference=="different",]
+		options(stringsAsFactors=optionsinit)
+		return(comparaison)
+	}
+
