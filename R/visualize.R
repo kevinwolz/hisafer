@@ -97,7 +97,7 @@ hisafe_slice <- function(hop,
 
   demanded.vars <- as.character(unlist(vars))
   cell.vars  <- c(demanded.vars[grep("crop|yield",  names(vars))],
-                  "phenologicStage", "nitrogenFertilisationMineral", "nitrogenFertilisationOrganic", "height", "biomass", "grainBiomass")
+                  "phenologicStageVegetative", "nitrogenFertilisationMineral", "nitrogenFertilisationOrganic", "height", "biomass", "grainBiomass")
   voxel.vars <- demanded.vars[grep("voxel", names(vars))]
   tree.vars  <- c(demanded.vars[!(demanded.vars %in% c(cell.vars, voxel.vars))],
                   "crownRadiusInterRow", "crownRadiusTreeLine", "crownBaseHeight", "dbh", "height", "age")
@@ -112,10 +112,10 @@ hisafe_slice <- function(hop,
 
   crops   <- crops   & profile_check(hop, "cells")
   voxels  <- voxels  & profile_check(hop, "voxels")
-  climate <- climate & profile_check(hop, "plot")
+  climate <- climate & profile_check(hop, "climate")
   if(crops)   variable_check(hop, "cells",  cell.vars,  error = TRUE)
   if(voxels)  variable_check(hop, "voxels", voxel.vars, error = TRUE)
-  if(climate) variable_check(hop, "plot", c("precipitation", "waterTableDepth"), error = TRUE)
+  if(climate) variable_check(hop, "climate", c("precipitation", "waterTableDepth"), error = TRUE)
   if(any(is.na(unlist(vars)))) { # account for any NA vars specifications
     vars <- purrr::map(vars, function(x) tidyr::replace_na(x, "none"))
     for(i in c("trees", "cells", "voxels")[c(trees, crops, voxels)]) hop[[i]]$none <- NA_real_
@@ -180,7 +180,7 @@ hisafe_slice <- function(hop,
   trees   <- trees   & profile_check(hop.full, "trees")
   crops   <- crops   & profile_check(hop.full, "cells")
   voxels  <- voxels  & profile_check(hop.full, "voxels")
-  climate <- climate & profile_check(hop.full, "plot")
+  climate <- climate & profile_check(hop.full, "climate")
 
   ## VOXEL & CELL MEMORY
   if(voxels & nrow(hop$voxels) == 0) hop$voxels <- add_historic_data(df = hop.full$voxels, dates = date, mem.max = mem.max)
@@ -346,7 +346,7 @@ hisafe_slice <- function(hop,
       dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
       dplyr::mutate(cell.height    = nan_to_zero((biomass - grainBiomass) / biomass * height)) %>%
       dplyr::mutate(yield.height   = nan_to_zero(grainBiomass / biomass * height)) %>%
-      dplyr::mutate(cell.color     = as.numeric(factor(phenologicStage))) %>%
+      dplyr::mutate(cell.color     = as.numeric(factor(phenologicStageVegetative))) %>%
       dplyr::mutate(fert.level     = nitrogenFertilisationMineral + nitrogenFertilisationOrganic) %>%
       dplyr::select(SimulationName, Year, Date, x, cellWidth, cell.height, cell.color, crop.alpha, yield.alpha, yield.height, fert.level) %>%
       dplyr::group_by(SimulationName, Year, Date, x, cellWidth) %>%
@@ -456,9 +456,9 @@ hisafe_slice <- function(hop,
   }
 
   if(climate) {
-    climate.data <- hop$plot %>%
+    climate.data <- hop$climate %>%
       dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
-      dplyr::mutate(precip.magnitude = nan_to_zero(precipitation / max(hop.full$plot$precipitation))) %>%
+      dplyr::mutate(precip.magnitude = nan_to_zero(precipitation / max(hop.full$climate$precipitation))) %>%
       dplyr::mutate(soilDepth        = -soilDepth) %>%
       dplyr::mutate(water.table      = as.numeric(waterTableDepth > soilDepth)) %>%
       dplyr::select(SimulationName, Year, Date, precip.magnitude, waterTableDepth, soilDepth, plotWidth, water.table)

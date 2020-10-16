@@ -921,9 +921,9 @@ plot_hisafe_bg <- function(hop,
   if(!(is.numeric(tree.ids) & length(tree.ids) == 1)) stop("tree.ids argument must be a numeric vector of length 1", call. = FALSE)
   is_TF(plot)
 
-  wt.profile <- ifelse(profile_check(hop, "plot"), "plot", "climate")
-  profile_check(hop, wt.profile, error = TRUE)
-  variable_check(hop, wt.profile, "waterTableDepth", error = TRUE)
+  wt.profiles <- c("climate", "plot")[profile_check(hop, c("climate", "plot"))]
+  wt.profile  <- c("climate", "plot")[purrr::map_lgl(wt.profiles, variable_check, hop = hop, variables = "waterTableDepth", error = FALSE)][1]
+  if(is.na(wt.profile)) stop("watertableDepth is required in either the climate or plot profiles", call. = FALSE)
 
   hop <- hop_filter(hop, simu.names = simu.names, tree.ids = tree.ids)
 
