@@ -696,7 +696,7 @@ get_light_fluxes <- function(hop, crop.names) {
                  c("mainCropArea", "interCropArea", "parIncident", "parInterceptedByMainCrop", "parInterceptedByInterCrop", "parInterceptedByTrees"),
                  error = TRUE)
   out <- hop$plot %>%
-    replace(is.na(.), 0) %>%
+    replace(is.na(.) & is.numeric(.), 0) %>%
     # Scale by area to conver to moles and then make percentage of inceident par
     dplyr::mutate(parIncident            = parIncident               * (mainCropArea + interCropArea),
                   InterceptedByMainCrop  = parInterceptedByMainCrop  * mainCropArea                   / parIncident * 100,
