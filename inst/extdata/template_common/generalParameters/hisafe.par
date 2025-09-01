@@ -4,7 +4,7 @@ diffuseCoeffB = 1.3
 SOC = 1
 UOC = 0
 turtleOption = 0
-cropLightMethod = 0
+hisafeLightMethodForCrop = 0
 timeStep = 0.5
 nbTimeStepMax = 100
 diffuseAngleStep = 15
@@ -18,8 +18,8 @@ bangst = 0.62
 
 ## MICROCLIMATE
 priestleyTaylorCoeff = 1.26
-sigma = 5.67e-8
-gamma = 0.65
+stefanBoltzmanConstant = 5.67e-8
+psychrometricConstant = 0.65
 integrationStep = 0.1
 maxPhiPF = 6
 
@@ -31,8 +31,9 @@ maxTempSnowMelt = 10
 minTempSnowMelt = 2 
 
 ## WATER
-sticsWaterExtraction = 0
-#laiFileName = lai.obs
+sticsWaterExtractionForCrop = 0
+waterStressMin = 0
+nitrogenStressMin = 0.0001
 
 ## NITROGEN
 nitrogenDiffusionConstant = 1
@@ -41,9 +42,15 @@ nitrogenEffectiveDiffusionA1 = 0.15
 no3AbsorptionConstant = 0.3
 nh4AbsorptionConstant = 5.00
 no3Fraction = 0.6
+
+## MINERALIZATION
 fmin1 = 0.65
 fmin2 = 11
 fmin3 = 60
+
+## RESIDUES SPREADING (0=exported, 1=under tree, 2=all over the plot) 
+leavesResiduesSpreading = 2
+branchesResiduesSpreading = 2
 
 ## WEATHER
 zr = 2.50

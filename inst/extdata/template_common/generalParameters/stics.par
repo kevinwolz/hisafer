@@ -1,4 +1,8 @@
 ## STICS V8 GENERAL PARAMETERS
+# Updated 11/02/2021 by C.DUPRAZ
+# SET swfacmin from 0.1 to  0 
+# Updated 11/03/2021 by I.LECOMTE
+# MOVE codecalferti ratiolN = dosimxN = codetesthumN  .itk file 
 codeinnact = 1
 codeh2oact = 1
 codeminopt = 2
@@ -83,47 +87,12 @@ proftravmin = 5
 codetycailloux = 2
 codetypeng = 1
 codetypres = 21
-
-## FERTILIZATION PARAMETERS
-#engamm	orgeng	deneng	voleng
-0.5	46	0.15	0.15
-0.75	42	0.13	0.3
-1	38	0.1	0.35
-1	38	0.1	0.35
-1	38	0.1	0.25
-1	38	0.1	0.25
-0	25	0.2	0
-0.5	0.2	0.05	0.05
-
-## RESIDUE PARAMETERS
-#CroCo	akres	bkres	awb	bwb	cwb	ahres	bhres	kbio	yres	CNresmin	CNresmax	qmulchruis0	mouillabilmulch	kcouvmlch	albedomulchresidus	Qmulchdec
-1	0.1	0.76	15.35	-76	7.8	0.73	10.2	0.01	0.62	8	100	1	0.4	0.37	0.1	100
-1	0.1	0.76	15.35	-76	7.8	0.73	10.2	0.01	0.62	8	100	1	0.4	0.37	0.1	100
-1	0.064	-0.26	28.8	-228	11.5	36.5	1305	0.003	0.9	12	27	1	0.4	0.37	0.1	100
-1	0.08	-0.48	33	-400	9.5	1	29.4	0.002	0.82	17	19	1	0.4	0.37	0.1	100
-1	0.064	0.05	12.7	-58	6.2	10	329	0.003	0.62	6	20	1	0.4	0.37	0.1	100
-1	0.7	0	5.45	0	5.45	0.18	0	0.01	0.42	5.8	7.8	1	0.4	0.37	0.1	100
-1	0.14	0	5.5	0	5.5	0.05	0	0	0.54	3.2	4	1	0.4	0.37	0.1	100
-1	0.14	0	5.5	0	5.5	0.05	0	0	0.54	3.2	4	1	0.4	0.37	0.1	100
-0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
-1	0.1	0.76	15.35	-76	7.8	0.73	10.2	0.01	0.62	8	100	1	0.4	0.37	0.1	100
-1	0.1	0.76	15.35	-76	7.8	0.73	10.2	0.01	0.62	8	100	0	0	0	0	0
-1	0.1	0.76	15.35	-76	7.8	0.73	10.2	0.01	0.62	8	100	0	0	0	0	0
-1	0.06	-0.26	28.8	-228	11.5	36.5	1305	0	0.9	12	27	0	0	0	0	0
-1	0.08	-0.48	33	-400	9.5	1	29.4	0	0.82	17	18.5	0	0	0	0	0
-1	0.06	0.05	12.7	-58	6.2	10	329	0	0.62	6	20	0	0	0	0	0
-1	0.7	0	5.45	0	5.45	0.18	0	0.01	0.42	5.8	7.8	0	0	0	0	0
-1	0.14	0	5.5	0	5.5	0.05	0	0	0.54	3.2	4	0	0	0	0	0
-1	0.14	0	5.5	0	5.5	0.05	0	0	0.54	3.2	4	0	0	0	0	0
-0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
-1	0.1	0.76	15.35	-76	7.8	0.73	10.2	0.01	0.62	8	100	0	0	0	0	0
-1	0.1	0.76	15.35	-76	7.8	0.73	10.2	0.01	0.62	8	100	0	0	0	0	0
-
-## TEMPOPARV6
 codetempfauche = 1
 codepluiepoquet = 2
 nbjoursrrversirrig = 15
-swfacmin = 0.1
+#Updated 11/02/2021
+#swfacmin = 0.1
+swfacmin = 0
 codetranspitalle = 2
 code_adapt_MO_CC = 1
 periode_adapt_CC = 10
@@ -138,10 +107,6 @@ TREFdenit2 = 20
 nbj_pr_apres_semis = 3
 eau_mini_decisemis = 10
 humirac_decisemis = 0.75
-codecalferti = 2
-ratiolN = 0
-dosimxN = 40
-codetesthumN = 1
 codeNmindec = 2
 rapNmindec = 0.001
 fNmindecmin = 0.1
@@ -189,3 +154,38 @@ resplmax1 = 0.66
 resplmax2 = 0.66
 codemontaison1 = 2
 codemontaison2 = 2
+
+## FERTILIZATION PARAMETERS
+#engamm	orgeng	deneng	voleng
+FERTILPARAM	0.5	46	0.15	0.15
+FERTILPARAM	0.75	42	0.13	0.3
+FERTILPARAM	1	38	0.1	0.35
+FERTILPARAM	1	38	0.1	0.35
+FERTILPARAM	1	38	0.1	0.25
+FERTILPARAM	1	38	0.1	0.25
+FERTILPARAM	0	25	0.2	0
+FERTILPARAM	0.5	0.2	0.05	0.05
+
+## RESIDUE PARAMETERS
+#CroCo	akres	bkres	awb	bwb	cwb	ahres	bhres	kbio	yres	CNresmin	CNresmax	qmulchruis0	mouillabilmulch	kcouvmlch	albedomulchresidus	Qmulchdec
+RESIDUEPARAM	1	0.1	0.76	15.35	-76	7.8	0.73	10.2	0.01	0.62	8	100	1	0.4	0.37	0.1	100
+RESIDUEPARAM	1	0.1	0.76	15.35	-76	7.8	0.73	10.2	0.01	0.62	8	100	1	0.4	0.37	0.1	100
+RESIDUEPARAM	1	0.064	-0.26	28.8	-228	11.5	36.5	1305	0.003	0.9	12	27	1	0.4	0.37	0.1	100
+RESIDUEPARAM	1	0.08	-0.48	33	-400	9.5	1	29.4	0.002	0.82	17	19	1	0.4	0.37	0.1	100
+RESIDUEPARAM	1	0.064	0.05	12.7	-58	6.2	10	329	0.003	0.62	6	20	1	0.4	0.37	0.1	100
+RESIDUEPARAM	1	0.7	0	5.45	0	5.45	0.18	0	0.01	0.42	5.8	7.8	1	0.4	0.37	0.1	100
+RESIDUEPARAM	1	0.14	0	5.5	0	5.5	0.05	0	0	0.54	3.2	4	1	0.4	0.37	0.1	100
+RESIDUEPARAM	1	0.14	0	5.5	0	5.5	0.05	0	0	0.54	3.2	4	1	0.4	0.37	0.1	100
+RESIDUEPARAM	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+RESIDUEPARAM	1	0.1	0.76	15.35	-76	7.8	0.73	10.2	0.01	0.62	8	100	1	0.4	0.37	0.1	100
+RESIDUEPARAM	1	0.1	0.76	15.35	-76	7.8	0.73	10.2	0.01	0.62	8	100	0	0	0	0	0
+RESIDUEPARAM	1	0.1	0.76	15.35	-76	7.8	0.73	10.2	0.01	0.62	8	100	0	0	0	0	0
+RESIDUEPARAM	1	0.06	-0.26	28.8	-228	11.5	36.5	1305	0	0.9	12	27	0	0	0	0	0
+RESIDUEPARAM	1	0.08	-0.48	33	-400	9.5	1	29.4	0	0.82	17	18.5	0	0	0	0	0
+RESIDUEPARAM	1	0.06	0.05	12.7	-58	6.2	10	329	0	0.62	6	20	0	0	0	0	0
+RESIDUEPARAM	1	0.7	0	5.45	0	5.45	0.18	0	0.01	0.42	5.8	7.8	0	0	0	0	0
+RESIDUEPARAM	1	0.14	0	5.5	0	5.5	0.05	0	0	0.54	3.2	4	0	0	0	0	0
+RESIDUEPARAM	1	0.14	0	5.5	0	5.5	0.05	0	0	0.54	3.2	4	0	0	0	0	0
+RESIDUEPARAM	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+RESIDUEPARAM	1	0.1	0.76	15.35	-76	7.8	0.73	10.2	0.01	0.62	8	100	0	0	0	0	0
+RESIDUEPARAM	1	0.1	0.76	15.35	-76	7.8	0.73	10.2	0.01	0.62	8	100	0	0	0	0	0
