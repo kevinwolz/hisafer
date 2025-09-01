@@ -1,4 +1,5 @@
 ## STICS PARAMETERS
+speciesName = sugarcanne
 codeplante = can
 codemonocot = 1
 alphaco2 = 1.06000
@@ -140,7 +141,7 @@ stoprac = sen
 sensrsec = 0.00000
 contrdamax = 0.30000
 codetemprac = 2
-coderacine = 1
+coderacine = 2
 zlabour = 20.00000
 zpente = 70.00000
 zprlim = 100.00000
@@ -240,8 +241,8 @@ stadebbchmat = -99
 stadebbchrec = 99
 stadebbchfindorm = -99
 
-## HISAFE PARAMETERS
-cropRootDiameter = 0.04
+## HISAFE WATER REPARTITION PARAMETERS
+cropRootDiameter = 0.02
 cropRootConductivity = 0.00001
 cropAlpha = 0.1
 cropMinTranspirationPotential = -35000
@@ -251,6 +252,6 @@ cropHarmonicWeightedMean = 1
 
 ## VARIETIES
 #ID	codevar	stlevamf	stamflax	stlevdrp	stflodrp	stdrpdes	pgrainmaxi	adens	croirac	durvieF	jvc	sensiphot	stlaxsen	stsenlan	nbgrmax	stdrpmat	afruitpot	dureefruit
-1	B69566	400	5000	1000	0	650	1200	-0.17	0.06	305	0	0	3800	5000	30000	3000	0.03	3000
-2	B8008	400	5000	1740	0	650	1200	-0.13	0.06	305	0	0	3800	5000	30000	3000	0.03	3000
-3	R570	240	5000	1000	0	650	2000	-0.27	0.08	510	0	0	3800	5000	30000	5000	0.0015	3500
+VARIETE	1	B69566	400	5000	1000	0	650	1200	-0.17	0.06	305	0	0	3800	5000	30000	3000	0.03	3000
+VARIETE	2	B8008	400	5000	1740	0	650	1200	-0.13	0.06	305	0	0	3800	5000	30000	3000	0.03	3000
+VARIETE	3	R570	240	5000	1000	0	650	2000	-0.27	0.08	510	0	0	3800	5000	30000	5000	0.0015	3500

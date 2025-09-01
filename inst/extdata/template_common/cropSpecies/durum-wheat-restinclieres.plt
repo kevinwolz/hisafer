@@ -241,8 +241,8 @@ stadebbchmat = 89
 stadebbchrec = 99
 stadebbchfindorm = -99
 
-## HISAFE PARAMETERS
-cropRootDiameter = 0.04
+## HISAFE WATER REPARTITION PARAMETERS
+cropRootDiameter = 0.002
 cropRootConductivity = 0.0000002
 cropAlpha = 0.1
 cropMinTranspirationPotential = -27500
@@ -252,4 +252,4 @@ cropHarmonicWeightedMean = 1
 
 ## VARIETIES
 #ID	codevar	stlevamf	stamflax	stlevdrp	stflodrp	stdrpdes	pgrainmaxi	adens	croirac	durvieF	jvc	sensiphot	stlaxsen	stsenlan	nbgrmax	stdrpmat	afruitpot	dureefruit
-1	Caludio	775	198	1422	10	551	1.04003	-0.4864	0.08	182	26	0.9	960	250	20000	522	0.00000	0.00000
+VARIETE	1	Caludio	775	198	1422	10	551	1.04003	-0.4864	0.11	182	26	0.9	960	250	20000	522	0.00000	0.00000

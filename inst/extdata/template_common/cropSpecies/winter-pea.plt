@@ -241,8 +241,8 @@ stadebbchmat = 89
 stadebbchrec = 99
 stadebbchfindorm = -99
 
-## HISAFE PARAMETERS
-cropRootDiameter = 0.04
+## HISAFE WATER REPARTITION PARAMETERS
+cropRootDiameter = 0.077
 cropRootConductivity = 0.000008
 cropAlpha = 0.18
 cropMinTranspirationPotential = -26500
@@ -252,5 +252,5 @@ cropHarmonicWeightedMean = 1
 
 ## VARIETIES
 #ID	codevar	stlevamf	stamflax	stlevdrp	stflodrp	stdrpdes	pgrainmaxi	adens	croirac	durvieF	jvc	sensiphot	stlaxsen	stsenlan	nbgrmax	stdrpmat	afruitpot	dureefruit
-1	Winter	510	543	980	270	500	0.28	-0.85	0.068	130	7	0	350	280	3950	561	520	750
-2	Grignon	622	693	1110	216	325	0.35	-0.45	0.068	160	0	0	350	280	3500	361	520	750
+VARIETE	1	Winter	510	543	980	270	500	0.28	-0.85	0.068	130	7	0	350	280	3950	561	520	750
+VARIETE	2	Grignon	622	693	1110	216	325	0.35	-0.45	0.068	160	0	0	350	280	3500	361	520	750

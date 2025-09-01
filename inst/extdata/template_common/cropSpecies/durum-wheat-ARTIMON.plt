@@ -255,4 +255,4 @@ cropHarmonicWeightedMean = 1
 
 ## VARIETIES
 #ID	codevar	stlevamf	stamflax	stlevdrp	stflodrp	stdrpdes	pgrainmaxi	adens	croirac	durvieF	jvc	sensiphot	stlaxsen	stsenlan	nbgrmax	stdrpmat	afruitpot	dureefruit
-1	Artimon	390	304	901	10	551.00	.03759	-0.5434	.11	213	21	0.3	575	362	30072	545	.00000	.00000
+VARIETE	1	Artimon	390	304	901	10	551.00	.03759	-0.5434	.11	213	21	0.3	575	362	30072	545	.00000	.00000

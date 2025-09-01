@@ -252,4 +252,4 @@ cropHarmonicWeightedMean = 1
 
 ## VARIETIES
 #ID	codevar	stlevamf	stamflax	stlevdrp	stflodrp	stdrpdes	pgrainmaxi	adens	croirac	durvieF	jvc	sensiphot	stlaxsen	stsenlan	nbgrmax	stdrpmat	afruitpot	dureefruit
-1	Nefer	330	247	850	0	700.00	.058	-0.4385	0.11	178	6	0.1	575	362	17900	700	.00000	.00000
+VARIETE	1	Nefer	330	247	850	0	700.00	.058	-0.4385	0.11	178	6	0.1	575	362	17900	700	.00000	.00000

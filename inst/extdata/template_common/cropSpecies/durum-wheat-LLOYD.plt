@@ -252,4 +252,4 @@ cropHarmonicWeightedMean = 1
 
 ## VARIETIES
 #ID	codevar	stlevamf	stamflax	stlevdrp	stflodrp	stdrpdes	pgrainmaxi	adens	croirac	durvieF	jvc	sensiphot	stlaxsen	stsenlan	nbgrmax	stdrpmat	afruitpot	dureefruit
-1	Lloyd	735	400	1545	0	700.00	.056	-.53	0.11	237	9	0.8	575	362	17400	700	.00000	.00000
+VARIETE	1	Lloyd	735	400	1545	0	700.00	.056	-.53	0.11	237	9	0.8	575	362	17400	700	.00000	.00000

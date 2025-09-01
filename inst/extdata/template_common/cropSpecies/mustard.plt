@@ -241,8 +241,8 @@ stadebbchmat = -99
 stadebbchrec = 99
 stadebbchfindorm = -99
 
-## HISAFE PARAMETERS
-cropRootDiameter = 0.04
+## HISAFE WATER REPARTITION PARAMETERS
+cropRootDiameter = 0.02
 cropRootConductivity = 0.00001
 cropAlpha = 0.1
 cropMinTranspirationPotential = -15000
@@ -252,4 +252,4 @@ cropHarmonicWeightedMean = 1
 
 ## VARIETIES
 #ID	codevar	stlevamf	stamflax	stlevdrp	stflodrp	stdrpdes	pgrainmaxi	adens	croirac	durvieF	jvc	sensiphot	stlaxsen	stsenlan	nbgrmax	stdrpmat	afruitpot	dureefruit
-1	tardi	250	500	3200	400	600	0.006	-0.82	0.082	119	0	1	100	250	35000	400	0.0	0.0
+VARIETE	1	tardi	250	500	3200	400	600	0.006	-0.82	0.082	119	0	1	100	250	35000	400	0.0	0.0

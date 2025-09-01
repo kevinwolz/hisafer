@@ -241,15 +241,25 @@ stadebbchmat = 89
 stadebbchrec = 99
 stadebbchfindorm = -99
 
-## HISAFE PARAMETERS
-cropRootDiameter = 0.04
-cropAlpha = 0.18
-cropMinTranspirationPotential = -24000
+## HISAFE WATER REPARTITION PARAMETERS
+cropRootDiameter = 0.005
 cropRootConductivity = 0.00001
-cropBufferPotential = 0.15
+cropAlpha = 0.2
+cropMinTranspirationPotential = -27000
+cropBufferPotential = 0.05
 cropLongitudinalResistantFactor = 50
 cropHarmonicWeightedMean = 1
 
 ## VARIETIES
 #ID	codevar	stlevamf	stamflax	stlevdrp	stflodrp	stdrpdes	pgrainmaxi	adens	croirac	durvieF	jvc	sensiphot	stlaxsen	stsenlan	nbgrmax	stdrpmat	afruitpot	dureefruit
-1	Allur	695	455	1388	10	551	0.04003	-0.4864	0.11	182	26	0.9	960	250	28077	522	0.00000	0.00000
+VARIETE	1	Allur	695	455	1388	10	551	0.04003	-0.4864	0.2	182	26	0.9	960	250	28077	522	0.0	0.0
+VARIETE	2	Acalou	228	207	695	0	700	0.0604	-0.54	0.2	224	3	0	703	362	15000	700	0.0	0.0
+VARIETE	3	Amarillo	290	448	720	0	700	0.04880	-0.65	0.2	233	20	0.1	575	362	20900	700	0.0	0.0
+VARIETE	4	Arcalis	745	399	1540	10	551	0.04775	-0.5365	0.2	188	16	0.9	575	250	21662	594	0.0	0.0
+VARIETE	5	Artimon	390	304	901	10	551	0.03759	-0.5434	0.2	213	21	0.3	575	362	30072	545	0.0	0.0
+VARIETE	6	Biensur	240	330	700	0	700	0.051	-0.7	0.2	245	6	0	575	362	19000	700	0.0	0.0
+VARIETE	7	Lloyd	735	400	1545	0	700	.056	-0.53	0.2	237	9	0.8	575	362	17400	700	0.0	0.0
+VARIETE	8	Montseg	255	463	800	0	700	0.058	-0.65	0.2	217	5	0	575	362	16600	700	0.0	0.0
+VARIETE	9	Nefer	330	247	850	0	700	0.058	-0.4385	0.2	178	6	0.1	575	362	17900	700	0.0	0.0
+VARIETE	10	Neodur	265	305	740	0	700	0.055	-0.7	0.2	249	0	0	575	362	17700	700	0.0	0.0
+VARIETE	11	Orjaune	789	411	1622	10	551	0.04850	-0.5209	0.2	199	11	1.0	575	362	26625	584	0.0	0.0

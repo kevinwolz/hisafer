@@ -141,7 +141,7 @@ stoprac = sen
 sensrsec = 0.50000
 contrdamax = 0.30000
 codetemprac = 1
-coderacine = 1
+coderacine = 2
 zlabour = 15.00000
 zpente = 29.00000
 zprlim = 30.00000
@@ -241,15 +241,15 @@ stadebbchmat = -99
 stadebbchrec = 99
 stadebbchfindorm = -99
 
-## HISAFE PARAMETERS
-cropRootDiameter = 0.04
+## HISAFE WATER REPARTITION PARAMETERS
+cropRootDiameter = 0.02
 cropRootConductivity = 0.00001
 cropAlpha = 0.1
 cropMinTranspirationPotential = -15000
-cropHarmonicWeightedMean = 1cropBufferPotential = 0.05
+cropBufferPotential = 0.05
 cropLongitudinalResistantFactor = 50
 cropHarmonicWeightedMean = 1
 
 ## VARIETIES
 #ID	codevar	stlevamf	stamflax	stlevdrp	stflodrp	stdrpdes	pgrainmaxi	adens	croirac	durvieF	jvc	sensiphot	stlaxsen	stsenlan	nbgrmax	stdrpmat	afruitpot	dureefruit
-1	Laitue	156	200	1000	0	700	0	-0.4	0.085	240	55	0	200	100	1	1000	0.0	0.0
+VARIETE	1	Laitue	156	200	1000	0	700	0	-0.4	0.085	240	55	0	200	100	1	1000	0.0	0.0

@@ -255,4 +255,4 @@ cropHarmonicWeightedMean = 1
 
 ## VARIETIES
 #ID	codevar	stlevamf	stamflax	stlevdrp	stflodrp	stdrpdes	pgrainmaxi	adens	croirac	durvieF	jvc	sensiphot	stlaxsen	stsenlan	nbgrmax	stdrpmat	afruitpot	dureefruit
-1	Orjaune	789	411	1622	10.	551.00	.04850	-0.5209	.11	199	11	1.0	575	362	26625	584	.00000	.00000
+VARIETE	1	Orjaune	789	411	1622	10.	551.00	.04850	-0.5209	.11	199	11	1.0	575	362	26625	584	.00000	.00000

@@ -252,4 +252,4 @@ cropHarmonicWeightedMean = 1
 
 ## VARIETIES
 #ID	codevar	stlevamf	stamflax	stlevdrp	stflodrp	stdrpdes	pgrainmaxi	adens	croirac	durvieF	jvc	sensiphot	stlaxsen	stsenlan	nbgrmax	stdrpmat	afruitpot	dureefruit
-1	Acalou	228	207	695	0	700.00	.0604	-.54000	0.11	224	3	0	703	362	15000	700	.00000	.00000
+VARIETE	1	Acalou	228	207	695	0	700.00	.0604	-.54000	0.11	224	3	0	703	362	15000	700	.00000	.00000

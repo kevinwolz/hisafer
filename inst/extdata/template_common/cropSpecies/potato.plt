@@ -141,7 +141,7 @@ stoprac = sen
 sensrsec = 0.00000
 contrdamax = 0.30000
 codetemprac = 2
-coderacine = 1
+coderacine = 2
 zlabour = 20.00000
 zpente = 21.00000
 zprlim = 23.00000
@@ -241,8 +241,8 @@ stadebbchmat = -99
 stadebbchrec = 99
 stadebbchfindorm = -99
 
-## HISAFE PARAMETERS
-cropRootDiameter = 0.04
+## HISAFE WATER REPARTITION PARAMETERS
+cropRootDiameter = 0.02
 cropRootConductivity = 0.00001
 cropAlpha = 0.1
 cropMinTranspirationPotential = -15000
@@ -252,4 +252,4 @@ cropHarmonicWeightedMean = 1
 
 ## VARIETIES
 #ID	codevar	stlevamf	stamflax	stlevdrp	stflodrp	stdrpdes	pgrainmaxi	adens	croirac	durvieF	jvc	sensiphot	stlaxsen	stsenlan	nbgrmax	stdrpmat	afruitpot	dureefruit
-1	bintje	150	700	450	0	700	40	-0.410	0.09	300	0	0	500	500	80	3300	60	2500
+VARIETE	1	bintje	150	700	450	0	700	40	-0.410	0.09	300	0	0	500	500	80	3300	60	2500

@@ -252,4 +252,4 @@ cropHarmonicWeightedMean = 1
 
 ## VARIETIES
 #ID	codevar	stlevamf	stamflax	stlevdrp	stflodrp	stdrpdes	pgrainmaxi	adens	croirac	durvieF	jvc	sensiphot	stlaxsen	stsenlan	nbgrmax	stdrpmat	afruitpot	dureefruit
-1	Amarillo	290	448	720	0	700.00	.04880	-.65	0.11	233	20	0.1	575	362	20900	700	.00000	.00000
+VARIETE	1	Amarillo	290	448	720	0	700.00	.04880	-.65	0.11	233	20	0.1	575	362	20900	700	.00000	.00000

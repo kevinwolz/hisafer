@@ -252,4 +252,4 @@ cropHarmonicWeightedMean = 1
 
 ## VARIETIES
 #ID	codevar	stlevamf	stamflax	stlevdrp	stflodrp	stdrpdes	pgrainmaxi	adens	croirac	durvieF	jvc	sensiphot	stlaxsen	stsenlan	nbgrmax	stdrpmat	afruitpot	dureefruit
-1	Neodur	265	305	740	0	700.00	.055	-.7	0.11	249	0	0	575	362	17700	700	.00000	.00000
+VARIETE	1	Neodur	265	305	740	0	700.00	.055	-.7	0.11	249	0	0	575	362	17700	700	.00000	.00000

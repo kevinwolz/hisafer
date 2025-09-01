@@ -241,8 +241,8 @@ stadebbchmat = 89
 stadebbchrec = 99
 stadebbchfindorm = -99
 
-## HISAFE PARAMETERS
-cropRootDiameter = 0.04
+## HISAFE WATER REPARTITION PARAMETERS
+cropRootDiameter = 0.01
 cropRootConductivity = 0.000003
 cropAlpha = 0.15
 cropMinTranspirationPotential = -22400
@@ -252,6 +252,6 @@ cropHarmonicWeightedMean = 1
 
 ## VARIETIES
 #ID	codevar	stlevamf	stamflax	stlevdrp	stflodrp	stdrpdes	pgrainmaxi	adens	croirac	durvieF	jvc	sensiphot	stlaxsen	stsenlan	nbgrmax	stdrpmat	afruitpot	dureefruit
-1	Olphi	100	650	940	0	760	0.00415	-0.82	0.12	200	60	0	300	700	850000	760	0.00000	0.00000
-2	Pollen	100	650	1002	0	760	0.00415	-0.82	0.12	200	60	0	300	700	850000	760	0.00000	0.00000
-3	Goeland	100	650	1000	0	760	0.00415	-0.82	0.12	200	60	0	300	700	850000	760	0.00000	0.00000
+VARIETE	1	Olphi	100	650	940	0	760	0.00415	-0.82	0.12	200	60	0	300	700	850000	760	0.00000	0.00000
+VARIETE	2	Pollen	100	650	1002	0	760	0.00415	-0.82	0.12	200	60	0	300	700	850000	760	0.00000	0.00000
+VARIETE	3	Goeland	100	650	1000	0	760	0.00415	-0.82	0.12	200	60	0	300	700	850000	760	0.00000	0.00000

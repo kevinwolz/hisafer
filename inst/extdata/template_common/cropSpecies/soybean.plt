@@ -241,8 +241,8 @@ stadebbchmat = -99
 stadebbchrec = 99
 stadebbchfindorm = -99
 
-## HISAFE PARAMETERS
-cropRootDiameter = 0.04
+## HISAFE WATER REPARTITION PARAMETERS
+cropRootDiameter = 0.02
 cropRootConductivity = 0.00001
 cropAlpha = 0.1
 cropMinTranspirationPotential = -35000
@@ -252,5 +252,5 @@ cropHarmonicWeightedMean = 1
 
 ## VARIETIES
 #ID	codevar	stlevamf	stamflax	stlevdrp	stflodrp	stdrpdes	pgrainmaxi	adens	croirac	durvieF	jvc	sensiphot	stlaxsen	stsenlan	nbgrmax	stdrpmat	afruitpot	dureefruit
-1	Variete.0	100	450	500	0	500	0.225	-0.5	0.15	200	0	0	260	160	2200	510	0.00000	0.00000
-2	Variete.I	90	530	800	0	500	0.225	-0.5	0.15	200	0	0	260	160	2200	520	0.00000	0.00000
+VARIETE	1	Variete.0	100	450	500	0	500	0.225	-0.5	0.15	200	0	0	260	160	2200	510	0.00000	0.00000
+VARIETE	2	Variete.I	90	530	800	0	500	0.225	-0.5	0.15	200	0	0	260	160	2200	520	0.00000	0.00000

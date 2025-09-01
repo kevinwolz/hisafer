@@ -54,7 +54,7 @@ phyllotherme = 200.00000
 bdens = 7.00000
 laicomp = 0.00000
 hautbase = 0.02000
-hautmax = 0.30000
+hautmax = 1.0000
 tcxstop = 100.00000
 codelaitr = 1
 vlaimax = 2.20000
@@ -241,8 +241,8 @@ stadebbchmat = -99
 stadebbchrec = -99
 stadebbchfindorm = -99
 
-## HISAFE PARAMETERS
-cropRootDiameter = 0.04
+## HISAFE WATER REPARTITION PARAMETERS
+cropRootDiameter = 0.02
 cropRootConductivity = 0.00001
 cropAlpha = 0.1
 cropMinTranspirationPotential = -15000
@@ -252,4 +252,4 @@ cropHarmonicWeightedMean = 1
 
 ## VARIETIES
 #ID	codevar	stlevamf	stamflax	stlevdrp	stflodrp	stdrpdes	pgrainmaxi	adens	croirac	durvieF	jvc	sensiphot	stlaxsen	stsenlan	nbgrmax	stdrpmat	afruitpot	dureefruit
-1	Fetuque	116	5000	1000	0	700	0.01	0	0.06	100	33	0	3000	2000	30000	600	0.00000	0.00000
+VARIETE	1	Fetuque	116	5000	1000	0	700	0.01	0	0.06	100	33	0	3000	2000	30000	600	0.00000	0.00000

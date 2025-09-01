@@ -252,4 +252,4 @@ cropHarmonicWeightedMean = 1
 
 ## VARIETIES
 #ID	codevar	stlevamf	stamflax	stlevdrp	stflodrp	stdrpdes	pgrainmaxi	adens	croirac	durvieF	jvc	sensiphot	stlaxsen	stsenlan	nbgrmax	stdrpmat	afruitpot	dureefruit
-1	Montseg	255	463	800	0	700.00	.058	-.65	0.11	217	5	0	575	362	16600	700	.00000	.00000
+VARIETE	1	Montseg	255	463	800	0	700.00	.058	-.65	0.11	217	5	0	575	362	16600	700	.00000	.00000

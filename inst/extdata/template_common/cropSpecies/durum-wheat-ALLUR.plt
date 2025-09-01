@@ -255,4 +255,4 @@ cropHarmonicWeightedMean = 1
 
 ## VARIETIES
 #ID	codevar	stlevamf	stamflax	stlevdrp	stflodrp	stdrpdes	pgrainmaxi	adens	croirac	durvieF	jvc	sensiphot	stlaxsen	stsenlan	nbgrmax	stdrpmat	afruitpot	dureefruit
-1	Allur	695	455	1388	10.	551.00	.04003	-0.4864	.11	182.	26	0.9	960.	250.	28077	522	.00000	.00000
+VARIETE	1	Allur	695	455	1388	10	551	0.04003	-0.4864	0.11	182	26	0.9	960	250	28077	522	0.0	0.0

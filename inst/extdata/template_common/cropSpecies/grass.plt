@@ -241,8 +241,8 @@ stadebbchmat = -99
 stadebbchrec = 99
 stadebbchfindorm = -99
 
-## HISAFE PARAMETERS
-cropRootDiameter = 0.04
+## HISAFE WATER REPARTITION PARAMETERS
+cropRootDiameter = 0.02
 cropRootConductivity = 0.00001
 cropAlpha = 0.1
 cropMinTranspirationPotential = -30000
@@ -252,7 +252,6 @@ cropHarmonicWeightedMean = 1
 
 ## VARIETIES
 #ID	codevar	stlevamf	stamflax	stlevdrp	stflodrp	stdrpdes	pgrainmaxi	adens	croirac	durvieF	jvc	sensiphot	stlaxsen	stsenlan	nbgrmax	stdrpmat	afruitpot	dureefruit
-
-1	fetuque	116	800	1000	0	700	0.01	-0.5	0.03	120.0	33	0	3000	2000	30000	600	0.0	0.0
-2	dactyle	116	5000	1000	0	700	0.01	-0.5	0.06	77.539	33	0	3000	2000	30000	600	0.0	0.0
-3	prairiep	116	1500	1000	0	700	0.01	-0.5	0.06	120	33	0	3000	2000	30000	600	0.0	0.0
+VARIETE	1	fetuque	116	800	1000	0	700	0.01	-0.5	0.03	120.0	33	0	3000	2000	30000	600	0.0	0.0
+VARIETE	2	dactyle	116	5000	1000	0	700	0.01	-0.5	0.06	77.539	33	0	3000	2000	30000	600	0.0	0.0
+VARIETE	3	prairiep	116	1500	1000	0	700	0.01	-0.5	0.06	120	33	0	3000	2000	30000	600	0.0	0.0

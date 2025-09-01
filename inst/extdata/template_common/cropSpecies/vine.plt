@@ -241,7 +241,7 @@ stadebbchmat = -99
 stadebbchrec = 99
 stadebbchfindorm = 01
 
-## HISAFE PARAMETERS
+## HISAFE WATER REPARTITION PARAMETERS
 cropRootDiameter = 0.02
 cropRootConductivity = 0.00001
 cropAlpha = 0.1

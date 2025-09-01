@@ -255,4 +255,4 @@ cropHarmonicWeightedMean = 1
 
 ## VARIETIES
 #ID	codevar	stlevamf	stamflax	stlevdrp	stflodrp	stdrpdes	pgrainmaxi	adens	croirac	durvieF	jvc	sensiphot	stlaxsen	stsenlan	nbgrmax	stdrpmat	afruitpot	dureefruit
-1	Arcalis	745	399	1540	10	551.00	.04775	-0.5365	.11	188	16	0.9	575	250	21662	594	.00000	.00000
+VARIETE	1	Arcalis	745	399	1540	10	551.00	.04775	-0.5365	.11	188	16	0.9	575	250	21662	594	.00000	.00000

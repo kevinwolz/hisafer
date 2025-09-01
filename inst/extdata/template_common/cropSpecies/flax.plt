@@ -241,8 +241,8 @@ stadebbchmat = -99
 stadebbchrec = 99
 stadebbchfindorm = -99
 
-## HISAFE PARAMETERS
-cropRootDiameter = 0.04
+## HISAFE WATER REPARTITION PARAMETERS
+cropRootDiameter = 0.02
 cropRootConductivity = 0.00001
 cropAlpha = 0.1
 cropMinTranspirationPotential = -15000
@@ -252,8 +252,8 @@ cropHarmonicWeightedMean = 1
 
 ## VARIETIES
 #ID	codevar	stlevamf	stamflax	stlevdrp	stflodrp	stdrpdes	pgrainmaxi	adens	croirac	durvieF	jvc	sensiphot	stlaxsen	stsenlan	nbgrmax	stdrpmat	afruitpot	dureefruit
-1	Baikal	119	210	492	161	700	0.012	-0.68	0.066	100	55	0.11	675	110	72490	709	0.0	0.0
-2	Niagara	73	143	470	161	700	0.012	-0.42	0.066	102	55	0.10	385	115	72490	260	0.0	0.0
-3	Oliver	50	250	292	161	700	0.0058	-0.68	0.051	252	55	0.12	675	110	77628	804	0.0	0.0
-4	Eole	51	228	180	161	700	0.0075	-0.68	0.19	50	55	0.137	675	110	121700	190	0.0	0.0
-5	Recital	52	228	180	161	700	0.0074	-0.68	0.19	50	55	0.166	675	110	126600	181	0.0	0.0
+VARIETE	1	Baikal	119	210	492	161	700	0.012	-0.68	0.066	100	55	0.11	675	110	72490	709	0.0	0.0
+VARIETE	2	Niagara	73	143	470	161	700	0.012	-0.42	0.066	102	55	0.10	385	115	72490	260	0.0	0.0
+VARIETE	3	Oliver	50	250	292	161	700	0.0058	-0.68	0.051	252	55	0.12	675	110	77628	804	0.0	0.0
+VARIETE	4	Eole	51	228	180	161	700	0.0075	-0.68	0.19	50	55	0.137	675	110	121700	190	0.0	0.0
+VARIETE	5	Recital	52	228	180	161	700	0.0074	-0.68	0.19	50	55	0.166	675	110	126600	181	0.0	0.0
