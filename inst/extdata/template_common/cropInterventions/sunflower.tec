@@ -1,4 +1,8 @@
 ## SUNFLOWER (TOURNESOL)
+species = sunflower.plt
+variete = 2
+daystart = 01-01
+dayend = 12-31
 
 ## SOIL MANAGEMENT
 nbjres = 0
@@ -6,15 +10,16 @@ nbjtrav = 0
 
 ## RESIDUE INCORPORATION TABLE
 #julres coderes qres Crespc CsurNres Nminres eaures
+#RESIDUEINC	10-20	1	1.00	42.00	15.00	0.00	0.00 
 
 ## TILLAGE TABLE
 #jultrav profres proftrav
+#TILLAGE	10-20	30.00	30.00 
 
 ## SOWING OPTIONS
-iplt0 = 106
+iplt0 = 04-16
 profsem = 3.00000
 densitesem = 6.22000
-variete = 2
 codetradtec = 2
 interrang = 0.00000
 orientrang = 0.00000
@@ -33,7 +38,7 @@ iflo = 999
 idrp = 999
 imat = 999
 irec = 999
-irecbutoir = 365
+irecbutoir = 999
 
 ## IRRIGATIONS
 effirr = 1.00000
@@ -42,29 +47,33 @@ ratiol = 0.00000
 dosimx = 40.00000
 doseirrigmin = 20.00000
 codedateappH2O = 2
-nap = 2
 codlocirrig = 1
 locirrig = 0
 profmes = 170.00000
+nap = 2
 
 ## IRRIGATION TABLE
-#julapl	qte
-172	50.00
-199	50.00
+#julapI doseI
+IRRIGATION	06-21	50.00
+IRRIGATION	07-18	50.00
 
 ## FERTILIZATIONS
+codecalferti = 2
+ratiolN = 0.00000
+dosimxN = 40.00000
+codetesthumN = 1
 engrais = 2
 concirr = 0.11000
 codedateappN = 2
 codefracappN = 1
 Qtot_N = 100
-napN = 1
 codlocferti = 1
 locferti = 0
+napN = 1
 
 ## FERTILIZATION TABLE
-#julapN qte
-107	80.00
+#julapN doseN
+FERTILIZATION	04-17	80.00
 
 ## HARVEST OPTIONS
 ressuite = straw+roots
@@ -91,10 +100,10 @@ stadecoupedf = rec
 nbcoupe = 0
 
 ## CUTTING TABLE
-#julfauche hautcoupe lairesiduel msresiduel anitcoupe
+#julfauche	hautcoupe	lairesiduel	msresiduel	anitcoupe
+#CUTTING	06-15	0.10	0.0	0.0	0.00
 
 ## OTHER INTERVENTIONS 
-nbinterventions = 0
 codepaillage = 1
 couvermulchplastique = 0.00000
 albedomulchplastique = 0.00000

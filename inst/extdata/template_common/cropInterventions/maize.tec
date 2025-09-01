@@ -1,4 +1,8 @@
 ## MAIZE (MAIS)
+species = maize.plt
+variete = 4
+daystart = 01-01
+dayend = 12-31
 
 ## SOIL MANAGEMENT
 nbjres = 1
@@ -6,17 +10,16 @@ nbjtrav = 1
 
 ## RESIDUE INCORPORATION TABLE
 #julres coderes qres Crespc CsurNres Nminres eaures
-112	1	1.00	42.00	60.00	0.00	0.00
+RESIDUEINC	04-22	1	1.00	42.00	60.00	0.00	0.00
 
 ## TILLAGE TABLE
 #jultrav profres proftrav
-112	0.0	25.0
+TILLAGE	04-22	0.0	25.00
 
 ## SOWING OPTIONS
-iplt0 = 117
+iplt0 = 04-27
 profsem = 5.00000
 densitesem = 9.50000
-variete = 4
 codetradtec = 1
 interrang = 2.00000
 orientrang = 0.00000
@@ -35,7 +38,8 @@ iflo = 999
 idrp = 999
 imat = 999
 irec = 999
-irecbutoir = 300
+irecbutoir = 10-27
+
 
 ## IRRIGATIONS
 effirr = 1.00000
@@ -44,46 +48,50 @@ ratiol = 0.00000
 dosimx = 40.00000
 doseirrigmin = 20.00000
 codedateappH2O = 2
-nap = 16 
 codlocirrig = 1
 locirrig = 0
 profmes = 120.00000
+nap = 16
 
 ## IRRIGATION TABLE
-#julapl	qte
-178	20.00 
-185	24.00 
-193	29.00 
-198	29.00 
-200	28.00 
-204	31.00 
-207	21.00 
-211	21.00 
-214	23.00 
-218	18.00 
-221	22.00 
-232	16.00 
-239	16.00 
-249	30.00 
-257	29.00 
-264	20.00
+#julapI doseI
+IRRIGATION	06-27	20.00
+IRRIGATION	07-04	24.00
+IRRIGATION	07-12	29.00
+IRRIGATION	07-17	29.00
+IRRIGATION	07-19	28.00
+IRRIGATION	07-23	31.00
+IRRIGATION	07-26	21.00
+IRRIGATION	07-30	21.00
+IRRIGATION	08-02	23.00
+IRRIGATION	08-06	18.00
+IRRIGATION	08-09	22.00
+IRRIGATION	08-20	16.00
+IRRIGATION	08-27	16.00
+IRRIGATION	09-06	30.00
+IRRIGATION	09-14	29.00
+IRRIGATION	09-21	20.00
 
 ## FERTILIZATIONS
+codecalferti = 2
+ratiolN = 0
+dosimxN = 40
+codetesthumN = 1
 engrais = 2
 concirr = 0.11000
 codedateappN = 2
 codefracappN = 1
 Qtot_N = 100
-napN = 1
 codlocferti = 1
 locferti = 0
+napN = 1
 
 ## FERTILIZATION TABLE
-#julapN qte
-112	220.00
+#julapN doseN
+FERTILIZATION	04-22	220.00
 
 ## HARVEST OPTIONS
-ressuite = roots
+ressuite = straw+roots
 codceuille = 1
 nbceuille = 1
 cadencerec = 7
@@ -105,10 +113,10 @@ codemodfauche = 1
 hautcoupedefaut = 0.00000
 stadecoupedf = rec
 nbcoupe = 0
-nbinterventions = 0
 
 ## CUTTING TABLE
-#julfauche hautcoupe lairesiduel msresiduel anitcoupe
+#julfauche	hautcoupe	lairesiduel	msresiduel	anitcoupe
+#CUTTING	06-15	0.10	0.0	0.0	0.00
 
 ## OTHER INTERVENTIONS
 codepaillage = 1

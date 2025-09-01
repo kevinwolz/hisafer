@@ -1,4 +1,8 @@
 ## VINE (VIGNE)
+species = vine-grenac.plt
+variete = 1
+daystart = 10-27
+dayend = 10-26
 
 ## SOIL MANAGEMENT
 nbjres = 1
@@ -6,19 +10,18 @@ nbjtrav = 3
 
 ## RESIDUE INCORPORATION TABLE
 #julres coderes qres Crespc CsurNres Nminres eaures
-385	9	1.46	43.00	60.00	0.00	25.00 
+RESIDUEINC	03-12	9	1.46	43.00	60.00	0.00	25.00
 
 ## TILLAGE TABLE
 #jultrav profres proftrav
-436	10.00	10.00
-536	10.00	10.00
-650	10.00	10.00
+TILLAGE	03-12	10.00	10.00
+TILLAGE	06-20	10.00	10.00
+TILLAGE	08-12	10.00	10.00
 
 ## SOWING OPTIONS
-iplt0 = 1
+iplt0 = 01-01
 profsem = 1.00000
 densitesem = 0.36360
-variete = 1
 codetradtec = 1
 interrang = 2.25000
 orientrang = 0.39000
@@ -28,16 +31,16 @@ nbjseuiltempref = 15
 
 ## STAGE FORCING
 codestade = 2
-ilev = 474
+ilev = 999
 iamf = 999
 ilax = 999
 isen = 999
 ilan = 999
-iflo = 522
+iflo = 999
 idrp = 999
-imat = 622
-irec = 622
-irecbutoir = 640
+imat = 999
+irec = 999
+irecbutoir = 999
 
 ## IRRIGATIONS
 effirr = 1.00000
@@ -46,26 +49,32 @@ ratiol = 1.00000
 dosimx = 20.00000
 doseirrigmin = 20.00000
 codedateappH2O = 2
-nap = 0
 codlocirrig = 2
 locirrig = 0
 profmes = 200.00000
+nap = 0
 
 ## IRRIGATION TABLE
-#julapl	qte
+#julapI doseI
+#IRRIGATION	02-01	30.00
 
 ## FERTILIZATIONS
+codecalferti = 2
+ratiolN = 0.00000
+dosimxN = 40.00000
+codetesthumN = 1
 engrais = 2
 concirr = 0.00000
 codedateappN = 2
 codefracappN = 1
 Qtot_N = 100
-napN = 0
 codlocferti = 1
 locferti = 0
+napN = 0
 
 ## FERTILIZATION TABLE
-#julapN qte
+#julapN doseN
+#FERTILIZATION	02-01	30.00
 
 ## HARVEST OPTIONS
 ressuite = whole_crop
@@ -90,10 +99,10 @@ codemodfauche = 1
 hautcoupedefaut = 0.00000
 stadecoupedf = rec
 nbcoupe = 0
-nbinterventions = 0
 
 ## CUTTING TABLE
-#julfauche hautcoupe lairesiduel msresiduel anitcoupe
+#julfauche	hautcoupe	lairesiduel	msresiduel	anitcoupe
+#CUTTING	06-15	0.10	0.0	0.0	0.00
 
 ## OTHER INTERVENTIONS
 codepaillage = 1
@@ -104,20 +113,20 @@ largrogne = 0.75000
 hautrogne = 1.50000
 biorognem = 0.10000
 codcalrogne = 2
-julrogne = 529
+julrogne = 08-13
 margerogne = 0.10000
 codeclaircie = 1
-juleclair = 500
+juleclair = 05-15
 nbinfloecl = 0.00000
 codeffeuil = 1
 codhauteff = 2
 codcaleffeuil = 2
 laidebeff = 1.00000
 effeuil = 1.00000
-juleffeuil = 1
+juleffeuil = 01-01
 laieffeuil = 0.10000
 codetaille = 2
-jultaille = 710
+jultaille = 12-11
 codepalissage = 2
 hautmaxtec = 1.80000
 largtec = 0.50000
@@ -140,12 +149,12 @@ profhumrecolteuse = 30.00000
 darecolte = 1.60000
 codeDSTnbcouche = 2
 
-## PERENNIAL CROP INITIALIZATION
-initialCropStage = 5
-initialCropLai = 0.2
-initialCropBiomass = 0.2
-initialCropRootDepth = 1
+## INIT	
+initialCropStage = 3
+initialCropLai = 0
+initialCropBiomass = 0.6
+initialCropRootDepth = 1.15
 initialCropGrainBiomass = 0
-initialCropNitrogen = 50
-initialCropReserveBiomass = 0
-initialCropRootDensity = 4,8,0.2,0,0
+initialCropNitrogen = 21
+initialCropReserveBiomass = 0.97
+initialCropRootDensity = 10.8,3.8,0,0,0

@@ -1,4 +1,8 @@
 ## WINTER PEA(POIS PROTEAGINEUX)
+species = winter-pea.plt
+variete = 1
+daystart = 07-04
+dayend = 07-02
 
 ## SOIL MANAGEMENT
 nbjres = 0
@@ -8,13 +12,12 @@ nbjtrav = 1
 
 ## TILLAGE TABLE
 #jultrav	profres	proftrav
-537	10	10
+TILLAGE	06-21	10	10
 
 ## SOWING OPTIONS
-iplt0 = 337
+iplt0 = 12-03
 profsem = 3
 densitesem = 72
-variete = 1
 codetradtec = 2
 interrang = 0.2
 orientrang = 0
@@ -24,7 +27,7 @@ nbjseuiltempref = 15
 
 ## STAGE FORCING
 codestade = 2
-ilev = 380
+ilev = 999
 iamf = 999
 ilax = 999
 isen = 999
@@ -33,7 +36,7 @@ iflo = 999
 idrp = 999
 imat = 999
 irec = 999
-irecbutoir = 529
+irecbutoir = 06-12
 
 ## IRRIGATIONS
 effirr = 1
@@ -50,6 +53,10 @@ profmes = 70
 ## IRRIGATION TABLE
 
 ## FERTILIZATIONS
+codecalferti = 2
+ratiolN = 0.00000
+dosimxN = 40.00000
+codetesthumN = 1
 engrais = 1
 concirr = 0.04
 codedateappN = 2
@@ -86,7 +93,6 @@ stadecoupedf = rec
 nbcoupe = 0
 
 ## OTHER INTERVENTIONS
-nbinterventions = 0
 codepaillage = 1
 couvermulchplastique = 0
 albedomulchplastique = 0
@@ -130,3 +136,4 @@ dasemis = 1.6
 profhumrecolteuse = 30
 darecolte = 1.6
 codeDSTnbcouche = 2
+

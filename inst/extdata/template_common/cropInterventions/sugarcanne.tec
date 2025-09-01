@@ -1,22 +1,25 @@
 ## SUGARCANNE (CANNE A SUCRE)
+species = sugarcanne.plt
+variete = 3
+daystart = 10-13
+dayend = 10-12
 
 ## SOIL MANAGEMENT
-nbjres = 1
-nbjtrav = 1
+nbjres = 0
+nbjtrav = 0
 
 ## RESIDUE INCORPORATION TABLE
 #julres coderes qres Crespc CsurNres Nminres eaures
-281	9	13.00	43.00	60.00	0.00	25.0
+#RESIDUEINC	10-20	1	1.00	42.00	15.00	0.00	0.00 
 
 ## TILLAGE TABLE
 #jultrav profres proftrav
-281	15.00	22.00
+#TILLAGE	10-20	30.00	30.00 
 
 ## SOWING OPTIONS
-iplt0 = 286
+iplt0 = 10-13
 profsem = 5.00000
 densitesem = 8.00000
-variete = 3
 codetradtec = 2
 interrang = 999.00000
 orientrang = 0.00000
@@ -35,7 +38,7 @@ iflo = 999
 idrp = 999
 imat = 999
 irec = 999
-irecbutoir = 651
+irecbutoir = 10-12
 
 ## IRRIGATIONS
 effirr = 1.00000
@@ -44,27 +47,32 @@ ratiol = 0.80000
 dosimx = 40.00000
 doseirrigmin = 20.00000
 codedateappH2O = 2
-nap = 0
 codlocirrig = 3
 locirrig = 15
 profmes = 80.00000
+nap = 0
 
 ## IRRIGATION TABLE
-#julapl	qte
+#julapI doseI
+#IRRIGATION	02-01	30.00
 
 ## FERTILIZATIONS
+codecalferti = 2
+ratiolN = 0.00000
+dosimxN = 40.00000
+codetesthumN = 1
 engrais = 1
 concirr = 0.00000
 codedateappN = 2
 codefracappN = 1
 Qtot_N = 100
-napN = 1
 codlocferti = 1
 locferti = 0
+napN = 1
 
 ## FERTILIZATION TABLE
-#julapN qte
-292	225.00
+#julapN doseN
+FERTILIZATION	10-19	225.00
 
 ## HARVEST OPTIONS
 ressuite = roots
@@ -91,10 +99,10 @@ stadecoupedf = rec
 nbcoupe = 0
 
 ## CUTTING TABLE
-#julfauche hautcoupe lairesiduel msresiduel anitcoupe
+#julfauche	hautcoupe	lairesiduel	msresiduel	anitcoupe
+#CUTTING	06-15	0.10	0.0	0.0	0.00
 
-## OTHER INTERVENTIONS 
-nbinterventions = 0
+## OTHER INTERVENTIONS
 codepaillage = 1
 couvermulchplastique = 0.00000
 albedomulchplastique = 0.00000

@@ -1,4 +1,8 @@
 ## WINTER BARLEY(ORGE HIVER)
+species = winter-barley.plt
+variete = 1
+daystart = 10-17
+dayend = 10-16
 
 ## SOIL MANAGEMENT
 nbjres = 1
@@ -6,17 +10,16 @@ nbjtrav = 1
 
 ## RESIDUE INCORPORATION TABLE
 #julres coderes qres Crespc CsurNres Nminres eaures
-343	1	1.00	42.00	15.00	0.00	0.00 
+RESIDUEINC	10-20	1	1.00	42.00	15.00	0.00	0.00
 
 ## TILLAGE TABLE
 #jultrav profres proftrav
-343	15.00	22.00 
+TILLAGE	10-20	15.00	22.00
 
 ## SOWING OPTIONS
-iplt0 = 300
+iplt0 = 10-27
 profsem = 3.00000
 densitesem = 268.00000
-variete = 1
 codetradtec = 2
 interrang = 0.00000
 orientrang = 0.00000
@@ -27,15 +30,15 @@ nbjseuiltempref = 15
 ## STAGE FORCING
 codestade = 2
 ilev = 999
-iamf = 388
+iamf = 999
 ilax = 999
 isen = 999
 ilan = 999
-iflo = 483
-idrp = 483
+iflo = 999
+idrp = 999
 imat = 999
 irec = 999
-irecbutoir = 700
+irecbutoir = 999
 
 ## IRRIGATIONS
 effirr = 1.00000
@@ -44,30 +47,35 @@ ratiol = 0.00000
 dosimx = 40.00000
 doseirrigmin = 20.00000
 codedateappH2O = 2
-nap = 0
 codlocirrig = 1
 locirrig = 0
 profmes = 120.00000
+nap = 0
 
 ## IRRIGATION TABLE
-#julapl	qte
+#julapI doseI
+#IRRIGATION	02-01	30.00
 
 ## FERTILIZATIONS
+codecalferti = 2
+ratiolN = 0.00000
+dosimxN = 40.00000
+codetesthumN = 1
 engrais = 2
 concirr = 0.00000
 codedateappN = 2
 codefracappN = 1
 Qtot_N = 100
-napN = 4
 codlocferti = 1
 locferti = 0
+napN = 4
 
 ## FERTILIZATION TABLE
-#julapN qte
-397	20.00
-423	86.00
-459	55.00
-476	35.00
+#julapN doseN
+FERTILIZATION	02-01	20.00
+FERTILIZATION	02-27	86.00
+FERTILIZATION	04-04	55.00
+FERTILIZATION	04-21	35.00
 
 ## HARVEST OPTIONS
 ressuite = roots
@@ -92,44 +100,44 @@ codemodfauche = 1
 hautcoupedefaut = 0.00000
 stadecoupedf = rec
 nbcoupe = 0
-nbinterventions = 0
 
 ## CUTTING TABLE
-#julfauche hautcoupe lairesiduel msresiduel anitcoupe
+#julfauche	hautcoupe	lairesiduel	msresiduel	anitcoupe
+#CUTTING	06-15	0.10	0.0	0.0	0.00
 
 ## OTHER INTERVENTIONS
 codepaillage = 1
 couvermulchplastique = 0.00000
 albedomulchplastique = 0.00000
 codrognage = 1
-largrogne = 0.55000
-hautrogne = 1.40000
-biorognem = 0.20000
+largrogne = 0.00000
+hautrogne = 0.00000
+biorognem = 0.00000
 codcalrogne = 1
-julrogne = 200
-margerogne = 0.20000
+julrogne = 0
+margerogne = 0.00000
 codeclaircie = 1
-juleclair = 190
-nbinfloecl = 2.50000
+juleclair = 0
+nbinfloecl = 0.00000
 codeffeuil = 1
-codhauteff = 2
-codcaleffeuil = 2
-laidebeff = 0.90000
-effeuil = 0.50000
-juleffeuil = 213
-laieffeuil = 0.50000
+codhauteff = 1
+codcaleffeuil = 1
+laidebeff = 0.00000
+effeuil = 0.00000
+juleffeuil = 0
+laieffeuil = 0.00000
 codetaille = 1
-jultaille = 320
+jultaille = 0
 codepalissage = 1
-hautmaxtec = 0.70000
+hautmaxtec = 0.00000
 largtec = 0.50000
 codabri = 1
 transplastic = 0.70000
-surfouvre1 = 0.10000
-julouvre2 = 40
-surfouvre2 = 0.50000
-julouvre3 = 120
-surfouvre3 = 0.70000
+surfouvre1 = 0.00000
+julouvre2 = 0
+surfouvre2 = 0.00000
+julouvre3 = 0
+surfouvre3 = 0.00000
 codeDST = 2
 dachisel = 1.10000
 dalabour = 1.30000

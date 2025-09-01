@@ -1,22 +1,25 @@
 ## ALFALFA (LUZERNE)
+species = alfalfa.plt
+variete = 1
+daystart = 01-01
+dayend = 12-31
 
 ## SOIL MANAGEMENT
-nbjres = 1
-nbjtrav = 1
+nbjres = 0
+nbjtrav = 0
 
 ## RESIDUE INCORPORATION TABLE
 #julres coderes qres Crespc CsurNres Nminres eaures
-2	1	1.00	42.00	20.00	0.00	0.00
+#RESIDUEINC	10-20	1	1.00	42.00	15.00	0.00	0.00 
 
 ## TILLAGE TABLE
 #jultrav profres proftrav
-2	0.00	10.00
+#TILLAGE	10-20	30.00	30.00 
 
 ## SOWING OPTIONS
-iplt0 = 32
+iplt0 = 02-01
 profsem = 2.00000
 densitesem = 500.00000
-variete = 1
 codetradtec = 2
 interrang = 0.00000
 orientrang = 0.00000
@@ -35,7 +38,7 @@ iflo = 999
 idrp = 999
 imat = 999
 irec = 999
-irecbutoir = 730
+irecbutoir = 999
 
 ## IRRIGATIONS
 effirr = 1.00000
@@ -44,46 +47,51 @@ ratiol = 0.00000
 dosimx = 40.00000
 doseirrigmin = 20.00000
 codedateappH2O = 2
-nap = 10
 codlocirrig = 1
 locirrig = 0
 profmes = 120.00000
+nap = 10
 
 ## IRRIGATION TABLE
-#julapl	qte
-260	25.00
-237	50.00
-215	5.00
-212	10.00
-204	22.00
-194	50.00
-182	50.00
-178	15.00
-153	27.00
-149	40.00
+#julapI doseI
+IRRIGATION	05-29	40.00
+IRRIGATION	06-02	27.00
+IRRIGATION	06-27	15.00
+IRRIGATION	07-01	50.00
+IRRIGATION	07-13	50.00
+IRRIGATION	07-23	22.00
+IRRIGATION	07-31	10.00
+IRRIGATION	08-03	5.00
+IRRIGATION	08-25	50.00
+IRRIGATION	09-17	25.00
 
 ## FERTILIZATIONS
+codecalferti = 2
+ratiolN = 0.00000
+dosimxN = 40.00000
+codetesthumN = 1
 engrais = 8
 concirr = 0.02000
 codedateappN = 2
 codefracappN = 1
 Qtot_N = 100
-napN = 0
 codlocferti = 1
 locferti = 0
+napN = 0
 
 ## FERTILIZATION TABLE
-#julapN qte
+#julapN doseN
+#FERTILIZATION	02-01	30.00
 
 ## HARVEST OPTIONS
-ressuite = pailles
+ressuite = roots
 codceuille = 1
 nbceuille = 1
 cadencerec = 7
 codrecolte = 1
 codeaumin = 2
 h2ograinmin = 0.80000
-h2ograinmax = 0.20000
+h2ograinmax = 0.14000
 sucrerec = 0.25000
 CNgrainrec = 0.02000
 huilerec = 0.25000
@@ -93,22 +101,17 @@ nbjmaxapresrecolte = 15
 
 ## CUTTING INTERVENTIONS
 codefauche = 1
-mscoupemini = 0.00000
+mscoupemini = 0
 codemodfauche = 2
-hautcoupedefaut = 0.30000
+hautcoupedefaut = 0.3
 stadecoupedf = drp
-nbcoupe = 5
+nbcoupe = 1
 
 ## CUTTING TABLE
-#julfauche hautcoupe lairesiduel msresiduel anitcoupe
-140	999.00	0.20	0.20	0.00
-176	999.00	0.20	0.20	0.00
-211	999.00	0.20	0.20	0.00
-253	999.00	0.20	0.20	0.00
-302	999.00	0.20	0.20	0.00
+#julfauche	hautcoupe	lairesiduel	msresiduel	anitcoupe
+CUTTING	06-15	0.10	0.0	0.0	0.00
 
-## OTHER INTERVENTIONS 
-nbinterventions = 0
+## OTHER INTERVENTIONS
 codepaillage = 1
 couvermulchplastique = 0.00000
 albedomulchplastique = 0.00000
@@ -153,12 +156,13 @@ profhumrecolteuse = 30.00000
 darecolte = 1.60000
 codeDSTnbcouche = 2
 
-## PERENNIAL CROP INITIALIZATION
+## PERENNIAL CROP INITILIZATION
 initialCropStage = 5
-initialCropLai = 0.2
-initialCropBiomass = 0.2
-initialCropRootDepth = 1
+initialCropLai = 0.8
+initialCropBiomass = 2.0
+initialCropRootDepth = 0.4
 initialCropGrainBiomass = 0
-initialCropNitrogen = 50
+initialCropNitrogen = 28
 initialCropReserveBiomass = 0
-initialCropRootDensity = 4,8,0.2,0,0
+initialCropRootDensity = 10.8,3.8,0,0,0
+

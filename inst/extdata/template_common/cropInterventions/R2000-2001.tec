@@ -1,4 +1,8 @@
 ## RAPE (COLZA)
+species = rape.plt
+variete = 3
+daystart = 07-03
+dayend = 07-03
 
 ## SOIL MANAGEMENT
 nbjres = 0
@@ -8,14 +12,13 @@ nbjtrav = 2
 
 ## TILLAGE TABLE
 #jultrav	profres	proftrav
-227	10	10
-547	10	10
+TILLAGE	08-15	10	10
+TILLAGE	07-01	10	10
 
 ## SOWING OPTIONS
-iplt0 = 247
+iplt0 = 09-03
 profsem = 4
 densitesem = 55
-variete = 3
 codetradtec = 2
 interrang = 0
 orientrang = 0
@@ -34,7 +37,7 @@ iflo = 999
 idrp = 999
 imat = 999
 irec = 999
-irecbutoir = 530
+irecbutoir = 999
 
 ## IRRIGATIONS
 effirr = 1
@@ -49,6 +52,10 @@ locirrig = 0
 profmes = 60
 
 ## FERTILIZATIONS
+codecalferti = 2
+ratiolN = 0.00000
+dosimxN = 40.00000
+codetesthumN = 1
 engrais = 2
 concirr = 0
 codedateappN = 2
@@ -60,8 +67,8 @@ locferti = 0
 
 ## FERTILIZATION TABLE
 #julapN	qte
-397	65
-445	65
+FERTILIZATION	01-31	65
+FERTILIZATION	03-20	65
 
 ## HARVEST OPTIONS
 ressuite = straw+roots
@@ -132,3 +139,4 @@ dasemis = 1.6
 profhumrecolteuse = 30
 darecolte = 1.6
 codeDSTnbcouche = 2
+

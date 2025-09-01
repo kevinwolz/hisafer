@@ -1,4 +1,8 @@
 ## FESCUE(FETUQUE)
+species = fescue.plt
+variete = 1
+daystart = 01-01
+dayend = 12-31
 
 ## SOIL MANAGEMENT
 nbjres = 0
@@ -6,15 +10,16 @@ nbjtrav = 0
 
 ## RESIDUE INCORPORATION TABLE
 #julres coderes qres Crespc CsurNres Nminres eaures
+#RESIDUEINC	10-20	1	1.00	42.00	15.00	0.00	0.00 
 
 ## TILLAGE TABLE
 #jultrav profres proftrav
+#TILLAGE	10-20	30.00	30.00 
 
 ## SOWING OPTIONS
-iplt0 = 1
+iplt0 = 01-01
 profsem = 2.50000
 densitesem = 4000.00000
-variete = 1
 codetradtec = 2
 interrang = 0.00000
 orientrang = 0.00000
@@ -25,7 +30,7 @@ nbjseuiltempref = 15
 ## STAGE FORCING
 codestade = 2
 ilev = 999
-iamf = 442
+iamf = 999
 ilax = 999
 isen = 999
 ilan = 999
@@ -33,7 +38,7 @@ iflo = 999
 idrp = 999
 imat = 999
 irec = 999
-irecbutoir = 700
+irecbutoir = 999
 
 ## IRRIGATIONS
 effirr = 1.00000
@@ -42,33 +47,39 @@ ratiol = 0.00000
 dosimx = 40.00000
 doseirrigmin = 20.00000
 codedateappH2O = 2
-nap = 0
 codlocirrig = 1
 locirrig = 0
 profmes = 60.00000
+nap = 0
 
 ## IRRIGATION TABLE
-#julapl	qte
+#julapI doseI
+#IRRIGATION	02-01	30.00
 
 ## FERTILIZATIONS
+codecalferti = 2
+ratiolN = 0.00000
+dosimxN = 40.00000
+codetesthumN = 1
 engrais = 1
 concirr = 0.00000
 codedateappN = 2
 codefracappN = 1
 Qtot_N = 100
-napN = 0
 codlocferti = 1
 locferti = 0
+napN = 0
 
 ## FERTILIZATION TABLE
-#julapN qte
+#julapN doseN
+#FERTILIZATION	02-01	30.00
 
 ## HARVEST OPTIONS
-ressuite = straw+roots
+ressuite = roots
 codceuille = 1
 nbceuille = 1
 cadencerec = 7
-codrecolte = 2
+codrecolte = 1
 codeaumin = 2
 h2ograinmin = 0.80000
 h2ograinmax = 0.14000
@@ -82,14 +93,14 @@ nbjmaxapresrecolte = 15
 ## CUTTING INTERVENTIONS
 codefauche = 1
 mscoupemini = 0
-codemodfauche = 1
-hautcoupedefaut = 10.00000
-stadecoupedf = lax
-nbcoupe = 0
-nbinterventions = 0
+codemodfauche = 2
+hautcoupedefaut = 0.00000
+stadecoupedf = rec
+nbcoupe = 1
 
 ## CUTTING TABLE
-#julfauche hautcoupe lairesiduel msresiduel anitcoupe
+#julfauche	hautcoupe	lairesiduel	msresiduel	anitcoupe
+CUTTING	06-15	0.3	0.0	0.0	0.00 
 
 ## OTHER INTERVENTIONS
 codepaillage = 1
@@ -136,7 +147,7 @@ profhumrecolteuse = 30.00000
 darecolte = 1.60000
 codeDSTnbcouche = 2
 
-## PERENNIAL CROP INITIALIZATION
+## INIT	
 initialCropStage = 5
 initialCropLai = 0.8
 initialCropBiomass = 2.0

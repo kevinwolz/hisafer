@@ -1,4 +1,8 @@
 ## RYEGRASS (IVRAIE)
+species = ryegrass.plt
+variete = 1
+daystart = 07-29
+dayend = 07-28
 
 ## SOIL MANAGEMENT
 nbjres = 1
@@ -6,17 +10,16 @@ nbjtrav = 1
 
 ## RESIDUE INCORPORATION TABLE
 #julres coderes qres Crespc CsurNres Nminres eaures
-215	1	2.98	42.00	76.00	0.00	0.00
+RESIDUEINC	08-03	1	2.98	42.00	76.00	0.00	0.00
 
 ## TILLAGE TABLE
 #jultrav profres proftrav
-215	15.00	20.00
+TILLAGE	08-03	15.00	20.00
 
 ## SOWING OPTIONS
-iplt0 = 215
+iplt0 = 08-03
 profsem = 2.50000
 densitesem = 515.00000
-variete = 1
 codetradtec = 2
 interrang = 0.00000
 orientrang = 0.00000
@@ -26,8 +29,8 @@ nbjseuiltempref = 15
 
 ## STAGE FORCING
 codestade = 1
-ilev = 241
-iamf = 452
+ilev = 08-29
+iamf = 03-28
 ilax = 999
 isen = 999
 ilan = 999
@@ -35,7 +38,7 @@ iflo = 999
 idrp = 999
 imat = 999
 irec = 999
-irecbutoir = 480
+irecbutoir = 04-25
 
 ## IRRIGATIONS
 effirr = 1.00000
@@ -44,26 +47,32 @@ ratiol = 0.00000
 dosimx = 40.00000
 doseirrigmin = 20.00000
 codedateappH2O = 2
-nap = 0
 codlocirrig = 1
 locirrig = 0
 profmes = 120.00000
+nap = 0
 
 ## IRRIGATION TABLE
-#julapl	qte
+#julapI doseI
+#IRRIGATION	02-01	30.00
 
 ## FERTILIZATIONS
+codecalferti = 2
+ratiolN = 0.00000
+dosimxN = 40.00000
+codetesthumN = 1
 engrais = 7
 concirr = 0.02000
 codedateappN = 2
 codefracappN = 1
 Qtot_N = 100
-napN = 0
 codlocferti = 1
 locferti = 0
+napN = 0
 
 ## FERTILIZATION TABLE
-#julapN qte
+#julapN doseN
+#FERTILIZATION	02-01	30.00
 
 ## HARVEST OPTIONS
 ressuite = straw+roots
@@ -90,10 +99,10 @@ stadecoupedf = rec
 nbcoupe = 0
 
 ## CUTTING TABLE
-#julfauche hautcoupe lairesiduel msresiduel anitcoupe
+#julfauche	hautcoupe	lairesiduel	msresiduel	anitcoupe
+#CUTTING	06-15	0.10	0.0	0.0	0.00
 
-## OTHER INTERVENTIONS 
-nbinterventions = 0
+## OTHER INTERVENTIONS
 codepaillage = 1
 couvermulchplastique = 0.00000
 albedomulchplastique = 0.00000

@@ -1,4 +1,8 @@
-## BARESOIL (SOL NU)
+## BARESOIL (SOLNU)
+species = baresoil.plt
+variete = 1
+daystart = 07-03
+dayend = 07-03
 
 ## SOIL MANAGEMENT
 nbjres = 0
@@ -8,13 +12,12 @@ nbjtrav = 1
 
 ## TILLAGE TABLE
 #jultrav	profres	proftrav
-190	10	10
+TILLAGE	07-08	10	10
 
 ## SOWING OPTIONS
 iplt0 = 999
 profsem = 999
 densitesem = 999
-variete = 1
 codetradtec = 2
 interrang = 0
 orientrang = 0
@@ -48,6 +51,10 @@ locirrig = 0
 
 ## FERTILIZATIONS
 profmes = 120
+codecalferti = 2
+ratiolN = 0.00000
+dosimxN = 40.00000
+codetesthumN = 1
 engrais = 2
 concirr = 0
 codedateappN = 2
@@ -59,9 +66,9 @@ locferti = 0
 
 ## FERTILIZATION TABLE
 #julapN	qte
-388	48
-437	51
-492	33
+FERTILIZATION	01-23	48
+FERTILIZATION	03-12	51
+FERTILIZATION	05-06	33
 
 ## HARVEST OPTIONS
 ressuite = whole_crop

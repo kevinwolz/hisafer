@@ -1,20 +1,25 @@
 ## POTATO (PATATE)
+species = potato.plt
+variete = 1
+daystart = 01-01
+dayend = 12-31
 
 ## SOIL MANAGEMENT
 nbjres = 0
-nbjtrav = 0
+nbjtrav = 1
 
 ## RESIDUE INCORPORATION TABLE
 #julres coderes qres Crespc CsurNres Nminres eaures
+#RESIDUEINC	10-20	1	1.00	42.00	15.00	0.00	0.00 
 
 ## TILLAGE TABLE
 #jultrav profres proftrav
+TILLAGE	01-01	0.00	1.00
 
-## SOWING OPTIONS 
-iplt0 = 106
+## SOWING OPTIONS
+iplt0 = 04-16
 profsem = 15.00000
 densitesem = 3.50000
-variete = 1
 codetradtec = 2
 interrang = 0.00000
 orientrang = 0.00000
@@ -24,7 +29,7 @@ nbjseuiltempref = 15
 
 ## STAGE FORCING
 codestade = 1
-ilev = 122
+ilev = 03-02
 iamf = 999
 ilax = 999
 isen = 999
@@ -33,7 +38,7 @@ iflo = 999
 idrp = 999
 imat = 999
 irec = 999
-irecbutoir = 720
+irecbutoir = 999
 
 ## IRRIGATIONS
 effirr = 0.80000
@@ -42,30 +47,34 @@ ratiol = 0.75000
 dosimx = 40.00000
 doseirrigmin = 20.00000
 codedateappH2O = 2
-nap = 3
 codlocirrig = 1
 locirrig = 0
 profmes = 120.00000
+nap = 3
 
 ## IRRIGATION TABLE
-#julapl	qte
-164	27.00
-202	25.00
-211	25.00
+#julapI doseI
+IRRIGATION	06-13	27.00
+IRRIGATION	07-21	25.00
+IRRIGATION	07-30	25.00
 
 ## FERTILIZATIONS
+codecalferti = 2
+ratiolN = 0.00000
+dosimxN = 40.00000
+codetesthumN = 1
 engrais = 1
 concirr = 0.02000
 codedateappN = 2
 codefracappN = 1
 Qtot_N = 100
-napN = 1
 codlocferti = 1
 locferti = 20
+napN = 1
 
 ## FERTILIZATION TABLE
-#julapN qte
-106	220.00
+#julapN doseN
+FERTILIZATION	04-16	220.00
 
 ## HARVEST OPTIONS
 ressuite = straw+roots
@@ -92,10 +101,10 @@ stadecoupedf = rec
 nbcoupe = 0
 
 ## CUTTING TABLE
-#julfauche hautcoupe lairesiduel msresiduel anitcoupe
+#julfauche	hautcoupe	lairesiduel	msresiduel	anitcoupe
+#CUTTING	06-15	0.10	0.0	0.0	0.00
 
-## OTHER INTERVENTIONS 
-nbinterventions = 0
+## OTHER INTERVENTIONS
 codepaillage = 1
 couvermulchplastique = 0.00000
 albedomulchplastique = 0.00000

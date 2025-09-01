@@ -1,4 +1,8 @@
 ## RAPE (COLZA)
+species = rape.plt
+variete = 3
+daystart = 09-09
+dayend = 09-08
 
 ## SOIL MANAGEMENT
 nbjres = 1
@@ -6,17 +10,16 @@ nbjtrav = 1
 
 ## RESIDUE INCORPORATION TABLE
 #julres coderes qres Crespc CsurNres Nminres eaures
-252	1	2.00	42.00	60.00	0.00	0.00
+RESIDUEINC	09-09	1	2.00	42.00	60.00	0.00	0.00
 
 ## TILLAGE TABLE
 #jultrav profres proftrav
-252	0.00	28.00
+TILLAGE	09-09	0.00	28.00
 
 ## SOWING OPTIONS
-iplt0 = 253
+iplt0 = 09-10
 profsem = 4.00000
 densitesem = 55.00000
-variete = 3
 codetradtec = 2
 interrang = 0.00000
 orientrang = 0.00000
@@ -35,7 +38,7 @@ iflo = 999
 idrp = 999
 imat = 999
 irec = 999
-irecbutoir = 700
+irecbutoir = 999
 
 ## IRRIGATIONS
 effirr = 1.00000
@@ -44,28 +47,33 @@ ratiol = 0.00000
 dosimx = 40.00000
 doseirrigmin = 20.00000
 codedateappH2O = 2
-nap = 0
 codlocirrig = 2
 locirrig = 0
 profmes = 60.00000
+nap = 0
 
 ## IRRIGATION TABLE
-#julapl	qte
+#julapI doseI
+#IRRIGATION	02-01	30.00
 
 ## FERTILIZATIONS
+codecalferti = 2
+ratiolN = 0
+dosimxN = 40
+codetesthumN = 1
 engrais = 2
 concirr = 0.00000
 codedateappN = 2
 codefracappN = 1
 Qtot_N = 100
-napN = 2
 codlocferti = 1
 locferti = 0
+napN = 2
 
 ## FERTILIZATION TABLE
-#julapN qte
-416	78.00
-439	57.00
+#julapN doseN
+FERTILIZATION	02-20	78.00
+FERTILIZATION	03-15	57.00
 
 ## HARVEST OPTIONS
 ressuite = straw+roots
@@ -90,10 +98,10 @@ codemodfauche = 1
 hautcoupedefaut = 0.00000
 stadecoupedf = rec
 nbcoupe = 0
-nbinterventions = 0
 
 ## CUTTING TABLE
-#julfauche hautcoupe lairesiduel msresiduel anitcoupe
+#julfauche	hautcoupe	lairesiduel	msresiduel	anitcoupe
+#CUTTING	06-15	0.10	0.0	0.0	0.00
 
 ## OTHER INTERVENTIONS
 codepaillage = 1

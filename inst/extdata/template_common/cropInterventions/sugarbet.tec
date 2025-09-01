@@ -1,4 +1,8 @@
 ## SUGARBET (BETTERAVE)
+species = sugarbet.plt
+variete = 1
+daystart = 01-01
+dayend = 12-31
 
 ## SOIL MANAGEMENT
 nbjres = 1
@@ -6,17 +10,16 @@ nbjtrav = 1
 
 ## RESIDUE INCORPORATION TABLE
 #julres coderes qres Crespc CsurNres Nminres eaures
-2	1	8.00	42.00	80.00	0.00	0.00
+RESIDUEINC	01-02	1	8.00	42.00	80.00	0.00	0.00
 
 ## TILLAGE TABLE
 #jultrav profres proftrav
-2	0.00	26.00
+TILLAGE	01-02	0.00	26.00
 
 ## SOWING OPTIONS
-iplt0 = 108
+iplt0 = 04-18
 profsem = 3.00000
 densitesem = 11.00000
-variete = 1
 codetradtec = 2
 interrang = 0.00000
 orientrang = 0.00000
@@ -35,7 +38,7 @@ iflo = 999
 idrp = 999
 imat = 999
 irec = 999
-irecbutoir = 999
+irecbutoir = 12-31
 
 ## IRRIGATIONS
 effirr = 0.80000
@@ -44,32 +47,36 @@ ratiol = 0.75000
 dosimx = 40.00000
 doseirrigmin = 20.00000
 codedateappH2O = 2
-nap = 5
 codlocirrig = 1
 locirrig = 0
 profmes = 180.00000
+nap = 5
 
 ## IRRIGATION TABLE
-#julapl	qte
-174	40.00
-186	40.00
-201	40.00
-208	40.00
-218	40.00
+#julapI doseI
+IRRIGATION	06-23	40.00
+IRRIGATION	07-05	40.00
+IRRIGATION	07-20	40.00
+IRRIGATION	07-27	40.00
+IRRIGATION	08-06	40.00
 
 ## FERTILIZATIONS
+codecalferti = 2
+ratiolN = 0.00000
+dosimxN = 40.00000
+codetesthumN = 1
 engrais = 8
 concirr = 0.02000
 codedateappN = 2
 codefracappN = 1
 Qtot_N = 100
-napN = 1
 codlocferti = 1
 locferti = 0
+napN = 1
 
 ## FERTILIZATION TABLE
-#julapN qte
-102	170.00
+#julapN doseN
+FERTILIZATION	04-12	170.00
 
 ## HARVEST OPTIONS
 ressuite = straw+roots
@@ -94,10 +101,10 @@ codemodfauche = 1
 hautcoupedefaut = 0.00000
 stadecoupedf = rec
 nbcoupe = 0
-nbinterventions = 0
 
 ## CUTTING TABLE
-#julfauche hautcoupe lairesiduel msresiduel anitcoupe
+#julfauche	hautcoupe	lairesiduel	msresiduel	anitcoupe
+#CUTTING	06-15	0.10	0.0	0.0	0.00
 
 ## OTHER INTERVENTIONS
 codepaillage = 1

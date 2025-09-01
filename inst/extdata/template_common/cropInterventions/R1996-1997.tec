@@ -1,4 +1,8 @@
 ## DURUM WHEAT ALLUR (BLE DUR)
+species = durum-wheat-restinclieres.plt
+variete = 1
+daystart = 07-03
+dayend = 07-03
 
 ## SOIL MANAGEMENT
 nbjres = 0
@@ -8,14 +12,13 @@ nbjtrav = 2
 
 ## TILLAGE TABLE
 #jultrav	profres	proftrav
-205	10	10
-280	15	15
+TILLAGE	07-23	10	10
+TILLAGE	10-06	15	15
 
 ## SOWING OPTIONS
-iplt0 = 314
+iplt0 = 11-09
 profsem = 2
 densitesem = 250.5
-variete = 1
 codetradtec = 2
 interrang = 0
 orientrang = 0
@@ -34,7 +37,7 @@ iflo = 999
 idrp = 999
 imat = 999
 irec = 999
-irecbutoir = 546
+irecbutoir = 999
 
 ## IRRIGATIONS
 effirr = 1
@@ -49,6 +52,10 @@ locirrig = 0
 profmes = 120
 
 ## FERTILIZATIONS
+codecalferti = 2
+ratiolN = 0.00000
+dosimxN = 40.00000
+codetesthumN = 1
 engrais = 2
 concirr = 0
 codedateappN = 2
@@ -60,9 +67,9 @@ locferti = 0
 
 ## FERTILIZATION TABLE
 #julapN	qte
-388	48
-437	51
-492	33
+FERTILIZATION	01-21	48
+FERTILIZATION	03-12	51
+FERTILIZATION	05-06	33
 
 ## HARVEST OPTIONS
 ressuite = stubble+roots
@@ -94,34 +101,34 @@ codepaillage = 1
 couvermulchplastique = 0
 albedomulchplastique = 0
 codrognage = 1
-largrogne = 0.55
-hautrogne = 1.4
-biorognem = 0.2
+largrogne = 0
+hautrogne = 0
+biorognem = 0
 codcalrogne = 1
-julrogne = 200
-margerogne = 0.2
+julrogne = 0
+margerogne = 0
 codeclaircie = 1
-juleclair = 190
-nbinfloecl = 2.5
+juleclair = 0
+nbinfloecl = 0
 codeffeuil = 1
-codhauteff = 2
-codcaleffeuil = 2
-laidebeff = 0.9
-effeuil = 0.5
-juleffeuil = 213
-laieffeuil = 0.5
+codhauteff = 1
+codcaleffeuil = 1
+laidebeff = 0
+effeuil = 0
+juleffeuil = 0
+laieffeuil = 0
 codetaille = 1
-jultaille = 320
+jultaille = 0
 codepalissage = 1
-hautmaxtec = 0.7
+hautmaxtec = 0
 largtec = 0.5
 codabri = 1
 transplastic = 0.7
-surfouvre1 = 0.1
-julouvre2 = 40
-surfouvre2 = 0.5
-julouvre3 = 120
-surfouvre3 = 0.7
+surfouvre1 = 0
+julouvre2 = 0
+surfouvre2 = 0
+julouvre3 = 0
+surfouvre3 = 0
 codeDST = 2
 dachisel = 1.1
 dalabour = 1.3

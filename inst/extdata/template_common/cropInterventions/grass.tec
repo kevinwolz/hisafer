@@ -1,19 +1,23 @@
 ## GRASS (HERBE)
+species = grass.plt
+variete = 1
+daystart = 01-01
+dayend = 12-31
 
 ## SOIL MANAGEMENT
-nbjres = 1
-nbjtrav = 1
+nbjres = 0
+nbjtrav = 0
 
 ## RESIDUE INCORPORATION TABLE
 #julres coderes qres Crespc CsurNres Nminres eaures
-2	1	1.00	42.00	20.00	0.00	0.00
+#RESIDUEINC	10-20	1	1.00	42.00	15.00	0.00	0.00 
 
 ## TILLAGE TABLE
 #jultrav profres proftrav
-2	0.00	10.00
+#TILLAGE	10-20	30.00	30.00 
 
 ## SOWING OPTIONS
-iplt0 = 32
+iplt0 = 01-01
 profsem = 2.00000
 densitesem = 200.00000
 variete = 1
@@ -35,38 +39,49 @@ iflo = 999
 idrp = 999
 imat = 999
 irec = 999
-irecbutoir = 730
+irecbutoir = 999
 
 ## IRRIGATIONS
 effirr = 1.00000
-codecalirrig = 1
+codecalirrig = 2
 ratiol = 1.00000
 dosimx = 40.00000
 doseirrigmin = 20.00000
 codedateappH2O = 2
-nap = 0
 codlocirrig = 1
 locirrig = 0
 profmes = 110.00000
+nap = 6
 
 ## IRRIGATION TABLE
-#julapl	qte
+#julapI doseI
+IRRIGATION	01-01	18.6
+IRRIGATION	06-29	40
+IRRIGATION	07-14	40
+IRRIGATION	07-29	40
+IRRIGATION	08-13	40
+IRRIGATION	09-02	40
 
 ## FERTILIZATIONS
+codecalferti = 2
+ratiolN = 0
+dosimxN = 40
+codetesthumN = 1
 engrais = 1
 concirr = 0.02000
 codedateappN = 2
 codefracappN = 1
 Qtot_N = 100
-napN = 0
 codlocferti = 1
 locferti = 0
+napN = 0
 
 ## FERTILIZATION TABLE
-#julapN qte
+#julapN doseN
+#FERTILIZATION	02-01	30.00
 
 ## HARVEST OPTIONS
-ressuite = straw+roots
+ressuite = roots
 codceuille = 1
 nbceuille = 1
 cadencerec = 7
@@ -83,19 +98,15 @@ nbjmaxapresrecolte = 15
 
 ## CUTTING INTERVENTIONS
 codefauche = 1
-mscoupemini = 0.00000
+mscoupemini = 0
 codemodfauche = 2
-hautcoupedefaut = 0.30000
+hautcoupedefaut = 0.3
 stadecoupedf = drp
-nbcoupe = 4
-nbinterventions = 0
+nbcoupe = 1
 
 ## CUTTING TABLE
-#julfauche hautcoupe lairesiduel msresiduel anitcoupe
-80	999	2	1	100
-130	999	0.45	0	100
-170	999	0.45	0	100
-210	999	0.45	0	0   
+#julfauche	hautcoupe	lairesiduel	msresiduel	anitcoupe
+CUTTING	05-31	0.30	0	0	0
 
 ## OTHER INTERVENTIONS
 codepaillage = 1
@@ -142,12 +153,12 @@ profhumrecolteuse = 30.00000
 darecolte = 1.60000
 codeDSTnbcouche = 2
 
-## PERENNIAL CROP INITIALIZATION
+## INIT	
 initialCropStage = 5
-initialCropLai = 0.2
-initialCropBiomass = 0.2
-initialCropRootDepth = 1
+initialCropLai = 0.8
+initialCropBiomass = 2.0
+initialCropRootDepth = 0.4
 initialCropGrainBiomass = 0
-initialCropNitrogen = 50
+initialCropNitrogen = 28
 initialCropReserveBiomass = 0
-initialCropRootDensity = 4,8,0.2,0,0
+initialCropRootDensity = 10.8,3.8,0,0,0

@@ -1,4 +1,8 @@
 ## BANANA (BANANE)
+species = banana.plt
+variete = 1
+daystart = 01-01
+dayend = 12-31
 
 ## SOIL MANAGEMENT
 nbjres = 1
@@ -6,17 +10,16 @@ nbjtrav = 1
 
 ## RESIDUE INCORPORATION TABLE
 #julres coderes qres Crespc CsurNres Nminres eaures
-30	1	4.00	42.00	40.00	0.00	0.00
+RESIDUEINC	01-30	1	4.00	42.00	40.00	0.00	0.00
 
 ## TILLAGE TABLE
 #jultrav profres proftrav
-30	0.00	20.00
+TILLAGE	01-30	0.00	20.00
 
 ## SOWING OPTIONS
-iplt0 = 32
+iplt0 = 02-01
 profsem = 20.00000
 densitesem = 0.18000
-variete = 1
 codetradtec = 2
 interrang = 999.00000
 orientrang = 0.00000
@@ -35,7 +38,7 @@ iflo = 999
 idrp = 999
 imat = 999
 irec = 999
-irecbutoir = 365
+irecbutoir = 999
 
 ## IRRIGATIONS
 effirr = 0.80000
@@ -44,38 +47,43 @@ ratiol = 0.00000
 dosimx = 20.00000
 doseirrigmin = 20.00000
 codedateappH2O = 2
-nap = 0
 codlocirrig = 2
 locirrig = 0
 profmes = 55.00000
+nap = 0
 
 ## IRRIGATION TABLE
-#julapl	qte
+#julapI doseI
+#IRRIGATION	05-29	40.00
 
 ## FERTILIZATIONS
+codecalferti = 2
+ratiolN = 0.00000
+dosimxN = 40.00000
+codetesthumN = 1
 engrais = 1
 concirr = 0.00000
 codedateappN = 2
 codefracappN = 1
 Qtot_N = 100
-napN = 12
 codlocferti = 1
 locferti = 0
+napN = 12
 
 ## FERTILIZATION TABLE
-#julapN qte
-32	30.00
-47	30.00
-62	30.00
-77	30.00
-92	30.00
-107	30.00
-122	30.00
-152	30.00
-182	30.00
-212	30.00
-242	30.00
-272	30.00
+#julapN doseN
+FERTILIZATION	02-01	30.00
+FERTILIZATION	02-16	30.00
+FERTILIZATION	03-03	30.00
+FERTILIZATION	03-18	30.00
+FERTILIZATION	04-02	30.00
+FERTILIZATION	04-17	30.00
+FERTILIZATION	05-02	30.00
+FERTILIZATION	06-01	30.00
+FERTILIZATION	07-01	30.00
+FERTILIZATION	07-31	30.00
+FERTILIZATION	08-30	30.00
+FERTILIZATION	09-29	30.00
 
 ## HARVEST OPTIONS
 ressuite = roots
@@ -100,10 +108,10 @@ codemodfauche = 1
 hautcoupedefaut = 0.00000
 stadecoupedf = rec
 nbcoupe = 0
-nbinterventions = 0
 
 ## CUTTING TABLE
-#julfauche hautcoupe lairesiduel msresiduel anitcoupe
+#julfauche	hautcoupe	lairesiduel	msresiduel	anitcoupe
+#CUTTING	06-15	0.10	0.0	0.0	0.00
 
 ## OTHER INTERVENTIONS
 codepaillage = 1
