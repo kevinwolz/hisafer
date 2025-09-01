@@ -27,11 +27,10 @@ SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("plot",   "plotDetail",
                                                     "only data for annual DBH of tree 1",
                                                     "only data for annual yield of specific cells"))
 
-CORE.PROFILES       <- c("plot", "trees", "cells", "voxelsMonth", "climate")
+CORE.PROFILES       <- c("plot", "zones", "trees", "cells", "voxelsMonth", "climate")
 PRIVATE.PROFILES    <- c("voxelsDebug", "voxelsOptim", "annualDBH", "annualCellsYield")
-PUBLIC.PROFILES     <- SUPPORTED.PROFILES$profiles[!(SUPPORTED.PROFILES$profiles %in% PRIVATE.PROFILES)]
-DATA.PROFILES       <- c("plot", "trees", "cells", "voxels", "climate", "monthCells", "annualCells")
-FILTERABLE.ELEMENTS <- c(DATA.PROFILES, "plot.info", "tree.info", "exp.plan", "metadata")
+DATA.PROFILES       <- c("plot", "zones", "trees", "cells", "voxels", "climate", "monthCells", "annualCells")
+FILTERABLE.ELEMENTS <- c(DATA.PROFILES, "plot.info", "zone.info", "tree.info", "exp.plan", "metadata")
 
 BASE.COLS <- c("SimulationName", "Date", "Day", "Month", "Year", "JulianDay")
 
@@ -75,7 +74,22 @@ get_template_subpath <- function(template) {
 
 get_available_profiles <- function(template) {
   path <- get_template_subpath(template)
-  profiles <- gsub("\\.pro", "", list.files(clean_path(paste0(path, "/exportParameters")), pattern = "\\.pro"))
+  exportFile<-paste(path, "/export.out",   sep="")
+  if(!file.exists(exportFile)) stop("le fichier export.out n'existe pas dans le répertoire : ", path)
+
+  lignes<-readLines(exportFile)
+  profiles <- c()
+  for (l in lignes) {
+    test<-grep(pattern="ProfileDef", x=l, value=TRUE)
+    if (length(test) > 0) {
+      lis<-unlist(strsplit(test, split = "\t"))
+      if (length(lis) > 1) {
+        profiles <- c(profiles, lis[2])
+      }
+    }
+  }
+
+
   return(profiles)
 }
 

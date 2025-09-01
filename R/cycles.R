@@ -14,7 +14,6 @@
 #' @param color.palette A character string of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
 #' If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette.
 #' @param bar.color A hex value or R standard color name defining the color to use for bar plot borders
-#' @param crop.names A character vector of length 2 containing the names to use in the legend for the mainCrop and interCrop of Hi-sAFe, in that order.
 #' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.
 #' @param tidy If \code{TRUE}, the summqrized version of the budget is created. Otherwise, a fully expanded budget is created.
 #' @details Detailed description of the flux components of the nitrogen and water cycles:
@@ -22,8 +21,7 @@
 #' NITROGEN
 #' \itemize{
 #'  \item{"Uptake - Trees"}{ - nitrogen uptake by trees}
-#'  \item{"Uptake - Inter crop"}{ - nitrogen uptake by main crop}
-#'  \item{"Uptake - Main crop"}{ - nitrogen uptake by inter crop}
+#'  \item{"Uptake - Crops"}{ - nitrogen uptake by crops}
 #'  \item{"Gaseous losses"}{ - gaseous nitrogen losses via nitrification, denitrification, and volatilization of mineral/organic fertilizer inputs}
 #'  \item{"Run-off"}{ - nitrogen contained in rain water (wet deposition) that runs off the scene}
 #'  \item{"Leaching"}{ - nitrate leaching via the (1) bottom of the scene, (2) artificial drainage pipes, and (3) losses to the water table when the nirate concentration in the water table is lower than the nitrate concentration of voxels that it saturates}
@@ -38,8 +36,7 @@
 #' WATER
 #' \itemize{
 #'  \item{"Uptake - Trees"}{ - water uptake by trees}
-#'  \item{"Uptake - Inter crop"}{ - water uptake by main crop}
-#'  \item{"Uptake - Main crop"}{ - water uptake by inter crop}
+#'  \item{"Uptake - Crops"}{ - water uptake by crops}
 #'  \item{"Interception"}{ - rain water intercepted by both tree and crop canopies (and then subsequently evaporated off)}
 #'  \item{"Run-off"}{ - rain & irrigation water that runs off the scene (including both the "surface" run-off associated with soil surface conditions plus the "overflow" runoff associated with saturation of the top soil layer and lack of infiltribility)}
 #'  \item{"Soil evaporation"}{ - water evaporated from (1) soil and (2) intercepted rain held in litter/mulch on soil surface}
@@ -73,7 +70,6 @@ plot_hisafe_cycle_bar <- function(hop,
                                   doy.start     = 1,
                                   color.palette = NULL,
                                   bar.color     = "black",
-                                  crop.names    = c("Main crop", "Inter crop"),
                                   plot          = TRUE,
                                   tidy          = plot) {
 
@@ -86,7 +82,6 @@ plot_hisafe_cycle_bar <- function(hop,
   if(!(length(doy.start)  == 1 & (is.numeric(doy.start) | doy.start == "sim")))  stop("doy.start argument must be an integer in [1,365] or 'sim'",     call. = FALSE)
   if(!(doy.start %in% 1:365 | doy.start == "sim"))                               stop("doy.start argument must be an integer in [1,365] or 'sim'",     call. = FALSE)
   if(!(length(bar.color)  == 1 & is.character(bar.color)))                       stop("bar.plot argument must be a character vector of length 1",      call. = FALSE)
-  if(!(length(crop.names) == 2 & is.character(crop.names)))                      stop("crop.names argument must be a character vector of length 2",    call. = FALSE)
   is_TF(plot)
 
   pre.filter <- profile_check(hop, "cells")
@@ -107,7 +102,7 @@ plot_hisafe_cycle_bar <- function(hop,
   METHOD <- ifelse(profile_check(hop, "cells"), "cells", "plot")
 
   if(cycle == "yield") {
-    plot.data <- get_yields(hop = hop, profile = METHOD, crop.names = crop.names)
+    plot.data <- get_yields(hop = hop, profile = METHOD)
     geom       <- geom_bar(stat = "identity", color = bar.color)
     plot.title <- "Yield"
     y.lab      <- bquote("Yield (kg "*ha^-1*")")
@@ -115,7 +110,7 @@ plot_hisafe_cycle_bar <- function(hop,
     summary_fun <- sum
 
   } else if(cycle == "water") {
-    plot.data <- get_water_fluxes(hop = hop, profile = METHOD, crop.names = crop.names, for.plot = (plot | tidy))
+    plot.data <- get_water_fluxes(hop = hop, profile = METHOD,  for.plot = (plot | tidy))
     geom       <- geom_bar(stat = "identity", color = bar.color)
     plot.title <- "Water Cycle"
     y.lab      <- "Water flux (mm)"
@@ -124,7 +119,7 @@ plot_hisafe_cycle_bar <- function(hop,
     summary_fun <- sum
 
   } else if(cycle == "nitrogen") {
-    plot.data  <- get_nitrogen_fluxes(hop = hop, profile = METHOD, crop.names = crop.names, for.plot = (plot | tidy))
+    plot.data  <- get_nitrogen_fluxes(hop = hop, profile = METHOD,  for.plot = (plot | tidy))
     geom       <- geom_bar(stat = "identity", color = bar.color)
     plot.title <- "Nitrogen Cycle"
     y.lab      <- bquote("N flux (kg N "*ha^-1*")")
@@ -133,7 +128,7 @@ plot_hisafe_cycle_bar <- function(hop,
     summary_fun <- sum
 
   } else if(cycle == "light") {
-    plot.data  <- get_light_fluxes(hop = hop, crop.names = crop.names)
+    plot.data  <- get_light_fluxes(hop = hop)
     geom       <- list(geom_bar(stat = "identity", aes(color = flux)),
                        scale_color_manual(values = c("black", "white", "black", "black")),
                        guides(fill = guide_legend(override.aes = list(color = "black"))))
@@ -148,7 +143,7 @@ plot_hisafe_cycle_bar <- function(hop,
     geom       <- geom_bar(stat = "identity", color = bar.color)
     plot.title <- "Tree Carbon Pools"
     y.lab      <- bquote("Tree C storage (Mg C "*ha^-1*")")
-    if(is.null(color.palette)) color.palette <- c("#009E73", "#999999", "#D55E00", "#E69F00", "#56B4E9", "#0072B2", "#F0E442")
+    if(is.null(color.palette)) color.palette <- c("#73009E", "#009E73", "#999999", "#D55E00", "#E69F00", "#56B4E9", "#0072B2", "#F0E442")
     summary_fun <- max
 
   } else {
@@ -235,7 +230,6 @@ plot_hisafe_cycle_bar <- function(hop,
 #' @param doy.lim A numeric vector of length two providing the \code{c(minimum, maximum)} of julian days to plot.
 #' @param color.palette A character stirng of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
 #' If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette.
-#' @param crop.names A character vector of length 2 containing the names to use in the legend for the mainCrop and interCrop of Hi-sAFe, in that order.
 #' @param pheno.lines Logical indicating whether or not vertical lines should be plotted on dates of tree phenoloigical stage changes
 #' @param branch.pruning.lines Logical indicating whether or not vertical lines should be plotted on dates of branch pruning
 #' @param root.pruning.lines Logical indicating whether or not vertical lines should be plotted on dates of root pruning
@@ -261,7 +255,6 @@ plot_hisafe_cycle_ts <- function(hop,
                                  tree.ids             = "all",
                                  doy.lim              = c(1, 366),
                                  color.palette        = NULL,
-                                 crop.names           = c("Main crop", "Inter crop"),
                                  pheno.lines          = TRUE,
                                  branch.pruning.lines = TRUE,
                                  root.pruning.lines   = TRUE,
@@ -274,7 +267,6 @@ plot_hisafe_cycle_ts <- function(hop,
   if(!(cycle %in% allowed.cycles))                          stop(paste0("cycle argument must be one of: ", paste(allowed.cycles, collapse = ", ")), call. = FALSE)
   if(!(all(is.numeric(years)) | years[1] == "all"))         stop("years argument must be 'all' or a numeric vector",           call. = FALSE)
   if(!(length(doy.lim)    == 2 & all(doy.lim %in% 1:366)))  stop("doy.lim argument must be of length 2 with values in 1:366",  call. = FALSE)
-  if(!(length(crop.names) == 2 & is.character(crop.names))) stop("crop.names argument must be a character vector of length 2", call. = FALSE)
   is_TF(pheno.lines)
   is_TF(trim)
   is_TF(plot)
@@ -291,7 +283,7 @@ plot_hisafe_cycle_ts <- function(hop,
   hop <- hop_filter(hop = hop, simu.names = simu.names, tree.ids = tree.ids)
 
   if(cycle == "yield") {
-    plot.data <- get_yields(hop = hop, profile = METHOD, crop.names = crop.names)
+    plot.data <- get_yields(hop = hop, profile = METHOD)
     if(is.null(color.palette)) color.palette <- c("#E69F00", "#009E73")
     cycle.geom  <- geom_area(aes(fill = flux), na.rm = TRUE)
     cycle.scale <- scale_color_manual(values = color.palette)
@@ -299,12 +291,11 @@ plot_hisafe_cycle_ts <- function(hop,
     y.lab       <- bquote("Yield (kg "*ha^-1*")")
 
   } else if(cycle == "water") {
-    plot.data <- get_water_fluxes(hop = hop, profile = METHOD, crop.names = crop.names, for.plot = plot) %>%
+    plot.data <- get_water_fluxes(hop = hop, profile = METHOD,  for.plot = plot) %>%
       dplyr::filter(flux %in% c("Uptake - Trees",
-                                paste("Uptake -", crop.names[2]),
-                                paste("Uptake -", crop.names[1]))) %>%
+                                paste("Uptake - Crops"))) %>%
       dplyr::mutate(flux = droplevels(flux))
-    levels(plot.data$flux) <- c("Trees", "Inter crop", "Main crop")
+    levels(plot.data$flux) <- c("Trees", "Crops")
     if(is.null(color.palette)) color.palette <- c("#009E73", "#56B4E9", "#E69F00")
     cycle.geom  <- geom_area(aes(fill = flux), na.rm = TRUE)
     cycle.scale <- scale_fill_manual(values = color.palette)
@@ -312,12 +303,11 @@ plot_hisafe_cycle_ts <- function(hop,
     y.lab       <- "Water uptake (mm)"
 
   } else if(cycle == "nitrogen") {
-    plot.data <- get_nitrogen_fluxes(hop = hop, profile = METHOD, crop.names = crop.names, for.plot = plot) %>%
+    plot.data <- get_nitrogen_fluxes(hop = hop, profile = METHOD,  for.plot = plot) %>%
       dplyr::filter(flux %in% c("Uptake - Trees",
-                                paste("Uptake -", crop.names[2]),
-                                paste("Uptake -", crop.names[1]))) %>%
+                                paste("Uptake - Crops"))) %>%
       dplyr::mutate(flux = droplevels(flux))
-    levels(plot.data$flux) <- c("Trees", "Inter crop", "Main crop")
+    levels(plot.data$flux) <- c("Trees", "Crops")
     if(is.null(color.palette)) color.palette <- c("#009E73", "#56B4E9", "#E69F00")
     cycle.geom  <- geom_area(aes(fill = flux), na.rm = TRUE)
     cycle.scale <- scale_fill_manual(values = color.palette)
@@ -325,7 +315,7 @@ plot_hisafe_cycle_ts <- function(hop,
     y.lab       <- bquote("N uptake (kg N "*ha^-1*")")
 
   } else if(cycle == "light") {
-    plot.data   <- get_light_fluxes(hop = hop, crop.names = crop.names)
+    plot.data   <- get_light_fluxes(hop = hop)
     if(is.null(color.palette)) color.palette <- c("#009E73", "white", "#56B4E9", "#E69F00")
     cycle.geom  <- geom_area(aes(fill = flux), na.rm = TRUE)
     cycle.scale <- scale_fill_manual(values = color.palette)
@@ -335,7 +325,7 @@ plot_hisafe_cycle_ts <- function(hop,
   } else if(cycle == "carbon") {
     if(!profile_check(hop, "trees")) return(NULL)
     plot.data   <- get_carbon_pools(hop = hop)
-    if(is.null(color.palette)) color.palette <- c("#009E73", "#999999", "#D55E00", "#E69F00", "#56B4E9", "#0072B2", "#F0E442")
+    if(is.null(color.palette)) color.palette <- c("#73009E", "#009E73", "#999999", "#D55E00", "#E69F00", "#56B4E9", "#0072B2", "#F0E442")
     cycle.geom  <- geom_area(aes(fill = flux), na.rm = TRUE)
     cycle.scale <- scale_fill_manual(values = color.palette)
     pre.title   <- "Tree Carbon Pools"
@@ -344,7 +334,7 @@ plot_hisafe_cycle_ts <- function(hop,
   } else if(cycle == "carbon-increment") {
     if(!profile_check(hop, "trees")) return(NULL)
     plot.data   <- get_carbon_increment(hop = hop)
-    if(is.null(color.palette)) color.palette <- c("#009E73", "#D55E00", "#E69F00", "#56B4E9", "#0072B2", "#F0E442")
+    if(is.null(color.palette)) color.palette <- c("#009E73", "#999999", "#D55E00", "#E69F00", "#56B4E9", "#0072B2", "#F0E442")
     cycle.geom  <- geom_area(aes(fill = flux), na.rm = TRUE)
     cycle.scale <- scale_fill_manual(values = color.palette)
     pre.title   <- "Tree Carbon Increment"
@@ -457,19 +447,18 @@ plot_hisafe_cycle_ts <- function(hop,
 #' @return A tibble with extracted and calculated water fluxes.
 #' @param hop An object of class hop or face.
 #' @param profile An character string indicating from which profile to pull flux data. Either "cells" or "plot".
-#' @param crop.names A character vector of length 2 containing the names to use in the legend for the mainCrop and interCrop of Hi-sAFe, in that order.
 #' @param for.plot A logical indicating whether the fluxes to retreive are for \code{\link{plot_hisafe_cycle_ts}} or not.
 #' @importFrom dplyr %>%
 #' @keywords internal
-get_water_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
+get_water_fluxes <- function(hop, profile,  for.plot = TRUE) {
   profile_check(hop, c(profile, "climate"), error = TRUE)
   variable_check(hop, "climate", "precipitation", error = TRUE)
 
   if(profile == "cells") {
     variable_check(hop, "cells",
-                   c("cropType", "rainInterceptedByTrees", "rainInterceptedByCrop",
+                   c("idZone", "rainInterceptedByTrees", "rainInterceptedByCrop",
                      "runOff", "soilEvaporation", "mulchEvaporation", "drainageBottom", "drainageArtificial",
-                     "waterUptakeByTrees", "waterUptake", "irrigation", "waterAddedByWaterTable",
+                     "waterUptakeByTrees", "waterUptakeByCrop", "irrigation", "waterAddedByWaterTable",
                      "waterUptakeInSaturationByTrees", "waterUptakeInSaturationByCrop", "capillaryRise"),
                    error = TRUE)
 
@@ -487,13 +476,12 @@ get_water_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
                       evaporation   = soilEvaporation + mulchEvaporation,
                       drainage      = drainageBottom + drainageArtificial,
                       uptakeTree    = waterUptakeByTrees,
-                      uptakeMain    = waterUptake * as.numeric(cropType == "mainCrop"),
-                      uptakeInter   = waterUptake * as.numeric(cropType == "interCrop"),
+                      uptakeCrop    = waterUptakeByCrop,
                       irrigation    = -irrigation,
                       waterTable    = -waterAddedByWaterTable + -waterUptakeInSaturationByTrees + -waterUptakeInSaturationByCrop + -capillaryRise,
                       precipitation = -precipitation) %>%
         dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay,
-                      interception, runOff, evaporation, drainage, uptakeTree, uptakeMain, uptakeInter, irrigation, waterTable, precipitation)
+                      interception, runOff, evaporation, drainage, uptakeTree, uptakeCrop,  irrigation, waterTable, precipitation)
     } else {
       out <- out %>%
         dplyr::mutate(tree.interception         = rainInterceptedByTrees,
@@ -504,8 +492,7 @@ get_water_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
                       drainage.bottom           = drainageBottom,
                       drainage.artificial       = drainageArtificial,
                       uptakeTree                = waterUptakeByTrees,
-                      uptakeMain                = waterUptake * as.numeric(cropType == "mainCrop"),
-                      uptakeInter               = waterUptake * as.numeric(cropType == "interCrop"),
+                      uptakeCrop                = waterUptakeByCrop,
                       irrigation                = -irrigation,
                       water.added.by.watertable = -waterAddedByWaterTable,
                       water.uptake.sat.trees    = -waterUptakeInSaturationByTrees,
@@ -514,7 +501,7 @@ get_water_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
                       precipitation             = -precipitation) %>%
         dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay,
                       tree.interception, crop.interception, runOff, soil.evaporation, mulch.evaporation, drainage.bottom, drainage.artificial,
-                      uptakeTree, uptakeMain, uptakeInter, irrigation, water.added.by.watertable, water.uptake.sat.trees, water.uptake.sat.crop,
+                      uptakeTree, uptakeCrop, irrigation, water.added.by.watertable, water.uptake.sat.trees, water.uptake.sat.crop,
                       capilary.rise, precipitation)
     }
 
@@ -523,9 +510,7 @@ get_water_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
       dplyr::summarize_all(mean) %>% # mean of all cells in scene
       dplyr::ungroup() %>%
       dplyr::group_by(SimulationName) %>%
-      # dplyr::mutate(uptakeTree  = c(NA, uptakeTree[1 :(length(uptakeTree)  - 1)]), # Hi-sAFe uses the water extraction from day j-1 to impact day j
-      #               uptakeMain  = c(NA, uptakeMain[1 :(length(uptakeMain)  - 1)]),
-      #               uptakeInter = c(NA, uptakeInter[1:(length(uptakeInter) - 1)])) %>%
+
       dplyr::ungroup() %>%
       tidyr::gather(key = "flux", value = "value", -(SimulationName:JulianDay))
 
@@ -537,8 +522,7 @@ get_water_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
     out <- out %>%
       dplyr::mutate(flux = factor(flux,
                                   levels = c("uptakeTree",
-                                             "uptakeInter",
-                                             "uptakeMain",
+                                             "uptakeCrop",
                                              "interception",
                                              "runOff",
                                              "evaporation",
@@ -547,9 +531,8 @@ get_water_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
                                              "waterTable",
                                              "precipitation"),
                                   labels = c("Uptake - Trees",
-                                             paste("Uptake -", crop.names[2]),
-                                             paste("Uptake -", crop.names[1]),
-                                             "Interception",
+                                             paste("Uptake - Crops"),
+                                             "Tree canopy interception",
                                              "Run-off",
                                              "Soil evaporation",
                                              "Drainage",
@@ -567,17 +550,16 @@ get_water_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
 #' @return A tibble with extracted and calculated nitrogen fluxes.
 #' @param hop An object of class hop or face.
 #' @param profile An character string indicating from which profile to pull flux data. Either "cells" or "plot".
-#' @param crop.names A character vector of length 2 containing the names to use in the legend for the mainCrop and interCrop of Hi-sAFe, in that order.
 #' @param for.plot A logical indicating whether the fluxes to retreive are for \code{\link{plot_hisafe_cycle_ts}} or not.
 #' @importFrom dplyr %>%
 #' @keywords internal
-get_nitrogen_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
+get_nitrogen_fluxes <- function(hop, profile,  for.plot = TRUE) {
   profile_check(hop, profile, error = TRUE)
 
   if(profile == "cells") {
     variable_check(hop, "cells",
-                   c("cropType", "nitrogenFertilisationMineral", "nitrogenFertilisationOrganic", "nitrogenIrrigation", "nitrogenRain", "nitrogenFixation",
-                     "nitrogenUptakeByTrees", "nitrogenUptakeInSaturationByTrees", "nitrogenUptakeInSaturationByCrop", "nitrogenUptake",
+                   c("idZone", "nitrogenFertilisationMineral", "nitrogenFertilisationOrganic", "nitrogenIrrigation", "nitrogenRain", "nitrogenFixation",
+                     "nitrogenUptakeByTrees", "nitrogenUptakeInSaturationByTrees", "nitrogenUptakeInSaturationByCrop", "nitrogenUptakeByCrop",
                      "nitrogenVolatilisation", "nitrogenVolatilisationOrganic", "nitrogenDenitrification", "nitrogenLossNitrification",
                      "nitrogenLeachingBottom", "nitrogenLeachingArtificial", "nitrogenLeachingWaterTable",
                      "treeNitrogenLeafLitter", "treeNitrogenFineRootLitter", "treeNitrogenCoarseRootLitter",
@@ -594,8 +576,7 @@ get_nitrogen_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
                       fixation       = -nitrogenFixation,
                       watertable     = -nitrogenAddedByWaterTable + -nitrogenUptakeInSaturationByTrees + -nitrogenUptakeInSaturationByCrop,
                       uptakeTree     = nitrogenUptakeByTrees,
-                      uptakeMain     = nitrogenUptake * as.numeric(cropType == "mainCrop") + nitrogenFixation,
-                      uptakeInter    = nitrogenUptake * as.numeric(cropType == "interCrop"),
+                      uptakeCrop     = nitrogenUptakeByCrop  + nitrogenFixation,
                       gaseous        = nitrogenVolatilisation + nitrogenVolatilisationOrganic + nitrogenDenitrification + nitrogenLossNitrification,
                       leaching       = nitrogenLeachingBottom + nitrogenLeachingArtificial + nitrogenLeachingWaterTable,
                       #runoff         = nitrogenRunOff, # STICS CURRENTLY DOES NOT INCLUDE THIS
@@ -604,7 +585,7 @@ get_nitrogen_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
                       crop.litter    = -cropNitrogenLeafLitter + -cropNitrogenRootLitter) %>%
         dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay,
                       fertilization, irrigation, deposition, fixation, watertable,
-                      uptakeTree, uptakeMain, uptakeInter, gaseous, leaching, tree.litter, crop.litter) #runoff,
+                      uptakeTree, uptakeCrop,  gaseous, leaching, tree.litter, crop.litter) #runoff,
     } else {
       out <- hop$cells %>%
         replace(is.na(.), 0) %>%
@@ -617,8 +598,7 @@ get_nitrogen_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
                       nitrogen.uptake.sat.trees = -nitrogenUptakeInSaturationByTrees,
                       nitrogen.uptake.sat.crop  = -nitrogenUptakeInSaturationByCrop,
                       uptakeTree                = nitrogenUptakeByTrees,
-                      uptakeMain                = nitrogenUptake * as.numeric(cropType == "mainCrop") + nitrogenFixation,
-                      uptakeInter               = nitrogenUptake * as.numeric(cropType == "interCrop"),
+                      uptakeCrop                = nitrogenUptakeByCrop  + nitrogenFixation,
                       volatilization.mineral    = nitrogenVolatilisation,
                       volatilization.organic    = nitrogenVolatilisationOrganic,
                       nitrification             = nitrogenLossNitrification,
@@ -634,7 +614,7 @@ get_nitrogen_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
                       crop.root.litter          = -cropNitrogenRootLitter) %>%
         dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay,
                       fertilization.mineral, fertilization.organic, irrigation, deposition, fixation, watertable, nitrogen.uptake.sat.trees, nitrogen.uptake.sat.crop,
-                      uptakeTree, uptakeMain, uptakeInter, volatilization.mineral, volatilization.organic, nitrification, denitrification,
+                      uptakeTree, uptakeCrop,  volatilization.mineral, volatilization.organic, nitrification, denitrification,
                       leaching.bottom, leaching.artificial, leaching.watertable, tree.leaf.litter, tree.shallow.root.litter, tree.deep.root.litter,
                       crop.leaf.litter, crop.root.litter) #runoff,
     }
@@ -653,8 +633,7 @@ get_nitrogen_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
     out <- out %>%
       dplyr::mutate(flux = factor(flux,
                                   levels = c("uptakeTree",
-                                             "uptakeInter",
-                                             "uptakeMain",
+                                             "uptakeCrop",
                                              "gaseous",
                                              "runoff",
                                              "leaching",
@@ -666,8 +645,7 @@ get_nitrogen_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
                                              "crop.litter",
                                              "deposition"),
                                   labels = c("Uptake - Trees",
-                                             paste("Uptake -", crop.names[2]),
-                                             paste("Uptake -", crop.names[1]),
+                                             "Uptake - Crops",
                                              "Gaseous losses",
                                              "Run-off",
                                              "Leaching",
@@ -687,34 +665,33 @@ get_nitrogen_fluxes <- function(hop, profile, crop.names, for.plot = TRUE) {
 #' Used within hisafe cycle functions.
 #' @return A tibble with extracted and calculated light fluxes.
 #' @param hop An object of class hop or face.
-#' @param crop.names A character vector of length 2 containing the names to use in the legend for the mainCrop and interCrop of Hi-sAFe, in that order.
 #' @importFrom dplyr %>%
 #' @keywords internal
-get_light_fluxes <- function(hop, crop.names) {
+get_light_fluxes <- function(hop) {
   profile_check(hop, "plot", error = TRUE)
   variable_check(hop, "plot",
-                 c("mainCropArea", "interCropArea", "parIncident", "parInterceptedByMainCrop", "parInterceptedByInterCrop", "parInterceptedByTrees"),
+                 c("totalParIncident", "totalParInterceptedByTrees", "totalParInterceptedByCrops"),
                  error = TRUE)
+
+
+
   out <- hop$plot %>%
     replace(is.na(.) & is.numeric(.), 0) %>%
     # Scale by area to conver to moles and then make percentage of inceident par
-    dplyr::mutate(parIncident            = parIncident               * (mainCropArea + interCropArea),
-                  InterceptedByMainCrop  = parInterceptedByMainCrop  * mainCropArea                   / parIncident * 100,
-                  InterceptedByInterCrop = parInterceptedByInterCrop * interCropArea                  / parIncident * 100,
-                  InterceptedByTrees     = parInterceptedByTrees     * (mainCropArea + interCropArea) / parIncident * 100,
-                  notCaptured            = 100 - InterceptedByMainCrop - InterceptedByInterCrop - InterceptedByTrees) %>%
+    dplyr::mutate(totalParIncident       = totalParIncident,
+                  interceptedByCrops     = totalParInterceptedByCrops / totalParIncident * 100,
+                  interceptedByTrees     = totalParInterceptedByTrees  / totalParIncident * 100,
+                  notCaptured            = 100 - interceptedByCrops  - interceptedByTrees) %>%
     dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay,
-                  InterceptedByTrees, notCaptured, InterceptedByInterCrop, InterceptedByMainCrop) %>%
+                  interceptedByTrees, notCaptured, interceptedByCrops) %>%
     tidyr::gather(key = "flux", value = "value", -(SimulationName:JulianDay)) %>%
     dplyr::mutate(flux = factor(flux,
-                                levels = c("InterceptedByTrees",
+                                levels = c("interceptedByTrees",
                                            "notCaptured",
-                                           "InterceptedByInterCrop",
-                                           "InterceptedByMainCrop"),
+                                           "interceptedByCrops"),
                                 labels = c("Trees",
                                            "Not captured",
-                                           crop.names[2],
-                                           crop.names[1])))
+                                           "Crops")))
   return(out)
 }
 
@@ -728,12 +705,12 @@ get_light_fluxes <- function(hop, crop.names) {
 get_carbon_pools <- function(hop) {
   profile_check(hop, "trees", error = TRUE)
   variable_check(hop, "trees",
-                 c("carbonFoliage", "carbonBranches", "carbonCoarseRoots", "carbonFineRoots", "carbonLabile", "carbonStem", "carbonStump"),
+                 c("carbonLabile", "totalCarbonFoliage", "carbonBranches", "carbonStem", "carbonFruit", "carbonFineRoots", "carbonCoarseRoots","carbonStump"),
                  error = TRUE)
   out <- hop$trees %>%
     replace(is.na(.), 0) %>%
     dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay, idTree,
-                  carbonFoliage, carbonBranches, carbonCoarseRoots, carbonFineRoots, carbonLabile, carbonStem, carbonStump) %>%
+                  carbonLabile, totalCarbonFoliage,carbonBranches, carbonStem, carbonFruit, carbonFineRoots, carbonCoarseRoots,carbonStump ) %>%
     dplyr::select(-idTree) %>%
     dplyr::group_by(SimulationName, Year, Month, Day, Date, JulianDay) %>%
     dplyr::summarize_all(sum) %>%
@@ -743,17 +720,19 @@ get_carbon_pools <- function(hop) {
     dplyr::mutate(carbonFineRoots   = -carbonFineRoots) %>%
     tidyr::gather(key = "flux", value = "value", -(SimulationName:JulianDay)) %>%
     dplyr::mutate(flux = factor(flux,
-                                levels = c("carbonFoliage",
-                                           "carbonLabile",
+                                levels = c("carbonLabile",
+                                           "totalCarbonFoliage",
                                            "carbonBranches",
                                            "carbonStem",
+                                           "carbonFruit",
                                            "carbonFineRoots",
                                            "carbonCoarseRoots",
                                            "carbonStump"),
-                                labels = c("Leaves",
-                                           "Labile",
+                                labels = c("Labile",
+                                           "Leaves",
                                            "Branches",
                                            "Stem",
+                                           "Fruit",
                                            "Fine Roots",
                                            "Coarse Roots",
                                            "Stump"))) %>%
@@ -774,12 +753,12 @@ get_carbon_pools <- function(hop) {
 get_carbon_increment <- function(hop) {
   profile_check(hop, "trees", error = TRUE)
   variable_check(hop, "trees",
-                 c("carbonFoliageIncrement", "carbonBranchesIncrement", "carbonCoarseRootsIncrement", "carbonFineRootsIncrement", "carbonStemIncrement", "carbonStumpIncrement"),
+                 c("carbonFoliageIncrement", "carbonBranchesIncrement", "carbonStemIncrement","carbonFruitIncrement", "carbonFineRootsIncrement","carbonCoarseRootsIncrement",   "carbonStumpIncrement"),
                  error = TRUE)
   out <- hop$trees %>%
     replace(is.na(.), 0) %>%
     dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay, idTree,
-                  carbonFoliageIncrement, carbonBranchesIncrement, carbonCoarseRootsIncrement, carbonFineRootsIncrement, carbonStemIncrement, carbonStumpIncrement) %>%
+                  carbonFoliageIncrement, carbonBranchesIncrement, carbonStemIncrement, carbonFruitIncrement, carbonFineRootsIncrement, carbonCoarseRootsIncrement,   carbonStumpIncrement) %>%
     dplyr::select(-idTree) %>%
     dplyr::group_by(SimulationName, Year, Month, Day, Date, JulianDay) %>%
     dplyr::summarize_all(sum) %>%
@@ -789,12 +768,14 @@ get_carbon_increment <- function(hop) {
                                 levels = c("carbonFoliageIncrement",
                                            "carbonBranchesIncrement",
                                            "carbonStemIncrement",
+                                           "carbonFruitIncrement",
                                            "carbonFineRootsIncrement",
                                            "carbonCoarseRootsIncrement",
                                            "carbonStumpIncrement"),
                                 labels = c("Leaves",
                                            "Branches",
                                            "Stem",
+                                           "Fruit",
                                            "Fine Roots",
                                            "Coarse Roots",
                                            "Stump")))
@@ -833,27 +814,27 @@ get_carbon_allocation <- function(hop) {
 #' @return A tibble with extracted yields.
 #' @param hop An object of class hop or face.
 #' @param profile An character string indicating from which profile to pull crop yield data. Either "cells" or "plot".
-#' @param crop.names A character vector of length 2 containing the names to use in the legend for the mainCrop and interCrop of Hi-sAFe, in that order.
+
 #' @importFrom dplyr %>%
 #' @keywords internal
-get_yields <- function(hop, profile, crop.names) {
+get_yields <- function(hop, profile) {
   profile_check(hop, c(profile, "trees", "plot.info"), error = TRUE)
   variable_check(hop, "trees", "stemYield", error = TRUE)
 
   if(profile == "cells") {
-    variable_check(hop, "cells", c("cropType", "grainBiomass"), error = TRUE)
+    variable_check(hop, "cells", c("idZone", "grainBiomass"), error = TRUE)
 
     mainCrop.rel.area <- hop$cells %>%
       dplyr::filter(Date == min(Date)) %>%
-      dplyr::group_by(SimulationName, cropType) %>%
+      dplyr::group_by(SimulationName, idZone) %>%
       dplyr::summarize(n = dplyr::n()) %>%
       dplyr::mutate(perc = n / sum(n)) %>%
-      dplyr::filter(cropType == "mainCrop") %>%
-      dplyr::select(-cropType, -n)
+      dplyr::filter(idZone == "1") %>%
+      dplyr::select(-idZone, -n)
 
     cells <- hop$cells %>%
       replace(is.na(.), 0) %>%
-      dplyr::filter(cropType == "mainCrop") %>%
+      dplyr::filter(idZone == "1") %>%
       dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay, grainBiomass) %>%
       dplyr::group_by(SimulationName, Year, Month, Day, Date, JulianDay) %>%
       dplyr::summarize_all(mean) %>% # mean of all cells in scene
@@ -890,7 +871,7 @@ get_yields <- function(hop, profile, crop.names) {
     tidyr::gather(key = "flux", value = "value", stemYield, yield) %>%
     dplyr::mutate(flux = factor(flux,
                                 levels = c("stemYield", "yield"),
-                                labels = c("Trees", crop.names[1])))
+                                labels = c("Trees", "Crops")))
   return(out)
 }
 
@@ -902,7 +883,6 @@ get_yields <- function(hop, profile, crop.names) {
 #' @param simu.name A character vector of legnth 1 indicating the SimulationName within \code{hop} to plot.
 #' @param cycles A character vector of the cycles to include. Supported cycles include: 'carbon', 'light', 'water', and 'nitrogen.
 #' See \code{\link{plot_hisafe_cycle_bar}} for details of each cycle.
-#' @param crop.names A character vector of length 2 containing the names to use in the legend for the mainCrop and interCrop of Hi-sAFe, in that order.
 #' @param output.path A character string indicating the path to the directory where plots should be saved.
 #' If \code{NULL}, the experiment/simulation path is read from the hop object, and a directory is created there called "analysis".
 #' The plot will be saved in this directory as "cycles_summary_SimulationName.jpg".
@@ -918,7 +898,6 @@ cycle_summary <- function(hop,
                           daily.year,
                           simu.name   = NULL,
                           cycles      = c("carbon", "light", "water", "nitrogen"),
-                          crop.names  = c("Main crop", "Inter crop"),
                           output.path = NULL,
                           plot.labels = NULL) {
 
@@ -960,14 +939,12 @@ cycle_summary <- function(hop,
                                         simu.names    = simu.name,
                                         cycle         = "light",
                                         years         = daily.year,
-                                        crop.names    = crop.names,
                                         pheno.lines   = FALSE) +
       guides(fill = FALSE)
 
     light.annual <- plot_hisafe_cycle_bar(hop           = hop,
                                           simu.names    = simu.name,
                                           cycle         = "light",
-                                          crop.names    = crop.names,
                                           bar.color     = "transparent")
   } else {
     light.daily  <- NA
@@ -980,14 +957,12 @@ cycle_summary <- function(hop,
                                         simu.names    = simu.name,
                                         cycle         = "water",
                                         years         = daily.year,
-                                        crop.names    = crop.names,
                                         pheno.lines   = FALSE) +
       guides(fill = FALSE)
 
     water.annual <- plot_hisafe_cycle_bar(hop        = hop,
                                           simu.names = simu.name,
-                                          cycle      = "water",
-                                          crop.names = crop.names)
+                                          cycle      = "water")
   } else {
     water.daily  <- NA
     water.annual <- NA
@@ -999,14 +974,12 @@ cycle_summary <- function(hop,
                                            simu.names  = simu.name,
                                            cycle       = "nitrogen",
                                            years       = daily.year,
-                                           crop.names  = crop.names,
                                            pheno.lines = FALSE) +
       guides(fill = FALSE)
 
     nitrogen.annual <- plot_hisafe_cycle_bar(hop        = hop,
                                              simu.names = simu.name,
-                                             cycle      = "nitrogen",
-                                             crop.names = crop.names)
+                                             cycle      = "nitrogen")
   } else {
     nitrogen.daily  <- NA
     nitrogen.annual <- NA

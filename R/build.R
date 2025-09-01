@@ -3,7 +3,7 @@
 #' @return Invisibly returns a list containing the original hip object.
 #' @param hip An object of class "hip". To create a hip object see \code{\link{define_hisafe}}.
 #' @param files A character string of file types indicating which simulation files to build. Use "all" to write all required simulation files.
-#' Otherwise, select one or more of "sim", "pld", "wth", "tree", "plt", "tec", "par", and "pro".
+#' Otherwise, select one or more of "sim", "pld", "wth", "tree", "plt", "tec", "ttec", "par", and "pro".
 #' @param plot.scene Logical indicating whether \code{\link{plot_hisafe_scene}} should be used to export plots of each scene during the build.
 #' @param summary.files Logical indicating whether or not to write out summary .CSV files about the experiment and each simulation during the build.
 #' @param stics.diagnostics Logical indicating whether or not STICS diagnostics files should be exported in the simulation.
@@ -32,7 +32,7 @@ build_hisafe <- function(hip,
   is_hip(hip, error = TRUE)
   is_TF(plot.scene)
 
-  allowed.files <- c("sim", "pld", "wth", "tree", "plt", "tec", "par", "pro")
+  allowed.files <- c("sim", "pld", "wth", "tree", "plt", "tec", "ttec", "par")
   if(files[1] == "all") files <- allowed.files
   if(!all(files %in% allowed.files)) stop(paste0("files argument must be 'all' or one or more of ",
                                                  paste(allowed.files, collapse = ", ")), call. = FALSE)
@@ -73,8 +73,6 @@ build_hisafe <- function(hip,
   purrr::walk(hip.list,
               build_structure,
               path              = hip$path,
-              profiles          = hip$profiles,
-              freqs             = hip$freqs,
               template          = hip$template,
               files             = files,
               plot.scene        = plot.scene,
@@ -96,17 +94,15 @@ build_hisafe <- function(hip,
 #' @return Invisibly returns a list containing the original hip object and supplied path.
 #' @param exp.plan The exp.plan element of a "hip" object, containing a single row.
 #' @param path A character string of the path to the simulation folder.
-#' @param profiles A character vector of export profiles the simulation should export.
-#' @param freqs A numeric vector of exportFrequencies of the export profiles.
 #' @param template A character string of the path to the Hi-sAFe directory structure/files to use as a template
 #' (or one of the strings signaling a default template)
 #' @param files A character string of file types indicating which simulation files to build. Use "all" to write all required simulation files.
-#' Otherwise, select one or more of "sim", "pld", "wth", "tree", "plt", "tec", "par", and "pro".
+#' Otherwise, select one or more of "sim", "pld", "wth", "tree", "plt", "tec", "ttec", "par", and "pro".
 #' @param plot.scene Logical indicating whether \code{\link{plot_hisafe_scene}} should be used to export plots of each scene during the build.
 #' @param summary.files Logical indicating whether or not to write out summary .CSV files about the experiment and each simulation during the build.
 #' @param stics.diagnostics Logical indicating whether or not STICS diagnostics files should be exported in the simulation.
 #' @keywords internal
-build_structure <- function(exp.plan, path, profiles, freqs, template, files, plot.scene, summary.files, stics.diagnostics) {
+build_structure <- function(exp.plan, path,  template, files, plot.scene, summary.files, stics.diagnostics) {
 
   TEMPLATE_PARAMS <- get_template_params(template)
   PARAM_NAMES     <- get_param_names(TEMPLATE_PARAMS)
@@ -132,45 +128,12 @@ build_structure <- function(exp.plan, path, profiles, freqs, template, files, pl
     dum <- file.copy(exp.plan$weatherFile, simu.path)
   }
 
-  ## Remove unused .plt files from cropSpecies
-  if("mainCropSpecies" %in% names(exp.plan)){
-    main.crop.used <- exp.plan$mainCropSpecies
-  } else {
-    main.crop.used <- PARAM_DEFAULTS$mainCropSpecies
-  }
-  if("interCropSpecies" %in% names(exp.plan)){
-    inter.crop.used <- exp.plan$interCropSpecies
-  } else {
-    inter.crop.used <- PARAM_DEFAULTS$interCropSpecies
-  }
-  existing.plt <- list.files(paste0(simu.path, "/cropSpecies"), full.names = TRUE)
-  required.plt <- paste0(simu.path, "/cropSpecies/", c(unlist(main.crop.used), unlist(inter.crop.used)))
-  remove.plt   <- existing.plt[!(existing.plt %in% required.plt)]
-  dum <- purrr::map(remove.plt, file.remove)
-
-  ## Remove unused .tec files from itk
-  if("mainCropItk" %in% names(exp.plan)){
-    main.itk.used <- exp.plan$mainCropItk
-  } else {
-    main.itk.used <- PARAM_DEFAULTS$mainCropItk
-  }
-  if("interCropItk" %in% names(exp.plan)){
-    inter.itk.used <- exp.plan$interCropItk
-  } else {
-    inter.itk.used <- PARAM_DEFAULTS$interCropItk
-  }
-  existing.itk <- list.files(paste0(simu.path, "/cropInterventions"), full.names = TRUE)
-  required.itk <- paste0(simu.path, "/cropInterventions/", c(unlist(main.itk.used), unlist(inter.itk.used)))
-  remove.itk   <- existing.itk[!(existing.itk %in% required.itk)]
-  dum <- purrr::map(remove.itk, file.remove)
-
   ## Remove unused .tree files from treeSpecies
-  if("tree.initialization" %in% names(exp.plan)){
-    trees.used <- exp.plan$tree.initialization[[1]]$species
-  } else if(PARAM_COMMENTED$tree.initialization == FALSE) {
-    trees.used <- PARAM_DEFAULTS$tree.initialization[[1]]$species
-  } else {
-    trees.used <- NA
+  trees.used <- NA
+  if("trees" %in% names(exp.plan)){
+    trees.used <- exp.plan$tree[[1]]$species
+  } else if(length(PARAM_DEFAULTS$tree)>0) {
+    trees.used <- PARAM_DEFAULTS$tree[[1]]$treeSpeciesFileName
   }
 
   if(all(is.na(trees.used))) {
@@ -184,20 +147,82 @@ build_structure <- function(exp.plan, path, profiles, freqs, template, files, pl
   remove.tree   <- existing.tree[!(existing.tree %in% required.tree)]
   dum <- purrr::map(remove.tree, file.remove)
 
-  existing.EP <- list.files(paste0(simu.path, "/exportParameters"), full.names = TRUE)
-  required.EP <- paste0(simu.path, "/exportParameters/", profiles, ".pro")
-  remove.EP   <- existing.EP[!(existing.EP %in% required.EP)]
-  dum <- purrr::map(remove.EP, file.remove)
+
+  ## Remove unused .ttec files from treeIntervention
+  if("ttec" %in% names(exp.plan)){
+    ttec.used <- exp.plan$treetec[[1]]$treeTecFileName
+  } else if(length(PARAM_DEFAULTS$treetec)>0) {
+    ttec.used <- PARAM_DEFAULTS$treetec[[1]]$treeTecFileName
+  } else {
+    ttec.used <- NA
+  }
+
+  if(all(is.na(ttec.used))) {
+    num.ttec <- 0
+  } else {
+    num.ttec <- length(ttec.used)
+  }
+
+  existing.ttec <- list.files(paste0(simu.path, "/treeInterventions"), full.names = TRUE)
+  required.ttec <- paste0(simu.path, "/treeInterventions/", ttec.used)
+  remove.ttec   <- existing.ttec[!(existing.ttec %in% required.ttec)]
+  dum <- purrr::map(remove.ttec, file.remove)
+
+
+  ## Remove unused .tec files from cropIntervention
+  newtec.used <- ""
+  if("tec" %in% names(exp.plan)){
+    tec.used <- exp.plan$zone[[1]]$zoneTecFileNameList
+  } else if(PARAM_COMMENTED$zone== FALSE) {
+    tec.used <- PARAM_DEFAULTS$zone[[1]]$zoneTecFileNameList
+  } else {
+    tec.used <- NA
+  }
+
+  for (i in  tec.used) {
+
+    crop.itks.used <- strsplit(i, split = ",", fixed = TRUE)
+
+    for (j in  crop.itks.used) {
+      test <- strsplit(j, split = " ", fixed = TRUE)
+      newtec.used <- c(newtec.used, test)
+    }
+  }
+
+  existing.tec <- list.files(paste0(simu.path, "/cropInterventions"), full.names = TRUE)
+  oldrequired.tec <- paste0(simu.path, "/cropInterventions/", tec.used)
+  required.tec <- paste0(simu.path, "/cropInterventions/", newtec.used)
+  remove.tec   <- existing.tec[!(existing.tec %in% required.tec)]
+  dum <- purrr::map(remove.tec, file.remove)
+
+
+  ## Remove unused .plt files from cropSpecies
+  plt.used <- NA
+  existing.plt <- list.files(paste0(simu.path, "/cropSpecies"), full.names = TRUE)
+  tec.path <- list.files(paste0(simu.path, "/cropInterventions"), pattern = "\\.tec$", full.names = TRUE)
+
+  for(i in tec.path) {
+    mytec      <- read_param_file(i)
+    new_row = c(paste0(simu.path, "/cropSpecies/", mytec[[1]]$species$value))
+    plt.used  <- rbind(plt.used ,new_row)
+
+  }
+
+  remove.plt   <- existing.plt[!(existing.plt %in% plt.used)]
+  dum <- purrr::map(remove.plt, file.remove)
+
 
   ## Edit files
-  params.to.edit <- names(dplyr::select(exp.plan, -SimulationName))
+  params.to.edit        <- names(dplyr::select(exp.plan, -SimulationName))
   sim.params.to.edit    <- params.to.edit[params.to.edit %in% PARAM_NAMES$sim]
   pld.params.to.edit    <- params.to.edit[params.to.edit %in% PARAM_NAMES$pld]
   tree.params.to.edit   <- params.to.edit[params.to.edit %in% PARAM_NAMES$tree]
   crop.params.to.edit   <- params.to.edit[params.to.edit %in% PARAM_NAMES$crop]
+  ttec.params.to.edit   <- params.to.edit[params.to.edit %in% PARAM_NAMES$ttec]
   tec.params.to.edit    <- params.to.edit[params.to.edit %in% PARAM_NAMES$tec]
   hisafe.params.to.edit <- params.to.edit[params.to.edit %in% PARAM_NAMES$hisafe]
   stics.params.to.edit  <- params.to.edit[params.to.edit %in% PARAM_NAMES$stics]
+
 
   ## Edit pld file
   pld.path <- list.files(simu.path, ".pld$", full.names = TRUE)
@@ -209,13 +234,13 @@ build_structure <- function(exp.plan, path, profiles, freqs, template, files, pl
   ## Edit sim file
   sim.path <- list.files(simu.path, ".sim$", full.names = TRUE)
   sim      <- read_param_file(sim.path)
-  sim.new  <- edit_param_file(sim, dplyr::select(exp.plan, sim.params.to.edit)) %>%
-    edit_param_element("profileNames", paste0(c(profiles, "sti"[stics.diagnostics]), collapse = ",")) %>%
-    edit_param_element("exportFrequencies", paste0(c(freqs, (1)[stics.diagnostics]), collapse = ","))
+  sim.new  <- edit_param_file(sim, dplyr::select(exp.plan, sim.params.to.edit))
   write_param_file(sim.new, sim.path)
   dum <- file.rename(sim.path, paste0(simu.path, "/", exp.plan$SimulationName, ".sim"))
 
-  ## Edit tree files
+
+
+## Edit tree files
   tree.path <- list.files(paste0(simu.path, "/treeSpecies"), pattern = "\\.tree$", full.names = TRUE)
   for(i in tree.path) {
     tree <- read_param_file(i)
@@ -226,6 +251,21 @@ build_structure <- function(exp.plan, path, profiles, freqs, template, files, pl
     }
     write_param_file(tree.new, i)
   }
+
+
+  ## Edit ttec files
+  ttec.path <- list.files(paste0(simu.path, "/treeInterventions"), pattern = "\\.ttec$", full.names = TRUE)
+  for(i in ttec.path) {
+    ttec <- read_param_file(i)
+
+    if(length(ttec.params.to.edit > 0)) {
+      ttec.new <- edit_param_file(ttec, dplyr::select(exp.plan, ttec.params.to.edit))
+    } else {
+      ttec.new <- ttec
+    }
+    write_param_file(ttec.new, i)
+  }
+
 
   ## Edit crop files
   crop.path <- list.files(paste0(simu.path, "/cropSpecies"), pattern = "\\.plt$", full.names = TRUE)
@@ -251,6 +291,10 @@ build_structure <- function(exp.plan, path, profiles, freqs, template, files, pl
     write_param_file(tec.new, i)
   }
 
+
+
+
+
   ## Edit Hi-sAFe general parameters file
   hisafe.path <- paste0(simu.path, "/generalParameters/hisafe.par")
   hisafe      <- read_param_file(hisafe.path)
@@ -265,9 +309,9 @@ build_structure <- function(exp.plan, path, profiles, freqs, template, files, pl
 
   ## Delete files that are not desired
   remove_files <- function(x, y) if(!(x %in% files)) unlink(paste0(simu.path, y), recursive = TRUE)
-  file.names     <- c("sim", "pld", "wth", "tree", "plt", "tec", "par", "pro")
+  file.names     <- c("sim", "pld", "wth", "tree", "plt", "ttec", "tec", "par")
   file.locations <- c("/*.sim", "/*.pld", "/*.wth", "/treeSpecies", "/cropSpecies",
-                      "/cropInterventions", "/generalParameters", "/exportParameters")
+                      "/treeInterventions", "/cropInterventions", "/generalParameters")
   purrr::map2(file.names, file.locations, remove_files)
 
   invisible(TRUE)

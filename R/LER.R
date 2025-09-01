@@ -22,7 +22,7 @@
 LER <- function(face,
                 cycle         = "yield",
                 timescales    = c("Annual", "Cumulative"),
-                components    = c("LER", "Trees", "Crop"),
+                components    = c("LER", "Trees", "Crops"),
                 color.palette = c("black", "#009E73", "#E69F00"),
                 size.palette  = c(2, 1, 1),
                 hline1        = TRUE,
@@ -31,7 +31,7 @@ LER <- function(face,
 
   supported.cycles     <- c("yield", "nitrogen", "water", "light")
   supported.timescales <- c("Annual", "Cumulative")
-  supported.components <- c("LER", "Trees", "Crop")
+  supported.components <- c("LER", "Trees", "Crops")
 
   is_face(face, error = TRUE)
   if(nrow(face$metadata) > 3)                        stop("LER can only handle face objects containing a single agroforestry simulation",               call. = FALSE)
@@ -47,17 +47,17 @@ LER <- function(face,
   is_TF(plot)
 
   ## Get flux data
+
   cycle.data <- plot_hisafe_cycle_bar(hop        = face,
                                       cycle      = cycle,
                                       plot       = FALSE,
-                                      tidy       = TRUE,
-                                      crop.names = c("Crop", "NA"), ...) %>%
+                                      tidy       = TRUE, ...) %>%
     dplyr::ungroup()
 
-  crop.descrip <- c("Crop",          # yield
-                    "Uptake - Crop", # nitrogen
-                    "Uptake - Crop", # water
-                    "Crop")          # light
+  crop.descrip <- c("Crops",          # yield
+                    "Uptake - Crops", # nitrogen
+                    "Uptake - Crops", # water
+                    "Crops")          # light
 
   tree.descrip <- c("Trees",          # yield
                     "Uptake - Trees", # nitrogen
@@ -77,14 +77,14 @@ LER <- function(face,
   mc <- cycle.data %>%
     dplyr::filter(SimulationName == "Monocrop") %>%
     dplyr::filter(flux %in% crop.id) %>%
-    dplyr::mutate(flux = "crop.mc") %>%
+    dplyr::mutate(flux = "crops.mc") %>%
     tidyr::spread(key = "flux", value = "value") %>%
     dplyr::select(-SimulationName)
 
   af <- cycle.data %>%
     dplyr::filter(SimulationName == "Agroforestry") %>%
     dplyr::filter(flux %in% c(tree.id, crop.id)) %>%
-    dplyr::mutate(flux = factor(flux, levels = c(tree.id, crop.id), labels = c("trees.af", "crop.af"))) %>%
+    dplyr::mutate(flux = factor(flux, levels = c(tree.id, crop.id), labels = c("trees.af", "crops.af"))) %>%
     tidyr::spread(key = "flux", value = "value") %>%
     dplyr::left_join(pf, by = c("Year", "cycle")) %>%
     dplyr::left_join(mc, by = c("Year", "cycle")) %>%
@@ -92,15 +92,16 @@ LER <- function(face,
     dplyr::group_by(SimulationName)
 
   ## CALCULATE LER
+
   calculate_ler <- function(x) {
     out <- x %>%
       dplyr::mutate(ry.trees = trees.af / trees.pf) %>%
-      dplyr::mutate(ry.crop  = crop.af  / crop.mc) %>%
-      dplyr::mutate(ler = ry.trees + ry.crop)
+      dplyr::mutate(ry.crops = crops.af / crops.mc) %>%
+      dplyr::mutate(ler = ry.trees + ry.crops)
   }
 
   cum.ler <- af %>%
-    dplyr::mutate_at(c("trees.af", "crop.af", "trees.pf", "crop.mc"), cumsum) %>%
+    dplyr::mutate_at(c("trees.af", "crops.af", "trees.pf", "crops.mc"), cumsum) %>%
     calculate_ler() %>%
     dplyr::mutate(timescale = "Cumulative") %>%
     dplyr::select(SimulationName, Year, cycle, timescale, dplyr::everything())
@@ -113,8 +114,8 @@ LER <- function(face,
 
 
   plot.data <- ler %>%
-    tidyr::gather(ry.trees, ry.crop, ler, key = "metric", value = "value") %>%
-    dplyr::mutate(metric = factor(metric, levels = c("ler", "ry.trees", "ry.crop"), labels = c("LER", "Trees", "Crop"))) %>%
+    tidyr::gather(ry.trees, ry.crops, ler, key = "metric", value = "value") %>%
+    dplyr::mutate(metric = factor(metric, levels = c("ler", "ry.trees", "ry.crops"), labels = c("LER", "Trees", "Crops"))) %>%
     dplyr::filter(timescale %in% timescales) %>%
     dplyr::filter(metric    %in% components)
 

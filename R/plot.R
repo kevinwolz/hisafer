@@ -24,8 +24,8 @@
 #' @param aes.cols A list with arguments "color" and "linetype" containing character strings of the column names to use for plot aesthetics.
 #' @param facet.simu A logical indicating whether the plot should be faceted by SimulationName This helps when values among simulations are overplotted.
 #' @param facet.year A logical indicating whether the plot should be faceted by year. This helps with seeing finer level detail.
-#' @param facet.crop A logical indicating whether the plot should be faceted by cropType (mainCrop vs. interCrop). Only applies when \code{profile} is 'cells'.
-#' @param intercrop A logical indicating whether the plot should include the interCrop cropType. Only applies when \code{profile} is 'cells'.
+#' @param facet.crop A logical indicating whether the plot should be faceted by idZone (1=mainCrop vs. 2=interCrop). Only applies when \code{profile} is 'cells'.
+#' @param intercrop A logical indicating whether the plot should include the idZone=2. Only applies when \code{profile} is 'cells'.
 #' @param crop.points Logical indicating if points should be plotted as well, with point shape desgnating the main crop name.
 #' Only applies when \code{profile} is 'plot'.
 #' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.
@@ -114,11 +114,11 @@ plot_hisafe_ts <- function(hop,
 
   if(facet.crop & facet.simu) {
     if(length(variables) > 1) stop("facet.crop and facet.simu can only both be TRUE when plotting a single variable", call. = FALSE)
-    facet <- facet_grid(cropType~SimulationName)
+    facet <- facet_grid(idZone~SimulationName)
   } else if(facet.crop & facet.year) {
     stop("facet.crop and facet.year cannot both be TRUE", call. = FALSE)
   } else if(facet.crop) {
-    facet <- facet_wrap(~cropType, nrow = force.rows)
+    facet <- facet_wrap(~idZone, nrow = force.rows)
   } else if(facet.simu & facet.year) {
     facet <- facet_grid(Year~SimulationName)
   } else if(facet.year) {
@@ -148,12 +148,12 @@ plot_hisafe_ts <- function(hop,
 
   plot.data  <- hop[[profile]]
 
-  if(!intercrop & profile == "cells") plot.data <- plot.data %>% dplyr::filter(cropType == "mainCrop")
+  if(!intercrop & profile == "cells") plot.data <- plot.data %>% dplyr::filter(idZone == "1")
 
   if(profile == "cells") {
     if(facet.crop) {
       plot.data <- plot.data %>%
-        dplyr::group_by(SimulationName, Date, Day, Month, Year, JulianDay, cropType)
+        dplyr::group_by(SimulationName, Date, Day, Month, Year, JulianDay, idZone)
     } else {
       plot.data <- plot.data %>%
         dplyr::group_by(SimulationName, Date, Day, Month, Year, JulianDay)
@@ -205,7 +205,7 @@ plot_hisafe_ts <- function(hop,
 
   ## Group for cumulation
   if(cumulative) {
-    cum.group <- c("SimulationName", "idTree"[profile == "trees"], "Year"[facet.year], "cropType"[facet.crop])
+    cum.group <- c("SimulationName", "idTree"[profile == "trees"], "Year"[facet.year], "idZone"[facet.crop])
     plot.data <- plot.data %>%
       dplyr::group_by_at(cum.group) %>%
       dplyr::mutate_at(variables, cumsum)

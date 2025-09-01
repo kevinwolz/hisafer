@@ -8,18 +8,11 @@
 #'  \item{"exp.plan"}{ - A data frame (tibble) of manipulated Hi-sAFe input parameters, with each row a Hi-sAFe simulation and each column a Hi-sAFe input parameter.}
 #'  \item{"template"}{ - A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files used.}
 #'  \item{"profiles"}{ - A character vector of the names of the Hi-sAFe export profiles that will be exported by Hi-sAFe.}
-#'  \item{"freqs"}{ - A numeric vector of the exportFrequencies at which the Hi-sAFe export profiles will be exported by Hi-sAFe.}
 #'  \item{"path"}{ - A character string of the absolute path to the directory where the simulation/experiment is to be built.
 #' }
 #' If a relative path is via \code{path}, it is converted to an absolute path to maximize "hip" object versaitility.}
 #' @param path A character string of the path (relative or absolute) to the directory where the simulation/experiment is to be built.
 #' @param exp.name A character string of the name of the experiment folder. Only used if defining more than one simulation.
-#' @param profiles A character vector of Hi-sAFe export profiles to be exported by Hi-sAFe.
-#' If "all" (the default), then the basic set of profiles for all data levels will be exported.
-#' @param freqs A numeric vector of export frequencies (days) for the export profiles specified in \code{profiles}.
-#' if \code{NULL} (the default), then the default export frequences (daily, monthly, annual) are applied to respective profiles.
-#' Export frequencies can be any positive integer. Special values include 30, which triggers export on the first day of each month,
-#' and 365, which triggers export on the first day of each January.
 #' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
 #' hisafer comes with a variety of "default" templates than can be used by specificying specific character strings:
 #' \itemize{
@@ -78,8 +71,6 @@
 #' }
 define_hisafe <- function(path,
                           exp.name  = "experiment",
-                          profiles  = "all",
-                          freqs     = NULL,
                           template  = "agroforestry",
                           factorial = FALSE,
                           force     = FALSE,
@@ -87,10 +78,6 @@ define_hisafe <- function(path,
 
   if(!(is.character(exp.name) & length(exp.name) == 1))
     stop("exp.name argument must be a character vector of length 1", call. = FALSE)
-  if(!(all(is.character(profiles)) | profiles[1] == "all"))
-    stop("profiles argument must be 'all' or a character vector",    call. = FALSE)
-  if(!(all(is.numeric(freqs)) | is.null(freqs)))
-    stop("freqs argument must be NULL or a numeric vector",          call. = FALSE)
   if(!(is.character(template) & length(template) == 1))
     stop("template argument must be a character vector of length 1", call. = FALSE)
   if(!(is.null(bulk.pass) | is.list(bulk.pass)))
@@ -105,26 +92,10 @@ define_hisafe <- function(path,
   param.list    <- list(...)
   if(!is.null(bulk.pass)) param.list <- c(param.list, bulk.pass)
 
-  ## Get profile names and check that they are present in template directory
-  available.profiles <- get_available_profiles(template)
-  if(profiles[1] == "all") {
-    profiles <- available.profiles[available.profiles %in% CORE.PROFILES]
-  } else if(profiles[1] == "all-private"){
-    profiles <- available.profiles
-  } else if(!all(profiles %in% available.profiles)) {
-    missing.profiles <- profiles[!(profiles %in% available.profiles)]
-    stop(paste(c("The following profiles are not available:", missing.profiles), collapse = "\n"), call. = FALSE)
-  }
 
-  ## Apply export frequencies from user or internal defaults
-  default.freqs <- SUPPORTED.PROFILES$freqs[match(profiles, SUPPORTED.PROFILES$profiles)]
-  if(is.null(freqs)) {
-    freqs <- default.freqs
-  } else if(length(profiles) != length(freqs)) {
-    stop("profiles and freqs must have the same length", call. = FALSE)
-  } else if(!all((freqs %% 1) == 0 & freqs > 0)) {
-    stop("freqs must positive integers", call. = FALSE)
-  }
+  ## Get profile names in export.out
+  profiles <- get_available_profiles(template)
+
 
   if(factorial) {
     exp.plan <- dplyr::as_tibble(expand.grid(param.list, stringsAsFactors = FALSE))
@@ -153,7 +124,6 @@ define_hisafe <- function(path,
   hip <- list(exp.plan = exp.plan,
               template = template,
               profiles = profiles,
-              freqs    = freqs,
               path     = path)
 
   check_input_values(hip = hip, force = force)
@@ -173,7 +143,6 @@ define_hisafe <- function(path,
 #' For more information on supported parameters, use \code{\link{hip_params}}.
 #' @param path A character string of the path (relative or absolute) to the directory where the simulation/experiment is to be built.
 #' @param exp.name A character string of the name of the experiment folder. Only used if defining more than one simulation.
-#' @param profiles A character vector of Hi-sAFe export profiles to be exported by Hi-sAFe. If "all" (the default), then all supported profiles will be exported.
 #' @param template A character string of the path to the directory containing the template set of Hi-sAFe simulation folders/files to use.
 #' See \code{\link{define_hisafe}} for more details.
 #' @param force Logical indicating wether the supplied values should be forced past the constraint checks. Use \code{TRUE} for development only.
@@ -189,7 +158,6 @@ define_hisafe <- function(path,
 define_hisafe_file <- function(file,
                                path,
                                exp.name = "experiment",
-                               profiles = "all",
                                template = "agroforestry",
                                force    = FALSE) {
 
@@ -199,28 +167,19 @@ define_hisafe_file <- function(file,
   if(!(is.character(file) & length(file) == 1))             stop("file argument must be a character vector of length 1",     call. = FALSE)
   if(!dir.exists(path))                                     stop("directory specified by path does not exist",               call. = FALSE)
   if(!(is.character(exp.name) & length(exp.name) == 1))     stop("exp.name argument must be a character vector of length 1", call. = FALSE)
-  if(!(all(is.character(profiles)) | profiles[1] == "all")) stop("profiles argument must be 'all' or a character vector",    call. = FALSE)
   if(!(is.character(template) & length(template) == 1))     stop("template argument must be a character vector of length 1", call. = FALSE)
   if(!dir.exists(template.path))                            stop("template directory does not exist",                        call. = FALSE)
   is_TF(force)
 
   exp.plan <- dplyr::as_tibble(read.csv(file, header = TRUE, stringsAsFactors = FALSE))
 
-  ## Get profile names and check that they are present in template directory
-  available.profiles <- get_available_profiles(template)
-  if(profiles[1] == "all") {
-    profiles <- available.profiles
-  } else if(!all(profiles %in% available.profiles)) {
-    missing.profiles      <- profiles[!(profiles %in% available.profiles)]
-    stop(paste(c("The following profiles are not available:", missing.profiles), collapse = "\n"), call. = FALSE)
-  }
+
 
   if(!("SimulationName" %in% names(exp.plan))) exp.plan$SimulationName <- paste0("Sim_", 1:nrow(exp.plan))
   exp.plan <- dplyr::select(exp.plan, SimulationName, dplyr::everything())
 
   hip <- list(exp.plan = exp.plan,
               template = template,
-              profiles = profiles,
               path     = clean_path(paste0(path, "/", exp.name)))
 
   check_input_values(hip = hip, force = force)
@@ -269,23 +228,24 @@ check_input_values <- function(hip, force) {
 
   ## Get available template file names
   avail.path  <- get_template_subpath(hip$template)
-  AVAIL.CROPS <- list.files(clean_path(paste0(avail.path, "/cropSpecies")))
-  AVAIL.TECS  <- list.files(clean_path(paste0(avail.path, "/cropInterventions")))
+  AVAIL.CROPS <- gsub("\\.plt", "", list.files(clean_path(paste0(avail.path, "/cropSpecies"))))
   AVAIL.TREES <- gsub("\\.tree", "", list.files(clean_path(paste0(avail.path, "/treeSpecies"))))
+  AVAIL.TECS  <- list.files(clean_path(paste0(avail.path, "/cropInterventions")))
+  AVAIL.TTEC  <- list.files(clean_path(paste0(avail.path, "/treeInterventions")))
 
   ## ENSURE INITIALIZATION TABLES ARE FROM CORRECT SOURCES
   comp_table_names <- function(x, check) {
     get_name <- function(x) ifelse(is.na(x), check, unique(x$name))
     all(unlist(purrr::map(x, get_name)) == check)
   }
-  tree.table        <- get_used("tree.initialization")
-  root.table        <- get_used("root.initialization")
-  layers.table      <- get_used("layers")
-  layers.init.table <- get_used("layer.initialization")
-  if(!comp_table_names(tree.table,        "TreeInit"))  stop("tree.initialization must be specified via tree_init_params()",   call. = FALSE)
-  if(!comp_table_names(root.table,        "RootInit"))  stop("root.initialization must be specified via root_init_params()",   call. = FALSE)
-  if(!comp_table_names(layers.table,      "Layer"))     stop("layers must be specified via layer_params()",                    call. = FALSE)
-  if(!comp_table_names(layers.init.table, "LayerInit")) stop("layer.initialization must be specified via layer_init_params()", call. = FALSE)
+
+  zones.table       <- get_used("zone")
+  layers.table      <- get_used("layer")
+  layers.init.table <- get_used("layerinit")
+
+  if(!comp_table_names(zones.table,       "ZONE"))     stop("zones must be specified in SIM FILE", call. = FALSE)
+  if(!comp_table_names(layers.table,      "LAYER"))     stop("layers must be specified in PLD FILE", call. = FALSE)
+  if(!comp_table_names(layers.init.table, "LAYERINIT")) stop("layer.initialization must be specified in PLD FILE", call. = FALSE)
 
   ## Initialize Error Message
   errors <-   "Hi-sAFe definition errors:"
@@ -322,10 +282,10 @@ check_input_values <- function(hip, force) {
                                  "", "-- SimulationName - names cannot contains spaces")
 
   ## Tree Errors
-  tree.species.used <- unique(unlist(get_init_vals("tree.initialization", "species")))
+  tree.species.used <- unique(unlist(get_init_vals("TREE", "treeSpeciesFileName")))
   if(!is.na(tree.species.used[1]) & any(!(tree.species.used %in% AVAIL.TREES))) {
     tree.species.missing <- tree.species.used[!(tree.species.used %in% AVAIL.TREES)]
-    unsupported.trees.error <- paste("--", tree.species.missing, "is not a tree available in the template directory.")
+    unsupported.trees.error <- paste("--", tree.species.missing, "is not a tree species available in the template directory.")
   } else {
     unsupported.trees.error <- ""
   }
@@ -334,23 +294,56 @@ check_input_values <- function(hip, force) {
   too.many.trees.error <- ifelse(several.trees & tree.params.edited,
                                  "-- Cannot edit tree paramaters when simulations contain more than one tree species.", "")
 
-  ## Crop Errors
-  crop.species.used <- unique(c(get_used_un("mainCropSpecies"), get_used_un("interCropSpecies")))
-  if(any(!(crop.species.used %in% AVAIL.CROPS))) {
-    crop.species.missing <- crop.species.used[!(crop.species.used %in% AVAIL.CROPS)]
-    unsupported.crops.error <- paste("-- The following crop .PLT files are not available in the template directory: ", paste(crop.species.missing, collapse = ", "))
+
+  ## Tree itk Errors
+  tree.itk.used <- unique(unlist(get_init_vals("TREETEC", "treeTecFileName")))
+  if(!is.na(tree.itk.used[1]) & any(!(tree.itk.used %in% AVAIL.TTEC))) {
+    tree.itk.missing <- tree.itk.used[!(tree.itk.used %in% AVAIL.TTEC)]
+    unsupported.ttec.error <- paste("--", tree.itk.missing, "is not a tree tec available in the template directory.")
   } else {
-    unsupported.crops.error <- ""
+    unsupported.ttec.error <- ""
+  }
+  several.ttec <- length(tree.itk.used) > 1
+  ttec.params.edited <- any(names(hip$exp.plan) %in% dplyr::filter(INPUT.DEFS, file == "TTEC")$name)
+  too.many.ttec.error <- ifelse(several.ttec & ttec.params.edited,
+                                 "-- Cannot edit tree paramaters when simulations contain more than one tree species.", "")
+
+
+
+  ## Crop Errors
+  ##crop.species.used <- unique(c(get_used_un("mainCropSpecies"), get_used_un("interCropSpecies")))
+  ##if(any(!(crop.species.used %in% AVAIL.CROPS))) {
+  ##  crop.species.missing <- crop.species.used[!(crop.species.used %in% AVAIL.CROPS)]
+  ##  unsupported.crops.error <- paste("-- The following crop .PLT files are not available in the template directory: ", paste(crop.species.missing, collapse = ", "))
+  ##} else {
+  ##  unsupported.crops.error <- ""
+  ##}
+
+  ## itk Errors split
+  unsupported.itks.error <- ""
+
+  crop.list.used <- unique(unlist(get_init_vals("zone", "zoneTecFileNameList")))
+  for (i in  crop.list.used) {
+
+    crop.itks.used <- strsplit(i, split = ",", fixed = TRUE)
+
+    for (j in  crop.itks.used) {
+
+      test <- strsplit(j, split = " ", fixed = TRUE)
+
+      if(any(!(test %in% AVAIL.TECS))) {
+        crop.itks.missing <- test[!(test %in% AVAIL.TECS)]
+        if (unsupported.itks.error=="") {
+          unsupported.itks.error <- paste("-- The following crop .TEC files are not available in the template directory: ", paste(crop.itks.missing, collapse = ", "))
+        }
+        else
+          unsupported.itks.error <- paste(unsupported.itks.error, paste(crop.itks.missing, collapse = ", "))
+      }
+
+    }
   }
 
-  ## itk Errors
-  crop.itks.used <- unique(c(get_used_un("mainCropItk"), get_used_un("interCropItk")))
-  if(any(!(crop.itks.used %in% AVAIL.TECS))) {
-    crop.itks.missing <- crop.itks.used[!(crop.itks.used %in% AVAIL.TECS)]
-    unsupported.itks.error <- paste("-- The following crop .TEC files are not available in the template directory: ", paste(crop.itks.missing, collapse = ", "))
-  } else {
-    unsupported.itks.error <- ""
-  }
+
 
   ## Spacing Errors
   plot.width.error   <- ifelse(!all(((get_used_un("plotWidth") / get_used_un("cellWidth")) %% 1) != 0),
@@ -364,8 +357,8 @@ check_input_values <- function(hip, force) {
   off.scene.trees <- ""
   coloc.sims <- ""
   for(i in 1:nrow(hip$exp.plan)) {
-    X <- get_init_vals("tree.initialization", "treeX")[[i]]
-    Y <- get_init_vals("tree.initialization", "treeY")[[i]]
+    X <- get_init_vals("tree", "treeX")[[i]]
+    Y <- get_init_vals("tree", "treeY")[[i]]
     if(all(is.na(X) & is.na(Y))) next
 
     okay.loc <- (X == 0 & Y == 0) | (abs(X %% get_used("cellWidth")[[i]] - rep(get_used("cellWidth")[[i]] / 2, length(X))) < 1e-5 &
@@ -392,35 +385,16 @@ check_input_values <- function(hip, force) {
   tree.coloc.error    <- ifelse(length(coloc.sims)      == 0, "", paste("-- The following simulations have two or more trees located on the same cell:",
                                                                         paste(hip$exp.plan$SimulationName[coloc], collapse = ', ')))
 
-  ## Distance & Time Errors
-  less_than_comp <- function(param, ref) {
-    ifelse(all(purrr::map2_lgl(get_used(param), get_used(ref), less_than)), "", paste0("-- ", param, " must be less than ", ref))
-  }
-  treeCropDistance.error        <- less_than_comp("treeCropDistance",        "plotWidth")
-  treeRootPruningDistance.error <- less_than_comp("treeRootPruningDistance", "plotWidth")
+
 
   ## nrow(tree_init) == nrow(root_init) Error
-  tree.init <- get_used("tree.initialization")
+  tree.init <- get_used("tree")
   if(all(is.na(tree.init))) {
     tree.rows <- rep(0, length(tree.init))
   } else {
     tree.rows <- purrr::map_dbl(tree.init, nrow)
   }
 
-  root.init <- get_used("root.initialization")
-  if(all(is.na(root.init))) {
-    root.rows <- 0
-  } else {
-    root.rows <- purrr::map_dbl(root.init, nrow)
-  }
-
-  tree.root.error <- ifelse(all(tree.rows == root.rows),
-                            "", "-- The number of rows in the tree initialization and root initialization tables must be equal.")
-
-  ## Don't Edit Export Profile Errors
-  EP.error <- ifelse(is_mod("profileNames") | is_mod("exportFrequencies"),
-                     "-- profileNames and exportFrequencies must be defined using the 'profiles' and 'freqs'
-                     arguments of define_hisafe(), respectively.", "")
 
   ## STICS parameter dependencies check
   capillary.error <- ifelse((is_mod("capillaryUptake") | is_mod("capillaryUptakeMinWater")) & (all(get_used("capillary") == 0) & all(get_used("macropososity") == 0)),
@@ -439,11 +413,6 @@ check_input_values <- function(hip, force) {
                       "-- macroporosity mucst be activated (set to 1) if capillary is activated (set to 1).", "")
 
   ## Timeseries Length Errors
-  treePlanting.length.error <- ifelse(all(purrr::map_lgl(list(get_length("treePlantingYears"),
-                                                              get_length("treePlantingDays")),
-                                                         identical,
-                                                         y = as.list(as.integer(tree.rows)))), "",
-                                      "-- treePlantingYears and treePlantingDays must have the same length as the number of rows in the tree initialziation table")
 
   treePruning.length.error <- ifelse(all(purrr::map_lgl(list(get_length("treePruningProp"),
                                                              get_length("treePruningMaxHeight"),
@@ -452,11 +421,6 @@ check_input_values <- function(hip, force) {
                                                         y = get_length("treePruningYears"))),
                                      "", "-- treePruningYears, treePruningProp, treePruningMaxHeight, and treePruningDays must have the same length")
 
-  treeThinning.length.error <- ifelse(all(purrr::map_lgl(list(get_length("treeThinningYears"),
-                                                              get_length("treeThinningDays")),
-                                                         identical,
-                                                         y = get_length("treeThinningIds"))),
-                                      "", "-- treeThinningIds, treeThinningYears, and treeThinningDays must have the same length")
 
   rootPruning.length.error <- ifelse(all(purrr::map_lgl(list(get_length("treeRootPruningDays"),
                                                              get_length("treeRootPruningDistance"),
@@ -467,38 +431,17 @@ check_input_values <- function(hip, force) {
 
   ## Root pruning depth less than max soil depth
   rp.depth.check <- purrr::map2_lgl(get_used("treeRootPruningDepth"),
-                                    purrr::map(get_init_vals("layers", "thick"), function(x) max(cumsum(x))),
+                                    purrr::map(get_init_vals("layer", "thick"), function(x) max(cumsum(x))),
                                     less_than)
   if(!all(rp.depth.check)) warning("-- treeRootPruningDepth is greater than the maximum soil depth", call. = FALSE, immediate. = TRUE)
 
-  ## Tree thinning ids <= number of trees
-  tree.thinning.id.check <- purrr::map2_lgl(get_length("treeThinningIds"),
-                                            purrr::map(get_init_vals("tree.initialization", "species"), length),
-                                            less_than)
-  tree.thinning.id.error <- ifelse(!all(rp.depth.check), "-- one or more values of treeThinningIds is greater than the number of simulated trees", "")
+  ## Tree thinning
+
 
   ## Crop Length & Simulation Length Errors
-  goes_evenly  <- function(x, y) x > y | y %% x == 0
-  if(!all(purrr::map2_lgl(get_length("mainCropSpecies"), get_used("nbSimulations"), goes_evenly))) {
-    warning("-- mainCropSpecies length does not go evenly into nbSimulations.", call. = FALSE, immediate. = TRUE)
-  }
-  if(!all(purrr::map2_lgl(get_length("interCropSpecies"), get_used("nbSimulations"), goes_evenly))) {
-    warning("-- interCropSpecies length does not go evenly into nbSimulations.", call. = FALSE, immediate. = TRUE)
-  }
-  if(!all(purrr::map2_lgl(get_length("mainCropSpecies"), get_used("nbSimulations"), less_than))) {
-    warning("-- length of mainCropSpecies is larger than value of nbSimulations", call. = FALSE, immediate. = TRUE)
-  }
-  if(!all(purrr::map2_lgl(get_length("interCropSpecies"), get_used("nbSimulations"), less_than))) {
-    warning("-- length of interCropSpecies is larger than value of nbSimulations", call. = FALSE, immediate. = TRUE)
-  }
-  if(!all(purrr::map_lgl(get_length("simulationNbrDays"), equal_to, y = 1) | purrr::map2_lgl(get_length("mainCropSpecies"),
-                                                                                             get_length("simulationNbrDays"), equal_to))) {
-    warning("-- simulationNbrDays and mainCropSpecies should have the same length if simulationNbrDays does not have length 1", call. = FALSE, immediate. = TRUE)
-  }
 
   ## Geometry Errors
-  weed.error <- ifelse(any(get_used_un("treeCropDistance") > 0 & get_used_un("treeCropRadius") > 0),
-                       "-- treeCropDistance and treeCropRadius can not both be greater than 0", "")
+
 
   ## All weatherFile files exist
   if("weatherFile" %in% names(hip$exp.plan)) {
@@ -515,14 +458,13 @@ check_input_values <- function(hip, force) {
   all.errors <- c(errors,
                   unique.sim.error, unique.simname.error, simname.space.error,
                   unsupported.trees.error, too.many.trees.error,
-                  unsupported.crops.error, unsupported.itks.error,
+                  unsupported.ttec.error, too.many.ttec.error,
+                  unsupported.itks.error,
                   plot.width.error, plot.height.error,
-                  treeCropDistance.error, treeRootPruningDistance.error,
                   tree.centered.error, tree.offscene.error, tree.coloc.error,
-                  tree.root.error, EP.error,
                   capillary.error, drainage.error, denitrif.error, watertable.error, dm.error, cap.error,
-                  treePlanting.length.error, treePruning.length.error, treeThinning.length.error, rootPruning.length.error,
-                  tree.thinning.id.error, weed.error, wth.error)
+                  treePruning.length.error,  rootPruning.length.error,
+                  wth.error)
   all.errors <- paste0(all.errors[!(all.errors == "") & !is.na(all.errors)], collapse = "\n")
   if(all.errors != errors) stop(all.errors, call. = FALSE)
 
@@ -558,7 +500,7 @@ check_accepted <- function(variable, exp.plan) {
 #' Check validity of Hi-sAFe input ranges
 #' @description Checks validity of Hi-sAFe inputs against accepted ranges found in the package param_defs.txt file
 #' Used within \code{\link{check_input_values}}.
-#' @return An error message or empty character stirng.
+#' @return An error message or empty character stirng. NA
 #' @param variable A character string of the name of the variable to check.
 #' @param exp.plan The exp.plan of a "hip" object.
 #' @keywords internal
@@ -569,10 +511,20 @@ check_range <- function(variable, exp.plan) {
     to.check <- to.check[!is.na(to.check)]
     if(length(to.check) == 0) return("")
     element.def <- dplyr::filter(INPUT.DEFS, name == variable)
-    min.val  <- element.def$min
-    max.val  <- element.def$max
-    max.pass <- (is.na(max.val) | all(to.check <= max.val))
-    min.pass <- (is.na(min.val) | all(to.check >= min.val))
+    if (is.na(element.def$min))  {
+      min.val <- -99999
+      }
+    else {
+      min.val  <- as.double(element.def$min)
+    }
+    if (is.na(element.def$max))  {
+      max.val <- 99999
+    }
+    else {
+      max.val  <- as.double(element.def$max)
+    }
+    max.pass <- all(to.check <= max.val)
+    min.pass <- all(to.check >= min.val)
     if(max.pass & min.pass) {
       return("")
     } else if(!is.na(max.val) & !is.na(min.val)) {
@@ -670,6 +622,7 @@ root_init_params <- function(template, reps = 1, ...) {
   return(out)
 }
 
+
 #' Generate tree initialization table for define_hisafe
 #' @description Generates a tree initialization table suitable for passing to \code{\link{define_hisafe}}.
 #' The output of this function is always passed to \code{\link{define_hisafe}} via the \code{tree.initialization} argument
@@ -681,32 +634,37 @@ root_init_params <- function(template, reps = 1, ...) {
 #' @param ... Any parameters of Hi-sAFe tree initialization table:
 #'  \itemize{
 #'  \item{"species"}{}
+#'  \item{"age"}{}
 #'  \item{"height"}{}
 #'  \item{"crownBaseHeight"}{}
 #'  \item{"crownRadius"}{}
 #'  \item{"treeX"}{}
 #'  \item{"treeY"}{}
+#'  \item{"plantingYear"}{}
+#'  \item{"plantingDay"}{}
+#'  \item{"cohortAge"}{}
 #' }
 #' @export
 #' @family hisafe definition functions
 #' @examples
 #' \dontrun{
 #' hip <- define_hisafe(path = getwd(), template = "agroforestry",
-#'                     tree.initialization = tree_init_params(template = "agroforestry",
-#'                                                            height   = 2))
+#'                     trees = tree_init_params(template = "agroforestry",
+#'                                                            x   = 2))
 #' }
 tree_init_params <- function(template, ...) {
-  supported <- c("species", "height", "crownBaseHeight", "crownRadius", "treeX", "treeY")
+  supported <- c("treeSpeciesFileName", "treeX", "treeY")
   out <- modify_table(args           = list(...),
                       supported.args = supported,
-                      character.args = "species",
-                      numeric.args   = supported[supported != "species"],
-                      positive.args  = supported[supported != "species"],
+                      character.args = "treeSpeciesFileName",
+                      numeric.args   = supported[supported != "treeSpeciesFileName"],
+                      positive.args  = supported[supported != "treeSpeciesFileName"],
                       perc.args      = NULL,
-                      table.name     = "tree.initialization",
+                      table.name     = "trees",
                       template       = template)
   return(list(out))
 }
+
 
 #' Generate soil layer initialization table for define_hisafe
 #' @description Generates a soil layer initialization table suitable for passing to \code{\link{define_hisafe}}.

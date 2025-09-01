@@ -4,6 +4,7 @@
 #' \itemize{
 #'  \item{trees}
 #'  \item{plot}
+#'  \item{zones}
 #'  \item{climate}
 #'  \item{cells}
 #'  \item{monthCells}
@@ -50,7 +51,7 @@ read_hisafe <- function(hip           = NULL,
                         profiles      = "all",
                         show.progress = TRUE,
                         read.inputs   = TRUE,
-                        max.size      = 300,
+                        max.size      = 30000,
                         date.min      = NA,
                         date.max      = NA,
                         dates         = NULL) {
@@ -62,7 +63,7 @@ read_hisafe <- function(hip           = NULL,
   is_TF(show.progress)
   if(!(is.numeric(max.size) & length(max.size) == 1 & max.size > 0)) stop("max.size argument must be a positive number", call. = FALSE)
 
-  if(profiles[1] == "all" & !is.null(hip)) profiles <- hip$profiles
+  if(!is.null(hip)) profiles <- hip$profiles
 
   ## Read simulation inputs & extract cols that vary for binding to output data
   if(!is.null(hip)) {
@@ -129,6 +130,7 @@ read_hisafe <- function(hip           = NULL,
   }
 
   data$trees       <- data_tidy(data$trees)
+  data$zones       <- data_tidy(data$zones)
   data$plot        <- data_tidy(data$plot)
   data$climate     <- data_tidy(data$climate)
   data$cells       <- data_tidy(data$cells)
@@ -163,6 +165,7 @@ read_hisafe <- function(hip           = NULL,
 #' \itemize{
 #'  \item{trees}
 #'  \item{plot}
+#'  \item{zones}
 #'  \item{climate}
 #'  \item{cells}
 #'  \item{monthCells}
@@ -211,7 +214,6 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
   }
 
   ## Create profile paths
-  if(profiles[1] == "all") profiles <- PUBLIC.PROFILES
   file.prefix <- paste0(simu.path, "/output-", simu.name, "/", simu.name, "_")
   files       <- paste0(file.prefix, profiles, ".txt" )
 
@@ -220,22 +222,24 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
     warning(paste("No requested profiles found for the following simulation:", simu.name), call. = FALSE)
     output <- list(trees       = dplyr::tibble(),
                    plot        = dplyr::tibble(),
+                   zones       = dplyr::tibble(),
                    climate     = dplyr::tibble(),
                    cells       = dplyr::tibble(),
                    monthCells  = dplyr::tibble(),
                    annualCells = dplyr::tibble(),
                    voxels      = dplyr::tibble(),
                    plot.info   = dplyr::tibble(),
+                   zone.info   = dplyr::tibble(),
                    tree.info   = dplyr::tibble(),
                    exp.plan    = dplyr::tibble(),
-                   metadata    = dplyr::tibble())
+                   session.info= dplyr::tibble())
     return(output)
   } else if(!all(file.exists(files))) {
     missing.profiles <- basename(files[!file.exists(files)])
     missing.profile.error <- paste(c("The following requested profiles do not exist:",
                                      paste0("      --", missing.profiles)),
                                    collapse = "\n")
-    warning(missing.profile.error, call. = FALSE)
+    ##warning(missing.profile.error, call. = FALSE)
     profiles <- profiles[file.exists(files)]
   }
 
@@ -251,10 +255,12 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
 
   join_plot   <- function(...) dplyr::left_join(..., by = BASE.COLS, suffix = c("", ".REMOVE"))
   join_trees  <- function(...) dplyr::left_join(..., by = c(BASE.COLS, "idTree"), suffix = c("", ".REMOVE"))
+  join_zones  <- function(...) dplyr::left_join(..., by = c(BASE.COLS, "idZone"), suffix = c("", ".REMOVE"))
   join_cells  <- function(...) dplyr::left_join(..., by = c(BASE.COLS, "idCell", "x", "y"), suffix = c("", ".REMOVE"))
   join_voxels <- function(...) dplyr::left_join(..., by = c(BASE.COLS, "idCell", "idVoxel", "x", "y", "z"), suffix = c("", ".REMOVE"))
 
   plot.data   <- out[grep("^plot",        names(out))]
+  zones.data  <- out[grep("^zones",       names(out))]
   trees.data  <- out[grep("^trees",       names(out))]
   cells.data  <- out[grep("^cells",       names(out))]
   voxels.data <- out[grep("^voxels",      names(out))]
@@ -263,6 +269,7 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
 
   check_function <- function(x) is.null(x) | nrow(x) == 0
   out[["plot"]]        <- Reduce(join_plot,   plot.data[  !purrr::map_lgl(plot.data,   check_function)])
+  out[["zones"]]       <- Reduce(join_zones,  zones.data[ !purrr::map_lgl(zones.data,  check_function)])
   out[["trees"]]       <- Reduce(join_trees,  trees.data[ !purrr::map_lgl(trees.data,  check_function)])
   out[["cells"]]       <- Reduce(join_cells,  cells.data[ !purrr::map_lgl(cells.data,  check_function)])
   out[["voxels"]]      <- Reduce(join_voxels, voxels.data[!purrr::map_lgl(voxels.data, check_function)])
@@ -312,50 +319,41 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
                                soilDepth           = soilDepth,
                                waterTable          = waterTable,
                                simulationDayStart  = simulationDayStart)
+
+    zone.info <- read_zone_info(path, simu.name)
+
   } else {
     plot.info <- tree.info <- dplyr::tibble()
   }
 
+
+  ## Read simulation metadata
+  ##simu.metadata <- dplyr::tibble(SimulationName = simu.name, path = simu.path)
+  ##session.path <- clean_path(paste0(path, "/", simu.name, "/output-", simu.name, "/session.txt"))
+  ##if(file.exists(session.path)) {
+  ##  session.info      <- read_param_file(session.path)
+  ##}
+  ##simu.metadata <- dplyr::bind_cols(simu.metadata, session.info)
+
+
+
+
+
   ## Read simulation metadata
   simu.metadata <- dplyr::tibble(SimulationName = simu.name, path = simu.path)
 
-  session.path <- clean_path(paste0(path, "/", simu.name, "/output-", simu.name, "/session.txt"))
-  if(file.exists(session.path)) {
-    session.names <- c("hisafe.version", "stics.version", "capsis.version", "simulation.start", "simulation.seconds")
-    session.info <- scan(session.path, what = "character", encoding = "latin1", sep = "\n", quiet = TRUE) %>%
-      .[-1] %>%
-      purrr::map(strsplit, split = " = ") %>%
-      purrr::map(1) %>%
-      purrr::map(2) %>%
-      c(rep(list(NA), length(session.names) - length(.))) %>% # if a simulation was not completed, simulation.start & simulation.seconds will not be in the file
-      as.data.frame(col.names = session.names, stringsAsFactors = FALSE) %>%
-      dplyr::as_tibble() %>%
-      dplyr::mutate(simulation.start   = lubridate::ymd_hms(simulation.start)) %>%
-      dplyr::mutate(simulation.seconds = as.numeric(simulation.seconds))
-    simu.metadata <- dplyr::bind_cols(simu.metadata, session.info)
-  }
-
-
-  ## Ensure crop names are characters in plot
-  clean_crop_name <- function(x) {
-    for(i in c("mainCropName", "interCropName")) {
-      if(i %in% names(x)) {
-        x[[i]] <- as.character(x[[i]])
-        x[[i]][x[[i]] == "0"]   <- NA
-      }
-    }
-    return(x)
-  }
 
   ## Creatd output list & assign class
   output <- list(trees       = get_prof(out, "trees"),
-                 plot        = clean_crop_name(get_prof(out, "plot")),
+                 plot        = get_prof(out, "plot"),
+                 zones       = get_prof(out, "zones"),
                  climate     = get_prof(out, "climate"),
                  cells       = get_prof(out, "cells"),
                  monthCells  = get_prof(out, "monthCells"),
                  annualCells = get_prof(out, "annualCells"),
                  voxels      = get_prof(out, "voxels"),
                  plot.info   = plot.info,
+                 zone.info   = zone.info,
                  tree.info   = tree.info,
                  exp.plan    = EXP.PLAN,
                  metadata    = simu.metadata)
@@ -371,7 +369,7 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
 #' @param ... Other arguments passed to \code{\link{read_hisafe}}.
 #' @export
 read_hisafe_example <- function(simu.names = c("monocrop", "agroforestry", "forestry"),
-                                profiles   = c("plot", "plotDetail", "trees", "treesDetail", "cells",  "cellsDetail",
+                                profiles   = c("plot", "plotDetail", "zones", "trees", "treesDetail", "cells",  "cellsDetail",
                                                "voxelsMonth", "climate", "monthCells", "annualCells"), ...) {
 
   if(!all(is.character(profiles))) stop("profiles argument must be a character vector", call. = FALSE)
@@ -440,8 +438,8 @@ read_hisafe_output_file <- function(profile, simu.name){
   return(dat)
 }
 
-#' Read tree information from a Hi-sAFe pld file
-#' @description Reads tree information from a Hi-sAFe pld file. Used by \code{\link{read_simulation}}.
+#' Read tree information from a Hi-sAFe pld and ttec file
+#' @description Reads tree information from a Hi-sAFe pld and ttec file. Used by \code{\link{read_simulation}}.
 #' @return A data frame (tibble) containing tree id, species, x, y, and pruning/root pruning parameters.
 #' @param path A character string of the path to the directory containing the simulation folder.
 #' @param simu.name A character string of the simualation name.
@@ -452,27 +450,37 @@ read_tree_info <- function(path, simu.name) {
   if(length(sim.path) > 1) stop(paste("there is more than 1 SIM file present in the simulation directory of:", simu.name), call. = FALSE)
   pld.path <- list.files(clean_path(paste0(path, "/", simu.name, "/")), ".pld$", full.names = TRUE)
   if(length(pld.path) > 1) stop(paste("there is more than 1 PLD file present in the simulation directory of:", simu.name), call. = FALSE)
+  ttec.path <- list.files(clean_path(paste0(path, "/", simu.name, "/treeInterventions/")), ".ttec$", full.names = TRUE)
+  if(length(ttec.path) > 1) stop(paste("there is more than 1 TTEC file present in the simulation directory of:", simu.name), call. = FALSE)
+
   sim <- read_param_file(sim.path)
   pld <- read_param_file(pld.path)
-  if(!pld$TREE_INITIALIZATION$tree.initialization$commented) {
-    tree.info <- pld$TREE_INITIALIZATION$tree.initialization$value[[1]] %>%
+  ttec <- read_param_file(ttec.path)
+
+
+  simulationYearStart = stringr::str_sub(sim$SIMULATION$simulationDateStart$value,1,4)
+  simulationDayStart = stringr::str_sub(sim$SIMULATION$simulationDateStart$value,8,9)
+
+
+  if(!pld$TREE$tree$commented) {
+    tree.info <- pld$TREE$tree$value[[1]] %>%
       dplyr::mutate(special.case = treeX == 0 & treeY == 0) %>% # special case when x == 0 & y == 0 : tree is at scene center
       dplyr::mutate(treeX = treeX + special.case * pld$PLOT$plotWidth$value  / 2) %>%
       dplyr::mutate(treeY = treeY + special.case * pld$PLOT$plotHeight$value / 2) %>%
       dplyr::rename(x = treeX, y = treeY) %>%
-      dplyr::select(species, x, y)
+      dplyr::select(treeSpeciesFileName, x, y)
     tree.info <- tree.info %>%
       dplyr::mutate(idTree = 1:nrow(tree.info)) %>%
       dplyr::mutate(SimulationName = rep(simu.name, nrow(tree.info))) %>%
-      dplyr::mutate(simulationYearStart = sim$SIMULATION$simulationYearStart$value) %>%
-      dplyr::mutate(simulationDayStart  = sim$SIMULATION$simulationDayStart$value) %>%
+      dplyr::mutate(simulationYearStart = simulationYearStart) %>%
+      dplyr::mutate(simulationDayStart  = simulationDayStart) %>%
       dplyr::select(SimulationName, idTree, dplyr::everything())
-    if(!sim$TREE_PRUNING$treePruningYears$commented) {
-      tree.info <- tree.info %>%
-        dplyr::mutate(treePruningYears     = list(sim$TREE_PRUNING$treePruningYears$value)) %>%
-        dplyr::mutate(treePruningProp      = list(sim$TREE_PRUNING$treePruningProp$value)) %>%
-        dplyr::mutate(treePruningMaxHeight = list(sim$TREE_PRUNING$treePruningMaxHeight$value)) %>%
-        dplyr::mutate(treePruningDays      = list(sim$TREE_PRUNING$treePruningDays$value))
+    if(!ttec$TREE_PRUNING$treePruningYears$commented) {
+       tree.info <- tree.info %>%
+       dplyr::mutate(treePruningYears     = list(ttec$TREE_PRUNING$treePruningYears$value)) %>%
+       dplyr::mutate(treePruningProp      = list(ttec$TREE_PRUNING$treePruningProp$value)) %>%
+       dplyr::mutate(treePruningMaxHeight = list(ttec$TREE_PRUNING$treePruningMaxHeight$value)) %>%
+       dplyr::mutate(treePruningDays      = list(ttec$TREE_PRUNING$treePruningDays$value))
     } else {
       tree.info <- tree.info %>%
         dplyr::mutate(treePruningYears     = list(NA_real_)) %>%
@@ -480,12 +488,12 @@ read_tree_info <- function(path, simu.name) {
         dplyr::mutate(treePruningMaxHeight = list(NA_real_)) %>%
         dplyr::mutate(treePruningDays      = list(NA_real_))
     }
-    if(!sim$TREE_ROOT_PRUNING$treeRootPruningYears$commented) {
+    if(!ttec$TREE_ROOT_PRUNING$treeRootPruningYears$commented) {
       tree.info <- tree.info %>%
-        dplyr::mutate(treeRootPruningYears    = list(sim$TREE_ROOT_PRUNING$treeRootPruningYears$value)) %>%
-        dplyr::mutate(treeRootPruningDays     = list(sim$TREE_ROOT_PRUNING$treeRootPruningDays$value)) %>%
-        dplyr::mutate(treeRootPruningDistance = list(sim$TREE_ROOT_PRUNING$treeRootPruningDistance$value)) %>%
-        dplyr::mutate(treeRootPruningDepth    = list(sim$TREE_ROOT_PRUNING$treeRootPruningDepth$value))
+        dplyr::mutate(treeRootPruningYears    = list(ttec$TREE_ROOT_PRUNING$treeRootPruningYears$value)) %>%
+        dplyr::mutate(treeRootPruningDays     = list(ttec$TREE_ROOT_PRUNING$treeRootPruningDays$value)) %>%
+        dplyr::mutate(treeRootPruningDistance = list(ttec$TREE_ROOT_PRUNING$treeRootPruningDistance$value)) %>%
+        dplyr::mutate(treeRootPruningDepth    = list(ttec$TREE_ROOT_PRUNING$treeRootPruningDepth$value))
     } else {
       tree.info <- tree.info %>%
         dplyr::mutate(treeRootPruningYears    = list(NA_real_)) %>%
@@ -493,8 +501,37 @@ read_tree_info <- function(path, simu.name) {
         dplyr::mutate(treeRootPruningDistance = list(NA_real_)) %>%
         dplyr::mutate(treeRootPruningDepth    = list(NA_real_))
     }
-  } else {
+    } else {
     tree.info <- dplyr::tibble()
-  }
+    }
   return(tree.info)
+}
+
+#' Read zones information from a Hi-sAFe sim file
+#' @description Reads zones information from a Hi-sAFe sim  file. Used by \code{\link{read_simulation}}.
+#' @return A data frame (tibble) containing zone id, name, area parameters.
+#' @param path A character string of the path to the directory containing the simulation folder.
+#' @param simu.name A character string of the simualation name.
+#' @importFrom dplyr %>%
+#' @keywords internal
+read_zone_info <- function(path, simu.name) {
+  sim.path <- list.files(clean_path(paste0(path, "/", simu.name, "/")), ".sim$", full.names = TRUE)
+  if(length(sim.path) > 1) stop(paste("there is more than 1 SIM file present in the simulation directory of:", simu.name), call. = FALSE)
+
+  sim <- read_param_file(sim.path)
+
+
+  if(!sim$ZONE$zone$commented) {
+    zone.info <- sim$ZONE$zone$value[[1]] %>%
+      dplyr::select(zoneName)
+    zone.info <- zone.info %>%
+      dplyr::mutate(idZone = 1:nrow(zone.info)) %>%
+      dplyr::mutate(SimulationName = rep(simu.name, nrow(zone.info))) %>%
+      dplyr::select(idZone, dplyr::everything())
+
+
+  } else {
+    zone.info <- dplyr::tibble()
+  }
+  return(zone.info)
 }

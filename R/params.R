@@ -8,11 +8,10 @@
 #' @keywords internal
 read_param_file <- function(path) {
   sim <- scan(file = path, what = "character", encoding = "latin1", sep = "\n", quiet = TRUE)
-
   titles        <- grepl("##", substr(sim, 1, 2))         # which lines have are headers
   single.hash   <- grepl("#",  substr(sim, 1, 1))          # which lines are commented out
   has.equals    <- grepl(" = ", sim)
-  pld.tabledata <- grepl("Layer", sim) | grepl("LayerInit", sim) | grepl("TreeInit", sim) | grepl("RootInit", sim)
+  pld.tabledata <- grepl("LAYER", sim) | grepl("LAYERINIT", sim) | grepl("TREE", sim)| grepl("ZONE", sim)| grepl("TREETEC", sim)| grepl("FERTILPARAM", sim)| grepl("RESIDUEPARAM", sim) | grepl("RESIDUEINC", sim) | grepl("TILLAGE", sim) | grepl("IRRIGATION", sim) | grepl("FERTILIZATION", sim) | grepl("CUTTING", sim)
   notes         <- single.hash & !titles & !has.equals & !pld.tabledata # which lines are notes
   comment       <- substr(sim, 1, 1) == "#"
 
@@ -29,7 +28,7 @@ read_param_file <- function(path) {
       names(x) <- table.names
       return(x)
     }
-
+    col_types <- readr::cols()
     table.tibble <- purrr::map(table.elements, clean_elements, table.names = table.names) %>%
       purrr::map_df(dplyr::bind_rows) %>%
       readr::type_convert(col_types = readr::cols())
@@ -37,28 +36,34 @@ read_param_file <- function(path) {
     return(table.tibble)
   }
 
-  tables <- list(layers                      = c("name", "thick", "sand", "clay", "limeStone", "organicMatter",                                 # .PLD
-                                                 "partSizeSand", "stone", "stoneType", "infiltrability"),
-                 layer_initialization        = c("name", "waterContent", "no3Concentration", "nh4concentration"),                               # .PLD
-                 tree_initialization         = c("name", "species", "height", "crownBaseHeight", "crownRadius", "treeX", "treeY"),              # .PLD
-                 root_initialization         = c("name", "shape", "repartition", "paramShape1", "paramShape2", "paramShape3"),                  # .PLD
-                 varieties                   = c("ID", "codevar", "stlevamf" ,"stamflax" ,"stlevdrp" ,"stflodrp", "stdrpdes", "pgrainmaxi",     # .PLT
-                                                 "adens", "croirac", "durvieF", "jvc", "sensiphot", "stlaxsen", "stsenlan", "nbgrmax",
-                                                 "stdrpmat", "afruitpot", "dureefruit"),
-                 residue_incorporation_table = c("julres", "coderes", "qres", "Crespc", "CsurNres", "Nminres", "eaures"),                       # .TEC
-                 tillage_table               = c("jultrav", "profres", "proftrav"),                                                             # .TEC
-                 irrigation_table            = c("julapl", "qte"),                                                                              # .TEC
-                 fertilization_table         = c("julapN", "qte"),                                                                              # .TEC
-                 cutting_table               = c("julfauche", "hautcoupe", "lairesiduel", "msresiduel", "anitcoupe"),                           # .TEC
-                 fertilization_parameters    = c("engamm", "orgeng", "deneng", "voleng"),                                                       # stics.par
-                 residue_parameters          = c("CroCo", "akres", "bkres", "awb", "bwb", "cwb", "ahres", "bhres", "kbio", "yres", "CNresmin",  # stics.par
-                                                 "CNresmax", "qmulchruis0", "mouillabilmulch", "kcouvmlch", "albedomulchresidus", "Qmulchdec"))
+  tables <- list(ZONE             = c("name", "zoneName", "zoneCellList", "zoneTecFileNameList"),                                    # .SIM
+                 TREETEC          = c("name", "treeTecFileName"),                                                                    # .SIM
+                 LAYER            = c("name", "thick", "sand", "clay", "limeStone", "organicMatter",                                 # .PLD
+                                       "partSizeSand", "stone", "stoneType", "infiltrability"),
+                 LAYERINIT        = c("name", "waterContent", "no3Concentration", "nh4concentration"),                               # .PLD
+                 TREE             = c("name", "treeSpeciesFileName", "treeX", "treeY"),                                   # .PLD
+                 VARIETE          = c("name", "ID", "codevar", "stlevamf" ,"stamflax" ,"stlevdrp" ,"stflodrp", "stdrpdes", "pgrainmaxi",     # .PLT
+                                       "adens", "croirac", "durvieF", "jvc", "sensiphot", "stlaxsen", "stsenlan", "nbgrmax",
+                                       "stdrpmat", "afruitpot", "dureefruit"),
+                 RESIDUEINC     = c("name", "julres", "coderes", "qres", "Crespc", "CsurNres", "Nminres", "eaures"),                       # .TEC
+                 TILLAGE        = c("name", "jultrav", "profres", "proftrav"),                                                             # .TEC
+                 IRRIGATION     = c("name", "julapl", "qte"),                                                                              # .TEC
+                 FERTILIZATION  = c("name", "julapN", "qte"),                                                                              # .TEC
+                 CUTTING        = c("name", "julfauche", "hautcoupe", "lairesiduel", "msresiduel", "anitcoupe"),                           # .TEC
+                 FERTILPARAM    = c("name", "engamm", "orgeng", "deneng", "voleng"),                                                       # stics.par
+                 RESIDUEPARAM   = c("name", "CroCo", "akres", "bkres", "awb", "bwb", "cwb", "ahres", "bhres", "kbio", "yres", "CNresmin",  # stics.par
+                                     "CNresmax", "qmulchruis0", "mouillabilmulch", "kcouvmlch", "albedomulchresidus", "Qmulchdec"))
   new.sim <- list()
   next_threshold <- 0
   list.title <- "temp"
   for(i in 1:length(sim)) {
+
     if(i < next_threshold) next
+
+    ##this is a comment
     if(notes[i]) next
+
+    ##this is a title
     if(titles[i]){
       list.title <- gsub(pattern = " ",
                          replacement = "_",
@@ -66,19 +71,10 @@ read_param_file <- function(path) {
       toto <- list(c())
       names(toto) <- list.title
       new.sim <- c(new.sim, toto)
-    } else if(tolower(list.title) %in% names(tables)){
-      list.names <- tables[[tolower(list.title)]]
-      element.table <- read_element_table(sim, i, titles, list.names)
-      element.table.reduced <- element.table[!grepl("#", element.table[[1]]),]
-      if(nrow(element.table.reduced) > 0) {
-        toto <- list(list(value = list(element.table), commented = FALSE, range = NA, type = NA, accepted = NA))
-      } else {
-        toto <- list(list(value = list(element.table), commented = TRUE,  range = NA, type = NA, accepted = NA))
-      }
-      names(toto) <- gsub("_", ".", names(tables)[names(tables) == tolower(list.title)])
-      new.sim[[list.title]] <- c(new.sim[[list.title]], toto)
-      next_threshold <- i + nrow(element.table)
-    } else {
+
+    ##this is a keyword = value
+    } else if (has.equals[i]) {
+
       line.text <- ifelse(comment[i], substr(sim[i], start = 2, stop = 10000), sim[i]) # remove first # only (definitions possible after another #)
 
       element.name  <- unlist(lapply(strsplit(line.text, split = "=", fixed = TRUE), "[[", 1))
@@ -88,14 +84,41 @@ read_param_file <- function(path) {
       element.vals  <- remove_whitespace(strsplit(element.vals, split = "#", fixed = TRUE)[[1]])
 
       element.value <- element.vals[1]
-      if(grepl(",", element.value)) {
-        element.value <- strsplit(element.value, split = ",")
-        if(substr(element.value[[1]][1], 1, 1) %in% as.character(0:9)) {
-          element.value <- purrr::map(element.value, as.numeric)
-        }
+
+      test <- strsplit(element.value, split = "-", fixed = TRUE)
+
+      ## This is a date format YYYY-MM-DD
+      if (nchar(element.value)==10 && grepl("-", element.value) && nchar(test[[1]][1])==4 ) {
+        element.value <- as.Date(element.value);
+
       } else {
-        if(substr(element.value, 1, 1) %in% as.character(0:9)) {
-          element.value <- as.numeric(element.value)
+        if (element.name=="zoneCellList") {
+
+        }
+        else {
+          if(grepl(",", element.value)) {
+            element.value <- strsplit(element.value, split = ",")
+            if (nchar(element.value[[1]][1])==5 && grepl("-", element.value[[1]][1])) {
+
+            }
+            else {
+              if(substr(element.value[[1]][1], 1, 1) %in% as.character(0:9)) {
+                element.value <- purrr::map(element.value, as.numeric)
+              }
+            }
+
+          } else {
+
+            if (grepl("-", element.value) || grepl("Version", element.name)) {
+
+            }
+            else {
+              if(substr(element.value, 1, 1) %in% as.character(0:9)) {
+                element.value <- as.numeric(element.value)
+              }
+            }
+
+          }
         }
       }
 
@@ -105,6 +128,76 @@ read_param_file <- function(path) {
       names(toto) <- element.name
       new.sim[[list.title]] <- c(new.sim[[list.title]], toto)
     }
+    ##this is a table
+    else {
+
+
+      line.text <- sim[i]
+      if(grepl("ZONE", line.text)) {
+        list.names <- c("name", "zoneName", "zoneCellList", "zoneTecFileNameList")
+        table.name <- "zone"
+      }
+      else if(grepl("TREETEC", line.text)) {
+        list.names <- c("name", "treeTecFileName")
+        table.name <- "treetec"
+      }
+      else if(grepl("LAYERINIT", line.text)) {
+        list.names <- c("name", "waterContent", "no3Concentration", "nh4concentration")
+        table.name <- "layerinit"
+      }
+      else if(grepl("LAYER", line.text)) {
+        list.names <- c("name", "thick", "sand", "clay", "limeStone", "organicMatter", "partSizeSand", "stone", "stoneType", "infiltrability")
+        table.name <- "layer"
+      }
+      else if(grepl("TREE", line.text)) {
+        list.names <- c("name", "treeSpeciesFileName", "treeX", "treeY")
+        table.name <- "tree"
+      }
+      else if(grepl("VARIETE", line.text)) {
+        list.names <- c("name", "ID", "codevar", "stlevamf" ,"stamflax" ,"stlevdrp" ,"stflodrp", "stdrpdes", "pgrainmaxi","adens", "croirac", "durvieF", "jvc", "sensiphot", "stlaxsen", "stsenlan", "nbgrmax", "stdrpmat", "afruitpot", "dureefruit")
+        table.name <- "variete"
+      }
+      else if(grepl("RESIDUEINC", line.text)) {
+        list.names <- c("name", "julres", "coderes", "qres", "Crespc", "CsurNres", "Nminres", "eaures")
+        table.name <- "residueinc"
+      }
+      else if(grepl("TILLAGE", line.text)) {
+        list.names <- c("name", "jultrav", "profres", "proftrav")
+        table.name <- "tillage"
+      }
+      else if(grepl("IRRIGATION", line.text)) {
+        list.names <- c("name", "julapl", "qte")
+        table.name <- "irrigation"
+      }
+      else if(grepl("FERTILIZATION", line.text)) {
+        list.names <-  c("name", "julapN", "qte")
+        table.name <- "fertilization"
+      }
+      else if(grepl("CUTTING", line.text)) {
+        list.names <- c("name", "julfauche", "hautcoupe", "lairesiduel", "msresiduel", "anitcoupe")
+        table.name <- "cutting"
+      }
+      else if(grepl("FERTILPARAM", line.text)) {
+        list.names <- c("name", "engamm", "orgeng", "deneng", "voleng")
+        table.name <- "fertilparam"
+      }
+      else if(grepl("RESIDUEPARAM", line.text)) {
+        list.names <- c("name", "CroCo", "akres", "bkres", "awb", "bwb", "cwb", "ahres", "bhres", "kbio", "yres", "CNresmin", "CNresmax", "qmulchruis0", "mouillabilmulch", "kcouvmlch", "albedomulchresidus", "Qmulchdec")
+        table.name <- "residueparam"
+      }
+
+      element.table <- read_element_table(sim, i, titles, list.names)
+      element.table.reduced <- element.table[!grepl("#", element.table[[1]]),]
+      if(nrow(element.table.reduced) > 0) {
+        toto <- list(list(value = list(element.table), commented = FALSE, range = NA, type = NA, accepted = NA))
+      } else {
+        toto <- list(list(value = list(element.table), commented = TRUE,  range = NA, type = NA, accepted = NA))
+      }
+      names(toto) <- table.name
+      new.sim[[list.title]] <- c(new.sim[[list.title]], toto)
+      next_threshold <- i + nrow(element.table)
+    }
+
   }
   return(new.sim)
 }
@@ -203,41 +296,9 @@ get_template_params <- function(template) {
   template.path    <- get_template_path(template)
   template.subpath <- get_template_subpath(template)
 
-  ## Determine which tree species to use from within the template for the .tree params
-  avail.template.trees <- unlist(purrr::map(strsplit(list.files(clean_path(paste0(template.subpath, "/treeSpecies"))), split = ".", fixed = TRUE), 1))
-  if(length(avail.template.trees) == 1) {
-    template.tree <- avail.template.trees
-  } else if("walnut-hybrid" %in% avail.template.trees) {
-    template.tree <- "walnut-hybrid"
-  } else {
-    template.tree <- avail.template.trees[1]
-  }
-
-  ## Determine which crop species to use from within the template for the .plt params
-  avail.template.crops <- unlist(purrr::map(strsplit(list.files(clean_path(paste0(template.subpath, "/cropSpecies"))), split = ".", fixed = TRUE), 1))
-  if(length(avail.template.crops) == 1) {
-    template.crop <- avail.template.crops
-  } else if("durum-wheat" %in% avail.template.crops) {
-    template.crop <- "durum-wheat"
-  } else {
-    template.crop <- avail.template.crops[1]
-  }
-
-  ## Determine which crop species to use from within the template for the .tec params
-  avail.template.crops <- unlist(purrr::map(strsplit(list.files(clean_path(paste0(template.subpath, "/cropInterventions"))), split = ".", fixed = TRUE), 1))
-  if(length(avail.template.crops) == 1) {
-    template.crop <- avail.template.crops
-  } else if("durum-wheat" %in% avail.template.crops) {
-    template.crop <- "durum-wheat"
-  } else {
-    template.crop <- avail.template.crops[1]
-  }
-
+  ## check sim, pld and general parameters files
   sim.file    <- clean_path(list.files(template.path, ".sim$", full.names = TRUE))
   pld.file    <- clean_path(list.files(template.path, ".pld$", full.names = TRUE))
-  tree.file   <- list.files(paste0(template.subpath, "/treeSpecies"),       paste0(template.tree, ".tree"), full.names = TRUE)
-  crop.file   <- list.files(paste0(template.subpath, "/cropSpecies"),       paste0(template.crop, ".plt"),  full.names = TRUE)
-  tec.file    <- list.files(paste0(template.subpath, "/cropInterventions"), paste0(template.crop, ".tec"),  full.names = TRUE)
   hisafe.file <- clean_path(paste0(template.subpath, "/generalParameters/hisafe.par"))
   stics.file  <- clean_path(paste0(template.subpath, "/generalParameters/stics.par"))
 
@@ -248,12 +309,26 @@ get_template_params <- function(template) {
 
   sim.params    <- read_param_file(sim.file)
   pld.params    <- read_param_file(pld.file)
-  tree.params   <- read_param_file(tree.file)
-  crop.params   <- read_param_file(crop.file)
-  tec.params    <- read_param_file(tec.file)
   hisafe.params <- read_param_file(hisafe.file)
   stics.params  <- read_param_file(stics.file)
-  return(list(sim = sim.params, pld = pld.params, tree = tree.params, crop = crop.params, tec = tec.params, hisafe = hisafe.params, stics = stics.params))
+
+  ## check tree species and tec files
+  L.TREES <- list.files(clean_path(paste0(template.subpath, "/treeSpecies")))
+  L.TTEC <- list.files(clean_path(paste0(template.subpath, "/treeInterventions")))
+  tree.file   <- paste0(template.subpath, "/treeSpecies/", L.TREES[1])
+  ttec.file   <- paste0(template.subpath, "/treeInterventions/", L.TTEC[1])
+  tree.params   <- read_param_file(tree.file)
+  ttec.params   <- read_param_file(ttec.file)
+
+  ## check crop species and tec files
+  L.CROPS <- list.files(clean_path(paste0(template.subpath, "/cropSpecies")))
+  L.TECS <- list.files(clean_path(paste0(template.subpath, "/cropInterventions")))
+  crop.file   <- paste0(template.subpath, "/cropSpecies/", L.CROPS[1])
+  tec.file    <- paste0(template.subpath, "/cropInterventions/", L.TECS[1])
+  crop.params   <- read_param_file(crop.file)
+  tec.params    <- read_param_file(tec.file)
+
+  return(list(sim = sim.params, pld = pld.params, tree = tree.params, crop = crop.params, ttec = ttec.params, tec = tec.params, hisafe = hisafe.params, stics = stics.params))
 }
 
 #' Get names of template parameters
@@ -266,10 +341,11 @@ get_param_names <- function(x) {
   pld.names    <- unlist(purrr::map(x$pld,    names), use.names = FALSE)
   tree.names   <- unlist(purrr::map(x$tree,   names), use.names = FALSE)
   crop.names   <- unlist(purrr::map(x$crop,   names), use.names = FALSE)
+  ttec.names   <- unlist(purrr::map(x$ttec,   names), use.names = FALSE)
   tec.names    <- unlist(purrr::map(x$tec,    names), use.names = FALSE)
   hisafe.names <- unlist(purrr::map(x$hisafe, names), use.names = FALSE)
   stics.names  <- unlist(purrr::map(x$stics,  names), use.names = FALSE)
-  return(list(sim = sim.names, pld = pld.names, tree = tree.names, crop = crop.names, tec = tec.names, hisafe = hisafe.names, stics = stics.names))
+  return(list(sim = sim.names, pld = pld.names, tree = tree.names, crop = crop.names, ttec = ttec.names, tec = tec.names, hisafe = hisafe.names, stics = stics.names))
 }
 
 #' Get values/constraints of template parameters
@@ -278,15 +354,16 @@ get_param_names <- function(x) {
 #' @param x A list containing all parameter values and constraints.
 #' @keywords internal
 get_param_vals <- function(x, type) {
-  sim.vals <- pld.vals <- tree.vals <- crop.vals <- tec.vals <- hisafe.vals <- stics.vals <- list()
+  sim.vals <- pld.vals <- tree.vals <- crop.vals <- ttec.vals  <- tec.vals <- hisafe.vals <- stics.vals <- list()
   for(i in names(x$sim))    sim.vals    <- c(sim.vals,    purrr::map(x$sim[[i]],    type))
   for(i in names(x$pld))    pld.vals    <- c(pld.vals,    purrr::map(x$pld[[i]],    type))
   for(i in names(x$tree))   tree.vals   <- c(tree.vals,   purrr::map(x$tree[[i]],   type))
   for(i in names(x$crop))   crop.vals   <- c(crop.vals,   purrr::map(x$crop[[i]],   type))
+  for(i in names(x$ttec))   ttec.vals   <- c(ttec.vals,   purrr::map(x$ttec[[i]],   type))
   for(i in names(x$tec))    tec.vals    <- c(tec.vals,    purrr::map(x$tec[[i]],    type))
   for(i in names(x$hisafe)) hisafe.vals <- c(hisafe.vals, purrr::map(x$hisafe[[i]], type))
   for(i in names(x$stics))  stics.vals  <- c(stics.vals,  purrr::map(x$stics[[i]],  type))
-  return(c(sim.vals, pld.vals, tree.vals, crop.vals, tec.vals, hisafe.vals, stics.vals))
+  return(c(sim.vals, pld.vals, tree.vals, crop.vals, ttec.vals, tec.vals, hisafe.vals, stics.vals))
 }
 
 #' Complies list of parameters actually used
@@ -302,16 +379,35 @@ get_used_params <- function(hip) {
       exp <- TRUE
     } else {
       commented <- template.commented[[variable]]
-      if(commented) {
+      if (is.null(commented)) {
+        print(variable)
         val <- NA
         exp <- FALSE
-      } else {
-        val <- template.defaults[[variable]]
-        exp <- FALSE
-        if(substr(as.character(val)[1], 1, 1) %in% as.character(0:9)){
-          val <- as.numeric(val)
+      }
+      else {
+        if(commented) {
+          val <- NA
+          exp <- FALSE
+        } else {
+          val <- template.defaults[[variable]]
+          exp <- FALSE
+
+          if (nchar(val)==10 && grepl("-", val)) {
+            val <- as.Date(val);
+          }
+          else {
+            if (nchar(val)==5 && grepl("-", val)) {
+
+            }
+            else {
+              if(substr(as.character(val)[1], 1, 1) %in% as.character(0:9)){
+                val <- as.numeric(val)
+              }
+            }
+          }
         }
       }
+
       if(!("list" %in% class(val))) {
         val <- rep(list(val), n.sims)
       } else {

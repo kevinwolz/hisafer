@@ -34,30 +34,87 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
 
   USED_PARAMS <- get_used_params(hip)
   get_used <- function(param) USED_PARAMS[[param]]$value[[1]]
+  mainCropSpecies <- ""
 
-  mainCropSpecies  <- gsub("\\.plt", "", get_used("mainCropSpecies")[1])
-  interCropSpecies <- gsub("\\.plt", "", get_used("interCropSpecies")[1])
+
+  list_zone <- get_used("zone")
+
+  zoneid <- 1
+
+  itk_zone <- list()
+
+  for (i in  list_zone$zoneTecFileNameList) {
+
+    itk_list_name  <- gsub("\\.tec", "", i)
+    itk_name <- strsplit(itk_list_name[[1]], split = ",", fixed = TRUE)
+
+    for (j in  itk_name) {
+      itk_zone <- c(itk_zone, strsplit(j, split = " ", fixed = TRUE))
+    }
+
+    zoneid <- zoneid + 1
+  }
+
+  mainCropSpecies <- itk_zone [[1]]
+
+
+  for (i in  list_zone$zoneCellList) {
+
+    cell_zone <- list()
+
+    if (grepl(",", i))
+      cell_list_name <- strsplit(i, split = ",", fixed = TRUE)
+    else
+      cell_list_name <- i
+
+    for (j in  cell_list_name) {
+
+      for (k in  j) {
+
+        if (grepl("-", k[[1]])) {
+          test <- strsplit(k[[1]], split = "-", fixed = TRUE)
+          for (cn in test) {
+            cellDebut = as.numeric(cn[[1]])
+            cellFin  = as.numeric(cn[[2]])
+            for ( c in cellDebut:cellFin) {
+              cell_zone <- c(cell_zone, c)
+            }
+          }
+        }
+        else {
+            c = as.numeric(k[[1]])
+            cell_zone <- c(cell_zone, c)
+        }
+      }
+
+      zoneid <- zoneid + 1
+    }
+
+
+  }
+
+
   toric <- purrr::map_dbl(c("toricXp", "toricXn", "toricYp", "toricYn"), get_used)
   toric.lab <- ifelse(any(toric == 1), paste(c("Xp", "Xn", "Yp", "Yn")[as.logical(toric)], collapse = ","), "off")
   toric.x.both <- ifelse(sum(toric[1:2]) == 2, TRUE, FALSE)
   toric.y.both <- ifelse(sum(toric[3:4]) == 2, TRUE, FALSE)
 
   ## Calculate total soil depth
-  soil.depth <- sum(as.numeric(get_used("layers")$thick))
+  soil.depth <- sum(as.numeric(get_used("layer")$thick))
 
-  if("data.frame" %in% class(get_used("tree.initialization"))) {
+  if("data.frame" %in% class(get_used("tree"))) {
     ## Extract tree data
-    tree.plot.data <- get_used("tree.initialization") %>%
+    tree.plot.data <- get_used("tree") %>%
       dplyr::mutate(special.case = treeX == 0 & treeY == 0) %>% # special case when x == 0 & y == 0 : tree is at scene center
       dplyr::mutate(treeX = treeX + special.case * get_used("plotWidth")  / 2) %>%
       dplyr::mutate(treeY = treeY + special.case * get_used("plotHeight") / 2) %>%
       dplyr::mutate(x = treeX / get_used("cellWidth"),
                     y = treeY / get_used("cellWidth")) %>%
       dplyr::mutate(id = 1:nrow(.)) %>%
-      dplyr::select(species, x, y, id)
+      dplyr::select(treeSpeciesFileName, x, y, id)
     num.trees <- nrow(tree.plot.data)
   } else {
-    tree.plot.data <- dplyr::tibble(species = "No trees", x = NA_real_, y = NA_real_, id = "")
+    tree.plot.data <- dplyr::tibble(treeSpeciesFileName = "No trees", x = NA_real_, y = NA_real_, id = "")
     num.trees <- 0
   }
   ## Calculate scene dimensions (cell size for plotting is always "1", but more/less cells added and labels adjusted based actual dimensions)
@@ -69,7 +126,7 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
   ## Create plot data
   plot.data <- expand.grid(x    = 1:WIDTH,
                            y    = 1:HEIGHT,
-                           crop = mainCropSpecies,
+                           crop = mainCropSpecies[[1]],
                            stringsAsFactors = FALSE) %>%
     dplyr::as_tibble() %>%
     dplyr::arrange(desc(y), x) %>%
@@ -107,49 +164,10 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
       return(c(low.inside, high.inside))
     }
 
-    if(get_used("treeCropDistance") > 0) {
-      boundaries <- as.list(tree.plot.data$x) %>%
-        purrr::map(create_range, get_used("treeCropDistance") / get_used("cellWidth")) %>%
-        purrr::map(round_to_cell)
 
-      x.inside <- boundaries %>%
-        purrr::map(which_inside, plot.data$x) %>%
-        unlist() %>%
-        c(., check_x_runover(boundaries)[toric.x.both]) # if toric symetry is on, check for intercrop runover across toric symmetry
-
-      plot.data$crop[which(plot.data$x %in% x.inside)] <- interCropSpecies
-
-    } else if(get_used("treeCropRadius") > 0) {
-
-      x.boundaries <- as.list(tree.plot.data$x) %>%
-        purrr::map(create_range, get_used("treeCropRadius") / get_used("cellWidth")) %>%
-        purrr::map(round_to_cell)
-
-      x.inside <- x.boundaries %>%
-        purrr::map(which_inside, plot.data$x) %>%
-        unlist() %>%
-        c(., check_x_runover(x.boundaries)[toric.x.both]) # if toric symetry is on, check for intercrop runover across toric symmetry
-
-      y.boundaries <- as.list(tree.plot.data$y) %>%
-        purrr::map(create_range, get_used("treeCropRadius") / get_used("cellWidth")) %>%
-        purrr::map(round_to_cell)
-
-      y.inside <- y.boundaries %>%
-        purrr::map(which_inside, plot.data$y) %>%
-        unlist() %>%
-        c(., check_y_runover(y.boundaries)[toric.y.both]) # if toric symetry is on, check for intercrop runover across toric symmetry
-
-      cells.inside <- expand.grid(x.inside, y.inside) %>%
-        dplyr::rename(x = Var1, y = Var2) %>%
-        dplyr::mutate(flagged = 1)
-
-      plot.data <- plot.data %>%
-        dplyr::left_join(cells.inside, by = c("x", "y"))
-
-      plot.data$crop[which(plot.data$flagged == 1)] <- interCropSpecies
-      plot.data$flagged <- NULL
-    }
   }
+
+
 
   plot.obj <- ggplot(plot.data, aes(x = x, y = y)) +
     labs(x       = paste0(WIDTH.lab,  "m"),
@@ -168,7 +186,7 @@ plot_hisafe_scene <- function(hip, simu.name = NULL, output.path = NULL) {
     scale_y_continuous(expand = c(0, 0)) +
     geom_tile(color = "black", aes(fill = crop)) +
     geom_text(aes(label = idCell)) +
-    geom_point(data = tree.plot.data, size = 10, aes(color = species), na.rm = TRUE) +
+    geom_point(data = tree.plot.data, size = 10, aes(color = treeSpeciesFileName), na.rm = TRUE) +
     geom_text(data = tree.plot.data, aes(label = id), color = "white", na.rm = TRUE) +
     scale_color_manual(values = c("black", "grey70", "grey30", "grey50")) +
     scale_fill_manual(values  = c("white", "grey80")) +

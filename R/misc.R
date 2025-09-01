@@ -132,6 +132,7 @@ hip_params <- function(params = "all", search = FALSE, template = "agroforestry"
   }
 
   acceptable <- c(INPUT.DEFS$name, "all")
+
   if(any(!(params %in% acceptable)) & !search) {
     bad.vars <- sort(params[!(params %in% acceptable)])
     if(requireNamespace("stringdist", quietly = TRUE)) {
@@ -768,7 +769,7 @@ get_pruning_dates <- function(hop, type = "branch", tree.ids = 1) {
   }
 
   get_dates <- function(x) {
-    pruningYears <- unlist(x$pruningYears) + x$simulationYearStart - 1 + as.numeric(unlist(x$pruningDays) < x$simulationDayStart)
+    pruningYears <- unlist(x$pruningYears)  + as.numeric(unlist(x$pruningDays) < x$simulationDayStart)
     if(!is.na(pruningYears[1])) {
       Date <- lubridate::ymd(paste0(pruningYears, "-01-01")) + unlist(x$pruningDays) - 1
       out <- dplyr::tibble(SimulationName = x$SimulationName, idTree = x$idTree, Year = as.integer(pruningYears), Date = Date) %>%
