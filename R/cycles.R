@@ -2,7 +2,7 @@
 #' @description Plots an annual barchart of tree carbon pools, water fluxes, nitrogen fluxes, or light capture.
 #' @return If \code{plot = TRUE}, returns a ggplot object. If \code{plot = FALSE}, returns the data that would create the plot.
 #' If \code{hop} contains more than one simulation, the plot will be faceted by SimulationName.
-#' @param hop An object of class hop or face.
+#' @param hop An object of class hop or face. treeNitrogenFineRootLitter
 #' @param cycle One of "carbon", "nitrogen", "water", "light", or "yield".
 #' @param freq One of "year", "month", "day".
 #' @param simu.names A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.
@@ -562,9 +562,8 @@ get_nitrogen_fluxes <- function(hop, profile,  for.plot = TRUE) {
                      "nitrogenUptakeByTrees", "nitrogenUptakeInSaturationByTrees", "nitrogenUptakeInSaturationByCrop", "nitrogenUptakeByCrop",
                      "nitrogenVolatilisation", "nitrogenVolatilisationOrganic", "nitrogenDenitrification", "nitrogenLossNitrification",
                      "nitrogenLeachingBottom", "nitrogenLeachingArtificial", "nitrogenLeachingWaterTable",
-                     "treeNitrogenLeafLitter", "treeNitrogenFineRootLitter", "treeNitrogenCoarseRootLitter",
-                     "treeNitrogenFineRootDeepLitter", "treeNitrogenCoarseRootDeepLitter",
-                     "cropNitrogenLeafLitter", "cropNitrogenRootLitter"),
+                     "treeNitrogenFoliageLitter", "treeNitrogenFineRootsLitter", "treeNitrogenCoarseRootsLitter",
+                     "cropNitrogenLeafLitter", "cropNitrogenRootsLitter"),
                    error = TRUE)
 
     if(for.plot) {
@@ -580,9 +579,8 @@ get_nitrogen_fluxes <- function(hop, profile,  for.plot = TRUE) {
                       gaseous        = nitrogenVolatilisation + nitrogenVolatilisationOrganic + nitrogenDenitrification + nitrogenLossNitrification,
                       leaching       = nitrogenLeachingBottom + nitrogenLeachingArtificial + nitrogenLeachingWaterTable,
                       #runoff         = nitrogenRunOff, # STICS CURRENTLY DOES NOT INCLUDE THIS
-                      tree.litter    = -treeNitrogenLeafLitter + -treeNitrogenFineRootLitter + -treeNitrogenCoarseRootLitter +
-                        -treeNitrogenFineRootDeepLitter + -treeNitrogenCoarseRootDeepLitter,
-                      crop.litter    = -cropNitrogenLeafLitter + -cropNitrogenRootLitter) %>%
+                      tree.litter    = -treeNitrogenFoliageLitter + -treeNitrogenFineRootsLitter + -treeNitrogenCoarseRootsLitter,
+                      crop.litter    = -cropNitrogenLeafLitter + -cropNitrogenRootsLitter) %>%
         dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay,
                       fertilization, irrigation, deposition, fixation, watertable,
                       uptakeTree, uptakeCrop,  gaseous, leaching, tree.litter, crop.litter) #runoff,
@@ -607,11 +605,11 @@ get_nitrogen_fluxes <- function(hop, profile,  for.plot = TRUE) {
                       leaching.artificial       = nitrogenLeachingArtificial,
                       leaching.watertable       = nitrogenLeachingWaterTable,
                       #runoff                    = nitrogenRunOff, # STICS CURRENTLY DOES NOT INCLUDE THIS
-                      tree.leaf.litter          = -treeNitrogenLeafLitter,
-                      tree.shallow.root.litter  = -treeNitrogenFineRootLitter     + -treeNitrogenCoarseRootLitter,
-                      tree.deep.root.litter     = -treeNitrogenFineRootDeepLitter + -treeNitrogenCoarseRootDeepLitter,
+                      tree.leaf.litter          = -treeNitrogenFoliageLitter,
+                      tree.shallow.root.litter  = -treeNitrogenFineRootsLitter     + -treeNitrogenCoarseRootsLitter,
+                      #tree.deep.root.litter     = -treeNitrogenFineRootsDeepLitter + -treeNitrogenCoarseRootsDeepLitter,
                       crop.leaf.litter          = -cropNitrogenLeafLitter,
-                      crop.root.litter          = -cropNitrogenRootLitter) %>%
+                      crop.root.litter          = -cropNitrogenRootsLitter) %>%
         dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay,
                       fertilization.mineral, fertilization.organic, irrigation, deposition, fixation, watertable, nitrogen.uptake.sat.trees, nitrogen.uptake.sat.crop,
                       uptakeTree, uptakeCrop,  volatilization.mineral, volatilization.organic, nitrification, denitrification,
