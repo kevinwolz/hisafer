@@ -2,7 +2,7 @@
 #' @description Plots an annual barchart of tree carbon pools, water fluxes, nitrogen fluxes, or light capture.
 #' @return If \code{plot = TRUE}, returns a ggplot object. If \code{plot = FALSE}, returns the data that would create the plot.
 #' If \code{hop} contains more than one simulation, the plot will be faceted by SimulationName.
-#' @param hop An object of class hop or face. treeNitrogenFineRootLitter
+#' @param hop An object of class hop or face. treeNitrogenFineRootsLitter
 #' @param cycle One of "carbon", "nitrogen", "water", "light", or "yield".
 #' @param freq One of "year", "month", "day".
 #' @param simu.names A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.

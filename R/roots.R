@@ -74,10 +74,10 @@ hisafe_root3D <- function(hop,
   rsyst <- hop$voxels %>%
     dplyr::filter(Date == date) %>%
     dplyr::mutate(colonisationDirection = .[[paste0("colonisationDirection_", tree.id)]]) %>%
-    dplyr::mutate(treeCarbonCoarseRoot = .[[paste0("treeCarbonCoarseRoot_", tree.id)]]) %>%
+    dplyr::mutate(treeCarbonCoarseRoots = .[[paste0("treeCarbonCoarseRoots_", tree.id)]]) %>%
     dplyr::mutate(root.color            = .[[color.var]]) %>%
-    dplyr::select(SimulationName, x, y, z, colonisationDirection, treeCarbonCoarseRoot, root.color) %>%
-    dplyr::filter(treeCarbonCoarseRoot > 0) %>%
+    dplyr::select(SimulationName, x, y, z, colonisationDirection, treeCarbonCoarseRoots, root.color) %>%
+    dplyr::filter(treeCarbonCoarseRoots > 0) %>%
     dplyr::mutate(z.up   = abs(Z[match(z, Z) - 1] - z)) %>%
     dplyr::mutate(z.down = abs(Z[match(z, Z) + 1] - z)) %>%
     dplyr::mutate(len    = 0) %>%
@@ -87,7 +87,7 @@ hisafe_root3D <- function(hop,
     dplyr::mutate(px     = x + as.numeric(colonisationDirection == 1) * len - as.numeric(colonisationDirection == 0) * len) %>%
     dplyr::mutate(py     = y - as.numeric(colonisationDirection == 3) * len + as.numeric(colonisationDirection == 2) * len) %>%
     dplyr::mutate(pz     = z + as.numeric(colonisationDirection == 5) * len - as.numeric(colonisationDirection == 4) * len) %>%
-    dplyr::mutate(ray    = sqrt(treeCarbonCoarseRoot / 616 / len / pi))
+    dplyr::mutate(ray    = sqrt(treeCarbonCoarseRoots / 616 / len / pi))
 
   ## PLOT
   rgl::rgl.open()
