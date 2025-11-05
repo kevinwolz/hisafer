@@ -341,7 +341,7 @@ plot_hisafe_monthcells <- function(hop,
     if(length(simu.names) < 1) stop("simulation filtering resulted in no simulations to plot", call. = FALSE)
   }
 
-  dates <- expand.grid(year = years, month = months, day = 1)
+  dates <- expand.grid(year = years, month = months, day = 28)
   dates <- lubridate::ymd(paste(dates$year, dates$month, dates$day, sep = "-"))
   hop <- hop_filter(hop            = hop,
                     simu.names     = simu.names,
@@ -914,7 +914,7 @@ plot_hisafe_bg <- function(hop,
 
   is_hop(hop, error = TRUE)
   profile_check(hop, "trees", error = TRUE)
-  variable_check(hop, "trees", c("rootingDepth", "carbonFineRootSenAnoxia", "carbonCoarseRootSenAnoxia"), error = TRUE)
+  variable_check(hop, "trees", c("rootingDepth", "carbonFineRootsSenAnoxia", "carbonCoarseRootsSenAnoxia"), error = TRUE)
 
   if(years[1] == "all") years <- unique(hop$trees$Year)
   if(!all(is.numeric(years)))                         stop("years argument must be 'all' or a numeric vector",       call. = FALSE)
@@ -930,7 +930,7 @@ plot_hisafe_bg <- function(hop,
   plot.data <- join_profiles(hop, profiles = c("trees", wt.profile)) %>%
     dplyr::filter(Year %in% years) %>%
     dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay,
-                  rootingDepth, carbonFineRootSenAnoxia, carbonCoarseRootSenAnoxia, waterTableDepth)
+                  rootingDepth, carbonFineRootsSenAnoxia, carbonCoarseRootsSenAnoxia, waterTableDepth)
 
   base.plot <- ggplot(plot.data, aes(x = Date)) +
     facet_wrap(~SimulationName, nrow = 1) +
@@ -955,7 +955,7 @@ plot_hisafe_bg <- function(hop,
   fr.sen.plot <- base.plot +
     labs(title = "Fine root senescence by anoxia",
          y     = "Senescence (kg C)") +
-    geom_line(aes(y = carbonFineRootSenAnoxia), na.rm = TRUE)
+    geom_line(aes(y = carbonFineRootsSenAnoxia), na.rm = TRUE)
 
   if("coarse" %in% sen) {
     fr.sen.plot <- fr.sen.plot +
@@ -969,7 +969,7 @@ plot_hisafe_bg <- function(hop,
   cr.sen.plot <- base.plot +
     labs(title = "Coarse root senescence by anoxia",
          y     = "Senescence (kg C)") +
-    geom_line(aes(y = carbonCoarseRootSenAnoxia), na.rm = TRUE) +
+    geom_line(aes(y = carbonCoarseRootsSenAnoxia), na.rm = TRUE) +
     theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
   plot.list <- list(root.wt.plot)
