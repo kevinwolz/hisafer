@@ -92,10 +92,8 @@ define_hisafe <- function(path,
   param.list    <- list(...)
   if(!is.null(bulk.pass)) param.list <- c(param.list, bulk.pass)
 
-
   ## Get profile names in export.out
   profiles <- get_available_profiles(template)
-
 
   if(factorial) {
     exp.plan <- dplyr::as_tibble(expand.grid(param.list, stringsAsFactors = FALSE))
@@ -416,10 +414,13 @@ check_input_values <- function(hip, force) {
 
   treePruning.length.error <- ifelse(all(purrr::map_lgl(list(get_length("treePruningProp"),
                                                              get_length("treePruningMaxHeight"),
-                                                             get_length("treePruningDays")),
+                                                             get_length("treePruningDays"),
+                                                             get_length("treePruningResiduesIncorporation"),
+                                                             get_length("treePruningResiduesSpreading")),
                                                         identical,
                                                         y = get_length("treePruningYears"))),
-                                     "", "-- treePruningYears, treePruningProp, treePruningMaxHeight, and treePruningDays must have the same length")
+                                     "", "-- treePruningYears, treePruningProp, treePruningMaxHeight, treePruningResiduesIncorporation , treePruningResiduesSpreading and treePruningDays must have the same length")
+
 
 
   rootPruning.length.error <- ifelse(all(purrr::map_lgl(list(get_length("treeRootPruningDays"),
@@ -429,18 +430,43 @@ check_input_values <- function(hip, force) {
                                                         y = get_length("treeRootPruningYears"))), "",
                                      "-- treeRootPruningYears, treeRootPruningDays, treeRootPruningDistance, and treeRootPruningDepth must have the same length")
 
+
+  leafAreaDensity.length.error <- ifelse(all(purrr::map_lgl(list(get_length("leafAreaDensityReductionDays"),
+                                                                 get_length("leafAreaDensityReductionThreshold"),
+                                                                 get_length("leafAreaDensityReductionFraction"),
+                                                                 get_length("leafAreaDensityReductionResiduesIncorporation"),
+                                                                 get_length("leafAreaDensityReductionResiduesSpreading")),
+                                                          identical,
+                                                           y = get_length("leafAreaDensityReductionYears"))), "",
+                                        "-- leafAreaDensityReductionYears, leafAreaDensityReductionDays, leafAreaDensityReductionThreshold, leafAreaDensityReductionResiduesIncorporation, leafAreaDensityReductionResiduesSpreading and leafAreaDensityReductionFraction must have the same length")
+
+
+  canopyTrimming.length.error <- ifelse(all(purrr::map_lgl(list(get_length("canopyTrimmingDays"),
+                                                                get_length("canopyTrimmingTreeLineTrigger"),
+                                                                get_length("canopyTrimmingTreeLineReductionTarget"),
+                                                                get_length("canopyTrimmingInterRowTrigger"),
+                                                                get_length("canopyTrimmingInterRowReductionTarget"),
+                                                                get_length("canopyTrimmingResiduesIncorporation"),
+                                                                get_length("canopyTrimmingResiduesSpreading")),
+                                                          identical,
+                                                          y = get_length("canopyTrimmingYears"))), "",
+                                    "-- canopyTrimmingYears, canopyTrimmingDays, canopyTrimmingTreeLineTrigger, canopyTrimmingTreeLineReductionTarget, canopyTrimmingInterRowTrigger,
+                                    canopyTrimmingInterRowReductionTarget, canopyTrimmingResiduesIncorporation and canopyTrimmingResiduesSpreading must have the same length")
+
+  fruitThinning.length.error <- ifelse(all(purrr::map_lgl(list(get_length("fruitThinningMethod"),
+                                                               get_length("fruitThinningDays"),
+                                                               get_length("fruitThinningResiduesIncorporation"),
+                                                               get_length("fruitThinningResiduesSpreading")),
+                                                          identical,
+                                                          y = get_length("fruitThinningYears"))),
+                                     "", "-- fruitThinningYears, fruitThinningMethod, fruitThinningDays, fruitThinningResiduesIncorporation and fruitThinningResiduesSpreading must have the same length")
+
+
   ## Root pruning depth less than max soil depth
   rp.depth.check <- purrr::map2_lgl(get_used("treeRootPruningDepth"),
                                     purrr::map(get_init_vals("layer", "thick"), function(x) max(cumsum(x))),
                                     less_than)
   if(!all(rp.depth.check)) warning("-- treeRootPruningDepth is greater than the maximum soil depth", call. = FALSE, immediate. = TRUE)
-
-  ## Tree thinning
-
-
-  ## Crop Length & Simulation Length Errors
-
-  ## Geometry Errors
 
 
   ## All weatherFile files exist
@@ -463,7 +489,8 @@ check_input_values <- function(hip, force) {
                   plot.width.error, plot.height.error,
                   tree.centered.error, tree.offscene.error, tree.coloc.error,
                   capillary.error, drainage.error, denitrif.error, watertable.error, dm.error, cap.error,
-                  treePruning.length.error,  rootPruning.length.error,
+                  treePruning.length.error, rootPruning.length.error,leafAreaDensity.length.error,
+                  canopyTrimming.length.error,fruitThinning.length.error,
                   wth.error)
   all.errors <- paste0(all.errors[!(all.errors == "") & !is.na(all.errors)], collapse = "\n")
   if(all.errors != errors) stop(all.errors, call. = FALSE)

@@ -40,7 +40,7 @@ hisafe_root3D <- function(hop,
                           date,
                           simu.name     = NULL,
                           tree.id       = 1,
-                          color.var     = paste0("treeRootDensity_", tree.id),
+                          color.var     = paste0("treeRootsDensity_", tree.id),
                           color.palette = c("#FFFFD4", "#FED98E", "#FE9929", "#D95F0E", "#993404"),
                           bg            = "white",
                           grid          = FALSE,
@@ -127,7 +127,7 @@ hisafe_root3D <- function(hop,
     }
 
     idCol <- max(1, min(floor(rsyst$root.color[i] * color.multiplier), n.cols))
-    rgl::rgl.linestrips(x   = x,
+    rgl::rgl.lines(x   = x,
                         z   = y,
                         y   = z,
                         col = cols[idCol],

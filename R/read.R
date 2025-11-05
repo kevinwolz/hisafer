@@ -64,6 +64,7 @@ read_hisafe <- function(hip           = NULL,
   if(!(is.numeric(max.size) & length(max.size) == 1 & max.size > 0)) stop("max.size argument must be a positive number", call. = FALSE)
 
   if(!is.null(hip)) profiles <- hip$profiles
+  else  profiles <- DATA.PROFILES
 
   ## Read simulation inputs & extract cols that vary for binding to output data
   if(!is.null(hip)) {
@@ -99,7 +100,7 @@ read_hisafe <- function(hip           = NULL,
   simu.paths <- clean_path(paste0(path, "/" , simu.names))
   if(!all(purrr::map_lgl(simu.paths, dir.exists))) {
     missing_simus <- simu.names[!purrr::map_lgl(simu.paths, dir.exists)]
-    stop(paste("the following simulations do not exist in the specified path:", paste(missing_simus, collapse = ", ")), call. = FALSE)
+    stop(paste("the following simulations do not exist in the specified path:", paste(simu.paths, missing_simus, collapse = ", ")), call. = FALSE)
   }
 
   ## Read all data from all simulations & combine
@@ -365,18 +366,13 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
 #' @description Reads in an example Hi-sAFe experiment. For more details see \code{\link{read_hisafe}}.
 #' @return An object of class "hop".
 #' @param simu.names A character vector of the names of the simulations to read. If "all", the default, then all simulations in the folder are read.
-#' @param profiles A character vector of the names of Hi-sAFe output profiles to read.
 #' @param ... Other arguments passed to \code{\link{read_hisafe}}.
 #' @export
-read_hisafe_example <- function(simu.names = c("monocrop", "agroforestry", "forestry"),
-                                profiles   = c("plot", "plotDetail", "zones", "trees", "treesDetail", "cells",  "cellsDetail",
-                                               "voxelsMonth", "climate", "monthCells", "annualCells"), ...) {
+read_hisafe_example <- function(simu.names = c("monocrop", "agroforestry", "forestry"), ...) {
 
-  if(!all(is.character(profiles))) stop("profiles argument must be a character vector", call. = FALSE)
 
   hop <- read_hisafe(path       = clean_path(paste0(system.file("extdata", "example_exp", package = "hisafer"), "/")),
-                     simu.names = simu.names,
-                     profiles   = profiles, ...)
+                     simu.names = simu.names, ...)
   return(hop)
 }
 
@@ -451,7 +447,9 @@ read_tree_info <- function(path, simu.name) {
   pld.path <- list.files(clean_path(paste0(path, "/", simu.name, "/")), ".pld$", full.names = TRUE)
   if(length(pld.path) > 1) stop(paste("there is more than 1 PLD file present in the simulation directory of:", simu.name), call. = FALSE)
   ttec.path <- list.files(clean_path(paste0(path, "/", simu.name, "/treeInterventions/")), ".ttec$", full.names = TRUE)
-  if(length(ttec.path) > 1) stop(paste("there is more than 1 TTEC file present in the simulation directory of:", simu.name), call. = FALSE)
+  if(length(ttec.path) > 1) {
+    ttec.path <- ttec.path[1]
+  }
 
   sim <- read_param_file(sim.path)
   pld <- read_param_file(pld.path)

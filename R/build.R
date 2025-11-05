@@ -104,6 +104,8 @@ build_hisafe <- function(hip,
 #' @keywords internal
 build_structure <- function(exp.plan, path,  template, files, plot.scene, summary.files, stics.diagnostics) {
 
+
+
   TEMPLATE_PARAMS <- get_template_params(template)
   PARAM_NAMES     <- get_param_names(TEMPLATE_PARAMS)
   PARAM_DEFAULTS  <- get_param_vals(TEMPLATE_PARAMS, "value")
