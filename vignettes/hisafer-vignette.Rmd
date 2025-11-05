@@ -38,9 +38,9 @@ The template directory structure for the latest version of Hi-sAFe (v4.0) has al
 - `weather.wth` - a default .WTH file
 - `treeSpecies/` - a folder containing all of the individual .TREE files that will be available for use
 - `cropSpecies/` - a folder containing all of the individual .PLT files that will be available for use
+- `treeInterventions/` - a folder containing all of the individual .TTEC files that will be available for use
 - `cropInterventions/` - a folder containing all of the individual .TEC files that will be available for use
 - `generalParameters/` - a folder containing the `hisafe.par` and `stics.par` files, which contains general Hi-sAFe and STICS parameters
-- `exportParameters/` - a folder containing all of the individual .PRO files that will be available for use
 
 Luckily, hisafer already has several built-in template directories available for you. You can use these in the next step simply by providing the name of the template rather than a path to a custom template directory. The built-in templates are:
 
@@ -64,45 +64,43 @@ Hi-sAFe simluatiosn are defined using `define_hisafe()`. To define a Hi-sAFe sim
 
 ```{r}
 hip <- define_hisafe(path     = "./simulations",
-                     profiles = "all",
                      template = "agroforestry")
 ```
 
-The `path` argument specifies the path (relative or absolute) where the simulation is to be built in the next step. The `profiles` argument specifies which Hi-sAFe export profiles are to be exported by Hi-sAFe ("all" specifies that all available profiles will be exported). Be careful when using "all", as this will include the very large "cells" and "voxels" outputs, slowing your Hi-sAFe simulations dramatically. To see which Hi-sAFe output profiles are supported and their export frequency, use `hisafe_profiles()`. Finally, the `template` argument specifies which template directory will serve as the foundation for the defined simulation. This can be the name of one of the built-in hisafer templates, or a path to a custom template directory.
+The `path` argument specifies the path (relative or absolute) where the simulation is to be built in the next step. The `template` argument specifies which template directory will serve as the foundation for the defined simulation. This can be the name of one of the built-in hisafer templates, or a path to a custom template directory.
 
-We can now see a defined Hi-sAFe simulation, which is contained within a `hip` object (for "Hi-sAFe Input Parmaeters"). 
+We can now see a defined Hi-sAFe simulation, which is contained within a `hip` object (for "Hi-sAFe Input Parameters"). 
 
 ```{r} 
 hip 
 ```
 
-The main feature of a `hip` object is the `exp.plan`, but we'll wait to look at that until we have a more interesting simulation. The other components of the `hip` object contain exactly the three core arguments that we just passed to `define_hisafe()`: the template name/directory, the list of export profiles, and the path where teh simulation is to be built. 
+The main feature of a `hip` object is the `exp.plan`, but we'll wait to look at that until we have a more interesting simulation. The other components of the `hip` object contain exactly the three core arguments that we just passed to `define_hisafe()`: the template name/directory, the list of export profiles, and the path where the simulation is to be built. 
 
 Okay, let's now begin to add complexity to our simulation by modifiying parameters away from the defaults in the template. All other arguments to `define_hisafe()` can specify any number of Hi-sAFe input parameters (named, spelled, and capitalized correctly!). The only additional input parameter that is available but not part of the input files is **weatherFile**, which specifies a path to a .WTH file to use.
 
 To see which Hi-SAFe input parameters are modifiable in your template, use `hip_params()`. You can modifty the `template` argument of `hip_params()` to be any of the other hisafer templates or a string to the path of your custom template. By default, `hip_params()` just provides the names of supported parameters. To also see the default values and range of allowed values for a parameter, just pass its name as a character string:
 
 ```{r} 
-hip_params("nbSimulations")
+hip_params("simulationDateStart")
 ```
 
-It looks like the agroforestry template defaults to running for 10 years. Let's start with a simple modification by changing that to 20 years and then take a look at the resulting `exp.plan`:
+It looks like the agroforestry template defaults to running for 2 years. Let's start with a simple modification by changing that to 10 years and then take a look at the resulting `exp.plan`:
 
 ```{r}
 hip <- define_hisafe(path     = "./simulations",
-                     profiles = "all",
                      template = "agroforestry",
-                     nbSimulations = 20)
+                     simulationDateStart = "1995-01-01",
+                     simulationDateEnd = "2004-12-31")
 hip$exp.plan
 ```
 
-Each row of the `exp.plan` table describes a single Hi-sAFe simulation, and each column provides the value of a Hi-sAFe input parameter. So, we can see here that we have a single simulation defined, with **nbSimulations** as the only modified parameter. All other Hi-sAFe parameters will remain unchagned from the template directory. If not provided manually, a default **SimulationName** is provided for each simulation within the `hip` object. This will become very important during analysis so we can specify which simulations we want to analyze.
+Each row of the `exp.plan` table describes a single Hi-sAFe simulation, and each column provides the value of a Hi-sAFe input parameter. So, we can see here that we have a single simulation defined, with **simulationDateStart** and **simulationDateEnd** as the only modified parameters. All other Hi-sAFe parameters will remain unchagned from the template directory. If not provided manually, a default **SimulationName** is provided for each simulation within the `hip` object. This will become very important during analysis so we can specify which simulations we want to analyze.
 
 Now, let's instead modifying two input parameters at the same time by customizing **latitude** and **northOrientation**.
 
 ```{r, error = TRUE, purl = FALSE}
 hip <- define_hisafe(path     = "./simulations",
-                     profiles = "all",
                      template = "agroforestry",
                      latitude         = 60, 
                      northOrientation = -90)
@@ -118,7 +116,6 @@ Okay, let's try again using a new value for **northOrientation**.
 
 ```{r}
 hip_sim <- define_hisafe(path     = "./simulations",
-                         profiles = "all",
                          template = "agroforestry",
                          latitude         = 60, 
                          northOrientation = 90)
@@ -135,7 +132,6 @@ If `factorial` is `FALSE`, the default, then parameter values are recycled (i.e.
 
 ```{r}
 hip <- define_hisafe(path      = "./simulations",
-                     profiles  = "all",
                      template  = "agroforestry",
                      exp.name  = "lat-orient",
                      factorial = FALSE,
@@ -150,7 +146,6 @@ If `factorial` is `TRUE`, then a factorial experiment is created, in which a sim
 
 ```{r}
 hip <- define_hisafe(path      = "./simulations",
-                     profiles  = "all",
                      template  = "agroforestry",
                      exp.name  = "lat-orient",
                      factorial = TRUE, 
@@ -166,7 +161,6 @@ Let's now go back to the default template simulation and try to change the crop 
 
 ```{r}
 hip <- define_hisafe(path      = "./simulations",
-                     profiles  = "all",
                      template  = "agroforestry",
                      mainCropSpecies = c("durum-wheat.plt", "rape.plt"),
                      mainCropItk     = c("durum-wheat.tec", "rape.tec"))
@@ -177,7 +171,6 @@ Oops! We accidentally created **two** simluations, rather than modifying the cro
 
 ```{r}
 hip <- define_hisafe(path      = "./simulations",
-                     profiles  = "all",
                      template  = "agroforestry",
                      mainCropSpecies = list(c("durum-wheat.plt", "rape.plt")),
                      mainCropItk     = list(c("durum-wheat.tec", "rape.tec")))
@@ -194,7 +187,6 @@ There are few, but important, Hi-sAFe input parameters that are passed as a mult
 
 ```{r}
 hip <- define_hisafe(path      = "./simulations",
-                     profiles  = "all",
                      template  = "agroforestry",
                      mainCropSpecies = list("durum-wheat.plt", c("durum-wheat.plt", "rape.plt")),
                      mainCropItk     = list("durum-wheat.tec", c("durum-wheat.tec", "rape.tec")))
@@ -204,7 +196,6 @@ hip$exp.plan$mainCropSpecies
 So far we have only tried to edit Hi-sAFe parameters in the .SIM and .PLD files. `define_hisafe()` can also be used to edit parameters in the .TREE and .PLT files. You must be careful, though, if your simluations have more than one tree species or more than one crop species, as any .TREE or .PLT parameters passed to `define_hisafe()` will be applied to **all** .TREE and .PLT files. Let's define a simple simulation where we edit `lueMax` in the .TREE file:
 ```{r}
 hip <- define_hisafe(path      = "./simulations",
-                     profiles  = c("plot", "trees", "climate", "monthCells", "cells", "voxels"),
                      template  = "agroforestry",
                      exp.name  = "lue",
                      lueMax    = c(0.6, 0.7))
