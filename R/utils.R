@@ -1,12 +1,12 @@
 ## This SUPPORTED.PROFILES object is only needed to write the exportFrequencies line of the sim file within build_structure().
-## There is no better way to do this until a better way to describe export profiles and frequenceies in Hi-sAFe is determined.
+## There is no better way to do this until a better way to describe export profiles and frequencies in Hi-sAFe is determined.
 SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("plot",   "annualPlot",
                                                  "zones",
                                                  "trees",  "annualTrees",
                                                  "cells",  "monthCells","annualCells",
-                                                 "voxels", "voxelsDetail",  "voxelsOptim", "voxels3D", "voxelsMonth",
+                                                 "voxels",
                                                  "climate"),
-                                    freqs       = c(1,365,1,1,365,1,30,365,1,1,1,30,30,1),
+                                    freqs       = c(1,365,1,1,365,1,30,365,1,1),
                                     description = c("daily plot-level data",
                                                     "annual plot-level data",
                                                     "daily zones-level data",
@@ -14,16 +14,12 @@ SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("plot",   "annualPlot",
                                                     "annual data for each tree in the scene",
                                                     "daily data for each cell in the scene",
                                                     "monthly data for each cell in the scene",
-                                                    "annual data for each voxel in the scene",
-                                                    "daily data for each voxel in the scene (core variables)",
-                                                    "daily data for each voxel in the scene (supplemental variables)",
-                                                    "daily data for each voxel in the scene (water module optimization variables)",
-                                                    "monthly data for each voxel in the scene (only 3D visualization variables)",
-                                                    "monthly data for each voxel in the scene (core variables)",
+                                                    "annual data for each cell in the scene",
+                                                    "daily data for each voxel in the scene",
                                                     "daily climate data"))
 
 CORE.PROFILES       <- c("plot", "zones", "trees", "cells", "climate")
-PRIVATE.PROFILES    <- c("voxelsDebug", "voxelsOptim")
+PRIVATE.PROFILES    <- c("voxels")
 DATA.PROFILES       <- c("plot", "zones", "trees", "cells", "voxels", "climate", "monthCells", "annualCells")
 FILTERABLE.ELEMENTS <- c(DATA.PROFILES, "plot.info", "zone.info", "tree.info", "exp.plan", "metadata")
 PUBLIC.PROFILES     <- SUPPORTED.PROFILES$profiles[!(SUPPORTED.PROFILES$profiles %in% PRIVATE.PROFILES)]

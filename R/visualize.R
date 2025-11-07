@@ -28,7 +28,6 @@
 #'  \item{"voxel.C.size"}{ - size of the center circle within the voxel}
 #'  \item{"voxel.R.size"}{ - size of the right circle within the voxel}
 #'  \item{"voxel.L.alpha"}{ - transparency of the left circle within the voxel}
-#'  \item{"voxel.C.alpha"}{ - transparency of the center circle within the voxel}
 #'  \item{"voxel.R.alpha"}{ - transparency of the right circle within the voxel}
 #' }
 #' @param tree.rel.vars A character string indicating how to group data to determine the maximum value by which to scale tree aesthetics set by \code{vars}.
@@ -72,7 +71,6 @@ hisafe_slice <- function(hop,
                                      voxel.C.size  = "totalTreeCarbonCoarseRoots",
                                      voxel.R.size  = "mineralNitrogenStock",
                                      voxel.L.alpha = "totalTreeWaterUptake",
-                                     voxel.C.alpha = "fineRootCost",
                                      voxel.R.alpha = "totalTreeNitrogenUptake"),
                          tree.rel.vars  = "SYT",
                          crop.rel.vars  = "SY",
@@ -110,8 +108,8 @@ hisafe_slice <- function(hop,
   profile_check(hop,  "trees",     error = TRUE)
   variable_check(hop, "trees", tree.vars, error = TRUE)
 
-  simulationYearStart = stringr::str_sub(sim$SIMULATION$simulationDateStart$value,1,4)
-  simulationDayStart = stringr::str_sub(sim$SIMULATION$simulationDateStart$value,8,9)
+  yearStart = stringr::str_sub(date,1,4)
+
 
   crops   <- crops   & profile_check(hop, "cells")
   voxels  <- voxels  & profile_check(hop, "voxels")
@@ -225,9 +223,9 @@ hisafe_slice <- function(hop,
   tree.grouping.strings  <- c("SimulationName", "Year", "idTree")[c(grepl("s|S", tree.rel.vars), grepl("y|Y", tree.rel.vars), grepl("t|T", tree.rel.vars))]
   crop.grouping.strings  <- c("SimulationName", "Year")[c(grepl("s|S", crop.rel.vars),  grepl("y|Y", crop.rel.vars))]
   voxel.grouping.strings <- c("SimulationName", "Year")[c(grepl("s|S", voxel.rel.vars), grepl("y|Y", voxel.rel.vars))]
-  tree.grouping.symbols  <- rlang::parse_quosures(paste(tree.grouping.strings,  collapse = ";"))
-  crop.grouping.symbols  <- rlang::parse_quosures(paste(crop.grouping.strings,  collapse = ";"))
-  voxel.grouping.symbols <- rlang::parse_quosures(paste(voxel.grouping.strings, collapse = ";"))
+  tree.grouping.symbols  <- rlang::parse_exprs(paste(tree.grouping.strings,  collapse = ";"))
+  crop.grouping.symbols  <- rlang::parse_exprs(paste(crop.grouping.strings,  collapse = ";"))
+  voxel.grouping.symbols <- rlang::parse_exprs(paste(voxel.grouping.strings, collapse = ";"))
 
   if(trees | voxels) { # OR voxelsbecause the tree root pruning needs to be calculated when voxels are being plotted.
     hop$tree.info <- hop$tree.info %>%
@@ -248,11 +246,11 @@ hisafe_slice <- function(hop,
       for(i in 1:nrow(hop$tree.info)) {
         if(!is.na(unlist(hop$tree.info$treePruningYears[[i]])[1])) {
           hop$tree.info$tree.pruning.dates[[i]] <- lubridate::ymd(paste0(unlist(hop$tree.info$treePruningYears[[i]]) - 1 - tree.age.at.start +
-                                                                           simulationYearStart, "-01-01")) + unlist(hop$tree.info$treePruningDays[[i]]) - 1
+                                                                           yearStart, "-01-01")) + unlist(hop$tree.info$treePruningDays[[i]]) - 1
         }
         if(!is.na(unlist(hop$tree.info$treeRootPruningYears[[i]])[1])) {
           hop$tree.info$root.pruning.dates[[i]] <- lubridate::ymd(paste0(unlist(hop$tree.info$treeRootPruningYears[[i]]) - 1 - tree.age.at.start +
-                                                                           simulationYearStart, "-01-01")) + unlist(hop$tree.info$treeRootPruningDays[[i]]) - 1
+                                                                           yearStart, "-01-01")) + unlist(hop$tree.info$treeRootPruningDays[[i]]) - 1
         }
         hop$tree.info$tree.pruning[i]         <- as.numeric(date %in% hop$tree.info$tree.pruning.dates[[i]])
         if(hop$tree.info$tree.pruning[i] == 1) {
@@ -392,13 +390,12 @@ hisafe_slice <- function(hop,
       dplyr::mutate(voxel.C.size  = .[[vars$voxel.C.size]])  %>%
       dplyr::mutate(voxel.R.size  = .[[vars$voxel.R.size]])  %>%
       dplyr::mutate(voxel.L.alpha = .[[vars$voxel.L.alpha]]) %>%
-      dplyr::mutate(voxel.C.alpha = .[[vars$voxel.C.alpha]]) %>%
       dplyr::mutate(voxel.R.alpha = .[[vars$voxel.R.alpha]]) %>%
       dplyr::filter(y %in% Yv) %>%
       dplyr::filter(z <= abs(max.soil.depth)) %>%
       dplyr::select(SimulationName, Year, Date, x, z, voxel.alpha, voxel.border,
                     voxel.L.size, voxel.C.size, voxel.R.size,
-                    voxel.L.alpha, voxel.C.alpha, voxel.R.alpha) %>%
+                    voxel.L.alpha,  voxel.R.alpha) %>%
       dplyr::group_by(SimulationName, Year, Date, x, z) %>%
       dplyr::summarize_all(mean) %>%
       dplyr::ungroup()
@@ -410,7 +407,6 @@ hisafe_slice <- function(hop,
       dplyr::mutate(voxel.C.size  = .[[vars$voxel.C.size]])  %>%
       dplyr::mutate(voxel.R.size  = .[[vars$voxel.R.size]])  %>%
       dplyr::mutate(voxel.L.alpha = .[[vars$voxel.L.alpha]]) %>%
-      dplyr::mutate(voxel.C.alpha = .[[vars$voxel.C.alpha]]) %>%
       dplyr::mutate(voxel.R.alpha = .[[vars$voxel.R.alpha]]) %>%
       dplyr::filter(y %in% Yv) %>%
       dplyr::filter(z <= abs(max.soil.depth)) %>%
@@ -421,7 +417,6 @@ hisafe_slice <- function(hop,
                        voxel.C.size  = mean(voxel.C.size),
                        voxel.R.size  = mean(voxel.R.size),
                        voxel.L.alpha = mean(voxel.L.alpha),
-                       voxel.C.alpha = mean(voxel.C.alpha),
                        voxel.R.alpha = mean(voxel.R.alpha)) %>%
       dplyr::ungroup() %>%
       dplyr::group_by(!!!voxel.grouping.symbols) %>%
@@ -431,7 +426,6 @@ hisafe_slice <- function(hop,
                        voxel.C.size.max  = max(voxel.C.size),
                        voxel.R.size.max  = max(voxel.R.size),
                        voxel.L.alpha.max = max(voxel.L.alpha),
-                       voxel.C.alpha.max = max(voxel.C.alpha),
                        voxel.R.alpha.max = max(voxel.R.alpha))
 
     replace_nan_0 <- function(x) {
@@ -447,14 +441,13 @@ hisafe_slice <- function(hop,
       dplyr::mutate(voxel.C.size   = voxel.C.size  / voxel.C.size.max * circle.max.radius) %>%
       dplyr::mutate(voxel.R.size   = voxel.R.size  / voxel.R.size.max * circle.max.radius) %>%
       dplyr::mutate(voxel.L.alpha  = voxel.L.alpha / voxel.L.alpha.max)  %>%
-      dplyr::mutate(voxel.C.alpha  = voxel.C.alpha / voxel.C.alpha.max)  %>%
       dplyr::mutate(voxel.R.alpha  = voxel.R.alpha / voxel.R.alpha.max)  %>%
       dplyr::mutate(voxel.L.border = circle.max.border * as.numeric(voxel.L.size > 0)) %>%
       dplyr::mutate(voxel.C.border = circle.max.border * as.numeric(voxel.C.size > 0)) %>%
       dplyr::mutate(voxel.R.border = circle.max.border * as.numeric(voxel.R.size > 0)) %>%
       dplyr::mutate_at(dplyr::vars(voxel.alpha,    voxel.border,
                                    voxel.L.size,   voxel.C.size,   voxel.R.size,
-                                   voxel.L.alpha,  voxel.C.alpha,  voxel.R.alpha,
+                                   voxel.L.alpha,  voxel.R.alpha,
                                    voxel.L.border, voxel.C.border, voxel.R.border), replace_nan_0)
   }
 
@@ -658,8 +651,7 @@ hisafe_slice <- function(hop,
                            aes(x0    = x,
                                y0    = -z,
                                size  = voxel.C.border,
-                               r     = voxel.C.size,
-                               alpha = voxel.C.alpha)) +
+                               r     = voxel.C.size)) +
       ## LEFT CIRCLE
       ggforce::geom_circle(data  = voxel.data,
                            color = "blue",
@@ -819,7 +811,6 @@ hisafe_snapshot <- function(hop,
                                         voxel.C.size  = "totalTreeCoarseRootsBiomass",
                                         voxel.R.size  = "mineralNitrogenStock",
                                         voxel.L.alpha = "totalTreeWaterUptake",
-                                        voxel.C.alpha = "fineRootCost",
                                         voxel.R.alpha = "totalTreeNitrogenUptake"), ...) {
 
   if(!requireNamespace(c("gtable", "egg"), quietly = TRUE)) stop("The packages 'gtable' and 'egg' are required for hisafe_snapshot().
@@ -986,7 +977,6 @@ visual_legend <- function(hop,
                                       voxel.C.size  = "totalTreeCoarseRootBiomass",
                                       voxel.R.size  = "mineralNitrogenStock",
                                       voxel.L.alpha = "totalTreeWaterUptake",
-                                      voxel.C.alpha = "fineRootCost",
                                       voxel.R.alpha = "totalTreeNitrogenUptake"),
                           cells.var = "relativeTotalParIncident") {
   text.size <- 2
@@ -1022,7 +1012,6 @@ visual_legend <- function(hop,
                               voxel.C.size   = 0.25*0.9/2,
                               voxel.R.size   = 0.25*0.9/2,
                               voxel.L.alpha  = 0.5,
-                              voxel.C.alpha  = 0.5,
                               voxel.R.alpha  = 0.5)
   line.data <- dplyr::tibble(x       = 8,
                              x.width = 1)
@@ -1195,14 +1184,8 @@ visual_legend <- function(hop,
                          size  = border.thickness,
                          aes(x0    = x,
                              y0    = -z - voxel.height / 2,
-                             r     = voxel.C.size,
-                             alpha = voxel.C.alpha)) +
-    geom_text(data  = voxel.data,
-              hjust = 0.5,
-              size  = text.size,
-              label = vars$voxel.C.alpha,
-              aes(x = x,
-                  y = -z - voxel.height / 2 + 0.5)) +
+                             r     = voxel.C.size)) +
+
     geom_segment(data  = voxel.data,
                  color = "black",
                  size  = pointer.thickness,
