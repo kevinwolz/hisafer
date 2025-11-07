@@ -1,23 +1,30 @@
 ---
-title: "Introduction to hisafer 1.5.0"
+title: "Introduction to hisafer 1.6.1"
 output: rmarkdown::html_vignette #pdf_document
 vignette: >
   %\VignetteIndexEntry{hisafer}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  warning = FALSE,
+  message = FALSE
+)
+```
 
 hisafer is an R toolbox for the Hi-sAFe biophysical agroforestry model. It provides functions for defining, building, running, reading, analyzing, plotting, and visualizing Hi-sAFe simulaitons. The first step to using hisafer is to install and load the library, which is currently available on GitHub. You need the `devtools` package to do this from within R.
 
 ```{r, eval = FALSE}
 install.packages("devtools")
-devtools::install_github("kevinwolz/hisafer")
+install.packages("remotes")
+remotes::install_github("kevinwolz/hisafer", ref = "updates2025")
 ```
 
 Alternatively, if the vignette is desired to be included and installed within R:
 ```{r eval=FALSE}
-install.packages("devtools")
-devtools::install_github("kevinwolz/hisafer", build_vignettes = TRUE, dependencies = TRUE)
+remotes::install_github("kevinwolz/hisafer", ref = "updates2025" , build_vignettes = TRUE, dependencies = TRUE)
+
 ```
 
 ```{r}
@@ -25,13 +32,13 @@ library(hisafer)
 ```
 
 ## Six Steps to Hi-sAFe Experimentation
-hisafer tools are organized via the six main steps of experimentation with Hi-sAFe: Define, Build, Run, Read, Diagnostics, Analysis. While hisafer can be used to interact with Hi-sAFe at any of these steps independently, enhanced functionality is available when using hisafer to interact with Hi-sAFe from the beginning.
+Hisafer tools are organized via the six main steps of experimentation with Hi-sAFe: Define, Build, Run, Read, Diagnostics, Analysis. While hisafer can be used to interact with Hi-sAFe at any of these steps independently, enhanced functionality is available when using hisafer to interact with Hi-sAFe from the beginning.
 
 
 ### 0. Create a TEMPLATE
 Prior to defining Hi-sAFe simulations, a critical preliminary step is to create a template Hi-sAFe simulation directory. This template will be the foundation of simulations/experiments that you define in the next step. The template directory contains all files available for use when defining simulations/experiments, and the values of parameters in each file are the default values that will be used if other values are not defined in the next step. 
 
-The template directory structure for the latest version of Hi-sAFe (v4.0) has all of the following contained within a single folder:
+The template directory structure for the latest version of Hi-sAFe (v4.4) has all of the following contained within a single folder:
 
 - `template.sim` - the template .SIM file
 - `template.pld` - the template .PLD file
@@ -228,14 +235,9 @@ If any Hi-sAFe output profiles specified by `profiles` were not created when Hi-
 
 ```{r, echo = FALSE, eval = FALSE}
 example.path <- "/Users/kevinwolz/Desktop/RESEARCH/ACTIVE_PROJECTS/HI-SAFE/hisafer/inst/extdata/example_exp"
-example.profiles <- c("plot", "plotDetail", "trees", "treesDetail", "cells",  "cellsDetail", 
-                      "voxelsMonth", "climate", "monthCells", "annualCells")
-mc.hip <- define_hisafe(path = example.path, template = "monocrop"    , SimulationName = "monocrop",     
-                        profiles = example.profiles, sticsReport = 1, nbSimulations = 7)
-af.hip <- define_hisafe(path = example.path, template = "agroforestry", SimulationName = "agroforestry",
-                        profiles = example.profiles, nbSimulations = 7, lueMax = 1.0)
-pf.hip <- define_hisafe(path = example.path, template = "forestry",     SimulationName = "forestry",     
-                        profiles = example.profiles, nbSimulations = 7, lueMax = 1.0)
+mc.hip <- define_hisafe(path = example.path, template = "monocrop"    , SimulationName = "monocrop",sticsReport = 1)
+af.hip <- define_hisafe(path = example.path, template = "agroforestry", SimulationName = "agroforestry", lueMax = 1.0)
+pf.hip <- define_hisafe(path = example.path, template = "forestry",     SimulationName = "forestry",  lueMax = 1.0)
 build_hisafe(hip = mc.hip)
 build_hisafe(hip = af.hip)
 build_hisafe(hip = pf.hip)
@@ -367,10 +369,10 @@ You can also easily apply the various analyze functions and write the output plo
 #### 6.3 Visualizations
 The most important visualization tool in hisafer is `hisafe_slice()` which "slices" through the 3D Hi-sAFe scene to create a 2D projection.
 
-```{r dpi=250, include=FALSE}
+```{r dpi=250, fig.width = 10}
 hisafe_slice(hop        = hop,
-             simu.names = c("AF", "PF"),
-             date       = "1999-06-01")
+             simu.names = c("AF"),
+             date       = "2000-06-01")
 ```
 
 You can use `hisafe_slice()` even if you do not have the voxels profile within your `hop` object by setting `voxels = FALSE`. You can also customize what you want each aspect of the plot to represent via the `vars` argument. Furthermore, you can switch the direction in which the scene is "sliced" by setting `plot.x = "y"`. This gives you the opportunity to view the 3D scene from both 2D directions.
@@ -437,9 +439,6 @@ ler.out <- LER_summary(face = face, nrow = 2)
 
 ler.out
 ```
-
-#### 6.5 Budgets
-Ensuring that the water and nitrogen budgets are closed isn't necessary every time you run a simulation, but it is very important if you are pushing the limits of Hi-sAFe with new functionality or complex management interventions. To check the basic Hi-sAFe water and nitrogen budgets, use `hisafe_budget()`. To compare the Hi-sAFe-calculated budget with the STICS-calculated budget, use `stics_budget_comp()`.
 
 ### Notes
 *hisafer utilizes the tidyverse approach to R programming and data manipulation. While most consequences of this approach are behind the scenes, one obvious example to users is that outputs from most hisafer functions are tibbles rather than simple data frames. This has little practical impact on your use of hisafer, but should improve your overall experience.*
