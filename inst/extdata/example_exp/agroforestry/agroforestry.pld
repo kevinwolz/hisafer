@@ -5,8 +5,8 @@ latitude = 45
 elevation = 0
 cellWidth = 1
 northOrientation = 0
-plotHeight = 5
-plotWidth = 5
+plotHeight = 3
+plotWidth = 3
 slopeIntensity = 0
 slopeAspect = 0
 

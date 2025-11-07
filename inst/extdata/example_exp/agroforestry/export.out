@@ -21,10 +21,7 @@ ProfileDef	monthCells	SafeCell	30
 ProfileDef	annualPlot	SafePlot	365			
 ProfileDef	annualCells	SafeCell	365			
 ProfileDef	annualTrees	SafeTree	365			
-ProfileDef	voxels	SafeVoxel	1			
-#ProfileDef	voxelsDetail	SafeVoxel	1			
-#ProfileDef	voxelsOptim	SafeVoxel	1			
-ProfileDef	voxels3D	SafeVoxel	1			
+ProfileDef	voxels	SafeVoxel	30					
 #SELECTION of CELLS or DEPTHS 						
 #Export	Object	Frequency	Ids	Depth		
 #ProfileDef	cell	SafeCell	1	01-mars		
@@ -208,7 +205,7 @@ cells	SafeCell	tetstomate	% vol	Threshold of soil water content, below which swf
 cells	SafeCell	teturg	% vol	Threshold of soil water content, below which turfac is induced (and limiting the surface area growth of leaves)	131	1
 cells	SafeCell	coeflev	-	Multiplier coefficient of the crop development	132	0
 cells	SafeCell	fruitBiomass	t ha-1	Total fruit biomass	133	1
-cells	SafeCell	isTreeAbove	-	isTreeAbove	134	1
+cells	SafeCell	isTreeAbove	-	isTreeAbove	134	0
 cells	SafeCell	nbrTreeAbove	-	nbrTreeAbove	135	1
 cells	SafeCell	cropCarbonLeafLitter	kgC.ha-1	Carbon input to soil from crop aerial litter	136	1
 cells	SafeCell	cropCarbonRootsLitter	kgC.ha-1	Carbon input to soil from crop roots litter	137	1

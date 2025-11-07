@@ -1,6 +1,6 @@
 ## SIMULATION
-simulationDateStart = 1995-01-01
-simulationDateEnd = 2000-12-31
+simulationDateStart = 2000-01-01
+simulationDateEnd = 2002-12-31
 saveProjectOption = 0
 #projectFileName = none.prj
 debugMode = 1
@@ -8,8 +8,8 @@ sticsReport = 0
 
 ## ZONES DEFINITION
 #name	zoneName	zoneCellList	zoneTecFileNameList
-ZONE	main	1-2,4-7,9-12,14-17,19-22,24-25	maize.tec
-ZONE	inter	3,8,13,18,23	baresoil.tec
+ZONE	main	1,3,4,6,7,9	maize.tec
+ZONE	inter	2,5,8	baresoil.tec
 
 ## TREES TECHNICAL FILES
 #name	treeTecFileName
