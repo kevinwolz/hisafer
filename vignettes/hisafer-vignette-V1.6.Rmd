@@ -275,7 +275,7 @@ You may also realize that you want to filter your hop to specific SimulationName
 
 ```{r}
 hop <- hop_filter(hop        = hop,
-                  date.min   = "1995-01-01")
+                  date.min   = "2000-01-01")
 ```
 
 Similarly, you may realize that you want to merge several `hop` objects together for collective analysis. This can be done using `hop_merge()`.
@@ -317,7 +317,7 @@ plot_hisafe_monthcells(hop        = hop,
                        variable   = "monthRelativeDirectParIncident",
                        colfacet   = "Year",
                        rowfacet   = "SimulationName",
-                       years      = 1995:2000,
+                       years      = 2000:2002,
                        months     = 7,
                        trees      = FALSE,
                        canopies   = FALSE)
@@ -337,19 +337,19 @@ plot_hisafe_cycle_bar(hop = hop, cycle = "water")
 plot_hisafe_cycle_bar(hop = hop, cycle = "light")
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_ts(hop = hop, cycle = "carbon", years = 2000)
+plot_hisafe_cycle_ts(hop = hop, cycle = "carbon", years = 2002)
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_ts(hop = hop, cycle = "nitrogen", years = 2000)
+plot_hisafe_cycle_ts(hop = hop, cycle = "nitrogen", years = 2002)
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_ts(hop = hop, cycle = "water", years = 2000)
+plot_hisafe_cycle_ts(hop = hop, cycle = "water", years = 2002)
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_ts(hop = hop, cycle = "light", years = 2000)
+plot_hisafe_cycle_ts(hop = hop, cycle = "light", years = 2002)
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_ts(hop = hop, cycle = "carbon-increment", years = 2000)
+plot_hisafe_cycle_ts(hop = hop, cycle = "carbon-increment", years = 2002)
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
 plot_hisafe_cycle_ts(hop = hop, cycle = "carbon-allocation", years = 2000)
@@ -358,7 +358,7 @@ plot_hisafe_cycle_ts(hop = hop, cycle = "carbon-allocation", years = 2000)
 You can also create a "dashboard" of the cycles of simulation via `cycle_summary()`:
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
 summary.out <- cycle_summary(hop         = hop,
-                             daily.year  = 2000,
+                             daily.year  = 2002,
                              cycles      = c("carbon", "light", "water", "nitrogen"),
                              simu.name   = "AF")
 summary.out
@@ -372,7 +372,7 @@ The most important visualization tool in hisafer is `hisafe_slice()` which "slic
 ```{r dpi=250, fig.width = 10}
 hisafe_slice(hop        = hop,
              simu.names = c("AF"),
-             date       = "2000-06-01")
+             date       = "2002-12-01")
 ```
 
 You can use `hisafe_slice()` even if you do not have the voxels profile within your `hop` object by setting `voxels = FALSE`. You can also customize what you want each aspect of the plot to represent via the `vars` argument. Furthermore, you can switch the direction in which the scene is "sliced" by setting `plot.x = "y"`. This gives you the opportunity to view the 3D scene from both 2D directions.
@@ -388,7 +388,7 @@ To visualize tree root topology, you can use `hiasfe_root3D()`. You must have th
 ```{r, eval = FALSE}
 hisafe_root3D(hop      = hop,
              simu.name = "AF",
-             date      = "2000-06-01")
+             date      = "2002-12-01")
 ```
 
 #### 6.4 FACE experiments
@@ -418,11 +418,11 @@ LER(face = face, cycle = "light")
 
 While the defualt summarization level for `plot_hisafe_cycle_bar()` is annual, you can also visualize monthly and even daily patterns.
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_bar(hop = hop, cycle = "water", freq = "month", years = 2000)
+plot_hisafe_cycle_bar(hop = hop, cycle = "water", freq = "month", years = 2002)
 ```
 
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_bar(hop = hop, cycle = "water", freq = "day", years = 2000, months = 4:5)
+plot_hisafe_cycle_bar(hop = hop, cycle = "water", freq = "day", years = 2002, months = 4:5)
 ```
 
 Furthermore, just as for normal `hop` objects, you can also use `plot_hisafe_cycle_bar()` and `plot_hisafe_cycle_ts()` to compare the simulations in a `face` object. 
