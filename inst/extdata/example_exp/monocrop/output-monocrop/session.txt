@@ -1,5 +1,5 @@
-Version-Hi-sAFe = 4.4.22137
+Version-Hi-sAFe = 4.4.22303
 Version-STICS = 8.5
 Version-Capsis = 4.2.6
-Start of simulation = 2025-11-07 14:02:16
-Duration of simulation in seconds = 85
+Start of simulation = 2025-11-07 14:32:57
+Duration of simulation in seconds = 133
