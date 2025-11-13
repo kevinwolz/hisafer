@@ -21,7 +21,7 @@ ProfileDef	monthCells	SafeCell	30
 ProfileDef	annualPlot	SafePlot	365			
 ProfileDef	annualCells	SafeCell	365			
 ProfileDef	annualTrees	SafeTree	365			
-#ProfileDef	voxels	SafeVoxel	1						
+#ProfileDef	voxels	SafeVoxel	1			
 #SELECTION of CELLS or DEPTHS 						
 #Export	Object	Frequency	Ids	Depth		
 #ProfileDef	cell	SafeCell	1	01-mars		
