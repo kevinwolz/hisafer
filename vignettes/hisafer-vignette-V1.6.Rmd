@@ -23,7 +23,8 @@ remotes::install_github("kevinwolz/hisafer", ref = "updates2025")
 
 Alternatively, if the vignette is desired to be included and installed within R:
 ```{r eval=FALSE}
-remotes::install_github("kevinwolz/hisafer", ref = "updates2025" , build_vignettes = TRUE, dependencies = TRUE)
+remotes::install_github("kevinwolz/hisafer", ref = "updates2025" , 
+                          build_vignettes = TRUE, dependencies = TRUE)
 
 ```
 
@@ -70,7 +71,11 @@ In this step, you will define one or more Hi-sAFe "simulations". Simulations are
 Hi-sAFe simluatiosn are defined using `define_hisafe()`. To define a Hi-sAFe simulation that has no modifications from your template directory, you only need to pass a few core arguments to `define_hisafe()`:
 
 ```{r}
-hip <- define_hisafe(path     = "D:/SimulHisafeR/simulation/agroforestry",
+
+setwd("D:/SimulHisafeR")
+
+
+hip <- define_hisafe(path     = "./simulations",
                      template = "agroforestry")
 ```
 
@@ -95,7 +100,7 @@ hip_params("simulationDateStart")
 It looks like the agroforestry template defaults to running for 2 years. Let's start with a simple modification by changing that to 10 years and then take a look at the resulting `exp.plan`:
 
 ```{r}
-hip <- define_hisafe(path     = "D:/SimulHisafeR/simulation/agroforestry",
+hip <- define_hisafe(path     = "./simulations",
                      template = "agroforestry",
                      simulationDateStart = "1995-01-01",
                      simulationDateEnd = "2004-12-31")
@@ -107,10 +112,10 @@ Each row of the `exp.plan` table describes a single Hi-sAFe simulation, and each
 Now, let's instead modifying two input parameters at the same time by customizing **latitude** and **northOrientation**.
 
 ```{r, error = TRUE, purl = FALSE}
-hip <- define_hisafe(path     = "D:/SimulHisafeR/simulation/agroforestry",
-                     template = "agroforestry",
-                     latitude         = 60, 
-                     northOrientation = -90)
+hip_sim <- define_hisafe(path     = "./simulations",
+                         template = "agroforestry",
+                         latitude         = 60,
+                         northOrientation = -90)
 ```
 
 Oops! It looks like **northOrientation** must be between 0 and 359. This error message is just one example of a suite of checks that `define_hisafe()` runs when attempting to define a simulation. Informative error messages are provided to help guide you in fixing any issues. Let's double check the details on the **northOrientation** parameter.
@@ -122,7 +127,7 @@ hip_params("northOrientation")
 Okay, let's try again using a new value for **northOrientation**.
 
 ```{r}
-hip_sim <- define_hisafe(path     = "D:/SimulHisafeR/simulation/agroforestry",
+hip_sim <- define_hisafe(path     = "./simulations",
                          template = "agroforestry",
                          latitude         = 60, 
                          northOrientation = 90)
@@ -138,7 +143,7 @@ There are two methods for defining an experiment, depending on if the `define_hi
 If `factorial` is `FALSE`, the default, then parameter values are recycled (i.e. such as for default behavior of `data.frame()`).
 
 ```{r}
-hip <- define_hisafe(path      = "D:/SimulHisafeR/simulation/agroforestry",
+hip <- define_hisafe(path      = "./simulations",
                      template  = "agroforestry",
                      exp.name  = "lat-orient",
                      factorial = FALSE,
@@ -152,10 +157,10 @@ In this case, you can see that there are two simulations in the resulting `hip`,
 If `factorial` is `TRUE`, then a factorial experiment is created, in which a simulation is defined for each possible combination of supplied values.
 
 ```{r}
-hip <- define_hisafe(path      = "D:/SimulHisafeR/simulation/agroforestry",
+hip <- define_hisafe(path      = "./simulations",
                      template  = "agroforestry",
                      exp.name  = "lat-orient",
-                     factorial = TRUE, 
+                     factorial = TRUE,
                      latitude         = c(30, 60),
                      northOrientation = c(0,  90))
 hip$exp.plan
@@ -166,7 +171,7 @@ In this case, you can see that there are four simulations in the resulting `hip`
 
 So far we have only tried to edit Hi-sAFe parameters in the .SIM and .PLD files. `define_hisafe()` can also be used to edit parameters in the .TREE and .PLT files. You must be careful, though, if your simulations have more than one tree species or more than one crop species, as any .TREE or .PLT parameters passed to `define_hisafe()` will be applied to **all** .TREE and .PLT files. Let's define a simple simulation where we edit `leafLueMax` in the .TREE file:
 ```{r}
-hip <- define_hisafe(path          = "D:/SimulHisafeR/simulation/agroforestry",
+hip <- define_hisafe(path          = "./simulations",
                      template      = "agroforestry",
                      exp.name      = "lue",
                      leafLueMax    = c(0.6, 0.7))
@@ -250,7 +255,7 @@ build_cluster_script(simu.names    = c("monocrop", "agroforestry", "forestry"),
 
 To read in the example experiment included in hisafer, we will use `read_hisafe_example()` as follows: 
 
-```{r}
+```{r, echo = FALSE}
 hop.raw <- hop <- read_hisafe_example()
 ```
 
@@ -275,7 +280,7 @@ You may also realize that you want to filter your hop to specific SimulationName
 
 ```{r}
 hop <- hop_filter(hop        = hop,
-                  date.min   = "2000-01-01")
+                  date.min   = "2020-01-01")
 ```
 
 Similarly, you may realize that you want to merge several `hop` objects together for collective analysis. This can be done using `hop_merge()`.
@@ -312,19 +317,19 @@ plot_hisafe_ts(hop        = hop,
                facet.year = FALSE)
 ```
 
-```{r, dpi = 250, fig.width = 10}
-plot_hisafe_monthcells(hop        = hop, 
-                       variable   = "monthRelativeDirectParIncident",
-                       colfacet   = "Year",
-                       rowfacet   = "SimulationName",
-                       years      = 2000:2002,
-                       months     = 7,
-                       trees      = FALSE,
-                       canopies   = FALSE)
+```{r, dpi = 250, fig.width = 6}
+plot_hisafe_monthcells(hop = hop,
+                       variable = "monthRelativeDirectParIncident",
+                       colfacet = "Year",
+                       rowfacet = "SimulationName",
+                       years = 2021:2023,
+                       months = 7,
+                       trees = TRUE,
+                       canopies = TRUE)
 ```
 #### 6.2 Cycle plots
 You can also compare the major Hi-sAFe "cycles" among your simulations by using `plot_hisafe_cycle_bar()` and `plot_hisafe_cycle_ts()`. Supported "cycles" include carbon, water, nitrogen, and light. 
-```{r, eval = TRUE, dpi = 250, fig.height = 10}
+```{r, eval = TRUE, dpi = 250, fig.width = 10}
 plot_hisafe_cycle_bar(hop = hop, cycle = "carbon")
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
@@ -337,28 +342,28 @@ plot_hisafe_cycle_bar(hop = hop, cycle = "water")
 plot_hisafe_cycle_bar(hop = hop, cycle = "light")
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_ts(hop = hop, cycle = "carbon", years = 2002)
+plot_hisafe_cycle_ts(hop = hop, cycle = "carbon", years = 2022)
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_ts(hop = hop, cycle = "nitrogen", years = 2002)
+plot_hisafe_cycle_ts(hop = hop, cycle = "nitrogen", years = 2022)
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_ts(hop = hop, cycle = "water", years = 2002)
+plot_hisafe_cycle_ts(hop = hop, cycle = "water", years = 2022)
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_ts(hop = hop, cycle = "light", years = 2002)
+plot_hisafe_cycle_ts(hop = hop, cycle = "light", years = 2022)
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_ts(hop = hop, cycle = "carbon-increment", years = 2002)
+plot_hisafe_cycle_ts(hop = hop, cycle = "carbon-increment", years = 2022)
 ```
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_ts(hop = hop, cycle = "carbon-allocation", years = 2000)
+plot_hisafe_cycle_ts(hop = hop, cycle = "carbon-allocation", years = 2022)
 ```
 
 You can also create a "dashboard" of the cycles of simulation via `cycle_summary()`:
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
 summary.out <- cycle_summary(hop         = hop,
-                             daily.year  = 2002,
+                             daily.year  = 2022,
                              cycles      = c("carbon", "light", "water", "nitrogen"),
                              simu.name   = "AF")
 summary.out
@@ -372,7 +377,7 @@ The most important visualization tool in hisafer is `hisafe_slice()` which "slic
 ```{r dpi=250, fig.width = 10}
 hisafe_slice(hop        = hop,
              simu.names = c("AF"),
-             date       = "2002-12-01")
+             date       = "2022-10-28")
 ```
 
 You can use `hisafe_slice()` even if you do not have the voxels profile within your `hop` object by setting `voxels = FALSE`. You can also customize what you want each aspect of the plot to represent via the `vars` argument. Furthermore, you can switch the direction in which the scene is "sliced" by setting `plot.x = "y"`. This gives you the opportunity to view the 3D scene from both 2D directions.
@@ -386,9 +391,9 @@ These plots from `hisafe_slice()` can be combined with plots from `plot_hisafe_c
 
 To visualize tree root topology, you can use `hiasfe_root3D()`. You must have the `rgl` library installed and functional to do so!
 ```{r, eval = FALSE}
-hisafe_root3D(hop      = hop,
-             simu.name = "AF",
-             date      = "2002-12-01")
+hisafe_root3D(hop = hop,
+              simu.name = "AF",
+              date = "2022-01-01")
 ```
 
 #### 6.4 FACE experiments
@@ -418,11 +423,11 @@ LER(face = face, cycle = "light")
 
 While the defualt summarization level for `plot_hisafe_cycle_bar()` is annual, you can also visualize monthly and even daily patterns.
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_bar(hop = hop, cycle = "water", freq = "month", years = 2002)
+plot_hisafe_cycle_bar(hop = hop, cycle = "water", freq = "month", years = 2022)
 ```
 
 ```{r, eval = TRUE, dpi = 250, fig.width = 10}
-plot_hisafe_cycle_bar(hop = hop, cycle = "water", freq = "day", years = 2002, months = 4:5)
+plot_hisafe_cycle_bar(hop = hop, cycle = "water", freq = "day", years = 2022, months = 4:5)
 ```
 
 Furthermore, just as for normal `hop` objects, you can also use `plot_hisafe_cycle_bar()` and `plot_hisafe_cycle_ts()` to compare the simulations in a `face` object. 
