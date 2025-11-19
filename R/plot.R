@@ -1475,7 +1475,7 @@ create_tree_data <- function(hop, trees, canopies, plot.x) {
       dplyr::mutate(special.case = x == 0 & y == 0) %>% # special case when x == 0 & y == 0 : tree is at scene center
       dplyr::mutate(x = x + special.case * plotWidth  / 2) %>%
       dplyr::mutate(y = y + special.case * plotHeight / 2) %>%
-      dplyr::select(SimulationName, idTree, species, x, y, plotWidth, plotHeight, cellWidth)
+      dplyr::select(SimulationName, idTree, treeSpeciesFileName, x, y, plotWidth, plotHeight, cellWidth)
 
     if(canopies) {
       profile_check(hop,  "trees", error = TRUE)

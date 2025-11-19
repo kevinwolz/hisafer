@@ -376,6 +376,8 @@ read_hisafe_example <- function(simu.names = c("monocrop", "agroforestry", "fore
   return(hop)
 }
 
+
+
 #' Read a Hi-sAFe output profile
 #' @description Wrapper for read_hisafe_output_file.
 #' @return A list containing the profile data and the profile variable definitions.

@@ -132,9 +132,7 @@ build_structure <- function(exp.plan, path,  template, files, plot.scene, summar
 
   ## Remove unused .tree files from treeSpecies
   trees.used <- NA
-  if("trees" %in% names(exp.plan)){
-    trees.used <- exp.plan$tree[[1]]$species
-  } else if(length(PARAM_DEFAULTS$tree)>0) {
+  if(length(PARAM_DEFAULTS$tree)>0) {
     trees.used <- PARAM_DEFAULTS$tree[[1]]$treeSpeciesFileName
   }
 

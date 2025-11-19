@@ -769,9 +769,10 @@ get_pruning_dates <- function(hop, type = "branch", tree.ids = 1) {
   }
 
   get_dates <- function(x) {
-    pruningYears <- unlist(x$pruningYears)  + as.numeric(unlist(x$pruningDays) < x$simulationDayStart)
+    pruningYears <- unlist(x$pruningYears)
+    pruningDays <- unlist(x$pruningDays)
     if(!is.na(pruningYears[1])) {
-      Date <- lubridate::ymd(paste0(pruningYears, "-01-01")) + unlist(x$pruningDays) - 1
+      Date <- lubridate::ymd(paste0(pruningYears, "-", pruningDays))
       out <- dplyr::tibble(SimulationName = x$SimulationName, idTree = x$idTree, Year = as.integer(pruningYears), Date = Date) %>%
         dplyr::mutate(Month = lubridate::month(Date)) %>%
         dplyr::mutate(Day   = lubridate::day(Date)) %>%

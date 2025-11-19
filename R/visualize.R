@@ -108,7 +108,7 @@ hisafe_slice <- function(hop,
   profile_check(hop,  "trees",     error = TRUE)
   variable_check(hop, "trees", tree.vars, error = TRUE)
 
-  yearStart = stringr::str_sub(date,1,4)
+  yearStart = as.numeric(stringr::str_sub(date,1,4))
 
 
   crops   <- crops   & profile_check(hop, "cells")
@@ -245,12 +245,12 @@ hisafe_slice <- function(hop,
     if(profile_check(hop, "trees")) {
       for(i in 1:nrow(hop$tree.info)) {
         if(!is.na(unlist(hop$tree.info$treePruningYears[[i]])[1])) {
-          hop$tree.info$tree.pruning.dates[[i]] <- lubridate::ymd(paste0(unlist(hop$tree.info$treePruningYears[[i]]) - 1 - tree.age.at.start +
-                                                                           yearStart, "-01-01")) + unlist(hop$tree.info$treePruningDays[[i]]) - 1
+          hop$tree.info$tree.pruning.dates[[i]] <- lubridate::ymd(paste0(unlist(hop$tree.info$treePruningYears[[i]]) - 1 - tree.age.at.start + yearStart
+                                                                       , unlist(hop$tree.info$treePruningDays[[i]])))
         }
         if(!is.na(unlist(hop$tree.info$treeRootPruningYears[[i]])[1])) {
-          hop$tree.info$root.pruning.dates[[i]] <- lubridate::ymd(paste0(unlist(hop$tree.info$treeRootPruningYears[[i]]) - 1 - tree.age.at.start +
-                                                                           yearStart, "-01-01")) + unlist(hop$tree.info$treeRootPruningDays[[i]]) - 1
+          hop$tree.info$root.pruning.dates[[i]] <- lubridate::ymd(paste0(unlist(hop$tree.info$treeRootPruningYears[[i]]) - 1 - tree.age.at.start + yearStart
+                                                                       , unlist(hop$tree.info$treeRootPruningDays[[i]])))
         }
         hop$tree.info$tree.pruning[i]         <- as.numeric(date %in% hop$tree.info$tree.pruning.dates[[i]])
         if(hop$tree.info$tree.pruning[i] == 1) {
