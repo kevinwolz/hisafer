@@ -88,7 +88,7 @@ read_param_file <- function(path) {
       test <- strsplit(element.value, split = "-", fixed = TRUE)
 
       ## This is a date format YYYY-MM-DD
-      if (nchar(element.value)==10 && grepl("-", element.value) && nchar(test[[1]][1])==4 ) {
+      if (nchar(element.value)==10 && grepl("-", element.value) && nchar(test[[1]][1])==4 && grepl("^[0-9]+$", test[[1]][1])) {
         element.value <- as.Date(element.value);
 
       } else {
@@ -391,9 +391,12 @@ get_used_params <- function(hip) {
         } else {
           val <- template.defaults[[variable]]
           exp <- FALSE
-
+          ## This is a date format YYYY-MM-DD
           if (nchar(val)==10 && grepl("-", val)) {
-            val <- as.Date(val);
+            test <- strsplit(val, split = "-", fixed = TRUE)
+            if (nchar(test[[1]][1])==4 && grepl("^[0-9]+$", test[[1]][1])) {
+              val <- as.Date(val);
+            }
           }
           else {
             if (nchar(val)==5 && grepl("-", val)) {
@@ -417,6 +420,7 @@ get_used_params <- function(hip) {
     out <- list(value = val, exp.plan = exp)
     return(out)
   }
+
 
   TEMPLATE_PARAMS <- get_template_params(hip$template)
   PARAM_NAMES     <- get_param_names(TEMPLATE_PARAMS)
