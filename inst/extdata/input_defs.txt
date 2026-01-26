@@ -479,6 +479,7 @@ TREE	fruitHeatStressTemperatureMax 	Temperature max  to trigger heat stress on f
 TREE	fruitFrostStressTemperatureMin	Temperature min  to trigger frost stress on fruit production	degrees C	-0.5	real	-40	50	NA	NA
 TREE	fruitFrostStressTemperatureMax	Temperature max  to trigger frost stress on fruit production	degrees C	-3	real	-40	50	NA	NA
 TREE	fruitAllocationFraction 	Above ground carbon fraction allocated to fruit 	ratio	0.5	real	0	1	NA	NA
+TREE	fruitCarbonStressDayStart 	First day for carbon stress calculation for fruits 	MM-DD	04-01	string	01-01	12-31	NA	NA
 TREE	fruitMaxDryMatterAllocation 	maximum daily fruit growth 	g DM/fruit/day	0.0001	real	0	10	NA	NA
 TREE	fruitDryToFreshMatterWeight 	Conversion rate from fruit dry to fresh matter 	NA	NA	real	NA	NA	NA	NA
 TREE	fruitDryMaterDensity	fruitDryMaterDensity	m3 / tonnes DM 	0.8	real	NA	NA	NA	NA
