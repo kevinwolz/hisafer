@@ -33,6 +33,12 @@ PLD	soilCrustRainMin	Minimum amount of rain required to create a soil crust (ina
 PLD	soilCrustDepth	Mulch depth from which a crust occurs (inactive if the STICS vigueurbat parameter is equal to 1)	cm	0.5	real	0	2	NA	mulchbat
 PLD	roughnessLength	Roughness length of bare soil	m	0.01	real	0.01	0.2	NA	z0solnu
 PLD	soilHumusCN	Initial C to N ratio of soil organic matter from the surface down to the humificationDepth. Used to initialize soil organic carbon via organicNitrogen.	ratio	12.2	real	8	20	NA	CsurNsol
+PLD	pedotransfertThetaSat	(optional) Saturated water content of the soil 	m3 water m-3 soil	0.45	real	0	1	NA	NA
+PLD	pedotransfertKSat	(optional) Saturated hydraulic conductivity of the soil 	cm day-1	50.4	real	10-6	100	NA	NA
+PLD	pedotransfertAlpha	(optional) Van Genuchten parameter 	cm-1	0.003	real	0.001	0.5	NA	NA
+PLD	pedotransfertLambda	(optional) Mualem pore connectivity parameter 	NA	0.5	real	0.3	0.5	NA	NA
+PLD	pedotransfertN	(optional) Van Genuchten parameter 	NA	2.9	real	1	5	NA	NA
+PLD	pedotransfertBulkDensity	(optional) Bulk density value of the soil 	kg m-3	1709.78	real	500	2000	NA	NA
 PLD	waterTable	Toggle on/off the inclusion of a water table 	0=off;1=on	1	integer	0	1	NA	NA
 PLD	evaporationValue	Cumulative soil evaporation above which evaporation rate is decreased 	mm	9	real	0	50	NA	q0
 PLD	evaporationMaxDepth	Maximum soil depth affected by soil evaporation	cm	60	real	0	150	NA	zesx   
