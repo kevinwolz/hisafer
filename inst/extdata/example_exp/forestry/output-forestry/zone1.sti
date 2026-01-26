@@ -1,0 +1,190 @@
+ P_nbjtrav            1
+ P_jultrav P_profres P_proftrav 
+    274       1.       1.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+ P_nbjres            0
+ P_iplt0          275
+ P_profsem    1.00000000    
+ P_densitesem    600.000000    
+ P_variete            1
+ P_ilev          999
+ P_iamf          999
+ P_ilax          999
+ P_iflo          999
+ P_idrp          999
+ P_imat          999
+ P_isen          999
+ P_irec          999
+ P_ilan          999
+ P_irecbutoir          999
+ P_effirr    1.00000000    
+ nap            0
+ P_codlocirrig            1
+ P_profmes   120.000000    
+ P_engrais           2
+ P_concirr    0.00000000    
+ P_engamm  0.750000000    
+ P_orgeng   42.0000000    
+ P_deneng  0.129999995    
+ P_voleng  0.300000012    
+ napN            0
+ P_codlocferti            1
+ P_ressuite            2
+ harvest = all plant harvest
+ harvest when water content (fruit) <  0.159999996    
+    
+ FICHIER PLANTE
+ *********************************************
+ for an annual plant P_julvernal can not be earlier than the sowing we put it equal to sowing
+ P_codeplante            6
+ monocotyledon            1
+ P_alphaCO2   1.20000005    
+ P_tdmin    0.00000000    
+ P_tdmax    28.0000000    
+ P_codetemp            2
+ driving temperature, crop
+ P_coeflevamf    1.00000000    
+ P_coefamflax    1.00000000    
+ P_coeflaxsen    1.00000000    
+ P_coefsenlan    1.00000000    
+ P_coeflevdrp    1.00000000    
+ P_coefdrpmat    1.00000000    
+ P_coefflodrp    1.00000000    
+ P_codephot            1
+ P_phobase    6.30000019    
+ P_phosat    20.0000000    
+ delay water stress before DRP stage 
+ P_stressdev   0.200000003    
+ P_codeperenne            1
+ annual
+ germination or latency = yes 
+ P_tgmin    0.00000000    
+ P_stpltger    40.0000000    
+ plantlet growth = hypocotyle growth 
+ P_belong    9.99999978E-03
+ P_celong    2.00000000    
+ P_elmax    8.43000031    
+ P_nlevlim1          200
+ P_nlevlim2          400
+ P_vigueurbat   1.00000000    
+ P_phyllotherme    120.000000    
+ P_bdens    7.00000000    
+ P_laicomp   0.303999990    
+ P_hautbase    0.00000000    
+ P_hautmax    1.00000000    
+ P_tcxstop    100.000000    
+ leaf dynamics = LAI 
+ P_vlaimax    2.20000005    
+ P_pentlaimax    5.00000000    
+ P_udlaimax    3.00000000    
+ P_ratiodurvieI   0.800000012    
+ P_tcmin    0.00000000    
+ P_tcmax    40.0000000    
+ P_ratiosen   0.800000012    
+ P_abscission    0.00000000    
+ P_parazofmorte    13.0000000    
+ P_innturgmin   0.300000012    
+ P_dlaimin    0.00000000    
+ LAI calculation option, LAInet=LAIbrut-senes 
+ P_dlaimaxbrut    1.50000007E-04
+ P_durviesupmax   0.400000006    
+ P_innsen   0.349999994    
+ P_rapsenturg   0.500000000    
+ radiation interception = Beers law
+ P_extin   0.500000000    
+ p%P_codetransrad           1
+ p%P_codebeso           1
+ temin=tcmin and temax=tcmax
+ P_temin    0.00000000    
+ P_temax    40.0000000    
+ P_teopt    10.0000000    
+ P_teoptbis    20.0000000    
+ P_efcroijuv    1.20000005    
+ P_efcroiveg    2.09999990    
+ P_efcroirepro    2.09999990    
+ P_coefmshaut    0.00000000    
+ slamax    300.000000    
+ slamin    180.000000    
+ P_tigefeuil   0.500000000    
+ P_envfruit   0.300000012    
+ P_sea    0.00000000    
+ growing dynamics = determinate growing plant
+ P_nbjgrain           30
+ P_cgrain    3.50000001E-02
+ P_cgrainv0    0.00000000    
+ P_nbgrmin    0.00000000    
+ unit Harvest Index = days
+ P_vitircarb    1.20999999E-02
+ P_irmax   0.550000012    
+ P_vitpropsucre    7.99999980E-04
+ P_vitprophuile    0.00000000    
+ P_vitirazo    2.06000004E-02
+ thermal stress on filling
+ P_tminremp    0.00000000    
+ P_tmaxremp    45.0000000    
+ P_sensanox    1.00000000    
+ P_stoprac           12
+ P_sensrsec    9.99999978E-03
+ P_contrdamax   0.300000012    
+ root driving temperature = soil
+ root density = true density
+ P_draclong    110.000000    
+ P_debsenrac    1000.00000    
+ P_lvfront    1.20000001E-02
+ P_longsperac    18182.0000    
+ P_tletale   -20.0000000    
+ P_tdebgel   -4.00000000    
+ plantlet or emergence frost
+ P_nbfgellev            2
+ P_tgellev10   -4.00000000    
+ P_tgellev90   -16.0000000    
+ leaf frost at juvenile phase (till AMF)
+ P_tgeljuv10   -10.0000000    
+ P_tgeljuv90   -16.0000000    
+ leaf frost at adult phase
+ P_tgelveg10   -4.50000000    
+ P_tgelveg90   -10.0000000    
+ flower/fruit frost (from FLO)
+ P_tgelflo10   -4.50000000    
+ P_tgelflo90   -6.50000000    
+ P_psisto    20.0000000    
+ P_psiturg    4.00000000    
+ P_h2ofeuilverte   0.899999976    
+ P_h2ofeuiljaune   0.150000006    
+ P_h2otigestruc   0.600000024    
+ P_h2oreserve   0.699999988    
+ P_h2ofrvert   0.400000006    
+ P_deshydbase    1.49999997E-02
+ P_tempdeshyd    9.99999978E-03
+ water requirements = crop coefficient
+ P_kmax    1.39999998    
+ P_Vmax1    1.79999997E-03
+ P_Kmabs1    50.0000000    
+ P_Vmax2    5.00000007E-02
+ P_Kmabs2    25000.0000    
+ P_adil    1.20000005    
+ P_bdil   0.442000002    
+ P_masecNmax   0.500000000    
+ P_INNmin   0.300000012    
+ P_INNimin  -0.500000000    
+ P_inngrain1   0.319999993    
+ P_inngrain2   0.779999971    
+ calculation nitrogen requirements = dense canopies (initial)
+ P_adilmax    3.00000000    
+ P_bdilmax   0.439999998    
+ P_codevar            1
+ P_stlevamf    400.000000    
+ P_stamflax    500.000000    
+ P_stlevdrp    1100.00000    
+ P_stflodrp    10.0000000    
+ P_stdrpdes    551.000000    
+ P_pgrainmaxi    9.99999978E-03
+ P_adens  -0.600000024    
+ P_croirac    3.99999991E-02
+ P_durvieF    300.000000    
+ P_sensiphot   0.500000000    
+ P_nbgrmax    5000.00000    
+ P_stdrpmat    450.000000    
+ P_afruitpot    0.00000000    
+ P_dureefruit    0.00000000    
+ with the option laibrut the residuel lai disappears entirely on the first day of senescence
+ no bud break if no dormancy
