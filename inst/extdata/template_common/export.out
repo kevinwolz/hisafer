@@ -22,6 +22,9 @@ ProfileDef	annualPlot	SafePlot	365
 ProfileDef	annualCells	SafeCell	365			
 ProfileDef	annualTrees	SafeTree	365			
 #ProfileDef	voxels	SafeVoxel	1			
+#ProfileDef	voxelsDetail	SafeVoxel	1			
+#ProfileDef	voxelsOptim	SafeVoxel	1			
+#ProfileDef	voxels3D	SafeVoxel	1			
 #SELECTION of CELLS or DEPTHS 						
 #Export	Object	Frequency	Ids	Depth		
 #ProfileDef	cell	SafeCell	1	01-mars		
@@ -37,8 +40,8 @@ annualCells	SafeCell	biomassMax	 t.ha-1	Maximum crop biomass for the year	4	1
 annualCells	SafeCell	laiMax	m2 leaf m-2 soil	Maximum crop LAI for the year	5	1
 annualCells	SafeCell	eaiMax	m2 leaf m-2 soil	Maximum crop EAI for the year	6	1
 annualCells	SafeCell	rootsDepthMax	m	Maximum crop roots depth for the year	7	1
-annualCells	SafeCell	cropMaxTemperature	degreesC	Crop max temperature	8	1
-annualCells	SafeCell	cropMinTemperature	degreesC	Crop min temperature	9	1
+annualCells	SafeCell	cropMaxTemperature	 C	Crop max temperature	8	1
+annualCells	SafeCell	cropMinTemperature	 C	Crop min temperature	9	1
 annualCells	SafeCell	annualSoilEvaporation	mm	annual evaporation	10	1
 annualCells	SafeCell	annualCapillaryRise	mm	annual capillary rise	11	1
 annualCells	SafeCell	annualDrainageBottom	mm	annual drainage bottom	12	1
@@ -219,10 +222,10 @@ cells	SafeCell	treeNitrogenBranchesLitter	kg N ha-1	treeNitrogenBranchesLitter	1
 cells	SafeCell	treeNitrogenFruitLitter	kg N ha-1	treeNitrogenFruitLitter	145	1
 cells	SafeCell	treeNitrogenFineRootsLitter	kg N ha-1	treeNitrogenFineRootsLitter	146	1
 cells	SafeCell	treeNitrogenCoarseRootsLitter	kg N ha-1	treeNitrogenCoarseRootsLitter	147	1
-climate	SafeMacroClimat	minTemperature	degreesC	Minimum temperature of the air	1	1
-climate	SafeMacroClimat	maxTemperature	degreesC	Maximum temperature of the air	2	1
-climate	SafeMacroClimat	minRelativeHumidity	%	Minimum relative humidity of the air	3	1
-climate	SafeMacroClimat	maxRelativeHumidity	%	Maximum relative humidity of the air	4	1
+climate	SafeMacroClimat	minTemperature	 	Minimum temperature of the air	1	1
+climate	SafeMacroClimat	maxTemperature	 	Maximum temperature of the air	2	1
+climate	SafeMacroClimat	minRelativeHumidity	 	Minimum relative humidity of the air	3	1
+climate	SafeMacroClimat	maxRelativeHumidity	 	Maximum relative humidity of the air	4	1
 climate	SafeMacroClimat	precipitation	mm	Precipitation from input wth file	5	1
 climate	SafeMacroClimat	rain	mm	Precipitation minus any calculated to fall as snow	6	1
 climate	SafeMacroClimat	snow	mm	Precipitation calculated to fall as snow	7	1
@@ -414,7 +417,8 @@ trees	SafeTree	fruitPhenologicalStage	0-4	Tree fruit phenological stage	53	1
 trees	SafeTree	rootingDepth	m	Tree maximum rooting depth	54	1
 trees	SafeTree	maxRootDistanceOnTreeLine	m	Tree maximum root extension parallel to tree line (in the Y direction)	55	1
 trees	SafeTree	maxRootDistanceOnCropLine	m	Tree maximum inter-row root extension (in the X direction)	56	1
-trees	SafeTree	totalRootLength	m	Total tree fine root length	57	1
+trees	SafeTree	totalRootsDensity	m	Total tree fine roots density	57	1
+trees	SafeTree	totalRootsLength	m	Total tree fine roots length	57	1
 trees	SafeTree	targetLfrRatio	kg C kg C-1	Target leaf to fine roots ratio (carbonFoliage / (carbonFoliage + carbonFineRoots))	58	1
 trees	SafeTree	lfrRatio	kg kg-1	Tree leaf to fine root ratio (carbonFoliage / (carbonFoliage / carbonFineRoots))	59	1
 trees	SafeTree	rootShootRatio	ratio	Ratio of belowground tree carbon to aboveground tree carbon	60	1
@@ -461,7 +465,6 @@ trees	SafeTree	nitrogenFineRoots	kg N	Nitrogen pool in tree fine roots	100	1
 trees	SafeTree	nitrogenLabile	kg N	Nitrogen in tree labile pool	101	1
 trees	SafeTree	nitrogenFruit	kg N	Nitrogen in tree fruit pool	102	1
 trees	SafeTree	nitrogenFoliageIncrement	kg C	Nitrogen foliage daily allocated	103	1
-trees	SafeTree	nitrogenLabileIncrement	kg C	Nitrogen labile daily allocated	104	1
 trees	SafeTree	nitrogenBranchesIncrement	kg C	Nitrogen branch daily allocated	105	1
 trees	SafeTree	nitrogenStemIncrement	kg C	Nitrogen stem daily allocated	106	1
 trees	SafeTree	nitrogenStumpIncrement	kg C	Nitrogen stump daily allocated	107	1
