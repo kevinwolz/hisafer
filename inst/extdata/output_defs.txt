@@ -433,7 +433,8 @@ trees	fruitPhenologicalStage	NA	0-4	Tree fruit phenological stage
 trees	rootingDepth	NA	m	Tree maximum rooting depth
 trees	maxRootDistanceOnTreeLine	NA	m	Tree maximum root extension parallel to tree line (in the Y direction)
 trees	maxRootDistanceOnCropLine	NA	m	Tree maximum inter-row root extension (in the X direction)
-trees	totalRootLength	NA	m	Total tree fine root length
+trees	totalRootsDensity	NA	m m-3	Total tree fine root density
+trees	totalRootsLength	NA	m	Total tree fine root length
 trees	targetLfrRatio	NA	kg C kg C-1	Target leaf to fine roots ratio (carbonFoliage / (carbonFoliage + carbonFineRoots))
 trees	lfrRatio	NA	kg kg-1	Tree leaf to fine root ratio (carbonFoliage / (carbonFoliage / carbonFineRoots))
 trees	rootShootRatio	NA	ratio	Ratio of belowground tree carbon to aboveground tree carbon
