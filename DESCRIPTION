@@ -1,9 +1,9 @@
 Package: hisafer
 Type: Package
 Title: An R Toolbox for the Hi-sAFe Biophysical Agroforestry Model
-Version: 1.6.1
-Author: Kevin J Wolz
-Maintainer: Kevin J Wolz <kevin@savannainstitute.org>
+Version: 1.6.2
+Author: Kevin J Wolz <kevin@savannainstitute.org>
+Maintainer: Isabelle Lecomte <isabelle.lecomte@inrae.fr>
 Description: An R toolbox for the Hi-sAFe biophysical agroforestry model.
     It provides functions for defining, building, running, reading, 
     analyzing, and plotting Hi-sAFe simulaitons. 
@@ -20,7 +20,7 @@ Imports: ggplot2 (>= 3.3.0),
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Suggests: knitr,
     rmarkdown,
     ggforce (>= 0.3.1),
