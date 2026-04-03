@@ -28,7 +28,7 @@ LER <- function(face,
                 hline1        = TRUE,
                 ymax          = NA,
                 plot          = TRUE, ...) {
-
+  library(dplyr)
   supported.cycles     <- c("yield", "nitrogen", "water", "light")
   supported.timescales <- c("Annual", "Cumulative")
   supported.components <- c("LER", "Trees", "Crops")
@@ -47,7 +47,6 @@ LER <- function(face,
   is_TF(plot)
 
   ## Get flux data
-
   cycle.data <- plot_hisafe_cycle_bar(hop        = face,
                                       cycle      = cycle,
                                       plot       = FALSE,

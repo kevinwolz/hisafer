@@ -47,109 +47,113 @@ hisafe_root3D <- function(hop,
                           box           = FALSE,
                           output.path   = NULL, ...) {
 
-  if(!requireNamespace("rgl", quietly = TRUE)) stop("The package 'rgl' is required for hisafe_root3D(). Please install and load it.", call. = FALSE)
+  if (!requireNamespace("rgl", quietly = TRUE))
+    stop("The package 'rgl' is required for hisafe_root3D(). Please install and load it.",
+         call. = FALSE)
   is_hop(hop, error = TRUE)
-  profile_check(hop, "voxels",    error = TRUE)
+  profile_check(hop, "voxels", error = TRUE)
   profile_check(hop, "plot.info", error = TRUE)
-
   date <- lubridate::ymd(date)
-  if(is.null(simu.name)) {
-    if("hop-group" %in% class(hop)) stop("simu.name must be specified if hop contains more than one simulation", call. = FALSE)
+  if (is.null(simu.name)) {
+    if ("hop-group" %in% class(hop))
+      stop("simu.name must be specified if hop contains more than one simulation",
+           call. = FALSE)
     simu.name <- hop$metadata$SimulationName[1]
   }
-
-  if(length(date) != 1)                                   stop("date argument must have length 1",                          call. = FALSE)
-  if(!(is.character(simu.name) & length(simu.name) == 1)) stop("simu.name argument must be a character vector of length 1", call. = FALSE)
-  if(!(is.numeric(tree.id)     & length(tree.id)   == 1)) stop("tree.id argument must be a numeric vector of length 1",     call. = FALSE)
-  if(!(is.character(color.var) & length(color.var) == 1)) stop("color.var argument must be a character vector of length 1", call. = FALSE)
-  if(!(is.character(bg)        & length(bg)        == 1)) stop("bg argument must be a character vector of length 1",        call. = FALSE)
-  is_TF(grid)
-  is_TF(box)
-
-  hop  <- hop_filter(hop = hop, simu.names = simu.name)
-
+  if (length(date) != 1)
+    stop("date argument must have length 1", call. = FALSE)
+  if (!(is.character(simu.name) & length(simu.name) == 1))
+    stop("simu.name argument must be a character vector of length 1",
+         call. = FALSE)
+  if (!(is.numeric(tree.id) & length(tree.id) == 1))
+    stop("tree.id argument must be a numeric vector of length 1",
+         call. = FALSE)
+  if (!(is.character(color.var) & length(color.var) == 1))
+    stop("color.var argument must be a character vector of length 1",
+         call. = FALSE)
+  if (!(is.character(bg) & length(bg) == 1))
+    stop("bg argument must be a character vector of length 1",
+         call. = FALSE)
+  # is_TF(grid)
+  # is_TF(box)
+  hop <- hop_filter(hop = hop, simu.names = simu.name)
   cellWidth <- hop$plot.info$cellWidth
-  Z <- c(-0.1, sort(unique(hop$voxels$z)), max(hop$voxels$z) + 0.2)
-
-  rsyst <- hop$voxels %>%
-    dplyr::filter(Date == date) %>%
-    dplyr::mutate(colonisationDirection = .[[paste0("colonisationDirection_", tree.id)]]) %>%
-    dplyr::mutate(treeCarbonCoarseRoots = .[[paste0("treeCarbonCoarseRoots_", tree.id)]]) %>%
-    dplyr::mutate(root.color            = .[[color.var]]) %>%
-    dplyr::select(SimulationName, x, y, z, colonisationDirection, treeCarbonCoarseRoots, root.color) %>%
-    dplyr::filter(treeCarbonCoarseRoots > 0) %>%
-    dplyr::mutate(z.up   = abs(Z[match(z, Z) - 1] - z)) %>%
-    dplyr::mutate(z.down = abs(Z[match(z, Z) + 1] - z)) %>%
-    dplyr::mutate(len    = 0) %>%
-    dplyr::mutate(len    = len + cellWidth * as.numeric(colonisationDirection %in% 0:3)) %>%
-    dplyr::mutate(len    = len + z.up      * as.numeric(colonisationDirection  ==  4)) %>%
-    dplyr::mutate(len    = len + z.down    * as.numeric(colonisationDirection  ==  5)) %>%
-    dplyr::mutate(px     = x + as.numeric(colonisationDirection == 1) * len - as.numeric(colonisationDirection == 0) * len) %>%
-    dplyr::mutate(py     = y - as.numeric(colonisationDirection == 3) * len + as.numeric(colonisationDirection == 2) * len) %>%
-    dplyr::mutate(pz     = z + as.numeric(colonisationDirection == 5) * len - as.numeric(colonisationDirection == 4) * len) %>%
-    dplyr::mutate(ray    = sqrt(treeCarbonCoarseRoots / 616 / len / pi))
-
-  ## PLOT
-  rgl::rgl.open()
+  Z <- c(-0.1, sort(unique(hop$voxels$z)), max(hop$voxels$z) +
+           0.2)
+  rsyst <- hop$voxels %>% dplyr::filter(Date == date) %>%
+    dplyr::mutate(colonisationDirection = .[[paste0("colonisationDirection_",
+                                                    tree.id)]]) %>% dplyr::mutate(treeCarbonCoarseRoots = .[[paste0("treeCarbonCoarseRoots_",
+                                                                                                                    tree.id)]]) %>% dplyr::mutate(root.color = .[[color.var]]) %>%
+    dplyr::select(SimulationName, x, y, z, colonisationDirection,
+                  treeCarbonCoarseRoots, root.color) %>% dplyr::filter(treeCarbonCoarseRoots >
+                                                                         0) %>% dplyr::mutate(z.up = abs(Z[match(z, Z) - 1] -
+                                                                                                           z)) %>% dplyr::mutate(z.down = abs(Z[match(z, Z) + 1] -
+                                                                                                                                                z)) %>% dplyr::mutate(len = 0) %>% dplyr::mutate(len = len +
+                                                                                                                                                                                                   cellWidth * as.numeric(colonisationDirection %in% 0:3)) %>%
+    dplyr::mutate(len = len + z.up * as.numeric(colonisationDirection ==
+                                                  4)) %>% dplyr::mutate(len = len + z.down * as.numeric(colonisationDirection ==
+                                                                                                          5)) %>% dplyr::mutate(px = x + as.numeric(colonisationDirection ==
+                                                                                                                                                      1) * len - as.numeric(colonisationDirection == 0) *
+                                                                                                                                  len) %>% dplyr::mutate(py = y - as.numeric(colonisationDirection ==
+                                                                                                                                                                               3) * len + as.numeric(colonisationDirection == 2) *
+                                                                                                                                                           len) %>% dplyr::mutate(pz = z + as.numeric(colonisationDirection ==
+                                                                                                                                                                                                        5) * len - as.numeric(colonisationDirection == 4) *
+                                                                                                                                                                                    len) %>% dplyr::mutate(ray = sqrt(treeCarbonCoarseRoots/616/len/pi))
+  rgl::open3d()
   rgl::par3d(...)
-  rgl::rgl.bg(color = bg)
-
-  helix.turns      <- 2000
-  size.multiplier  <- 10
+  rgl::bg3d(color = bg)
+  helix.turns <- 2000
+  size.multiplier <- 10
   color.multiplier <- 100
   co <- colorRampPalette(color.palette, space = "Lab")
-  n.cols <- floor(quantile(rsyst$root.color * color.multiplier, 0.95))
+  n.cols <- floor(quantile(rsyst$root.color * color.multiplier,
+                           0.95))
   cols <- co(n.cols)
-
-
-  for(i in 1:nrow(rsyst)) {
-
+  for (i in 1:nrow(rsyst)) {
     compte <- 0
     r <- rsyst$ray[i] * size.multiplier
-
-    if(rsyst$x[i] == rsyst$px[i]){
-      x <- rsyst$x[i] + r * sin(1:helix.turns * pi / size.multiplier)
+    if (rsyst$x[i] == rsyst$px[i]) {
+      x <- rsyst$x[i] + r * sin(1:helix.turns * pi/size.multiplier)
       compte <- 1
-    } else {
+    }
+    else {
       x <- seq(from = rsyst$x[i], to = rsyst$px[i], length = helix.turns)
     }
-
-    if(rsyst$y[i] == rsyst$py[i]){
-      y <- rsyst$y[i] + r * sin(1:helix.turns * pi / size.multiplier) * (compte == 0) + r * cos(1:helix.turns * pi / size.multiplier) * (compte == 1)
-    } else {
+    if (rsyst$y[i] == rsyst$py[i]) {
+      y <- rsyst$y[i] + r * sin(1:helix.turns * pi/size.multiplier) *
+        (compte == 0) + r * cos(1:helix.turns * pi/size.multiplier) *
+        (compte == 1)
+    }
+    else {
       y <- seq(from = rsyst$y[i], to = rsyst$py[i], length = helix.turns)
     }
-
-    if(rsyst$z[i] == rsyst$pz[i]){
-      z <- -(rsyst$z[i] + r * cos(1:helix.turns * pi / size.multiplier))
-    } else {
-      z <- -(seq(from = rsyst$z[i], to = rsyst$pz[i], length = helix.turns))
+    if (rsyst$z[i] == rsyst$pz[i]) {
+      z <- -(rsyst$z[i] + r * cos(1:helix.turns * pi/size.multiplier))
     }
-
-    idCol <- max(1, min(floor(rsyst$root.color[i] * color.multiplier), n.cols))
-    rgl::rgl.lines(x   = x,
-                        z   = y,
-                        y   = z,
-                        col = cols[idCol],
-                        lwd = 3)
+    else {
+      z <- -(seq(from = rsyst$z[i], to = rsyst$pz[i],
+                 length = helix.turns))
+    }
+    idCol <- max(1, min(floor(rsyst$root.color[i] * color.multiplier),
+                        n.cols))
+    rgl::segments3d(x = x, z = y, y = z, col = cols[idCol],
+                    lwd = 3)
   }
-
-  if(box)	rgl::rgl.bbox()
-  if(grid) {
+  if (box)
+    rgl::rgl.bbox()
+  if (grid) {
     centerpos <- which(rsyst$pz < 0)
-    center <- c(rsyst$x[centerpos], rsyst$y[centerpos], -rsyst$z[centerpos])
-    addGrid(center,
-            xlim  = c(min(rsyst$x), max(rsyst$x)),
-            ylim  = c(min(rsyst$y), max(rsyst$y)),
-            zlim  = c(min(rsyst$z), max(rsyst$z)),
-            xstep = 1,
-            ystep = 1,
-            zstep = 0.2)
+    center <- c(rsyst$x[centerpos], rsyst$y[centerpos],
+                -rsyst$z[centerpos])
+    addGrid(center, xlim = c(min(rsyst$x), max(rsyst$x)),
+            ylim = c(min(rsyst$y), max(rsyst$y)), zlim = c(min(rsyst$z),
+                                                           max(rsyst$z)), xstep = 1, ystep = 1, zstep = 0.2)
   }
-
-  output.path <- clean_path(paste0(diag_output_path(hop = hop, output.path = output.path), "/root3D/"))
+  output.path <- clean_path(paste0(diag_output_path(hop = hop,
+                                                    output.path = output.path), "/root3D/"))
   dir.create(output.path, recursive = TRUE, showWarnings = FALSE)
-  rgl::rgl.snapshot(paste0(output.path, simu.name, "_", date, "_root3D.png"))
+  rgl::rgl.snapshot(paste0(output.path, simu.name, "_", date,
+                           "_root3D.png"))
 }
 
 #' Add grid to hisafe_root3D() plot

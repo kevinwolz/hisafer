@@ -16,6 +16,7 @@ read_param_file <- function(path) {
   comment       <- substr(sim, 1, 1) == "#"
 
   read_element_table <- function(sim, i, titles, table.names) {
+
     if(any(which(titles) > i)) {
       next.header <- which(titles)[which(titles) > i][[1]]
       table.elements <- strsplit(remove_whitespace(sim[i:(next.header - 1)]), split = "\t")
@@ -29,9 +30,14 @@ read_param_file <- function(path) {
       return(x)
     }
     col_types <- readr::cols()
+
     table.tibble <- purrr::map(table.elements, clean_elements, table.names = table.names) %>%
       purrr::map_df(dplyr::bind_rows) %>%
       readr::type_convert(col_types = readr::cols())
+
+    if(grepl("ZONE", table.elements[[1]][1]))  {
+      table.tibble[[3]] <- purrr::map_chr(table.elements, 3)
+    }
 
     return(table.tibble)
   }
@@ -92,10 +98,7 @@ read_param_file <- function(path) {
         element.value <- as.Date(element.value);
 
       } else {
-        if (element.name=="zoneCellList") {
 
-        }
-        else {
           if(grepl(",", element.value)) {
             element.value <- strsplit(element.value, split = ",")
             if (nchar(element.value[[1]][1])==5 && grepl("-", element.value[[1]][1])) {
@@ -119,7 +122,7 @@ read_param_file <- function(path) {
             }
 
           }
-        }
+
       }
 
       toto <- list(list(value     = element.value,
@@ -130,8 +133,6 @@ read_param_file <- function(path) {
     }
     ##this is a table
     else {
-
-
       line.text <- sim[i]
       if(grepl("ZONE", line.text)) {
         list.names <- c("name", "zoneName", "zoneCellList", "zoneTecFileNameList")

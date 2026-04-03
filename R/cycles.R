@@ -816,8 +816,10 @@ get_carbon_allocation <- function(hop) {
 #' @importFrom dplyr %>%
 #' @keywords internal
 get_yields <- function(hop, profile) {
+  library(dplyr)
   profile_check(hop, c(profile, "trees", "plot.info"), error = TRUE)
-  variable_check(hop, "trees", "stemYield", error = TRUE)
+  variable_check(hop, "trees", "stemVolumePerHectare", error = TRUE)
+  variable_check(hop, "trees", "stemVolumeHarvestedPerHectare", error = TRUE)
 
   if(profile == "cells") {
     variable_check(hop, "cells", c("idZone", "grainBiomass"), error = TRUE)
@@ -833,6 +835,7 @@ get_yields <- function(hop, profile) {
     cells <- hop$cells %>%
       replace(is.na(.), 0) %>%
       dplyr::filter(idZone == "1") %>%
+      dplyr::mutate(grainBiomass = if_else(cropSpeciesName == "weed", 0, grainBiomass)) %>%
       dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay, grainBiomass) %>%
       dplyr::group_by(SimulationName, Year, Month, Day, Date, JulianDay) %>%
       dplyr::summarize_all(mean) %>% # mean of all cells in scene
@@ -849,15 +852,13 @@ get_yields <- function(hop, profile) {
     out <- hop$trees %>%
       dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
       replace(is.na(.), 0) %>%
-      dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay, stemYield, plotAreaHa) %>%
-      dplyr::group_by(SimulationName, Year, Month, Day, Date, JulianDay, plotAreaHa) %>%
+      dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay, stemVolumePerHectare, stemYield) %>%
+      dplyr::group_by(SimulationName, Year, Month, Day, Date, JulianDay) %>%
       dplyr::summarize_all(sum) %>% # sum of all trees in scene
       dplyr::ungroup() %>%
       dplyr::group_by(SimulationName) %>%
       dplyr::arrange(SimulationName, Year, JulianDay) %>%
-      dplyr::mutate(stemYield = stemYield / plotAreaHa) %>% # convert from kg to kg/ha
       dplyr::mutate(stemYield = c(NA, pmax(diff(stemYield), 0))) %>% # convert to yield increment
-      dplyr::select(-plotAreaHa) %>%
       dplyr::full_join(cells, by = c("SimulationName", "Year", "Month", "Day", "Date", "JulianDay")) %>%
       replace(is.na(.), 0)
 
