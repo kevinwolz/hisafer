@@ -454,11 +454,9 @@ hisafe_slice <- function(hop,
   if(climate) {
     climate.data <- hop$climate %>%
       dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
-      dplyr::mutate(precip.magnitude = nan_to_zero(precipitation / max(hop.full$climate$precipitation))) %>%
-      dplyr::mutate(soilDepth        = -soilDepth) %>%
-      dplyr::mutate(water.table      = as.numeric(waterTableDepth > soilDepth)) %>%
-      dplyr::select(SimulationName, Year, Date, precip.magnitude, waterTableDepth, soilDepth, plotWidth, water.table)
-    climate.data$waterTableDepth[climate.data$waterTableDepth < climate.data$soilDepth] <- 0
+      dplyr::mutate(precip.magnitude = nan_to_zero(precipitation/max(hop$climate$precipitation))) %>%
+      dplyr::mutate(water.table = as.numeric(waterTableDepth > Y.MIN)) %>%
+      dplyr::select(SimulationName, Year, Date, precip.magnitude, waterTableDepth, plotWidth, water.table)
   }
 
   white.boxes <- build_white_boxes_slice(hop   = hop,

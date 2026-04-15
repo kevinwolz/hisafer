@@ -63,8 +63,14 @@ read_hisafe <- function(hip           = NULL,
   is_TF(show.progress)
   if(!(is.numeric(max.size) & length(max.size) == 1 & max.size > 0)) stop("max.size argument must be a positive number", call. = FALSE)
 
-  if(!is.null(hip)) profiles <- hip$profiles
-  else  profiles <- DATA.PROFILES
+  ## replaces "all" by profiles chain of characters
+  if (profiles[1] == "all") {
+    if (!is.null(hip)) {
+      profiles <- hip$profiles
+    } else {
+      profiles <- DATA.PROFILES
+    }
+  }
 
   ## Read simulation inputs & extract cols that vary for binding to output data
   if(!is.null(hip)) {
@@ -148,7 +154,7 @@ read_hisafe <- function(hip           = NULL,
   }
 
   ## Check if there are NO results at all
-  if(!any(purrr::map_lgl(DATA.PROFILES, profile_check, hop = data))) {
+  if(!any(purrr::map_lgl(profiles, profile_check, hop = data))) {
     stop("No requested profiles were found for any of the requested simulations", call. = FALSE)
   }
 

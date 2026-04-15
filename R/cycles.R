@@ -144,7 +144,9 @@ plot_hisafe_cycle_bar <- function(hop,
     plot.title <- "Tree Carbon Pools"
     y.lab      <- bquote("Tree C storage (Mg C "*ha^-1*")")
     if(is.null(color.palette)) color.palette <- c("#73009E", "#009E73", "#999999", "#D55E00", "#E69F00", "#56B4E9", "#0072B2", "#F0E442")
-    summary_fun <- max
+    summary_fun <- function(x) {
+      x[which.max(abs(x))]
+    }
 
   } else {
     stop("cycle argument not supported. Use one of: carbon, nitrogen, water, light.", call. = FALSE)
