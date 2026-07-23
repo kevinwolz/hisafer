@@ -144,6 +144,7 @@ read_hisafe <- function(hip           = NULL,
   data$monthCells  <- data_tidy(data$monthCells)
   data$annualCells <- data_tidy(data$annualCells)
   data$voxels      <- data_tidy(data$voxels)
+  data$yield       <- data_tidy(data$yield)
   data$path        <- ifelse(nrow(EXP.PLAN) > 1, path, simu.paths)
 
   ## Assign class designators
@@ -224,6 +225,7 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
   file.prefix <- paste0(simu.path, "/output-", simu.name, "/", simu.name, "_")
   files       <- paste0(file.prefix, profiles, ".txt" )
 
+
   ## Check for existence of all requested profiles and warn if profile does not exist
   if(!any(file.exists(files))) {
     warning(paste("No requested profiles found for the following simulation:", simu.name), call. = FALSE)
@@ -235,6 +237,7 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
                    monthCells  = dplyr::tibble(),
                    annualCells = dplyr::tibble(),
                    voxels      = dplyr::tibble(),
+                   yield       = dplyr::tibble(),
                    plot.info   = dplyr::tibble(),
                    zone.info   = dplyr::tibble(),
                    tree.info   = dplyr::tibble(),
@@ -265,6 +268,7 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
   join_zones  <- function(...) dplyr::left_join(..., by = c(BASE.COLS, "idZone"), suffix = c("", ".REMOVE"))
   join_cells  <- function(...) dplyr::left_join(..., by = c(BASE.COLS, "idCell", "x", "y"), suffix = c("", ".REMOVE"))
   join_voxels <- function(...) dplyr::left_join(..., by = c(BASE.COLS, "idCell", "idVoxel", "x", "y", "z"), suffix = c("", ".REMOVE"))
+  join_yield  <- function(...) dplyr::left_join(..., by = c(BASE.COLS, "idCell", "x", "y"), suffix = c("", ".REMOVE"))
 
   plot.data   <- out[grep("^plot",        names(out))]
   zones.data  <- out[grep("^zones",       names(out))]
@@ -273,6 +277,8 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
   voxels.data <- out[grep("^voxels",      names(out))]
   mcells.data <- out[grep("^monthCells",  names(out))]
   acells.data <- out[grep("^annualCells", names(out))]
+  yield.data  <- out[grep("^yield",       names(out))]
+
 
   check_function <- function(x) is.null(x) | nrow(x) == 0
   out[["plot"]]        <- Reduce(join_plot,   plot.data[  !purrr::map_lgl(plot.data,   check_function)])
@@ -282,6 +288,7 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
   out[["voxels"]]      <- Reduce(join_voxels, voxels.data[!purrr::map_lgl(voxels.data, check_function)])
   out[["monthCells"]]  <- Reduce(join_cells,  mcells.data[!purrr::map_lgl(mcells.data, check_function)])
   out[["annualCells"]] <- Reduce(join_cells,  acells.data[!purrr::map_lgl(acells.data, check_function)])
+  out[["yield"]]       <- Reduce(join_yield,  yield.data[ !purrr::map_lgl(yield.data,  check_function)])
 
   get_prof <- function(out, prof) {
     if(is.null(out[[prof]])) {
@@ -359,6 +366,7 @@ read_simulation <- function(simu.name, hip, path, profiles, show.progress, read.
                  monthCells  = get_prof(out, "monthCells"),
                  annualCells = get_prof(out, "annualCells"),
                  voxels      = get_prof(out, "voxels"),
+                 yield       = get_prof(out, "yield"),
                  plot.info   = plot.info,
                  zone.info   = zone.info,
                  tree.info   = tree.info,

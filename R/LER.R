@@ -20,6 +20,8 @@
 #' ler.plot <- LER(hop, "yield")
 #' }
 LER <- function(face,
+                path          = "",
+                simul         = "",
                 cycle         = "yield",
                 timescales    = c("Annual", "Cumulative"),
                 components    = c("LER", "Trees", "Crops"),
@@ -47,11 +49,11 @@ LER <- function(face,
   is_TF(plot)
 
   ## Get flux data
-  cycle.data <- plot_hisafe_cycle_bar(hop        = face,
-                                      cycle      = cycle,
-                                      plot       = FALSE,
-                                      tidy       = TRUE, ...) %>%
-    dplyr::ungroup()
+  cycle.data <- plot_hisafe_ler(hop        = face,
+                                cycle      = cycle,
+                                plot       = FALSE,
+                                tidy       = TRUE, ...) %>%
+  dplyr::ungroup()
 
   crop.descrip <- c("Crops",          # yield
                     "Uptake - Crops", # nitrogen
@@ -103,14 +105,18 @@ LER <- function(face,
     dplyr::mutate_at(c("trees.af", "crops.af", "trees.pf", "crops.mc"), cumsum) %>%
     calculate_ler() %>%
     dplyr::mutate(timescale = "Cumulative") %>%
-    dplyr::select(SimulationName, Year, cycle, timescale, dplyr::everything())
+    dplyr::select(SimulationName, Year, cycle, timescale, dplyr::everything())  %>%
+    dplyr::mutate(SimulationName = simul)
+
 
   ler <- af %>%
     calculate_ler() %>%
     dplyr::mutate(timescale = "Annual") %>%
     dplyr::select(SimulationName, Year, cycle, timescale, dplyr::everything()) %>%
+    dplyr::mutate(SimulationName = simul) %>%
     dplyr::bind_rows(cum.ler)
 
+  if (path != "") write.csv(ler, paste(path, "/", simul, "_ler.csv" ,  sep=""), row.names = FALSE)
 
   plot.data <- ler %>%
     tidyr::gather(ry.trees, ry.crops, ler, key = "metric", value = "value") %>%
@@ -144,6 +150,155 @@ LER <- function(face,
   if(plot) return(plot.obj) else return(plot.data)
 }
 
+
+#' Plot annual LER
+#' @description Plots an annual barchart of tree carbon pools, water fluxes, nitrogen fluxes, or light capture.
+#' @return If \code{plot = TRUE}, returns a ggplot object. If \code{plot = FALSE}, returns the data that would create the plot.
+#' If \code{hop} contains more than one simulation, the plot will be faceted by SimulationName.
+#' @param hop An object of class hop or face. treeNitrogenFineRootsLitter
+#' @param cycle One of "carbon", "nitrogen", "water", "light", or "yield".
+#' @param freq One of "year", "month", "day".
+#' @param simu.names A character vector of the SimulationNames within \code{hop} to include. Use "all" to include all available values.
+#' @param tree.ids A numeric vector indicating a subset of tree ids to plot. Use "all" to include all available values.
+#' This only applies when \code{cycle} is "carbon".
+#' @param year.lim A numeric vector of length two providing the \code{c(minimum, maximum)} of calendar years to plot.
+#' If no input, the full available time range is plotted. Use \code{NA} to refer to the start or end of the simulation.
+#' @param doy.start The JulianDay [1-365] on which to start the annual cycle accounting. Use 'sim' to specify the starting JulianDay of the simulation.
+#' @param color.palette A character string of hex values or R standard color names defining the color palette to use in plots with multiple simulations.
+#' If \code{NULL}, the default, then the default color palette is a color-blind-friendly color palette.
+#' @param bar.color A hex value or R standard color name defining the color to use for bar plot borders
+#' @param plot If \code{TRUE}, the default, a ggplot object is returned. If \code{FALSE}, the data that would create the plot is returned.
+#' @param tidy If \code{TRUE}, the summqrized version of the budget is created. Otherwise, a fully expanded budget is created.
+#' @details Detailed description of the flux components of the nitrogen and water cycles:
+#'
+#' }
+plot_hisafe_ler <- function(hop,
+                            cycle,
+                            freq          = "year",
+                            simu.names    = "all",
+                            tree.ids      = "all",
+                            years         = "all",
+                            months        = "all",
+                            date.min      = NA,
+                            date.max      = NA,
+                            doy.start     = 1,
+                            color.palette = NULL,
+                            bar.color     = "black",
+                            plot          = TRUE,
+                            tidy          = plot) {
+
+  is_hop(hop, error = TRUE)
+
+  METHOD <- ifelse(profile_check(hop, "yield"), "yield", "plot")
+
+  plot.data <- get_yields_ler(hop = hop, profile = METHOD)
+
+  plot.data <- plot.data %>%
+    dplyr::mutate(Month = 12, cycle = cycle) %>%
+    dplyr::ungroup()
+
+  complete <- hop$plot %>%
+    dplyr::filter(SimulationName == "Monocrop") %>%
+    dplyr::group_by(SimulationName, Year) %>%
+    dplyr::summarize(n = dplyr::n() >= 365)
+
+
+  out.data  <- plot.data %>%
+    dplyr::left_join(complete, by = "Year") %>%
+    dplyr::filter(n) %>%
+    dplyr::select(SimulationName.x, Year, flux, value, Month, cycle)
+
+  out.data <- out.data %>%
+    dplyr::rename(SimulationName = SimulationName.x)
+
+  return(out.data)
+}
+
+#' Get yields from a hop object
+#' @description Gets yields from a hop object.
+#' Used within hisafe cycle functions.
+#' @return A tibble with extracted yields.
+#' @param hop An object of class hop or face.
+#' @param profile An character string indicating from which profile to pull crop yield data. Either "yield" or "plot".
+
+#' @importFrom dplyr %>%
+#' @keywords internal
+get_yields_ler <- function(hop, profile) {
+
+  library(dplyr)
+  profile_check(hop, c(profile, "trees", "plot.info"), error = TRUE)
+  variable_check(hop, "trees", "stemYield", error = TRUE)
+  variable_check(hop, "yield", "grainBiomass", error = TRUE)
+
+  if(profile == "yield") {
+    variable_check(hop, "yield", c("idZone", "grainBiomass"), error = TRUE)
+
+    zone.rel.area <- hop$annualCells %>%
+      dplyr::filter(Date == min(Date)) %>%
+      dplyr::group_by(SimulationName, idZone) %>%
+      dplyr::summarize(n = dplyr::n()) %>%
+      dplyr::mutate(perc = n / sum(n)) %>%
+      dplyr::select(-n)
+
+    cellnew <- hop$yield %>%
+      replace(is.na(.), 0) %>%
+      dplyr::filter(cropSpeciesName != "weed") %>%
+      dplyr::select(SimulationName, Year, idZone, grainBiomass) %>%
+      dplyr::group_by(SimulationName, Year, idZone) %>%
+      dplyr::summarize_all(mean) %>% # mean of all yield in scene
+      dplyr::ungroup() %>%
+      dplyr::group_by(SimulationName) %>%
+      dplyr::arrange(SimulationName, Year, idZone) %>%
+      dplyr::rename(yield = grainBiomass) %>%
+      dplyr::ungroup()
+
+    cellnew2 <- cellnew %>%
+      dplyr::left_join(zone.rel.area, by = c("SimulationName", "idZone")) %>%
+      dplyr::mutate(yield = yield * perc) %>% # convert from cell basis to scene basis
+      dplyr::mutate(yield = yield * 1000) %>% # convert t/ha to kg/ha
+      dplyr::ungroup()
+
+    cellnew3 <- cellnew2 %>%
+      dplyr::select(SimulationName, Year,  yield) %>%
+      dplyr::ungroup()
+
+    cells <- cellnew3 %>%
+      group_by(SimulationName, Year) %>%
+      summarise(yield = sum(yield, na.rm = TRUE), .groups = "drop")
+
+    treenew <- hop$trees %>%
+      dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
+      replace(is.na(.), 0) %>%
+      dplyr::select(SimulationName, Year,  Month, Day, Date, JulianDay, stemYield) %>%
+      dplyr::group_by(SimulationName, Year, Month, Day, Date, JulianDay) %>%
+      dplyr::summarize_all(sum) %>% # sum of all trees in scene
+      dplyr::ungroup() %>%
+      dplyr::group_by(SimulationName) %>%
+      dplyr::arrange(SimulationName, Year, JulianDay) %>%
+      dplyr::mutate(stemYield = c(NA, pmax(diff(stemYield), 0)))  # convert to yield increment
+
+    trees <- treenew %>%
+      group_by(SimulationName, Year) %>%
+      summarise(stemYield = sum(stemYield, na.rm = TRUE), .groups = "drop")
+
+
+    out <- trees %>%
+      dplyr::full_join(cells, by = c("SimulationName", "Year")) %>%
+      replace(is.na(.), 0)
+
+    out <- out %>%
+      tidyr::gather(key = "flux", value = "value", stemYield, yield) %>%
+      dplyr::mutate(flux = factor(flux,
+                                  levels = c("stemYield", "yield"),
+                                  labels = c("Trees", "Crops")))
+
+  } else {
+    stop("Plotting nitrogen cycle using plot profile is currently not supported. Export yield profile.", call. = FALSE)
+  }
+
+
+  return(out)
+}
 #' Plot LER for yield, light, water, or nitrogen
 #' @description Plot LER for yield, light, water, or nitrogen.
 #' @return Invisibly retruns an egg object.

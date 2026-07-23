@@ -826,6 +826,8 @@ get_yields <- function(hop, profile) {
   if(profile == "cells") {
     variable_check(hop, "cells", c("idZone", "grainBiomass"), error = TRUE)
 
+
+
     mainCrop.rel.area <- hop$cells %>%
       dplyr::filter(Date == min(Date)) %>%
       dplyr::group_by(SimulationName, idZone) %>%
@@ -833,6 +835,8 @@ get_yields <- function(hop, profile) {
       dplyr::mutate(perc = n / sum(n)) %>%
       dplyr::filter(idZone == "1") %>%
       dplyr::select(-idZone, -n)
+
+
 
     cells <- hop$cells %>%
       replace(is.na(.), 0) %>%
@@ -851,10 +855,11 @@ get_yields <- function(hop, profile) {
       dplyr::mutate(yield = c(NA, pmax(diff(yield), 0))) %>% # convert to yield increment
       dplyr::ungroup()
 
+
     out <- hop$trees %>%
       dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
       replace(is.na(.), 0) %>%
-      dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay, stemVolumePerHectare, stemYield) %>%
+      dplyr::select(SimulationName, Year, Month, Day, Date, JulianDay, stemYield) %>%
       dplyr::group_by(SimulationName, Year, Month, Day, Date, JulianDay) %>%
       dplyr::summarize_all(sum) %>% # sum of all trees in scene
       dplyr::ungroup() %>%

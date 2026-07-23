@@ -18,9 +18,9 @@ SUPPORTED.PROFILES <- dplyr::tibble(profiles = c("plot",   "annualPlot",
                                                     "daily data for each voxel in the scene",
                                                     "daily climate data"))
 
-CORE.PROFILES       <- c("plot", "zones", "trees", "cells", "climate")
+CORE.PROFILES       <- c("plot", "zones", "trees", "cells", "climate", "yield")
 PRIVATE.PROFILES    <- c("voxels")
-DATA.PROFILES       <- c("plot", "zones", "trees", "cells", "voxels", "climate", "monthCells", "annualCells")
+DATA.PROFILES       <- c("plot", "zones", "trees", "cells", "voxels", "climate", "monthCells", "annualCells", "yield")
 FILTERABLE.ELEMENTS <- c(DATA.PROFILES, "plot.info", "zone.info", "tree.info", "exp.plan", "metadata")
 PUBLIC.PROFILES     <- SUPPORTED.PROFILES$profiles[!(SUPPORTED.PROFILES$profiles %in% PRIVATE.PROFILES)]
 BASE.COLS <- c("SimulationName", "Date", "Day", "Month", "Year", "JulianDay")

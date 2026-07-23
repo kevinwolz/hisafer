@@ -62,7 +62,7 @@ create_face <- function(agroforestry, forestry, monocrop, face.path) {
   # Tree checks
   AG.tree.check <- ifelse(!profile_check(agroforestry, "trees"), "-- one or more of the agroforestry simulation does/do not contain any trees", "")
   FC.tree.check <- ifelse(!profile_check(forestry,     "trees"), "-- the forestry simulation does not contain any trees", "")
-  CC.tree.check <- ifelse(profile_check(monocrop,      "trees"), "-- the monocrop simulation contains trees", "")
+  CC.tree.check <- ifelse(!profile_check(monocrop,      "annualCells"), "-- the monocrop simulation contains trees", "")
   tree.errors <- c(AG.tree.check, FC.tree.check, CC.tree.check)
   tree.errors <- paste0(tree.errors[!(tree.errors == "")], collapse = "\n")
   if(tree.errors != "") stop(tree.errors, call. = FALSE)
