@@ -9,10 +9,10 @@ SIM	zoneName	Name of the crop zone	NA	mainCrop	character	NA	NA	NA	NA
 SIM	zoneCellList	List of cells composing the zone  (separated by , or -)	NA	1,2,3,4,5	character	NA	NA	NA	NA
 SIM	zoneTecFileNameList	Name of the crop technical file (*.tec)	NA	maize.tec	character	NA	NA	NA	NA
 SIM	treeTecFileName	Name of the tree technical file (*.ttec)	NA	walnut.ttec	character	NA	NA	NA	NA
-SIM	toricXp	Toric symetry of X axis in the positive direction	0 = off; 1 = on	0	integer	0	1	NA	NA
-SIM	toricXn	Toric symetry of X axis in the negative direction	0 = off; 1 = on	0	integer	0	1	NA	NA
-SIM	toricYp	Toric symetry of Y axis in the positive direction	0 = off; 1 = on	0	integer	0	1	NA	NA
-SIM	toricYn	Toric symetry of Y axis in the negative direction	0 = off; 1 = on	0	integer	0	1	NA	NA
+SIM	toricXp	Toric symetry of X axis in the positive direction	"0 = off; 1 = on"	0	integer	0	1	NA	NA
+SIM	toricXn	Toric symetry of X axis in the negative direction	"0 = off; 1 = on"	0	integer	0	1	NA	NA
+SIM	toricYp	Toric symetry of Y axis in the positive direction	"0 = off; 1 = on"	0	integer	0	1	NA	NA
+SIM	toricYn	Toric symetry of Y axis in the negative direction	"0 = off; 1 = on"	0	integer	0	1	NA	NA
 SIM	laiFileName	Name of file for daily crop LAI forcing (for water extraction calibration). Should be commented out unless it is intended for use.	NA	 lai.obs	character	NA	NA	NA	NA
 PLD	latitude	Latitude 	degrees (negative is south of equator)	45	real	-90	90	NA	latitude
 PLD	elevation	Elevation above sea level	m	100	real	0	2000	NA	altisimul
@@ -27,36 +27,36 @@ PLD	humificationDepth	Depth of soil humification zone (soil depth with an active
 PLD	albedo	Albedo for dry bare soil 	ratio	0.2	real	0.05	0.6	NA	albedo
 PLD	cropRootObstruction	Soil depth at which CROP root growth is stopped due to physical constraints	m	3.2	real	0.1	10	NA	obstarac
 PLD	ph	Initial soil pH (water solution). Applies to all soil layers.	unitless	8.4	real	4	9	NA	pH
-PLD	swellingClaySoil	Toggle on/off the option to activiate an additional water compartment for swelling soils	0=off;1=on	0	integer	0	1	NA	codefente
-PLD	macroporosity	Toggle on/off the calculation of water flux in soil macroporosity	0=off;1=on	0	integer	0	1	NA	codemacropor
+PLD	swellingClaySoil	Toggle on/off the option to activiate an additional water compartment for swelling soils	"0=off;1=on"	0	integer	0	1	NA	codefente
+PLD	macroporosity	Toggle on/off the calculation of water flux in soil macroporosity	"0=off;1=on"	0	integer	0	1	NA	codemacropor
 PLD	soilCrustRainMin	Minimum amount of rain required to create a soil crust (inactive if the STICS vigueurbat parameter is equal to 1)	mm day-1	50	real	5	100	NA	pluiebat
 PLD	soilCrustDepth	Mulch depth from which a crust occurs (inactive if the STICS vigueurbat parameter is equal to 1)	cm	0.5	real	0	2	NA	mulchbat
 PLD	roughnessLength	Roughness length of bare soil	m	0.01	real	0.01	0.2	NA	z0solnu
 PLD	soilHumusCN	Initial C to N ratio of soil organic matter from the surface down to the humificationDepth. Used to initialize soil organic carbon via organicNitrogen.	ratio	12.2	real	8	20	NA	CsurNsol
 PLD	pedotransfertThetaSat	(optional) Saturated water content of the soil 	m3 water m-3 soil	0.45	real	0	1	NA	NA
-PLD	pedotransfertKSat	(optional) Saturated hydraulic conductivity of the soil 	cm day-1	50.4	real	10-6	100	NA	NA
+PLD	pedotransfertKSat	(optional) Saturated hydraulic conductivity of the soil 	cm day-1	50.4	real	10-juin	100	NA	NA
 PLD	pedotransfertAlpha	(optional) Van Genuchten parameter 	cm-1	0.003	real	0.001	0.5	NA	NA
 PLD	pedotransfertLambda	(optional) Mualem pore connectivity parameter 	NA	0.5	real	0.3	0.5	NA	NA
 PLD	pedotransfertN	(optional) Van Genuchten parameter 	NA	2.9	real	1	5	NA	NA
 PLD	pedotransfertBulkDensity	(optional) Bulk density value of the soil 	kg m-3	1709.78	real	500	2000	NA	NA
-PLD	waterTable	Toggle on/off the inclusion of a water table 	0=off;1=on	1	integer	0	1	NA	NA
+PLD	waterTable	Toggle on/off the inclusion of a water table 	"0=off;1=on"	1	integer	0	1	NA	NA
 PLD	evaporationValue	Cumulative soil evaporation above which evaporation rate is decreased 	mm	9	real	0	50	NA	q0
 PLD	evaporationMaxDepth	Maximum soil depth affected by soil evaporation	cm	60	real	0	150	NA	zesx   
 PLD	evaporationDepthContribution	Parameter defining the soil contribution to evaporation versus depth 	unitless	5	real	0.5	NA	NA	cfes
 PLD	runOffCoefPlantMulch	Runoff coefficient taking account for plant mulch	unitless	0.33	real	0	5	NA	penterui
 PLD	rainRunOffFraction	Run off fraction (relative to total rainfall) in bare soil 	ratio	0.2	real	0	1	NA	ruisolnu
-PLD	capillary	Toggle on/off the inclusion of capillary rise at the base of the soil profile. Only used if macroporosity == 1 as well. 	0=off;1=on	0	integer	0	1	NA	coderemontcap
+PLD	capillary	Toggle on/off the inclusion of capillary rise at the base of the soil profile. Only used if macroporosity == 1 as well. 	"0=off;1=on"	0	integer	0	1	NA	coderemontcap
 PLD	capillaryUptake	Capillary rise upward water flux. Only used if capillary == 1 and macroporosity == 1.	mm day-1	1.2	real	0.1	20	NA	capiljour
 PLD	capillaryUptakeMinWater	Threshold of soil gravimetric water content under which capillary rise occurs. Only used if capillary == 1 and macroporosity == 1.	g water / g soil	0.3	real	0	10	NA	humcapil
-PLD	artificialDrainage	Toggle on/off the inclusion of artificial drainage (pipes).  Only used if macroporosity == 1 as well.	0=off;1=on	0	integer	0	1	NA	codrainage
+PLD	artificialDrainage	Toggle on/off the inclusion of artificial drainage (pipes).  Only used if macroporosity == 1 as well.	"0=off;1=on"	0	integer	0	1	NA	codrainage
 PLD	drainagePipesSpacing	Spacing between artificial drainage pipes. Only used if artificialDrainage == 1 and macroporosity == 1.	m	25	real	1	50	NA	ecartdrain
 PLD	drainagePipesDepth	Depth (from the soil surface) of artificial drainage pipes. Only used if artificialDrainage == 1 and macroporosity == 1.	m	1	real	0.2	2	NA	profdrain
 PLD	waterConductivity	Soil hydraulic conductivity in the vicinity of artificial drainage pipes (for water moving into drainage pipes). Only used if artificialDrainage == 1 and macroporosity == 1.	unitless	0.5	real	0.0001	1	NA	Ksol
 PLD	impermeableLayerDepth	Upper depth of the impermeable layer (from the soil surface). May be greater than the soil depth. Only used if artificialDrainage == 1 and macroporosity == 1.	m	2	real	5	20	NA	profimper
 PLD	organicNitrogen	Initial soil organic N content in the soil layer from the surface down to humificationDepth.	% of fine soil	0.13	real	0	100	-	Norg
 PLD	minNh4Concentration	Soil minimum NH4 concentration 	kg N ha-1 mm-1	0	real	0	0.5	NA	concseuil
-PLD	nitrification	Toggle on/off the calculation of nitrification. If true, nitrification is calculated daily. If false, all NH4 is assumed to be nitrified to NO3 each day.	0=off;1=on	1	integer	0	1	NA	codenitrif
-PLD	denitrification	Toggle on/off to activate a more mechanistic calculation of denitrification via the NEMIS model.	0=off;1=on	0	integer	0	1	NA	codedenit
+PLD	nitrification	Toggle on/off the calculation of nitrification. If true, nitrification is calculated daily. If false, all NH4 is assumed to be nitrified to NO3 each day.	"0=off;1=on"	1	integer	0	1	NA	codenitrif
+PLD	denitrification	Toggle on/off to activate a more mechanistic calculation of denitrification via the NEMIS model.	"0=off;1=on"	0	integer	0	1	NA	codedenit
 PLD	denitrificationDepth	Soil depth on which denitrification is active. Only used if denitrification == 1.	cm	20	real	10	40	NA	profdenit
 PLD	denitrificationRate	Potential rate of denitrification for the whole denitrifying layer. Only used if denitrification == 1.	kg N ha-1 day-1	16	real	0.3	10	NA	vpotdenit
 PLD	no3ConcentrationInWaterTable	Fixed concentraiton of NO3 in water table. Only used if waterTable == 1.	g L-1	0.00009	real	0	NA	NA	NA
@@ -84,8 +84,8 @@ TTEC	plantingAge	Tree age at planting	year	1	real	0	NA	NA	NA
 TTEC	plantingHeight	Tree height at planting	m	1	real	0	NA	NA	NA
 TTEC	plantingCrownBaseHeight	Crown base height at planting	m	0.5	real	0	NA	NA	NA
 TTEC	plantingCrownRadius	Crown radius at planting (in both the x and y directions)	m	0.25	real	0	NA	NA	NA
-TTEC	plantingRootShape	Initial shape of tree root volume. A set of voxels are selected to include initial root biomass using this shape. 	1=Sphere; 2=Ellipsoid; 3=Cone	1	integer	1	3	NA	NA
-TTEC	plantingRootRepartition	Method for initial allocation of fine root biomass among the voxels selected for root initialization via the shape parameter.	1=Uniform; 2=Inverse proportional to distance; 3=Negative exponential	3	integer	1	3	NA	NA
+TTEC	plantingRootShape	Initial shape of tree root volume. A set of voxels are selected to include initial root biomass using this shape. 	"1=Sphere; 2=Ellipsoid; 3=Cone"	1	integer	1	3	NA	NA
+TTEC	plantingRootRepartition	Method for initial allocation of fine root biomass among the voxels selected for root initialization via the shape parameter.	"1=Uniform; 2=Inverse proportional to distance; 3=Negative exponential"	3	integer	1	3	NA	NA
 TTEC	plantingRootShapeParam1	Parameter 1 for root initialization. For Sphere: radius of sphere. For Ellipsoid: radius of ellipsoid in X direction. For Cone: radius of cone base.	m	0.75	real	0	NA	NA	NA
 TTEC	plantingRootShapeParam2	Parameter 2 for root initialization. For Sphere: NOT USED. For Ellipsoid: radius of ellipsoid in Y direction. For Cone: depth of cone.	m	0	real	0	NA	NA	NA
 TTEC	plantingRootShapeParam3	Parameter 3 for root initialization. For Sphere: NOT USED. For Ellipsoid: radius of ellipsoid in Z direction. For Cone: NOT USED.	m	0	real	0	NA	NA	NA
@@ -96,7 +96,7 @@ TTEC	treePruningDays	Tree pruning days (separated by ,)	DOY	365,365,365,365,365	
 TTEC	treePruningProp	Proportion of tree height (bottom part of tree) on which branches are pruned (separated by ,)	proportion	 0.66,0.66,0.66,0.66,0.66	real	0	1	NA	NA
 TTEC	treePruningMaxHeight	Tree pruning maximum height (separated by ,)	m	 6.0,6.0,6.0,10.0,10.0	real	0	NA	NA	NA
 TTEC	treeDensityReduction	Proportion of branches & leaves that are removed (while keeping the crown volume constant) (separated by ,)	proportion	 0.5,0.5,0.5,0.5,0.5	real	0	1	NA	NA
-TTEC	treePruningResiduesIncorporation	Toggle on/off for the incoproration of tree pruning residue into soil. If 1,  litter is incorporated into the soil and nutrient cycling dynamics. If 0, litter disappears from the system.	0=off;1=on	0	integer	0	1	NA	NA
+TTEC	treePruningResiduesIncorporation	Toggle on/off for the incoproration of tree pruning residue into soil. If 1,  litter is incorporated into the soil and nutrient cycling dynamics. If 0, litter disappears from the system.	"0=off;1=on"	0	integer	0	1	NA	NA
 TTEC	treePruningResiduesSpreading	Pruning residues spreading.	(0=exported 1=under tree crown 2=all over the plot)	0	integer	0	2	NA	NA
 TTEC	treeRootPruningYears	Years in which root pruning occurs (separated by ,). If extending from a .PRJ file, the year numbering continues from that base simulation!	simulation year	1	integer	1	NA	NA	NA
 TTEC	treeRootPruningDays	Days on which root pruning occurs (separated by ,)	DOY	365	integer	1	365	NA	NA
@@ -124,12 +124,12 @@ TTEC	treeFertilizerCode	Tree manual fertilization code 	1 =Nitrate.of ammonium ,
 TTEC	treeToppingYears	Years in which tree topping occurs (separated by ,). If extending from a .PRJ file, the year numbering continues from that base simulation!	simulation year	2	integer	1	NA	NA	NA
 TTEC	treeToppingDays	Day on which tree topping occurs (separated by ,)	DOY	365	integer	1	364	NA	NA
 TTEC	treeToppingHeight	Tree topping  height (separated by ,)	m	1	real	0	NA	NA	NA
-TTEC	treeToppingResidusIncorporation	Toggle on/off for the incoproration of tree topping residue into soil. If 1, litter is incorporated into the soil and nutrient cycling dynamics. If 0,  litter disappears from the system.	0=off;1=on	0	integer	0	1	NA	NA
+TTEC	treeToppingResidusIncorporation	Toggle on/off for the incoproration of tree topping residue into soil. If 1, litter is incorporated into the soil and nutrient cycling dynamics. If 0,  litter disappears from the system.	"0=off;1=on"	0	integer	0	1	NA	NA
 TTEC	leafAreaDensityReductionYears	Years in which leaf area density occurs (separated by ,). If extending from a .PRJ file, the year numbering continues from that base simulation!	simulation year	2	integer	1	NA	NA	NA
 TTEC	leafAreaDensityReductionDays	Day on which leaf area density thinning occurs (separated by ,)	DOY	365	integer	1	364	NA	NA
 TTEC	leafAreaDensityReductionThreshold	Threshold to trigger leaf area reduction	m2	200	real	0	NA	NA	NA
 TTEC	leafAreaDensityReductionFraction	Fraction of leaf area reduction	NA	0.5	real	0	NA	NA	NA
-TTEC	leafAreaDensityReductionResiduesIncorporation	Toggle on/off for the incoproration of leaf area density residue into soil. If 1, litter is incorporated into the soil and nutrient cycling dynamics. If 0,  litter disappears from the system.	0=off;1=on	0	integer	0	1	NA	NA
+TTEC	leafAreaDensityReductionResiduesIncorporation	Toggle on/off for the incoproration of leaf area density residue into soil. If 1, litter is incorporated into the soil and nutrient cycling dynamics. If 0,  litter disappears from the system.	"0=off;1=on"	0	integer	0	1	NA	NA
 TTEC	leafAreaDensityReductionResiduesSpreading	Leaf area density reduction residues spreading.	(0=exported 1=under tree crown 2=all over the plot)	0	integer	0	2	NA	NA
 TTEC	canopyTrimmingYears	Years in which canopy trimming occurs (separated by ,). If extending from a .PRJ file, the year numbering continues from that base simulation!	simulation year	2	integer	1	NA	NA	NA
 TTEC	canopyTrimmingDays	Day on which canopy trimming occurs (separated by ,)	DOY	365	integer	1	364	NA	NA
@@ -137,30 +137,30 @@ TTEC	canopyTrimmingTreeLineTrigger	Crown radius trigger for canopy trimming on t
 TTEC	canopyTrimmingTreeLineReductionTarget	Crown radius target after canopy trimming on treeLine	m	1	integer	1	NA	NA	NA 
 TTEC	canopyTrimmingInterRowTrigger	Crown radius trigger for canopy trimming on interRow	m	1	integer	1	NA	NA	NA 
 TTEC	canopyTrimmingInterRowReductionTarget	Crown radius target after canopy trimming on interRow	m	1	integer	1	NA	NA	NA 
-TTEC	canopyTrimmingResiduesIncorporation	Toggle on/off for the incoproration of canopy trimming residue into soil. If 1,  litter is incorporated into the soil and nutrient cycling dynamics. If 0, litter disappears from the system.	0=off;1=on	1	integer	0	1	NA	NA
+TTEC	canopyTrimmingResiduesIncorporation	Toggle on/off for the incoproration of canopy trimming residue into soil. If 1,  litter is incorporated into the soil and nutrient cycling dynamics. If 0, litter disappears from the system.	"0=off;1=on"	1	integer	0	1	NA	NA
 TTEC	canopyTrimmingResiduesSpreading	Canopy trimming residues spreading.	(0=exported 1=under tree crown 2=all over the plot)	0	integer	0	2	NA	NA
-TTEC	fruitThinningMethod	fruit thinning method	 0=none;1=auto;2=manual	1	integer	1	3	NA	NA
+TTEC	fruitThinningMethod	fruit thinning method	" 0=none;1=auto;2=manual"	1	integer	1	3	NA	NA
 TTEC	fruitThinningYears	Years in which fruit thinning occurs (separated by ,). If extending from a .PRJ file, the year numbering continues from that base simulation!	simulation year	2	integer	1	NA	NA	NA
 TTEC	fruitThinningDays	Day on which fruit thinning occurs (separated by ,)	DOY	365	integer	1	364	NA	NA
 TTEC	fruitThinningFruitNbrTarget	Number of target fruits after thinning	nbr fruits	500	integer	0	NA	NA	NA
 TTEC	fruitOptimalLoadLeafArea	Number of fruit optimal for a 1m2 of leaf area	nbr fruits	500	integer	0	NA	NA	NA
 TTEC	fruitThinningDelayAfterSetting	Number of day after fruit setting for thinning 	nbr days	10	integer	0	NA	NA	NA
-TTEC	fruitThinningResiduesIncorporation	Toggle on/off for the incorproration of fruit thinning residue into soil. If 1,  litter is incorporated into the soil and nutrient cycling dynamics. If 0, litter disappears from the system.	0=off;1=on	1	integer	0	1	NA	NA
+TTEC	fruitThinningResiduesIncorporation	Toggle on/off for the incorproration of fruit thinning residue into soil. If 1,  litter is incorporated into the soil and nutrient cycling dynamics. If 0, litter disappears from the system.	"0=off;1=on"	1	integer	0	1	NA	NA
 TTEC	fruitThinningResiduesSpreading	Fruit thinning residues spreading.	(0=exported 1=under tree crown 2=all over the plot)	0	integer	0	2	NA	NA
 TTEC	fruitHarvestDays	Day on which  fruit harvest occurs (separated by ,)	DOY	365	integer	1	364	NA	NA
-TTEC	frostDamageActivation	Toggle on/off for the frost damage of leaves. If 1, frost damage is active of leaves. If 0, frost has no effect on leaves.	0=off;1=on	1	integer	0	1	NA	NA
+TTEC	frostDamageActivation	Toggle on/off for the frost damage of leaves. If 1, frost damage is active of leaves. If 0, frost has no effect on leaves.	"0=off;1=on"	1	integer	0	1	NA	NA
 HISAFE	diffuseCoeffA	Used in the calculation of daily diffuse radiation via: DiffusePar == GlobalPar * (a - b * GlobalRadiation/ExtraterrestrialRadiation)	unitless	1.2	real	NA	NA	NA	NA
 HISAFE	diffuseCoeffB	Used in the calculation of daily diffuse radiation via: DiffusePar == GlobalPar * (a - b * GlobalRadiation/ExtraterrestrialRadiation)	unitless	1.3	real	NA	NA	NA	NA
-HISAFE	SOC	Standard Overcast Sky. Must turn this on OR UOC.	0=off;1=on	0	integer	0	1	NA	NA
-HISAFE	UOC	Uniform Overcast Sky. Must turn this on OR SOC.	0=off;1=on	0	integer	0	1	NA	NA
-HISAFE	turtleOption	If 1, use the Turtle Option (diffuse beams). If 0, use the direct beam option with temporal discretisation. Turtle option is faster, but less accurate. 	0=off;1=on	0	integer	0	1	NA	NA
-HISAFE	hisafeLightMethodForCrop	Toggle for selecting which light module to use. If 0, light is calculated by STICS. If 1, light is calculated by Hi-sAFe. MUST BE 1 FOR Hi-sAFe TO WORK.	0=off;1=on	0	integer	0	1	NA	NA
+HISAFE	SOC	Standard Overcast Sky. Must turn this on OR UOC.	"0=off;1=on"	0	integer	0	1	NA	NA
+HISAFE	UOC	Uniform Overcast Sky. Must turn this on OR SOC.	"0=off;1=on"	0	integer	0	1	NA	NA
+HISAFE	turtleOption	If 1, use the Turtle Option (diffuse beams). If 0, use the direct beam option with temporal discretisation. Turtle option is faster, but less accurate. 	"0=off;1=on"	0	integer	0	1	NA	NA
+HISAFE	hisafeLightMethodForCrop	Toggle for selecting which light module to use. If 0, light is calculated by STICS. If 1, light is calculated by Hi-sAFe. MUST BE 1 FOR Hi-sAFe TO WORK.	"0=off;1=on"	0	integer	0	1	NA	NA
 HISAFE	timeStep	Number of hours between two calculations of the sun's position. Only used if turtleOption == 0.	hours	0.5	real	0	24	NA	NA
 HISAFE	nbTimeStepMax	Maximum number of time step calculation per day. If the number of time steps calculated using timeStep is greater than this value, then this maximum value is used instead. Only used if turtleOption == 0.	NA	100	integer	0	NA	NA	NA
 HISAFE	diffuseAngleStep	Angle step between two beams. Only used if turtleOption == 0.	degrees	15	real	0	180	NA	NA
 HISAFE	declinationThreshold	The threshold change in sun declination that triggers a recalculation of the light module. If the sun declincation does not change by more than this threshold, then the light module calculations from the previous day are used. 	degrees	2	real	0	180	NA	NA
 HISAFE	leafAreaThreshold	The threshold change in tree leaf area that triggers a recalculation of the light module. If the tree leaf area does not change by more than this threshold, then the light module calculations from the previous day are used. 	%	5	real	0	100	NA	NA
-HISAFE	nbImpactMultiplication	Specifies the number of rays that are traced to each cell.	1: 1; 2: 4; 3: 9	3	integer	1	3	NA	NA
+HISAFE	nbImpactMultiplication	Specifies the number of rays that are traced to each cell.	"1: 1; 2: 4; 3: 9"	3	integer	1	3	NA	NA
 HISAFE	parGlobalCoefficient	Coefficient to convert GLOBAL radiation to PAR (PAR == parGlobalCoefficient  * RG)	ratio	0.48	real	0	1	NA	NA
 HISAFE	molesParCoefficient	Coefficient to convert Moles to MJ (1 Mole == 0.217 MJ). Approximation by photosyn assistant (Dundee Scientific Ltd).	MJ mol-1	0.217	real	NA	NA	NA	NA
 HISAFE	aangst	Angstrom coefficients for calculating insolation	unitless	0.18	real	0.0001	0.9	NA	aangst
@@ -175,7 +175,7 @@ HISAFE	minTempSnow	Rain is transformed to snow when Tavg is less than this value
 HISAFE	maxDailySnowMelt	Maximum amount of snow that can melt each day.	mm	10	real	0	NA	NA	NA
 HISAFE	maxTempSnowMelt	Snow melt occurs at a rate of maxDailySnowMelt mm per day when Tavg is this value.	degreeC	10	real	NA	NA	NA	NA
 HISAFE	minTempSnowMelt	Snow melt does not occur when Tavg is below this value.	degreeC	2	real	NA	NA	NA	NA
-HISAFE	sticsWaterExtractionForCrop	Code to select which water module to use for the CROP.	0 = Hi-sAFe; 1 = STICS	0	integer	0	1	NA	NA
+HISAFE	sticsWaterExtractionForCrop	Code to select which water module to use for the CROP.	"0 = Hi-sAFe; 1 = STICS"	0	integer	0	1	NA	NA
 HISAFE	waterStressMin	Minimum value for water stress	NA	0	real	0	1	NA	NA
 HISAFE	nitrogenStressMin	Minimum value for nitrogen stress	NA	0.0001	real	0	1	NA	NA
 HISAFE	nitrogenDiffusionConstant	Nitrogen diffusion constant. Used in: nitrogenDiffusionFactor = theta * max(theta, theta * nitrogenEffectiveDiffusionA1 + nitrogenEffectiveDiffusionA0)	cm2 day-1	1	real	0	NA	NA	NA
@@ -196,7 +196,7 @@ HISAFE	altinversion	altitude of inversion of the thermal gradient	m	500	real	0	2
 HISAFE	altistation	altitude of the input metorological station 	m	130	real	0	2000	NA	altistation
 HISAFE	bks	parameter of calculation of the energetic lost between the inside and the outside of a greenhouse 	W m-2 K-1	0.5	real	0	100	NA	bks
 HISAFE	cielclair	fraction of sunny hours allowing the inversion of thermal gradient with altitude	unitless	0.8	real	0	1	NA	cielclair
-HISAFE	codadret	option to calculate mountain climate taking into account the orientation 	code 1/2; 1 = south	1	integer	1	2	NA	codadret
+HISAFE	codadret	option to calculate mountain climate taking into account the orientation 	"code 1/2; 1 = south"	1	integer	1	2	NA	codadret
 HISAFE	codaltitude	option to activate the calculation of the climate in altitude 	1 = no, 2 = yes	1	integer	1	2	NA	codaltitude
 HISAFE	codecaltemp	option to activate the use of crop temperature for phasic development calculation 	1 = empirical relation, 2 = energy balance	1	integer	1	2	NA	codecaltemp
 HISAFE	codeclichange	option to activate climate change 	1 = no, 2 =yes	1	integer	1	2	NA	codeclichange
@@ -363,7 +363,7 @@ STICS	Xorgmax	maximal amount of N immobilised in soil derived from the mineral f
 STICS	y0msrac	minimal amount of root mass at harvest (when aerial biomass is nil)	t ha-1		real	0	5	NA	y0msrac
 STICS	yres	Carbon assimilation yield by the microbial biomass during crop residues decomposition	g g-1		real	0.3	0.7	NA	yres
 TREE	treeSpecies	Name of tree species	NA	walnut-hybrid	character	NA	NA	NA	NA
-TREE	crownShape	Crown shape code (PARABOLOID NOT IMPLEMENTED)	1=ellipsoid; 2=paraboloid	1	integer	1	2	NA	NA
+TREE	crownShape	Crown shape code (PARABOLOID NOT IMPLEMENTED)	"1=ellipsoid; 2=paraboloid"	1	integer	1	2	NA	NA
 TREE	ellipsoidTruncationRatio	Ratio for calculating ellipsoid truncation. A value of 0 means that the shape is a full/true ellipsoid -- verticalCrownRadius = ((height - crownBaseHeight) / (1 - truncatureRatio))/2. Only used when crownShape == 1.	ratio	0	real	0	1	NA	NA
 TREE	heightDbhAllometricCoeffA	Parameter A for the allometric relationship between height and DBH: height = A * DBH^B (height & DBH in meters)	NA	30.9	real	NA	NA	NA	NA
 TREE	heightDbhAllometricCoeffB	Parameter B for the allometric relationship between height and DBH: height = A * DBH^B (height & DBH in meters)	NA	0.72	real	NA	NA	NA	NA
@@ -372,7 +372,7 @@ TREE	crownDbhAllometricCoeffB	Parameter B for the allometric relationship betwee
 TREE	stemDbhAllometricCoeffA	Parameter A for the allometric relationship between stem volume, DBH, and height: volume = exp(A) * DBH^B * height^C	NA	-1.29	real	NA	NA	NA	NA
 TREE	stemDbhAllometricCoeffB	Parameter B for the allometric relationship between stem volume, DBH, and height: volume = exp(A) * DBH^B * height^C	NA	1.75	real	NA	NA	NA	NA
 TREE	stemDbhAllometricCoeffC	Parameter C for the allometric relationship between stem volume, DBH, and height: volume = exp(A) * DBH^B * height^C	NA	0.86	real	NA	NA	NA	NA
-TREE	dcbFromDbhAllometricCoeff	Parameter for the allometric relationship between DBH and DCB: DCB = DBH * min(1, (1 + (1.3 - PH) / H) ^ (1 / COEF (DCB and DBH are in meters; H = tree height; PH = tree pruned height)	NA	2.14	real	NA	NA	NA	NA
+TREE	dcbFromDbhAllometricCoeff	"Parameter for the allometric relationship between DBH and DCB: DCB = DBH * min(1, (1 + (1.3 - PH) / H) ^ (1 / COEF (DCB and DBH are in meters; H = tree height; PH = tree pruned height)"	NA	2.14	real	NA	NA	NA	NA
 TREE	leafAreaCrownVolCoefA	Parameter A for the allometric relationship between leafArea and crownVolume: leafArea = A * crownVolume ^ B (leafArea in m2 and crownVolume in m3)	NA	5.57	real	NA	NA	NA	NA
 TREE	leafAreaCrownVolCoefB	Parameter B for the allometric relationship between leafArea and crownVolume: leafArea = A * crownVolume ^ B (leafArea in m2 and crownVolume in m3)	NA	0.62	real	NA	NA	NA	NA
 TREE	stumpToStemBiomassRatio	Stump to stem biomass ratio	ratio	0.2	real	0	1	NA	NA
@@ -398,15 +398,16 @@ TREE	stemFlowCoefficient	Used for calculating stem flow via: stemFlow = rain * s
 TREE	stemFlowMax	Maximum fraction of rain that leaves via stemflow	ratio	0	real	0	1	NA	NA
 TREE	wettability	Wettability of leaves, for calculating interception of rain by tree canopy	mm lai-1	0.1	real	0	NA	NA	NA
 TREE	transpirationCoefficient	Scaling factor for transpiration. Used via: transpirationDemand = etpPenman * (globalRadIntercepted / globalRadiation) * transpirationCoefficient	NA	1	real	0	NA	NA	NA
-TREE	rsBelowGroundStressActivation	Activation of below ground stress (water and nitrogen) effect on LUE	0=off;1=on	1	integer	0	1	NA	NA
-TREE	rsNitrogenExcessStressActivation	Activation of nitrogen excess effect on LUE	0=off;1=on	1	integer	0	1	NA	NA
-TREE	rsLightStressActivation	Activation of light stress effect on LUE	0=off;1=on	1	integer	0	1	NA	NA
+TREE	rsBelowGroundStressActivation	Activation of below ground stress (water and nitrogen) effect on LUE	"0=off;1=on"	1	integer	0	1	NA	NA
+TREE	rsNitrogenExcessStressActivation	Activation of nitrogen excess effect on LUE	"0=off;1=on"	1	integer	0	1	NA	NA
+TREE	rsLightStressActivation	Activation of light stress effect on LUE	"0=off;1=on"	1	integer	0	1	NA	NA
 TREE	leafLueMax	Maximum potential leaf light use efficiency	g C MJ-1	0.7	real	0	NA	NA	NA
 TREE	leafAgeForLueMax	Leaf age for lueMax (used to compute LUE according to time after budburst)	days	60	integer	1	365	NA	NA
 TREE	leafPhotosynthesisEfficiencyTimeConstant	Used to compute LUE according to time after budburst via: lue = max(lueMax*(1- LeafSenescenceTimeConstant*(DOY-tmax)^2, 0)	days -2	0.0000781	real	0	NA	NA	NA
 TREE	lueStressMethod	Toggle to select the method for applying water and nitrogen stresses to LUE. If 1, LUE = lueMax * lueWaterStress * lueNitrogenStess. If 2, LUE = lueMax * min(lueWaterStress, lueNitrogenStess)	NA	1	integer	1	2	NA	NA
 TREE	lueWaterStressResponsiveness	Governs amplitude of response in LUE reduction to water stress via: lueWaterStress = waterStress ^ lueWaterStressResponsiveness)	NA	1	real	0	NA	NA	NA
 TREE	lueNitrogenStressResponsiveness	Governs amplitude of response in LUE reduction to nitrogen stress via: lueNitrogenStress = nitrogenSatisfaction ^ lueNitrogenStressResponsiveness	NA	1	real	0	NA	NA	NA
+TREE	lightCompetitionIndexMin	Minimum light competition index below which there is no DBH growth	NA	1	real	0	0.99	NA	NA
 TREE	lueTemperatureStressTMin	Temperature below which photosynthesis is inhibited 	degrees C	0	real	-50	50	NA	NA
 TREE	lueTemperatureStressTMax	Temperature above which photosynthesis is inhibited 	degrees C	35	real	-50	60	NA	NA
 TREE	lueTemperatureStressTOptMin	Threshold above which photosynthesis is optimal 	degrees C	15	real	-50	50	NA	NA
@@ -421,10 +422,9 @@ TREE	leafCarbonContent	Leaf carbon content 	g C g-1 dry biomass	0.5	real	0	1	NA	
 TREE	leafMassArea	Leaf dry mass per unit leaf area	kg m-2	0.1	real	0	NA	NA	NA
 TREE	woodDensity	wood density of branches, stem, stump, and coarse roots	kg m-3	616	real	0	NA	NA	NA
 TREE	imbalanceThreshold	Level of aboveGroundImbalance above which remobilisation of reserves is triggered, where aboveGroundImbalance is calculated as: aboveGroundImbalance = max (1 - carbonFoliage / targetCarbonFoliage, 0) and targetCarbonFoliage = leafArea * leafCarbonContent * leafMassArea  	ratio	0.1	real	0	1	NA	NA
-TREE	rsStressMethod	Toggle to select the method for applying water and nitrogen stresses to shoot-root allocation. If 1, variation = maxTargetLfrRatioDailyVariation * rsWaterStress *rsNitrogenStess. If 2, variation = maxTargetLfrRatioDailyVariation * min(rsWaterStress, rsNitrogenStess)	NA	1	integer	1	2	NA	NA
-TREE	rsWaterStressResponsiveness	Governs amplitude of response in shoot-root allocation to water stress via: rsWaterStress = waterStress ^ rsWaterStressResponsiveness	NA	1.5	real	0	NA	NA	NA
-TREE	rsNitrogenStressResponsiveness	Governs amplitude of response in shoot-root allocation to nitrogen stress via: rsNitrogenStress = nitrogenSatisfaction ^ nitrogenStressResponsiveness	NA	1	real	0	NA	NA	NA
-TREE	rsNoStressResponsiveness	Governs amplitude of response in shoot-root allocation when there is no stress	day-1	0.02	real	0	NA	NA	NA
+TREE	rsBelowGroundStressActivation	Activation of effect of below ground stress (water and nitrogen) in shoot root allocation	NA	1	integer	0	1	NA	NA
+TREE	rsNitrogenExcessStressActivation	Activation of effect of nitrogen excess in shoot root allocation	NA	1	integer	0	1	NA	NA
+TREE	rsLightStressActivation	Activation of effect of light competition in shoot root allocation	NA	1	integer	0	1	NA	NA
 TREE	maxTargetLfrRatioDailyVariation	Maximum daily change (positive or negative) in the target leaf-fine root ratio ((leaf cabon / (leaf carbon + fine root carbon)). This is reduced by any stress effects.	kg kg-1	0.002	real	0	NA	NA	NA
 TREE	targetLfrRatioUpperDrift	Target daily upwards drift in the target leaf-fine root ratio ((leaf cabon / (leaf carbon + fine root carbon))	kg kg-1	0.17	real	0	NA	NA	NA
 TREE	minTargetLfrRatio	Minimum target leaf-fine root ratio ((leaf cabon / (leaf carbon + fine root carbon))	kg kg-1	0.15	real	0	1	NA	NA
@@ -458,7 +458,7 @@ TREE	geotropismFactor	Governs the fraction of vertical root colonisation to upwa
 TREE	localWaterUptakeFactor	Fine root proliferation weighting factor for water uptake efficiency	NA	1	real	0	NA	NA	NA
 TREE	sinkDistanceEffect	Fine root proliferation weighting factor for the cost of fine roots (i.e. the cost of the coarse roots necessary to connect the fine roots to the tree stump)	NA	1	real	0	NA	NA	NA
 TREE	localNitrogenUptakeFactor	Fine root proliferation weighting factor for nitrogen uptake efficiency	NA	1	real	0	NA	NA	NA
-TREE	coarseRootTopologyType	Coarse root topology shape at initalization. Only impacts initialization of large root systems.	1: surface then down; 2: taproot, 3: ray from stump	1	integer	1	3	NA	NA
+TREE	coarseRootTopologyType	Coarse root topology shape at initalization. Only impacts initialization of large root systems.	"1: surface then down; 2: taproot, 3: ray from stump"	1	integer	1	3	NA	NA
 TREE	treeRootDiameter	Fine root diameter 	cm	0.049	real	0	NA	NA	NA
 TREE	treeRootConductivity	Fine root axial conductance of water	cm day-1	0.00001	real	0	NA	NA	NA
 TREE	treeAlpha	Parameter for transpiration reduction factor following Campbell	NA	0.1	real	0	1	NA	NA
@@ -479,10 +479,10 @@ TREE	fruitHeatStressTemperatureMax 	Temperature max  to trigger heat stress on f
 TREE	fruitFrostStressTemperatureMin	Temperature min  to trigger frost stress on fruit production	degrees C	-0.5	real	-40	50	NA	NA
 TREE	fruitFrostStressTemperatureMax	Temperature max  to trigger frost stress on fruit production	degrees C	-3	real	-40	50	NA	NA
 TREE	fruitAllocationFraction 	Above ground carbon fraction allocated to fruit 	ratio	0.5	real	0	1	NA	NA
-TREE	fruitCarbonStressDayStart 	First day for carbon stress calculation for fruits 	MM-DD	04-01	string	01-01	12-31	NA	NA
+TREE	fruitCarbonStressDayStart 	First day for carbon stress calculation for fruits 	MM-DD	04-janv	string	01-janv	déc-31	NA	NA
 TREE	fruitMaxDryMatterAllocation 	maximum daily fruit growth 	g DM/fruit/day	0.0001	real	0	10	NA	NA
 TREE	fruitDryToFreshMatterWeight 	Conversion rate from fruit dry to fresh matter 	NA	NA	real	NA	NA	NA	NA
-TREE	fruitDryMaterDensity	fruitDryMaterDensity	m3 / tonnes DM 	0.8	real	NA	NA	NA	NA
+TREE	fruitDryMatterDensity	Fruit dry matter density	m3 / tonnes DM 	0.8	real	NA	NA	NA	NA
 TREE	fruitOilConversionCoeffA 	Conversion parameter from fruit fresh matter weight to oil concentration 	NA	18.2	real	NA	NA	NA	NA
 TREE	fruitOilConversionCoeffB	Conversion parameter from fruit fresh matter weight to oil concentration 	NA	0.78	real	NA	NA	NA	NA
 TREE	fruitOilConversionCoeffC	Conversion parameter from fruit fresh matter weight to oil concentration 	NA	1.31	real	NA	NA	NA	NA
@@ -513,12 +513,12 @@ TREE	bnfNodMaxStart	bnfNodMaxStart	NA	0.0001	real	NA	NA	NA	NA
 TREE	bnfNoduleMaxAllocRate	bnfNoduleMaxAllocRate	NA	0.3	real	NA	NA	NA	NA
 TREE	bnfBasalNoduleAlloc	bnfBasalNoduleAlloc	NA	1	real	NA	NA	NA	NA
 TREE	bnfNoduleLifespan	bnfNoduleLifespan	days	113.95572	real	NA	NA	NA	NA
-TREE	co2EffectOnLueActivation 	Activation of CO2 effect on LUE	0=off;1=on	1	integer	0	1	NA	NA
-TREE	co2EffectOnWueActivation	Activation of CO2 effect on WE	0=off;1=on	1	integer	0	1	NA	NA
-TREE	co2ReferenceValue	co2ReferenceValue	ppm	360	real	330	400	NA	NA
-TREE	co2EffectOnLueHalfSaturationConstant	co2EffectOnLueHalfSaturationConstant	ppm	600	real	300	900	NA	NA
-TREE	co2EffectIntrinsicWueSensitivity	co2EffectIntrinsicWueSensitivity	NA	1	real	0	2	NA	NA
-TREE	coldRequirement	Activation of cold requierement for budburst	0=off;1=on	1	integer	0	1	NA	NA
+TREE	co2EffectOnLueActivation 	Activation of CO2 effect on LUE	"0=off;1=on"	1	integer	0	1	NA	NA
+TREE	co2EffectOnWueActivation	Activation of CO2 effect on WE	"0=off;1=on"	1	integer	0	1	NA	NA
+TREE	co2ReferenceValue	CO2 concentration reference value	ppm	360	real	330	400	NA	NA
+TREE	co2EffectOnLueHalfSaturationConstant	CO2 Effect on LUE (Light use efficiency) : half saturation constant	ppm	600	real	300	900	NA	NA
+TREE	co2EffectIntrinsicWueSensitivity	CO2 intrinsic effect on WUE (Water use efficiency) sensitivity 	NA	1	real	0	2	NA	NA
+TREE	coldRequirement	Activation of cold requierement for budburst	"0=off;1=on"	1	integer	0	1	NA	NA
 TREE	coldTempAccumulationDateStart	Date to start accumulation of cold temperature for budburst	DOY	61	integer	1	365	NA	NA
 TREE	coldTempThreshold	Threshold of effective cold temperature for cumulating degree day	degrees C	0	real	0	NA	NA	NA
 TREE	coldBudBurstTriggerTemp	Threshold of accumulated cold degree-days to trigger budburst	degree(C)-days	0	real	-50	50	NA	NA
@@ -535,7 +535,7 @@ PLT	afpf	logistic parameter defining the fruit sink strength (undetermined growt
 PLT	allocamx	maximum daily allocation of assimilates towards fruits			real	NA	NA	NA	allocamx
 PLT	ampfroid	thermal semi-amplitude of vernalising effect	degrees C	10	real	1	30	NA	ampfroid
 PLT	bdens	minimum density as from which there is competition between plants for leaf growth	plants m-2	7	real	1	200	NA	bdens
-PLT	bdil	param?tre for the critical dilution curve  [Nplant]=adil MS^(-bdil)		0.442	real	0.01	0.8	NA	bdil
+PLT	bdil	parametre for the critical dilution curve  [Nplant]=adil MS^(-bdil)		0.442	real	0.01	0.8	NA	bdil
 PLT	bdilmax	parameter for the maximum dilution curve  [Nplant]=adilmax MS^(-bdilmax)		0.44	real	0.01	0.8	NA	bdilmax
 PLT	belong	parameter for the elongation curve of the coleoptile	degree day -1	0.006	real	0.005	0.04	NA	belong
 PLT	bfpf	logistic parameter defining the strength of the fruit sink (undetermined growth): rate of maximum growth as a proportion of maximum fruit weight		4.32	real	0	30	NA	bfpf
@@ -866,7 +866,7 @@ TEC	dasemis	bulk density of soil after sowing			real	0.8	2	NA	dasemis
 TEC	profhumrecolteuse	soil depth at which moisture is considered to allow harvesting (if soil compaction is activated)	m		real	0	100	NA	profhumrecolteuse
 TEC	darecolte	bulk density of soil after harvest			real	0.8	2	NA	darecolte
 TEC	codeDSTnbcouche	number of compacted soil layers	1 = one layer, 2 = two layers		integer	1	2	NA	codeDSTnbcouche
-TEC	initialCropStage	Crop stage at initialization	1 = snu; 2 = plt; 3 = dor; 4 = lev; 5 = amf; 6 = lax; 7 = flo; 8 = drp; 9 = des ; 10 = mat ; 11 = rec; 12 = sen; 13 = lan	5	integer	1	13	NA	stade0
+TEC	initialCropStage	Crop stage at initialization	"1 = snu; 2 = plt; 3 = dor; 4 = lev; 5 = amf; 6 = lax; 7 = flo; 8 = drp; 9 = des ; 10 = mat ; 11 = rec; 12 = sen; 13 = lan"	5	integer	1	13	NA	stade0
 TEC	initialCropLai	Leaf area index at initialization	m2 m-2 	0.2	real	0	NA	NA	lai0
 TEC	initialCropBiomass	Crop biomass at initialization	t ha-1	0.2	real	0	NA	NA	masec0
 TEC	initialCropRootDepth	Crop root depth at initialization	m	1	real	0	NA	NA	zrac0
