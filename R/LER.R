@@ -49,6 +49,7 @@ LER <- function(face,
   is_TF(plot)
 
   ## Get flux data
+
   cycle.data <- plot_hisafe_ler(hop        = face,
                                 cycle      = cycle,
                                 plot       = FALSE,
@@ -228,43 +229,62 @@ get_yields_ler <- function(hop, profile) {
   library(dplyr)
   profile_check(hop, c(profile, "trees", "plot.info"), error = TRUE)
   variable_check(hop, "trees", "stemYield", error = TRUE)
-  variable_check(hop, "yield", "grainBiomass", error = TRUE)
+  variable_check(hop, "yield", "totalCropYield", error = TRUE)
 
   if(profile == "yield") {
-    variable_check(hop, "yield", c("idZone", "grainBiomass"), error = TRUE)
 
-    zone.rel.area <- hop$annualCells %>%
-      dplyr::filter(Date == min(Date)) %>%
-      dplyr::group_by(SimulationName, idZone) %>%
-      dplyr::summarize(n = dplyr::n()) %>%
-      dplyr::mutate(perc = n / sum(n)) %>%
-      dplyr::select(-n)
+   crops <- hop$yield  %>%
+     # Rendement = 0 si weed
+     mutate(
+       totalCropYield = if_else(
+         cropSpeciesName == "weed",
+         0,
+         totalCropYield
+       )
+     ) %>%
 
-    cellnew <- hop$yield %>%
-      replace(is.na(.), 0) %>%
-      dplyr::filter(cropSpeciesName != "weed") %>%
-      dplyr::select(SimulationName, Year, idZone, grainBiomass) %>%
-      dplyr::group_by(SimulationName, Year, idZone) %>%
-      dplyr::summarize_all(mean) %>% # mean of all yield in scene
-      dplyr::ungroup() %>%
-      dplyr::group_by(SimulationName) %>%
-      dplyr::arrange(SimulationName, Year, idZone) %>%
-      dplyr::rename(yield = grainBiomass) %>%
-      dplyr::ungroup()
+      # Une seule observation par zone, année
+     select(
+        SimulationName,
+        id,
+        Year,
+        area,
+        totalCropYield
+      ) %>%
 
-    cellnew2 <- cellnew %>%
-      dplyr::left_join(zone.rel.area, by = c("SimulationName", "idZone")) %>%
-      dplyr::mutate(yield = yield * perc) %>% # convert from cell basis to scene basis
-      dplyr::mutate(yield = yield * 1000) %>% # convert t/ha to kg/ha
-      dplyr::ungroup()
 
-    cellnew3 <- cellnew2 %>%
-      dplyr::select(SimulationName, Year,  yield) %>%
-      dplyr::ungroup()
+      # Rendement total de chaque zone sur l'année
+      group_by(SimulationName, id, Year) %>%
+      summarise(
+        area = first(area),
+        yield = sum(totalCropYield, na.rm = TRUE),
+        .groups = "drop"
+      )
 
-    cells <- cellnew3 %>%
-      group_by(SimulationName, Year) %>%
-      summarise(yield = sum(yield, na.rm = TRUE), .groups = "drop")
+
+   crops <- crops  %>%
+
+     # Une seule observation par année (on cumule les zones)
+     select(
+       SimulationName,
+       Year,
+       area,
+       yield
+     ) %>%
+
+     # Rendement total de chaque zone sur l'année
+     group_by(SimulationName, Year) %>%
+     summarise(
+       area = sum(area, na.rm = TRUE),
+       yield = sum(yield, na.rm = TRUE),
+       .groups = "drop"
+     )
+
+   crops <- crops  %>%
+     # Rendement = 0 si weed
+     mutate(
+       yield = yield / area
+    )
 
     treenew <- hop$trees %>%
       dplyr::left_join(hop$plot.info, by = "SimulationName") %>%
@@ -283,7 +303,7 @@ get_yields_ler <- function(hop, profile) {
 
 
     out <- trees %>%
-      dplyr::full_join(cells, by = c("SimulationName", "Year")) %>%
+      dplyr::full_join(crops, by = c("SimulationName", "Year")) %>%
       replace(is.na(.), 0)
 
     out <- out %>%
